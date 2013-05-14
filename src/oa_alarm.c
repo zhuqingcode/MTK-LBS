@@ -1,0 +1,124 @@
+/*****************************************************************************
+*  Copyright Statement:
+*  --------------------
+*  njtalent Co., Ltd.
+*
+*****************************************************************************/
+
+/*****************************************************************************
+*
+* Filename:
+* ---------
+*   oa_alarm.c
+*
+* Project:
+* --------
+*   MTK-LBS project
+*
+* Description:
+* ------------
+*   This Module declares OPEN AT's api.
+*
+* Author:
+* -------
+*   zhuqing.
+*
+****************************************************************************/
+#include "oa_alarm.h"
+#include "oa_jt808.h"
+#include "oa_dev_params.h"
+#include "oa_platform.h"
+#include "oa_hw.h"
+extern DEVICE_PARAMS dev_now_params;
+extern DEV_PLAT_PARAS dev_running;
+extern oa_uint8 acc_status;
+oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, oa_bool flag)
+{
+
+	u32 alarm_flag;
+	oa_bool ret;
+	oa_uint16 build_ret;
+	oa_uint16 soc_ret;
+	
+	if (part >= StatusNum){
+		Trace("(%s:%s:%d): params err!", __FILE__, __func__, __LINE__);
+		return OA_FALSE;
+	}
+	if (flag == OA_TRUE){
+		alarm_flag = dev_now_params.alarm_mask;
+		if (alarm_flag & alarm_bit){//alarm is masked
+			Trace("(%s:%s:%d): this alarm is masked!", __FILE__, __func__, __LINE__);
+			return OA_TRUE;
+		}
+		else{//alarm is unmasked
+			if (SET == status){
+				if (ReadAlarmPara(part, alarm_bit) == RESET)	WriteAlarmPara(SET, part, alarm_bit);
+			}
+			else if (RESET == status){
+				if (ReadAlarmPara(part, alarm_bit) == SET)	WriteAlarmPara(RESET, part, alarm_bit);
+			}
+			
+			
+			if (dev_running.plat_status == OFFLINE){
+				if (acc_status == ACC_ON){//blind data
+					ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
+					if (!ret)	return OA_TRUE;
+					else return OA_FALSE;
+					
+				}
+				else{
+					return OA_FALSE;
+				}
+			}
+			
+			build_ret = DevReq2ServPackag_build(REPORT_LOCATION);//upload instantly<!!!>
+			if (build_ret > 0){
+				soc_ret = oa_soc_send_req();//check datas in buffer & send, concern it send ok.
+				if (soc_ret != build_ret){
+					Trace("(%s:%s:%d): send data is not equal!", __FILE__, __func__, __LINE__);
+					return OA_FALSE;
+				}
+				else{
+					return OA_TRUE;
+				}
+			}
+			else{
+				Trace("(%s:%s:%d): build packet err!", __FILE__, __func__, __LINE__);
+				return OA_FALSE;
+			}
+			
+		}
+	}
+	else{
+
+		if (dev_running.plat_status == OFFLINE){
+				if (acc_status == ACC_ON){//blind data
+					ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
+					if (!ret)	return OA_TRUE;
+					else return OA_FALSE;
+					
+				}
+				else{
+					return OA_FALSE;
+				}
+		}
+		
+		build_ret = DevReq2ServPackag_build(REPORT_LOCATION);
+		if (build_ret > 0){
+			soc_ret = oa_soc_send_req();//check datas in buffer & send, concern it send ok.
+			if (soc_ret != build_ret){
+				Trace("(%s:%s:%d): send data is not equal!", __FILE__, __func__, __LINE__);
+				return OA_FALSE;
+			}
+			else{
+				return OA_TRUE;
+			}
+		}
+		else{
+			Trace("(%s:%s:%d): build packet err!", __FILE__, __func__, __LINE__);
+			return OA_FALSE;
+		}
+	}
+	
+
+}
