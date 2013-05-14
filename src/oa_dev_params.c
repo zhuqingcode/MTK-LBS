@@ -104,7 +104,7 @@ DEVICE_PARAMS dev_def_params =
 	21,							//port
 	{"talent"},					//user name
 	{"talent"},					//pwd
-	{"mtk-lbs v1.0.0"},				//program name
+	{"mtk-lbs-beta v1.0.0"},				//program name
 };
 
 DEVICE_PARAMS dev_now_params;
@@ -508,31 +508,31 @@ void print_key_dev_params(void)
 {
 	oa_char tmp[64] = {0x0};
 	Trace("------------------------------device params-----------------------------");
-	Trace("server ip					:%s		|", dev_now_params.m_server_ip);
-	Trace("server tcp port				:%d			|", dev_now_params.server_tcp_port);
-	Trace("server udp port 				:%d			|", dev_now_params.server_udp_port);
-	Trace("LclTEL						:%s		|", dev_now_params.term_tel_num);
-	Trace("resettel					:%s		|", dev_now_params.reset_num);
-	Trace("factorysettel					:%s		|", dev_now_params.restore_factory_settings_num);
-	Trace("man id						:%s			|", dev_now_params.manufacturers_id);
-	Trace("term model					:%s			|", dev_now_params.term_model);
-	Trace("term id					:%s		|", dev_now_params.term_id);
-	Trace("car id						:%s			|", dev_now_params.vehicle_license);
-	Trace("plate_color					:%d			|", dev_now_params.plate_color);
-	Trace("hearttime					:%d			|", dev_now_params.heartbeat_interval);
-	Trace("continuous driving time			:%d			|", dev_now_params.continuous_drive_time_threshold);
-	Trace("min rest time					:%d			|", dev_now_params.min_rest_time);
-	Trace("max part time					:%d			|", dev_now_params.max_park_time);
-	Trace("default report time				:%d			|", dev_now_params.default_reporttime);
-	Trace("max speed					:%d			|", dev_now_params.max_speed);
+	Trace("server ip					:%s", dev_now_params.m_server_ip);
+	Trace("server tcp port				:%d", dev_now_params.server_tcp_port);
+	Trace("server udp port 				:%d", dev_now_params.server_udp_port);
+	Trace("LclTEL						:%s", dev_now_params.term_tel_num);
+	Trace("resettel					:%s", dev_now_params.reset_num);
+	Trace("factorysettel					:%s", dev_now_params.restore_factory_settings_num);
+	Trace("man id						:%s", dev_now_params.manufacturers_id);
+	Trace("term model					:%s", dev_now_params.term_model);
+	Trace("term id					:%s", dev_now_params.term_id);
+	Trace("car id						:%s", dev_now_params.vehicle_license);
+	Trace("plate_color					:%d", dev_now_params.plate_color);
+	Trace("hearttime					:%d", dev_now_params.heartbeat_interval);
+	Trace("continuous driving time			:%d", dev_now_params.continuous_drive_time_threshold);
+	Trace("min rest time					:%d", dev_now_params.min_rest_time);
+	Trace("max part time					:%d", dev_now_params.max_park_time);
+	Trace("default report time				:%d", dev_now_params.default_reporttime);
+	Trace("max speed					:%d", dev_now_params.max_speed);
 	oa_itoa(dev_now_params.alarm_mask, tmp, BI);
-	Trace("swh_alarmmask					:%s			|", tmp);
+	Trace("swh_alarmmask					:%s", tmp);
 	oa_itoa(dev_now_params.alarm_send_sms_mask, tmp, BI);
-	Trace("swh_alarmsms					:%s			|", tmp);
-	Trace("alarmsmstel					:%s		|", dev_now_params.terminal_sms_num);
-	Trace("UPIP						:%s		|", dev_now_params.update_server_ip);
-	Trace("UPPORT						:%d			|", dev_now_params.update_server_port);
-	Trace("ftp_prog_name					:%s		|", dev_now_params.ftp_prog_name);
+	Trace("swh_alarmsms					:%s", tmp);
+	Trace("alarmsmstel					:%s", dev_now_params.terminal_sms_num);
+	Trace("UPIP						:%s", dev_now_params.update_server_ip);
+	Trace("UPPORT						:%d", dev_now_params.update_server_port);
+	Trace("ftp_prog_name					:%s", dev_now_params.ftp_prog_name);
 	Trace("------------------------------------------------------------------------");
 	
 }

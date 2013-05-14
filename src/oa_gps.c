@@ -241,11 +241,11 @@ void oa_app_gps(void)
 			//--------------------------mileage statistis-----------------------------
 			IntvlDistanc += GPS_IntvlDistanc(); //km
 			d_r_distance = IntvlDistanc;//just for distance report
-			if (IntvlDistanc - UPDATE_DISTANC > EPSINON){
+			if (IntvlDistanc - UPDATE_DISTANC >= EPSINON){
 				//GpsDistancCacul(&IntvlDistanc);//changed to statement below
 				ret = mile_stat_add(IntvlDistanc);
 				if (OA_TRUE == ret){
-					IntvlDistanc = 0.0;
+					IntvlDistanc -= UPDATE_DISTANC;//IntvlDistanc = 0.0;
 				}
 				
 			}

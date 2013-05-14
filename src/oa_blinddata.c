@@ -656,8 +656,11 @@ oa_bool oa_app_blinddata(void)
 		//has blinddata
 		ret_len = escape_copy_to_send(blind_buf, data_len);
 		//Trace("(%s:%s:%d): ret_len:%d!", __FILE__, __func__, __LINE__, ret_len);
-		oa_soc_send_req();//check datas in buffer & send	
-		Trace("(%s:%s:%d): send one blinddata packet!", __FILE__, __func__, __LINE__);
+		if (ret_len > 0){
+			oa_soc_send_req();//check datas in buffer & send	
+			Trace("(%s:%s:%d): send one blinddata packet!", __FILE__, __func__, __LINE__);
+		}
+		
 
 	}
 	
