@@ -245,6 +245,13 @@ oa_bool set_enquiry_check_4trans(oa_char *p_key, oa_uint8 e_len, keyword_context
 					}
 				}
 			}break;
+			case e_DEVID:{
+				if (oa_strlen(temp) == DEVID_LEN)	oa_memcpy(p_set->context.con_ch, temp, DEVID_LEN);
+				else{
+					Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+					return OA_FALSE;
+				}
+			}break;
 			default:{
 				Trace("(%s:%s:%d): e_kind:%d", __FILE__, __func__, __LINE__, e_kind);
 				Trace("(%s:%s:%d): not support!", __FILE__, __func__, __LINE__);
@@ -497,6 +504,9 @@ void handle_common_4trans(e_keyword key_kind, keyword_context *p_set, u8 *p_fbk,
 			}break;	
 			case e_RESTART:{
 				oa_strcat(enquire_temp, "RESTART OK");
+			}break;
+			case e_DEVID:{
+				oa_strcat(enquire_temp, dev_now_params.term_id);
 			}break;
 			default:{
 				oa_strcat(enquire_temp, "not support!");
@@ -1123,6 +1133,20 @@ void handle_keyword_4trans(e_keyword key_kind, keyword_context *p_set, u16 *p_ac
 					if (use_is_lock())	use_unlock();
 				}
 				
+			}
+		}break;
+		case e_DEVID:{
+			if (p_set->kind == set){
+				if (!oa_strncmp(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN)){
+						PRINT_SAMEPARA;
+						p_set->act_kind = no_act;
+						break;
+					}
+					else{//not equal
+						oa_memset(dev_now_params.term_id, 0x0, sizeof(dev_now_params.term_id));
+						oa_memcpy(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN);
+						p_set->act_kind = para_save;
+					}
 			}
 		}break;
 		case e_none:{

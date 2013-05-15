@@ -106,6 +106,7 @@ oa_char *p_keyword[] = {
  CLRLOG,
  AUTHEN,
  RESTART,
+ DEVID,
 };
 oa_uint8 KEYWORDS_SIZE = sizeof(p_keyword)/4;
 /*********************************************************
@@ -451,6 +452,13 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 					}
 				}
 			}break;
+			case e_DEVID:{
+				if (oa_strlen(temp) == DEVID_LEN)	oa_memcpy(p_set->context.con_ch, temp, DEVID_LEN);
+				else{
+					Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+					return OA_FALSE;
+				}
+			}break;
 			default:{
 				Trace("(%s:%s:%d): e_kind:%d", __FILE__, __func__, __LINE__, e_kind);
 				Trace("(%s:%s:%d): not support!", __FILE__, __func__, __LINE__);
@@ -709,6 +717,9 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 			}break;	
 			case e_RESTART:{
 				oa_strcat(enquire_temp, "RESTART OK");
+			}break;
+			case e_DEVID:{
+				oa_strcat(enquire_temp, dev_now_params.term_id);
 			}break;
 			default:{
 				oa_strcat(enquire_temp, "not support!");
@@ -1332,6 +1343,20 @@ void handle_keyword(e_keyword key_kind, keyword_context *p_set, sms_or_uart whic
 					if (use_is_lock())	use_unlock();
 				}
 				
+			}
+		}break;
+		case e_DEVID:{
+			if (p_set->kind == set){
+				if (!oa_strncmp(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN)){
+						PRINT_SAMEPARA;
+						p_set->act_kind = no_act;
+						break;
+					}
+					else{//not equal
+						oa_memset(dev_now_params.term_id, 0x0, sizeof(dev_now_params.term_id));
+						oa_memcpy(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN);
+						p_set->act_kind = para_save;
+					}
 			}
 		}break;
 		case e_none:{

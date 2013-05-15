@@ -97,7 +97,7 @@ DEVICE_PARAMS dev_def_params =
 	2,							//plate_color
 	//user definition
 	{"70555"},					//man id
-	{"T200C"},					//term model
+	{"T100G"},					//term model
 	{"3000015"},					//term id
 	{"13814120415"},				//LclTEL
 	{"114.221.34.95"},				//ftp ip

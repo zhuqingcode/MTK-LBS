@@ -98,6 +98,7 @@
 #define CLRLOG "CLRLOG"
 #define AUTHEN "AUTHEN"
 #define RESTART "RESTART"
+#define DEVID "DEVID"//7 λ
 
 #define COLON ':'
 #define SEMICOLON ';'
@@ -110,6 +111,7 @@
 #define ALARMBIT_MAX_LEN 32
 #define Rpt_strategy_max_num 3
 #define UNLOCK 0
+#define DEVID_LEN 7
 
 typedef enum
 {
@@ -175,6 +177,7 @@ typedef enum
 	e_CLRLOG,
 	e_AUTHEN,
 	e_RESTART,
+	e_DEVID,
 	e_none = 0xff,
 }e_keyword;
 typedef enum
