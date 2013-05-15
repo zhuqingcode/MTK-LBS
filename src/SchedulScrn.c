@@ -1162,7 +1162,7 @@ u8 SScrn_DataAnaly(void)
 			default:
 			//	SScrn_Result.CMD_TYPE=SCCRN_UNEXP_CMD;
 				SSCRN_Print("(%s %s %d):调度屏收到未定义消息:", __FILE__, __func__, __LINE__);
-				SSCRN_Print("(%s %s %d):指令码为:%02x",, __FILE__, __func__, __LINE__, Cmd);
+				SSCRN_Print("(%s %s %d):指令码为:%02x",__FILE__, __func__, __LINE__, Cmd);
 				return 	SCCRN_UNEXP_CMD;
 //			break;
 		}
