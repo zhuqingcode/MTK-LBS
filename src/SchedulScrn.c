@@ -1161,8 +1161,8 @@ u8 SScrn_DataAnaly(void)
 			break;
 			default:
 			//	SScrn_Result.CMD_TYPE=SCCRN_UNEXP_CMD;
-				SSCRN_Print("µ÷¶ÈÆÁÊÕµ½Î´¶¨ÒåÏûÏ¢:\r\n");
-				SSCRN_Print("Ö¸ÁîÂëÎª:%02x\r\n",Cmd);
+				SSCRN_Print("(%s %s %d):µ÷¶ÈÆÁÊÕµ½Î´¶¨ÒåÏûÏ¢:", __FILE__, __func__, __LINE__);
+				SSCRN_Print("(%s %s %d):Ö¸ÁîÂëÎª:%02x",, __FILE__, __func__, __LINE__, Cmd);
 				return 	SCCRN_UNEXP_CMD;
 //			break;
 		}
@@ -2056,7 +2056,7 @@ u8 SScrn_CenterSMS_Send(u8* Str,u16 len)	  //·¢ËÍÖÐÐÄ¶ÌÐÅ	//ÐÞ¸Ä,Ö§³Ö³¬³¤ÖÐÐÄµ÷¶
 		SSCRN_Print("Ïòµ÷¶ÈÆÁ·¢ËÍÖÐÐÄ¶ÌÐÅ³ö´í,ÊäÈë´íÎó");
 		return 1;
 	}
-	SSCRN_Print("Ïòµ÷¶ÈÆÁ·¢ËÍÖÐÐÄ¶ÌÐÅ");
+	SSCRN_Print("(%s %s %d):Ïòµ÷¶ÈÆÁ·¢ËÍÖÐÐÄ¶ÌÐÅ", __FILE__, __func__, __LINE__);
 	while(strlen>MAX_MSG_LEN)
 	{
 		res=Host_Send_Packag(HOST_CenSMS_CMD,Pstr,MAX_MSG_LEN);
@@ -2545,7 +2545,7 @@ static u8 Protocol_Check_2para(const u8 *PStr1,const u16 PStr_Length1,const u8 *
 		#endif
 //		else
 //		{
-			SSCRN_Print("Ïòµ÷¶ÈÆÁ·¢ËÍ³É¹¦");
+			SSCRN_Print("(%s %s %d):Ïòµ÷¶ÈÆÁ·¢ËÍ³É¹¦", __FILE__, __func__, __LINE__);
 			result=0;
 			break;
 //		}

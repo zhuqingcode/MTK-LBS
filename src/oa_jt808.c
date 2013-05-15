@@ -552,16 +552,20 @@ u8 Write_ProtclHandl(Protocol_Handle_e type, u8 *pbuf, u16 buflen)
 			Mem_Copy(&sProtclHandl.ReportDriveDatarsp, pbuf, buflen);
 			break;
 		}
+#endif
+
 		case e_TrackLocationCtlreq:
 		{
 			Mem_Copy(&sProtclHandl.TrackLocationCtlreq, pbuf, buflen);
 			break;
 		}
+
 		case e_TextDownloadreq:
 		{
 			Mem_Copy(&sProtclHandl.TextDownloadreq, pbuf, buflen);
 			break;
 		}
+#if 0
 		case e_SetEventreq_EventType:	//事件设置//设置类型
 		{
 			Mem_Copy(&sProtclHandl.SetEventreq.EventType, pbuf, buflen);
@@ -2192,11 +2196,11 @@ static u8 ServReq_GetPositionData_Period(u8 *pmsgbody, u16 msgbodylen)
 		Trace("check_track_location_ctl param error!\r\n");
 		return 1;
 	}
-	Trace("Period position trace:\r\n");
-	Trace("    Inteval is    0x%02x%02x\r\n    Limit time is 0x%02x%02x%02x%02x\r\n",*pmsgbody,
+	Trace("Period position trace:");
+	Trace("    Inteval is    0x%02x%02x    Limit time is 0x%02x%02x%02x%02x",*pmsgbody,
 	*(pmsgbody+1),*(pmsgbody+2),*(pmsgbody+3),*(pmsgbody+4),*(pmsgbody+5));
 	Write_ProtclHandl(e_TrackLocationCtlreq, pmsgbody,msgbodylen);
-	return 0;;
+	return 0;
 }
 /*********************************************************
 *Function:     ServReq_Textinfo
