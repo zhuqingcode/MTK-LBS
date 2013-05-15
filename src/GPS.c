@@ -2960,7 +2960,7 @@ static float GPS_Local_Change(STRUCT_RMC POS_Inf,u8 Mode)
 		{
 			Minutes	=Minutes*10+POS_Inf.Longitude[i]-0x30;	
 		}
-		Temp= Degrees+ ((Minutes+0.0)/pow(10,4))/60;
+		Temp= Degrees+ ((Minutes+0.0)/powme(10,4))/60;
 		return Temp;
 	}
 	else						   		/*Î³¶È*/
@@ -2973,7 +2973,7 @@ static float GPS_Local_Change(STRUCT_RMC POS_Inf,u8 Mode)
 		{
 			Minutes	=Minutes*10+POS_Inf.Latitude[i]-0x30;	
 		}
-		Temp= Degrees+ ((Minutes+0.0)/pow(10,4))/60;
+		Temp= Degrees+ ((Minutes+0.0)/powme(10,4))/60;
 		return Temp;
 	}
 }
