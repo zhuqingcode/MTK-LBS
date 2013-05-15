@@ -42,6 +42,7 @@ extern STRUCT_RMC Pos_Inf;
 extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 KEYWORDS_SIZE;
 extern oa_char *p_keyword[];
+#if 0
 /*********************************************************
 *Function:      need_ack_check()
 *Description:  search key word in message
@@ -269,8 +270,10 @@ oa_bool set_enquiry_check_4trans(oa_char *p_key, oa_uint8 e_len, keyword_context
 	}
 	return OA_TRUE;
 }
+#endif
+#if 0
 /*********************************************************
-*Function:      need_ack_check()
+*Function:      need_ack_check_4trans()
 *Description:  search key word in message
 *Return:        void
 *Others:         
@@ -301,9 +304,10 @@ ack_kind need_ack_check_4trans(oa_char *p)
 		return noack;//p_set->need_ack = OA_FALSE;
 	}	
 }
-
+#endif
+#if 0
 /*********************************************************
-*Function:      lookfor_keywords_loop()
+*Function:      lookfor_keywords_4trans()
 *Description:  search key word in message
 *Return:        void
 *Others:         
@@ -346,6 +350,8 @@ e_keyword lookfor_keywords_4trans(u8 *p_sms, u16 sms_len, keyword_context *p_set
 
 	return e_none;
 }
+#endif
+#if 0
 /*********************************************************
 *Function:      handle_keyword()
 *Description:  handle the keyword
@@ -520,7 +526,8 @@ void handle_common_4trans(e_keyword key_kind, keyword_context *p_set, u8 *p_fbk,
 	
 	
 }
-
+#endif
+#if 0
 /*********************************************************
 *Function:      handle_keyword()
 *Description:  handle the keyword
@@ -1210,7 +1217,7 @@ void handle_keyword_4trans(e_keyword key_kind, keyword_context *p_set, u16 *p_ac
 	p_set->act_kind = no_act;
 	
 }
-
+#endif
 /*********************************************************
 *Function:      sched_scrn_ana_4trans()
 *Description:  analysis the schedule screen sms content
@@ -1227,12 +1234,13 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 	//do not support multiple sms
 	for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
 		
-		key_ret = lookfor_keywords_4trans(p_sms, sms_len, &set, e_i);
+		key_ret = lookfor_keywords_loop(p_sms, sms_len, &set, e_i, scrn)/*lookfor_keywords_4trans(p_sms, sms_len, &set, e_i)*/;
 		if (e_none == key_ret){
 			//Trace("(%s:%s:%d): not support!", __FILE__, __func__, __LINE__);
 			continue;
 		}
-		handle_keyword_4trans(key_ret, &set, p_act, p_fbk, p_fbk_len);
+		//handle_keyword_4trans(key_ret, &set, p_act, p_fbk, p_fbk_len);
+		handle_keyword(p_act, p_fbk, p_fbk_len, key_ret, &set, scrn);
 		oa_memset(&set, 0x0, sizeof(set));
 		return ActionOK;
 	}

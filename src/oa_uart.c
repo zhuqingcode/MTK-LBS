@@ -220,12 +220,12 @@ void oa_app_uart(void)
 	//do not support multiple sms
 	//Trace("(%s:%s:%d):KEYWORDS_SIZE:%d", __FILE__, __func__, __LINE__,KEYWORDS_SIZE);
 	for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
-		key_ret = lookfor_keywords_loop(&set, e_i, uart);
+		key_ret = lookfor_keywords_loop(NULL, 0, &set, e_i, uart);
 		if (e_none == key_ret){
 			//Trace("(%s:%s:%d): not support!", __FILE__, __func__, __LINE__);
 			continue;
 		}
-		handle_keyword(key_ret, &set, uart);
+		handle_keyword(NULL, NULL, NULL, key_ret, &set, uart);
 		oa_memset(&set, 0x0, sizeof(set));
 	}
 	return;

@@ -74,7 +74,7 @@
 	return OA_TRUE;
 	
  }
-  /*********************************************************
+/*********************************************************
 *Function:     digit_check()
 *Description:  digit_check
 *Return:		void
@@ -85,7 +85,17 @@
 	if (((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z'))) return OA_TRUE;
 	else return OA_FALSE;
  }
-  
+/*********************************************************
+*Function:     digit_check()
+*Description:  digit_check
+*Return:		void
+*Others:         
+*********************************************************/
+ oa_bool cap_alpha_check(oa_char ch)
+ {
+	if ((ch >= 'A') && (ch <= 'Z')) return OA_TRUE;
+	else return OA_FALSE;
+ }
  /*********************************************************
 *Function:     digit_alpha_check()
 *Description:  digit_alpha_check
@@ -102,6 +112,30 @@
 
 	for (i = 0;i < len; i++){
 		if (digit_check(src[i]) || alpha_check(src[i])){
+			continue;
+		}
+		else{
+			return OA_FALSE;
+		}
+	}
+	return OA_TRUE;
+ }
+  /*********************************************************
+*Function:     digit_alpha_check()
+*Description:  digit_alpha_check
+*Return:		void
+*Others:         
+*********************************************************/
+ oa_bool cap_digit_alpha_check(oa_char *src, oa_uint8 len)
+ {
+	oa_uint8 i;
+	if (NULL == src || len == 0){
+		Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+		return OA_FALSE;
+	}
+
+	for (i = 0;i < len; i++){
+		if (digit_check(src[i]) || cap_alpha_check(src[i])){
 			continue;
 		}
 		else{

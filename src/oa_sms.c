@@ -32,6 +32,7 @@
 #include "oa_use_lock.h"
 #include "oa_gps.h"
 #include "oa_platform.h"
+#include "oa_lbs2mtk.h"
 #include "oa_jt808.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -240,6 +241,7 @@ ack_kind need_ack_check(oa_char *p)
 		}
 		if (*(p_SEMICOLON+1) == 'A' || *(p_SEMICOLON+1) == 'a')	return ack;
 		else if (*(p_SEMICOLON+1) == 'N' || *(p_SEMICOLON+1) == 'n')	return noack;
+		else if (*(p_SEMICOLON+1) == 0x0)	return ack;//this is only for schedule screen
 		else{
 			Trace("(%s:%s:%d): format err!", __FILE__, __func__, __LINE__);
 			return ackerr;
@@ -256,7 +258,8 @@ ack_kind need_ack_check(oa_char *p)
 *Return:        void
 *Others:         
 *********************************************************/
-oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set, e_keyword e_kind, sms_or_uart which)
+oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set, 
+										e_keyword e_kind, sms_or_uart which, u16 len)
 {
 	char *p = NULL;
 	oa_char *p_SEMICOLON = NULL; 
@@ -268,6 +271,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 	}
 	if (sms == which) copy_len = message.len;
 	else if (uart == which) copy_len = uart_contain.len;
+	else if (scrn == which)	 copy_len = len;
 	p = p_key+e_len;
 	if (*p == COLON){//means set
 		p_set->kind = set;
@@ -453,7 +457,13 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 				}
 			}break;
 			case e_DEVID:{
-				if (oa_strlen(temp) == DEVID_LEN)	oa_memcpy(p_set->context.con_ch, temp, DEVID_LEN);
+				if (oa_strlen(temp) == DEVID_LEN){
+					if (cap_digit_alpha_check(temp, oa_strlen(temp)))	oa_memcpy(p_set->context.con_ch, temp, DEVID_LEN);
+					else{
+						Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+						return OA_FALSE;
+					}
+				}
 				else{
 					Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
 					return OA_FALSE;
@@ -482,10 +492,10 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 *Return:        void
 *Others:         
 *********************************************************/
-e_keyword lookfor_keywords_loop(keyword_context *p_set, oa_uint8 e_i, sms_or_uart which)
+e_keyword lookfor_keywords_loop(u8 *p_sms, u16 sms_len, keyword_context *p_set, oa_uint8 e_i, sms_or_uart which)
 {
 	oa_char *p_key = NULL;
-	oa_char temp[16] = {0x0};
+	oa_char temp[256] = {0x0};
 	oa_char ch;
 	ack_kind ack_ret;
 	oa_uint8 e_len;
@@ -498,10 +508,26 @@ e_keyword lookfor_keywords_loop(keyword_context *p_set, oa_uint8 e_i, sms_or_uar
 	}
 	
 	if (sms == which){
+		if (NULL == p_set || e_i == e_none){
+			Trace("(%s:%s:%d): p_set err!", __FILE__, __func__, __LINE__);
+			return e_none;
+		}
 		p_key = oa_strstr(message.data, p_keyword[e_i]);
 	}
-	else if(uart == which){
+	else if (uart == which){
+		if (NULL == p_set || e_i == e_none){
+			Trace("(%s:%s:%d): p_set err!", __FILE__, __func__, __LINE__);
+			return e_none;
+		}
 		p_key = oa_strstr(uart_contain.buf, p_keyword[e_i]);
+	}
+	else if (scrn == which){
+		if (NULL == p_set || NULL == p_sms || sms_len > 255){
+			Trace("(%s:%s:%d): p_set err!", __FILE__, __func__, __LINE__);
+			return e_none;
+		}
+		oa_memcpy(temp, p_sms, sms_len);
+		p_key = oa_strstr(temp, p_keyword[e_i]);
 	}
 	
 	if (NULL != p_key){
@@ -510,7 +536,10 @@ e_keyword lookfor_keywords_loop(keyword_context *p_set, oa_uint8 e_i, sms_or_uar
 		}
 		else if (uart == which){
 			if (p_key != &uart_contain.buf[0])		return e_none;
-		}	
+		}
+		else if (scrn == which){
+			if (p_key != &temp[0])		return e_none;
+		}
 		
 		//need ack check
 		ack_ret = need_ack_check(p_key);
@@ -519,7 +548,7 @@ e_keyword lookfor_keywords_loop(keyword_context *p_set, oa_uint8 e_i, sms_or_uar
 		else if (ack_ret == noack)  p_set->need_ack = OA_FALSE;
 		//set/enquiry check
 		e_len = oa_strlen(p_keyword[e_i]);
-		ret = set_enquiry_check(p_key, e_len, p_set, e_i, which);
+		ret = set_enquiry_check(p_key, e_len, p_set, e_i, which, sms_len);
 		if (OA_FALSE == ret) return e_none;
 		else return e_i;
 	}
@@ -551,7 +580,8 @@ void sms_send_feedback_func(os_sms_result send_ret)
 *Return:        void
 *Others:         
 *********************************************************/
-void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which)
+void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which, 
+															u8 *p_fbk, u16 *p_fbk_len)
 {
 	oa_bool ret;
 	char temp[16] = {0x0};
@@ -742,8 +772,104 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 		oa_memcpy(sms_fail.deliver_num, message.deliver_num, oa_strlen(message.deliver_num));
 		sms_fail.dcs = message.dcs;
 	}
+	else if (scrn == which){
+		*p_fbk_len = oa_strlen(enquire_temp);
+		oa_memcpy(p_fbk, enquire_temp, *p_fbk_len);
+	}
 	
 	
+}
+/*********************************************************
+*Function:      dev_action_handle()
+*Description:  maybe device need do something
+*Return:        void
+*Others:         
+*********************************************************/
+void dev_action_handle(keyword_context *p_set)
+{
+	oa_bool ret;
+	if (NULL == p_set){
+		Trace("(%s:%s:%d): p_set err!", __FILE__, __func__, __LINE__);
+		return;
+	}
+	
+	switch (p_set->act_kind){
+		case para_save:{
+			ret = dev_params_save();
+			if (ret == OA_TRUE)	print_key_dev_params();
+		}break;
+		case reconn:{
+			ret = dev_params_save();
+			if (ret == OA_TRUE)	print_key_dev_params();
+			do_soc_reconn();
+		}break;
+		case update:{
+			ftp_update();
+		}break;
+		case reset:{
+			do_reset();
+		}break;
+		case clr_log:{
+			clear_miles();
+			del_blinddata();
+		}break;
+		case clr_authcode:{
+			if (OFFLINE == dev_running.plat_status)	break;
+
+			ret = del_authcode();
+			if (OA_TRUE == ret){//if you delete authcode, you must unregsiter & reg again
+				dev_running.next_step = PLAT_DEV_UNREG;
+				dev_running.plat_switch = OA_TRUE;
+			}
+		}break;
+		case update_authcode:{
+			ret = save_authen_code((oa_uint8 *)p_set->context.con_ch, 
+										oa_strlen(p_set->context.con_ch));
+			if (OA_TRUE == ret){//if you update authcode, you must unregsiter & reg again
+				dev_running.next_step = PLAT_DEV_UNREG;
+				dev_running.plat_switch = OA_TRUE;
+			}
+		}break;
+		default:break;
+	}
+#if 0	
+	if (para_save == p_set->act_kind){
+		ret = dev_params_save();
+		if (ret == OA_TRUE)	print_key_dev_params();
+	}
+	else if (reconn == p_set->act_kind){
+		ret = dev_params_save();
+		if (ret == OA_TRUE)	print_key_dev_params();
+		do_soc_reconn();
+	}
+	else if (update == p_set->act_kind){
+		ftp_update();
+	}
+	else if (reset == p_set->act_kind){
+		do_reset();		
+	}
+	else if (clr_log == p_set->act_kind){
+		clear_miles();
+		del_blinddata();
+	}
+	else if (clr_authcode == p_set->act_kind){
+		oa_bool ret = del_authcode();
+		if (OA_TRUE == ret){//if you delete authcode, you must unregsiter & reg again
+			dev_running.next_step = PLAT_DEV_UNREG;
+			dev_running.plat_switch = OA_TRUE;
+		}
+	}
+	else if (update_authcode == p_set->act_kind){//maybe useless
+		oa_bool ret = save_authen_code((oa_uint8 *)p_set->context.con_ch, 
+										oa_strlen(p_set->context.con_ch));
+		if (OA_TRUE == ret){//if you update authcode, you must unregsiter & reg again
+			dev_running.next_step = PLAT_DEV_UNREG;
+			dev_running.plat_switch = OA_TRUE;
+		}
+	}
+#endif	
+
+	p_set->act_kind = no_act;
 }
 /*********************************************************
 *Function:      handle_keyword()
@@ -751,7 +877,8 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 *Return:        void
 *Others:         
 *********************************************************/
-void handle_keyword(e_keyword key_kind, keyword_context *p_set, sms_or_uart which)
+void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind, 
+										keyword_context *p_set, sms_or_uart which)
 {
 	oa_bool ret;
 	char temp[16] = {0x0};
@@ -1368,86 +1495,24 @@ void handle_keyword(e_keyword key_kind, keyword_context *p_set, sms_or_uart whic
 		}
 	}
 	
-	if (p_set->need_ack == OA_TRUE)	handle_common(key_kind, p_set, which);
-
-	switch (p_set->act_kind){
-		case para_save:{
-			ret = dev_params_save();
-			if (ret == OA_TRUE)	print_key_dev_params();
-		}break;
-		case reconn:{
-			ret = dev_params_save();
-			if (ret == OA_TRUE)	print_key_dev_params();
-			do_soc_reconn();
-		}break;
-		case update:{
-			ftp_update();
-		}break;
-		case reset:{
-			do_reset();
-		}break;
-		case clr_log:{
-			clear_miles();
-			del_blinddata();
-		}break;
-		case clr_authcode:{
-			oa_bool ret;
-			if (OFFLINE == dev_running.plat_status)	break;
-
-			ret = del_authcode();
-			if (OA_TRUE == ret){//if you delete authcode, you must unregsiter & reg again
-				dev_running.next_step = PLAT_DEV_UNREG;
-				dev_running.plat_switch = OA_TRUE;
-			}
-		}break;
-		case update_authcode:{
-			oa_bool ret = save_authen_code((oa_uint8 *)p_set->context.con_ch, 
-										oa_strlen(p_set->context.con_ch));
-			if (OA_TRUE == ret){//if you update authcode, you must unregsiter & reg again
-				dev_running.next_step = PLAT_DEV_UNREG;
-				dev_running.plat_switch = OA_TRUE;
-			}
-		}break;
-		default:break;
-	}
-#if 0	
-	if (para_save == p_set->act_kind){
-		ret = dev_params_save();
-		if (ret == OA_TRUE)	print_key_dev_params();
-	}
-	else if (reconn == p_set->act_kind){
-		ret = dev_params_save();
-		if (ret == OA_TRUE)	print_key_dev_params();
-		do_soc_reconn();
-	}
-	else if (update == p_set->act_kind){
-		ftp_update();
-	}
-	else if (reset == p_set->act_kind){
-		do_reset();		
-	}
-	else if (clr_log == p_set->act_kind){
-		clear_miles();
-		del_blinddata();
-	}
-	else if (clr_authcode == p_set->act_kind){
-		oa_bool ret = del_authcode();
-		if (OA_TRUE == ret){//if you delete authcode, you must unregsiter & reg again
-			dev_running.next_step = PLAT_DEV_UNREG;
-			dev_running.plat_switch = OA_TRUE;
+	if (p_set->need_ack == OA_TRUE){
+		if (sms == which || uart == which){
+			handle_common(key_kind, p_set, which, NULL, NULL);
+		}
+		else if (scrn == which){
+			handle_common(key_kind, p_set, which, p_fbk, p_fbk_len);
+			*p_act |= Sms_Ack_Enable;
 		}
 	}
-	else if (update_authcode == p_set->act_kind){//maybe useless
-		oa_bool ret = save_authen_code((oa_uint8 *)p_set->context.con_ch, 
-										oa_strlen(p_set->context.con_ch));
-		if (OA_TRUE == ret){//if you update authcode, you must unregsiter & reg again
-			dev_running.next_step = PLAT_DEV_UNREG;
-			dev_running.plat_switch = OA_TRUE;
+	else{
+		if (scrn == which){
+			*p_act &= ~Sms_Ack_Enable;
+			*p_act |= Sms_Ack_Force_DISABLE;
 		}
 	}
-#endif	
 
-	p_set->act_kind = no_act;
+	dev_action_handle(p_set);
+
 	
 }
 /*********************************************************
@@ -1489,12 +1554,12 @@ void oa_app_sms(void)
 #endif
 	//do not support multiple sms
 	for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
-		key_ret = lookfor_keywords_loop(&set, e_i, sms);
+		key_ret = lookfor_keywords_loop(NULL, 0, &set, e_i, sms);
 		if (e_none == key_ret){
 			//Trace("(%s:%s:%d): not support!", __FILE__, __func__, __LINE__);
 			continue;
 		}
-		handle_keyword(key_ret, &set, sms);
+		handle_keyword(NULL, NULL, NULL, key_ret, &set, sms);
 		oa_memset(&set, 0x0, sizeof(set));
 	}
 	#if 0

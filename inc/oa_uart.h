@@ -35,7 +35,8 @@
 typedef enum
 {
 	sms = 0x0,
-	uart,
+	uart,//derectly uart
+	scrn,//schedule screen
 }sms_or_uart;
 extern oa_bool oa_uart_init(oa_uart_enum port);
 extern void oa_app_uart();
