@@ -33,7 +33,7 @@
 #include "oa_gps.h"
 #include "oa_platform.h"
 #include "oa_blinddata.h"
-//#include "oa_sms.h"
+#include "SchedulScrn.h"
 #define PRINT_SAMEPARA	Trace("(%s:%s:%d): this parameter is same as the original, so I do nothing...", __FILE__, __func__, __LINE__)
 #define PORT_MAX 65535
 extern DEVICE_PARAMS dev_now_params;
@@ -2199,6 +2199,84 @@ static u8 ServReq_GetPositionData_Period(u8 *pmsgbody, u16 msgbodylen)
 	return 0;;
 }
 /*********************************************************
+*Function:     ServReq_Textinfo
+*Description:  校验平台下发文本信息下发请求
+*文本信息以中心短信格式发送调度屏
+*Calls:          
+*Called By:      
+*Input:         pprotHandle 句柄的指针
+				pbuf 是外部缓冲区首地址
+*Output:        pbuflen 是组成的报文长度
+*Return:        函数是否执行成功，返回0表示成功
+*Others:         
+*********************************************************/
+static u8 ServReq_Textinfo(u8 *pbuf, u16 buflen)
+{
+	u8 U8Temp=0;
+	u8 type=0;
+	
+	if((pbuf==NULL)||(buflen==0))
+	{
+		//Trace(PrintInfo,"check_text_download param error!\r\n");
+		Trace("(%s:%s:%d):check_text_download param error!", __FILE__, __func__, __LINE__);
+		return 1;
+	}
+	
+	if(0)
+	{
+	//处理
+	return 0;
+	}
+	else
+	{
+	type=*pbuf++;	//文本处理方式,暂未分类 bit	
+	if(buflen>1) //peijl_20121229 修改：空文本不处理
+	{	
+		#if 0
+		if(type&0x10)
+		{
+			u16 u16temp;
+			u16temp = buflen-1;
+			//zjw_show_soon_mess(0,pbuf,u16temp);
+			zjw_show_adv_mess(0,pbuf,u16temp);
+			Flash_Write_Buffer(NULL,0,ADV_LED_DATA_ADDR,Sector_Erase);
+			Flash_Write_Buffer((u8 *)&u16temp,sizeof(u16temp),ADV_LED_DATA_ADDR,Write_Mode);
+			Flash_Write_Buffer(pbuf,u16temp,ADV_LED_DATA_ADDR+sizeof(u16temp),Write_Mode);
+//		u8 buf[12]={0};
+//		buf[0]=0x10;
+//		buf[1]=0x01;
+//		buf[2]=0x01;
+//		buf[3]=0x11;
+//		buf[4]=0x11;
+//		buf[5]=0x11;
+//	
+//		buf[6]=0x14;
+//		buf[7]=0x12;
+//		buf[8]=0x30;
+//		buf[9]=0x11;
+//		buf[10]=0x11;
+//		buf[11]=0x11;
+//		zjw_send_mess(0,0,SHOW_TYPE1,&buf[0],&buf[6],pbuf,buflen-1);
+		}
+		#endif
+		if(type&0x0D)
+		{
+			#if SCREEN_N990>0
+			{
+				u8 Time[6]={0};
+				app_GetPosinf(Time,GPSTime,BCD_Code);
+				SScrn_SMS_Send('E',"000",3,Time,pbuf,buflen-1); //短信格式？？
+			}
+			#else
+				SScrn_CenterSMS_Send(pbuf,buflen-1);
+			#endif 
+		}
+	}
+	return ActionOK;
+	}
+}
+
+/*********************************************************
 *Function:		ServReq_808data_handle
 *Description:	对监控平台请求命令的处理及应答
 *				1.简单处理在本函数完成
@@ -2255,15 +2333,15 @@ u8 JT808_ServReq_handle(u16 ServReqMsgid,u8 *msgbody,u16 msgbodylen/*,u8 *sendbu
 			break;
 		}
 //status=3 为暂时处理
-		#if 0
+		
 		case TEXT_DOWNLOAD:
 		{
 			status = ServReq_Textinfo(msgbody,msgbodylen);
 			Write_ProtclHandl(eRsp2ServSeq,&status,1);
-			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0,sendbuf,sendbuflen);
+			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
 			break;
 		}
-		
+		#if 0
 		case SET_EVENT:
 		{
 			status = ServReq_SetEvent(msgbody,msgbodylen);
