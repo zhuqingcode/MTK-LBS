@@ -163,14 +163,16 @@ void gps_extract(oa_char *enquire_temp){
 		oa_strcat(tmp, "N:");
 		tmp[2] = Pos_Inf.Latitude[0];
 		tmp[3] = Pos_Inf.Latitude[1];
-		tmp[4] = '\'';
+		//tmp[4] = '\'';
+		tmp[4] = '$';
 		tmp[5] = Pos_Inf.Latitude[2];
 		tmp[6] = Pos_Inf.Latitude[3];
 		tmp[7] = Pos_Inf.Latitude[4];
 		tmp[8] = Pos_Inf.Latitude[5];
 		tmp[9] = Pos_Inf.Latitude[6];
 		tmp[10] = Pos_Inf.Latitude[7];
-		tmp[11] = '\"';
+		//tmp[11] = '\"';
+		tmp[11] = '\'';
 		tmp[12] = ';';
 		oa_strcat(enquire_temp, tmp);
 		oa_memset(tmp, 0x0, sizeof(tmp));
