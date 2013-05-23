@@ -1160,6 +1160,7 @@ area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool
 *********************************************************/
 void oa_app_area(void *para)
 {
+	static oa_bool task_runed = OA_FALSE;
 	oa_bool ret;
 	u32 lon;
 	u32 lat;
@@ -1173,10 +1174,17 @@ void oa_app_area(void *para)
 	oa_bool o_s = OA_FALSE;
 	u8 o_s_t;
 	static u8 o_s_alarm_period;
+
+	if (OA_TRUE == task_runed){
+		OA_DEBUG_USER("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>", __func__);
+		task_runed = OA_FALSE;
+	}
 	
 	ret = has_areadata_dir_n_c();
 	//don't exist area data
 	if (!ret) goto again;
+	//gps check
+	if (GPS_GetFixStatus()) goto again;
 	//extract datas
 	GetPosinf((u8 *)&lon, GPSLon, 5);
 	GetPosinf((u8 *)&lat, GPSLat, 5);
