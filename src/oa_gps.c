@@ -233,7 +233,7 @@ void oa_app_gps(void)
 			}
 			else if (gps_info.Speed <= speed){
 				if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET){
-					//WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm & don't upload instantly
+					//WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 					handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, RESET, OA_TRUE);
 				}
 			}
