@@ -32,6 +32,12 @@
 extern DEVICE_PARAMS dev_now_params;
 extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 acc_status;
+/*********************************************************
+*Function:     handle_alarm_status()
+*Description:  handle alarm status
+*Return:		
+*Others:         
+*********************************************************/
 oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, oa_bool flag)
 {
 

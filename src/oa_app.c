@@ -42,6 +42,7 @@
 #include "oa_platform.h"
 #include "oa_blinddata.h"
 #include "oa_lbs2mtk.h"
+#include "oa_area.h"
 DEV_PLAT_PARAS dev_running =
 {
 	PLAT_SOC_INIT,
@@ -453,6 +454,8 @@ void oa_app_main(void)
 		oa_timer_start(OA_TIMER_ID_7, oa_app_blinddata, NULL, OA_APP_BLINDDATA);
 		//schedule screen task, send mainly ,transplant from lbs@wjn
 		oa_timer_start(OA_TIMER_ID_8, App_TaskSScrnSendManage, NULL, SCHD_SCRN_TIME);
+		//area judge task
+		oa_timer_start(OA_TIMER_ID_9, oa_app_area, NULL, OA_AREA_DETECT_TIME);
 	}
 	else if (OA_TRUE == dev_is_locked)  //device is lock
 	{

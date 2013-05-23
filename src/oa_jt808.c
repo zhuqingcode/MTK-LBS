@@ -34,6 +34,8 @@
 #include "oa_platform.h"
 #include "oa_blinddata.h"
 #include "SchedulScrn.h"
+#include "Area_Judge.h"
+#include "oa_debug.h"
 #define PRINT_SAMEPARA	Trace("(%s:%s:%d): this parameter is same as the original, so I do nothing...", __FILE__, __func__, __LINE__)
 #define PORT_MAX 65535
 extern DEVICE_PARAMS dev_now_params;
@@ -2279,6 +2281,186 @@ static u8 ServReq_Textinfo(u8 *pbuf, u16 buflen)
 	return ActionOK;
 	}
 }
+/*********************************************************
+*Function:     set_round_area
+*Description:  下发圆形区域
+*Calls:          
+*Called By:      
+*Input:         pprotHandle 句柄的指针
+				pbuf 是外部缓冲区首地址
+*Output:        pbuflen 是组成的报文长度
+*Return:        函数是否执行成功，返回0表示成功
+*Others:         
+*********************************************************/
+static u8 set_round_area(u8 *pbuf, u16 buflen)
+{	
+	u8 	option;//操作类型  0:更新  1:追加 2:修改
+	u8 area_num;
+	u16 read_len;
+	u8 i;
+	u8 ret;
+
+	if((pbuf==NULL)||(buflen==0))
+	{
+		//Trace(PrintInfo,"check_car_ctl param error!\r\n");
+		DEBUG("check_car_ctl param error!");
+		return 1;
+	}
+	//Trace(PrintDebug,"设置圆形区域\r\n");
+	DEBUG("设置圆形区域");
+	option =  *pbuf++;
+	area_num = 	*pbuf++;
+
+	if (area_num > MAX_AREA_SUM){
+		DEBUG("area num is too large");
+		return 1;
+	}
+	
+	for(i=0;i<area_num;i++)
+	{
+		SaveAreaData(pbuf,Circular_Area,option,&read_len);  //保存
+		if(option == 0)	 //如果是更新操作，只在第一次清除，后面则改为追加
+		{
+			option = 1;//
+		}
+		pbuf+=read_len;
+	}
+	return 1;
+}
+/*********************************************************
+*Function:     set_rect_area
+*Description:  下发矩形区域
+*Calls:          
+*Called By:      
+*Input:         pprotHandle 句柄的指针
+				pbuf 是外部缓冲区首地址
+*Output:        pbuflen 是组成的报文长度
+*Return:        函数是否执行成功，返回0表示成功
+*Others:         
+*********************************************************/
+static u8 set_rect_area(u8 *pbuf, u16 buflen)
+{
+	u8 	option;//操作类型  0:更新  1:追加 2:修改
+	u8 area_num;
+	u16 read_len;
+	u8 i;
+
+	if((pbuf==NULL)||(buflen==0))
+	{
+		//Trace(PrintInfo,"check_car_ctl param error!\r\n");
+		DEBUG("check_car_ctl param error!");
+		return 1;
+	}
+	//Trace(PrintDebug,"设置矩形区域\r\n");
+	DEBUG("设置矩形区域");
+	option =  *pbuf++;
+	area_num = 	*pbuf++;
+	
+	if (area_num > MAX_AREA_SUM){
+		DEBUG("area num is too large");
+		return 1;
+	}
+	
+	for(i=0;i<area_num;i++)
+	{
+		SaveAreaData(pbuf,Rectangle_Area,option,&read_len);  //保存
+		if(option == 0)	 //如果是更新操作，只在第一次清除，后面则改为追加
+		{
+			option = 1;//
+		}
+		pbuf+=read_len;
+	}
+	return 1;
+}
+	
+/*********************************************************
+*Function:     set_poly_area
+*Description:  下发多边形区域
+*Calls:          
+*Called By:      
+*Input:         pprotHandle 句柄的指针
+				pbuf 是外部缓冲区首地址
+*Output:        pbuflen 是组成的报文长度
+*Return:        函数是否执行成功，返回0表示成功
+*Others:         
+*********************************************************/
+static u8 set_poly_area(u8 *pbuf, u16 buflen)	
+{
+	u8 	option;//操作类型  0:更新  1:追加 2:修改
+	u8 area_num;
+	u16 read_len;
+	u8 i;
+
+	if((pbuf==NULL)||(buflen==0))
+	{
+		//Trace(PrintInfo,"check_car_ctl param error!\r\n");
+		DEBUG("check_car_ctl param error!");
+		return 1;
+	}
+	//Trace(PrintDebug,"设置多边形区域\r\n");
+	DEBUG("设置多边形区域");
+	option =  *pbuf++;
+	area_num = 	*pbuf++;
+
+	if (area_num > MAX_AREA_SUM){
+		DEBUG("area num is too large");
+		return 1;
+	}
+	
+	for(i=0;i<area_num;i++)
+	{
+		SaveAreaData(pbuf,Poly_Area,option,&read_len);  //保存
+		if(option == 0)	 //如果是更新操作，只在第一次清除，后面则改为追加
+		{
+			option = 1;//
+		}
+		pbuf+=read_len;
+	}
+	return 1;
+}
+/*********************************************************
+*Function:     del_area_message
+*Description:  删除区域
+*Calls:          
+*Called By:      
+*Input:         pprotHandle 句柄的指针
+				pbuf 是外部缓冲区首地址
+*Output:        pbuflen 是组成的报文长度
+*Return:        函数是否执行成功，返回0表示成功
+*Others:         
+*********************************************************/
+static u8 del_area_message(u8 *pbuf, u16 buflen,u8 area_type)	
+{
+	u8 area_num;
+	u8 i;
+
+	if((pbuf==NULL)||(buflen==0))
+	{
+		//Trace(PrintInfo,"check_car_ctl param error!\r\n");
+		DEBUG("check_car_ctl param error!");
+		return 1;
+	}
+	//Trace(PrintDebug,"删除区域信息\r\n");
+	DEBUG("删除区域信息");
+	area_num = 	*pbuf++;
+	if (area_num > MAX_AREA_SUM){
+		DEBUG("area num is too large");
+		return 1;
+	}
+	if(area_num)
+	{
+		for(i=0;i<area_num;i++)
+		{
+			 DelAreaData(pbuf,area_type);  //删除区域
+			 pbuf+=4;
+		}
+	}
+	else
+	{
+		DelAreaData(NULL,area_type);//删除所有区域
+	}
+	return 1;
+}
 
 /*********************************************************
 *Function:		ServReq_808data_handle
@@ -2401,12 +2583,44 @@ u8 JT808_ServReq_handle(u16 ServReqMsgid,u8 *msgbody,u16 msgbodylen/*,u8 *sendbu
 			JT808MsgRsp_Send(CAR_CTL_rsp,1,0,sendbuf,sendbuflen);
 			break;
 		}
+		#endif
 		case SET_ROUND_AREA:
+			set_round_area(msgbody,msgbodylen);
+			status=0;
+			Write_ProtclHandl(eRsp2ServSeq,&status,1);
+			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
+		break;
 		case DEL_ROUND_AREA:
+			del_area_message(msgbody,msgbodylen,Circular_Area);
+			status=0;
+			Write_ProtclHandl(eRsp2ServSeq,&status,1);
+			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
+		break;
 		case SET_SQUARE_AREA:
+			set_rect_area(msgbody,msgbodylen);
+			status=0;
+			Write_ProtclHandl(eRsp2ServSeq,&status,1);
+			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
+		break;
 		case DEL_SQUARE_AREA:
+			del_area_message(msgbody,msgbodylen,Rectangle_Area);
+			status=0;
+			Write_ProtclHandl(eRsp2ServSeq,&status,1);
+			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
+		break;
 		case SET_POLYGON_AREA:
+			set_poly_area(msgbody,msgbodylen);
+			status=0;
+			Write_ProtclHandl(eRsp2ServSeq,&status,1);
+			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
+		break;
 		case DEL_POLYGON_AREA:
+			del_area_message(msgbody,msgbodylen,Poly_Area);
+			status=0;
+			Write_ProtclHandl(eRsp2ServSeq,&status,1);
+			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
+		break;
+		#if 0
 		case SET_LINE:
 		case DEL_LINE:
 		{
