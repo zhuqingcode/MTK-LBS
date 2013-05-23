@@ -26,12 +26,11 @@
  ****************************************************************************/
 #ifndef __OA_DEBUG_H__
 #define __OA_DEBUG_H__
-#include "oa_api.h"
 #define __DEBUG__ 
 
 #ifdef __DEBUG__  
-#define DEBUG(format, ...) OA_DEBUG_USER("("__FILE__","__func__",%d):"format"", __LINE__, ##__VA_ARGS__)
+#define DEBUG(format,...) OA_DEBUG_USER(" "__FILE__" %d : "format"", __LINE__, ##__VA_ARGS__)
 #else  
-#define DEBUG(format, ...)  
+#define DEBUG(format,...)  
 #endif  
 #endif

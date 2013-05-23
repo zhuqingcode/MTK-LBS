@@ -34,7 +34,7 @@ oa_bool set_time = OA_FALSE;
 *Return:		
 *Others:         
 *********************************************************/
-void set_rtc_time(u8 *time_str)
+u8 set_rtc_time(u8 *time_str)
 {
 	oa_time_struct t = {0};
 	

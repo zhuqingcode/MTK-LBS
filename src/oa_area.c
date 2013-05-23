@@ -24,10 +24,13 @@
  *   zhuqing.
  *
  ****************************************************************************/
+ #include "oa_type.h"
  #include "oa_api.h"
  #include "oa_debug.h"
  #include "oa_area.h"
  #include "oa_blinddata.h"
+ #include "oa_gps.h"
+ #include "oa_jt808.h"
  /*********************************************************
 *Function:     has_areadata_dir_n_c()
 *Description:  if system desn't have area data directory,create it 
@@ -420,7 +423,7 @@ fail:	oa_fclose(handle);
 *Return:		
 *Others:         
 *********************************************************/
-oa_bool write_circle_area_data(u8 *buf, Area_Type_enum area_type, u16 *read_len)
+oa_bool write_circle_area_data(u8 *buf, u16 *read_len)
 {
 	oa_int32 handle, ret, i;
 	u8 illegal = 0x0;
@@ -503,7 +506,7 @@ oa_bool write_circle_area_data(u8 *buf, Area_Type_enum area_type, u16 *read_len)
 *Return:		
 *Others:         
 *********************************************************/
-oa_bool write_rect_area_data(u8 *buf, Area_Type_enum area_type, u16 *read_len)
+oa_bool write_rect_area_data(u8 *buf, u16 *read_len)
 {
 	oa_int32 handle, ret, i;
 	u8 illegal = 0x0;
@@ -589,12 +592,13 @@ oa_bool write_rect_area_data(u8 *buf, Area_Type_enum area_type, u16 *read_len)
 *Return:		
 *Others:         
 *********************************************************/
-oa_bool write_poly_area_data(u8 *buf, Area_Type_enum area_type, u16 *read_len)
+oa_bool write_poly_area_data(u8 *buf, u16 *read_len)
 {
 	oa_int32 handle, ret, i;
 	u8 illegal = 0x0;
 	u32 u32temp;
 	u16 u16temp;
+	u32 temp0, temp1;
 	poly_area_item poly_area_var;
 	
 	if (NULL == buf || NULL == read_len){
@@ -629,8 +633,11 @@ oa_bool write_poly_area_data(u8 *buf, Area_Type_enum area_type, u16 *read_len)
 			}
 			else poly_area_var.total_point = u16temp;
 			for (i=0; i<u16temp; i++){
-				poly_area_var.vertax[i].vertax_lat = buf+23+i*8;
-				poly_area_var.vertax[i].vertax_lon = buf+27+i*8;
+				
+				char_to_int(buf+23+i*8, &temp0);
+				char_to_int(buf+27+i*8, &temp1);
+				poly_area_var.vertax[i].vertax_lat = temp0;
+				poly_area_var.vertax[i].vertax_lon = temp1;
 			}
 			//total length
 			*read_len = 23 + u16temp * 8;
@@ -646,8 +653,10 @@ oa_bool write_poly_area_data(u8 *buf, Area_Type_enum area_type, u16 *read_len)
 			}
 			else poly_area_var.total_point = u16temp;
 			for (i=0; i<u16temp; i++){
-				poly_area_var.vertax[i].vertax_lat = buf+20+i*8;
-				poly_area_var.vertax[i].vertax_lon = buf+24+i*8;
+				char_to_int(buf+20+i*8, &temp0);
+				char_to_int(buf+24+i*8, &temp1);
+				poly_area_var.vertax[i].vertax_lat = temp0;
+				poly_area_var.vertax[i].vertax_lon = temp1;
 			}
 			//total length
 			*read_len = 20 + u16temp * 8;
@@ -673,8 +682,10 @@ oa_bool write_poly_area_data(u8 *buf, Area_Type_enum area_type, u16 *read_len)
 			}
 			else poly_area_var.total_point = u16temp;
 			for (i=0; i<u16temp; i++){
-				poly_area_var.vertax[i].vertax_lat = buf+11+i*8;
-				poly_area_var.vertax[i].vertax_lon = buf+15+i*8;
+				char_to_int(buf+11+i*8, &temp0);
+				char_to_int(buf+15+i*8, &temp1);
+				poly_area_var.vertax[i].vertax_lat = temp0;
+				poly_area_var.vertax[i].vertax_lon = temp1;
 			}
 			//total length
 			*read_len = 11 + u16temp * 8;
@@ -690,8 +701,10 @@ oa_bool write_poly_area_data(u8 *buf, Area_Type_enum area_type, u16 *read_len)
 			}
 			else poly_area_var.total_point = u16temp;
 			for (i=0; i<u16temp; i++){
-				poly_area_var.vertax[i].vertax_lat = buf+8+i*8;
-				poly_area_var.vertax[i].vertax_lon = buf+12+i*8;
+				char_to_int(buf+8+i*8, &temp0);
+				char_to_int(buf+12+i*8, &temp1);
+				poly_area_var.vertax[i].vertax_lat = temp0;
+				poly_area_var.vertax[i].vertax_lon = temp1;
 			}
 			*read_len = 8 + i * 8;
 		}
@@ -976,7 +989,7 @@ u8 del_area_data(u32 area_id, Area_Type_enum area_type, del_option_enum del_opti
 fail:	oa_fclose(handle);    
 	return 1;
 }
-area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time)
+area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool *over_speed, u8 *o_s_time)
 {
 	oa_bool ret;
 	u8 i, i_o, res;
@@ -1008,13 +1021,29 @@ area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time)
 				else if (1 == res){
 					i_o = Circular_Judge(lon, lat, &circle_area_desc);
 					//inside
-					if (1 == i_o) return area_inside;
+					if (1 == i_o){
+						if (circle_area_var.area_para.speed_limit){
+							if (speed > circle_area_var.max_speed){
+								*o_s_time = circle_area_var.continue_time;
+								*over_speed = OA_TRUE;	
+							}
+						}
+						return area_inside;
+					}
 				}
 			}
 			else{
 				i_o = Circular_Judge(lon, lat, &circle_area_desc);
 				//inside
-				if (1 == i_o) return area_inside;
+				if (1 == i_o){
+					if (circle_area_var.area_para.speed_limit){
+						if (speed > circle_area_var.max_speed){
+							*o_s_time = circle_area_var.continue_time;
+							*over_speed = OA_TRUE;	
+						}
+					}
+					return area_inside;
+				}
 			}
 		}
 	}
@@ -1045,13 +1074,29 @@ area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time)
 				else if (1 == res){
 					i_o = poly_Judge(lon, lat, &rect_area_desc, 4);
 					//inside
-					if (1 == i_o) return area_inside;
+					if (1 == i_o){
+						if (rect_area_var.area_para.speed_limit){
+							if (speed > rect_area_var.max_speed){
+								*o_s_time = rect_area_var.continue_time;
+								*over_speed = OA_TRUE;	
+							}
+						}
+						return area_inside;
+					}
 				}
 			}
 			else{
 				i_o = poly_Judge(lon, lat, &rect_area_desc, 4);
 				//inside
-				if (1 == i_o) return area_inside;
+				if (1 == i_o){
+					if (rect_area_var.area_para.speed_limit){
+						if (speed > rect_area_var.max_speed){
+							*o_s_time = rect_area_var.continue_time;
+							*over_speed = OA_TRUE;	
+						}
+					}
+					return area_inside;
+				}
 			}
 		}
 	}
@@ -1079,13 +1124,29 @@ area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time)
 				else if (1 == res){
 					i_o = poly_Judge(lon, lat, &poly_area_desc, poly_area_var.total_point);
 					//inside
-					if (1 == i_o) return area_inside;
+					if (1 == i_o){
+						if (poly_area_var.area_para.speed_limit){
+							if (speed > poly_area_var.max_speed){
+								*o_s_time = poly_area_var.continue_time;
+								*over_speed = OA_TRUE;	
+							}
+						}
+						return area_inside;
+					}
 				}
 			}
 			else{
 				i_o = poly_Judge(lon, lat, &poly_area_desc, poly_area_var.total_point);
 				//inside
-				if (1 == i_o) return area_inside;
+				if (1 == i_o){
+					if (poly_area_var.area_para.speed_limit){
+						if (speed > poly_area_var.max_speed){
+							*o_s_time = poly_area_var.continue_time;
+							*over_speed = OA_TRUE;	
+						}
+					}
+					return area_inside;
+				}
 			}
 		}
 	}
@@ -1105,15 +1166,74 @@ void oa_app_area(void *para)
 	u16 speed;
 	u8 time[6];
 	area_status_enum area_status;
+	static area_status_enum last_status = area_outtime;
+	static u8 area_alarm_period;
+	static oa_bool flag = OA_FALSE;
+	static oa_bool o_s_flag = OA_FALSE;
+	oa_bool o_s = OA_FALSE;
+	u8 o_s_t;
+	static u8 o_s_alarm_period;
+	
 	ret = has_areadata_dir_n_c();
 	//don't exist area data
 	if (!ret) goto again;
+	//extract datas
 	GetPosinf((u8 *)&lon, GPSLon, 5);
 	GetPosinf((u8 *)&lat, GPSLat, 5);
 	GetPosinf((u8 *)&speed, GPSSpeed, 0);
 	get_rtc_time(time);
+	//inside/outside judge
+	area_status = area_inout_judge(lat, lon, time, speed, &o_s, &o_s_t);
+	//inside/outside area alarm
+	if ((last_status == area_inside && area_status == area_outside) || 
+		(last_status == area_outside && area_status == area_inside)){
+		//do alarm
+		if (ReadAlarmPara(StaAlarm0, ALARM_ENTER_AREA) == RESET){
+			handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
+			flag = OA_TRUE;
+		}
+	}
+	
+	//overspeed alarm
+	if (area_inside == area_status){
+		if (OA_TRUE == o_s){
+			o_s_alarm_period++;
+			if (o_s_alarm_period * OA_AREA_RUN_SECOND >= o_s_t){
+				if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == RESET){
+					handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
+					o_s_flag = OA_TRUE;
+				}
 
-	area_status = area_inout_judge(lat, lon, time);
+				o_s_alarm_period = 0;
+			}
+		}
+		else o_s_alarm_period = 0;
+	}
+	else if (area_outside == area_status && o_s_alarm_period > 0) o_s_alarm_period = 0;
+	//if device is outside area,cancel related alarm
+	else if (area_outside == area_status && OA_TRUE == o_s_flag){
+		if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET){
+			handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, RESET, OA_TRUE);
+			o_s_flag = OA_FALSE;
+		}
+	}
+	
+	//cancel this alarm:I think this kind of alarm is a periodic one, so it doesn't need to alarm all the time!
+	if (flag == OA_TRUE){
+		area_alarm_period++;
+		if (area_alarm_period * OA_AREA_RUN_SECOND >= OA_AREA_ALARM_PERIOD){
+			//cancel alarm
+			if (ReadAlarmPara(StaAlarm0, ALARM_ENTER_AREA) == SET){
+				handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, RESET, OA_TRUE);
+				flag = OA_FALSE;
+			}
+			area_alarm_period = 0;
+		}
+	}
+	
+
+	last_status = area_status;
+	
 	
 	
 again:

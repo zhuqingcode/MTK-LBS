@@ -56,6 +56,7 @@ oa_bool acc_short_conning = OA_FALSE;//just used for send a location data when a
 extern DEVICE_PARAMS dev_now_params;
 extern oa_uint8 acc_status;
 extern void App_TaskSScrnSendManage(void *Para);
+extern void oa_app_area(void *para);
 /*--------END: Customer code----------*/
 oa_char OA_VERSION_NO[]="v4.0.0ep";
 /*****************************************************************

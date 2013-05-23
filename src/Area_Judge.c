@@ -18,21 +18,24 @@
 #include "oa_debug.h"
 #define min(x,y) (((x)>(y))?(y):(x))
 #define max(x,y) (((x)<(y))?(y):(x))
-
+#define CheckParam1(param1) ((param1) == NULL)
+#define CheckParam2(param1,param2) (((param1) == NULL)||((param2) == NULL))
+#define CheckParam3(param1,param2,param3) (((param1) == NULL)||((param2)== NULL)||((param3) == NULL))
+#define CheckParam4(param1,param2,param3,param4) (((param1) == NULL)||((param2) == NULL)||((param3) == NULL)||((param4) == NULL))
 
 /*变量声明*/
 //extern OS_FLAG_GRP* Alarm_Driver_Event;
-static Area_Manage_struct area_manage;
-static Area_attr_struct  area_attr_struct;
-static u8 AreaJudgeSta[MAX_AREA_SUM]; //区域判断状态组
-static u32 AreaSpeedOverSta; //超速判断状态位组，一位表示一个超速报警已上报
-static u32 AreaDoorOpenSta; //门开关判断状态位组，一位表示一个区域的非法开门报警已上报
-static u32 SpeedOverStartTime[MAX_AREA_SUM];//超速判断起始时间组
+//static Area_Manage_struct area_manage;
+//static Area_attr_struct  area_attr_struct;
+//static u8 AreaJudgeSta[MAX_AREA_SUM]; //区域判断状态组
+//static u32 AreaSpeedOverSta; //超速判断状态位组，一位表示一个超速报警已上报
+//static u32 AreaDoorOpenSta; //门开关判断状态位组，一位表示一个区域的非法开门报警已上报
+//static u32 SpeedOverStartTime[MAX_AREA_SUM];//超速判断起始时间组
 
 //static OS_EVENT *Area_Protect_Sem = 0;
 
 //Area_Desc area_desc;
-static u8 W_R_buf[1024];/*读写缓区*/
+//static u8 W_R_buf[1024];/*读写缓区*/
 
 /*内部函数接口声明*/
 static void Reset_Area_ALL(void);
@@ -40,12 +43,12 @@ static u8 CheckSameID(u32 NewID,u8 area_type);
 static u8 CheckFreeID(void);
 static u8 SaveAreaDatatoFlash(u8 *pbuf,u8 SaveNum,u8 area_type,u16 *readlen);
 static u8 DelAreaDataData(u8 save_num);
-static u8 CompareTime(u8 *start_time,u8 *stop_time,u8* now_time,u8 index);
+u8 CompareTime(u8 *start_time,u8 *stop_time,u8* now_time,u8 index);
 static u8 Area_Judge_Process(u32 now_lon,u32 now_lat,Area_Desc *area_desc);
-static u8 Circular_Judge(u32 now_lon,u32 now_lat,Cir_Area_Desc *point_data);
-static u8 poly_Judge(u32 lon,u32 lat,Poly_Area_Desc *point_data,u16 polySides);
+u8 Circular_Judge(u32 now_lon,u32 now_lat,Cir_Area_Desc *point_data);
+u8 poly_Judge(u32 lon,u32 lat,Poly_Area_Desc *point_data,u16 polySides);
 static Area_Desc * GetAreaData(u8 save_num,u8 *now_time);
-static u32 GetUnixTime(u8 *TimeStr);
+u32 GetUnixTime(u8 *TimeStr);
 
 
 /*********************************************************
@@ -122,7 +125,7 @@ u8 SaveAreaData(u8 *pbuf,u8 area_type,u8 option,u16 *readlen)
 #endif
 	write_area_data(pbuf, area_type, readlen);
 }
-
+#if 0
 /*********************************************************
 *Function:       GetAreaData()
 *Description:    
@@ -229,7 +232,7 @@ static Area_Desc * GetAreaData(u8 save_num,u8 *now_time)
 	}
 	return NULL;
 }
-
+#endif
 /*********************************************************
 *Function:       DelAreaData()
 *Description:    删除区域信息
@@ -259,9 +262,9 @@ u8 DelAreaData(u8* pbuf,u8 areatype)
 		char_to_int(pbuf,&New_Area_ID);//获取新ID
 		ret = del_area_data(New_Area_ID, areatype, one_area);
 		if (ret == 0){
-			DEBUG("======删除成功======");
+			OA_DEBUG_USER("======delete area ok======");
 		}
-		else DEBUG("======删除失败======");
+		else OA_DEBUG_USER("======delete area failed======");
 #if 0
 		/*检查是否有相同存储ID的区域,如果有，无论下发指令是否为追加区域，一律对原区域信息做替换*/
 		SaveNum = CheckSameID(New_Area_ID,areatype);
@@ -285,9 +288,9 @@ u8 DelAreaData(u8* pbuf,u8 areatype)
 	{
 		ret = del_area_data(0/*has no effects*/, areatype, all_area);
 		if (ret == 0){
-			DEBUG("======删除成功======");
+			OA_DEBUG_USER("======delete area ok======");
 		}
-		else DEBUG("======删除失败======");
+		else OA_DEBUG_USER("======delete area failed======");
 #if 0
 		OSSemPend(Area_Protect_Sem,0,&err);
 		if(err != OS_ERR_NONE)
@@ -719,7 +722,7 @@ static u8 DelAreaDataData(u8 save_num)
 *Return:         0：不在区域时间内 1：在区域内 0xff:区域时间出错，需要调用删除本段区域信息
 *Others:
 *********************************************************/
-static u8 CompareTime(u8 *start_time,u8 *stop_time,u8* now_time,u8 index)
+u8 CompareTime(u8 *start_time,u8 *stop_time,u8* now_time,u8 index)
 {
 	u8 i;
 	u32 start_time_unix=0;
@@ -900,7 +903,7 @@ static u32 GetUnixTime(u8 *TimeStr)
 
 	return mktime(&TimeNow);
 }
-
+#if 0
 /*********************************************************
 *Function:       Area_Judge()
 *Description:    根据当前经纬度，速度值判断是否进出区域，是否超速，并作出相应操作
@@ -1162,6 +1165,7 @@ u32 Area_Judge(u32 lon,u32 lat,u16 speed,u8 door_state,u8 *now_time)
 	}
 	return result;
 }
+
 /*********************************************************
 *Function:       Circular_Judge()
 *Description:    圆形区域判断
@@ -1189,7 +1193,7 @@ static u8 Area_Judge_Process(u32 now_lon,u32 now_lat,Area_Desc *area_desc)
 		return poly_Judge(now_lon,now_lat,&(area_desc->poly_area_desc),area_attr_struct.point_num);
 	}
 }
-
+#endif
 /*********************************************************
 *Function:       Circular_Judge()
 *Description:    圆形区域判断
