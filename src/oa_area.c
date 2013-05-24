@@ -114,6 +114,7 @@ fail:
 	return OA_FALSE;
 
 }
+#if 0
 /*********************************************************
 *Function:     reset_all_area_data()
 *Description:  delete all the area data
@@ -169,6 +170,7 @@ oa_bool reset_all_area_file(Area_Type_enum area_type)
 
 	return OA_TRUE;
 }
+#endif
 /*********************************************************
 *Function:     r_w_area_data_file()
 *Description:  has specifie file? If doesn't have, create it
@@ -756,6 +758,7 @@ u8 write_area_data(u8 *buf, Area_Type_enum area_type, u16 *read_len)
 	else return 1;
 
 }
+#if 0
 /*********************************************************
 *Function:     del_area_data()
 *Description:  write area data to file
@@ -809,6 +812,7 @@ fail:	oa_fclose(handle);
 	return OA_FALSE;
 	
 }
+#endif
 /*********************************************************
 *Function:     del_area_data()
 *Description:  write area data to file
