@@ -2334,7 +2334,7 @@ u8 SScrn_Status_Send(STRUCT_RMC *pGpsInfo,STRUCT_HOST_STATE * Host_State)
 	*P=0x0a;
 	Len+=2;
 
-	SSCRN_Print("向调度屏发送主机状态");
+//	SSCRN_Print("向调度屏发送主机状态");
 //	OSSemPend(Schedul_UsartSendSem,0,&temp);
 	SchedulScrn_SendStr(Buf,Len);
 //	OSSemPost(Schedul_UsartSendSem);
