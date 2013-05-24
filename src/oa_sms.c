@@ -34,6 +34,8 @@
 #include "oa_platform.h"
 #include "oa_lbs2mtk.h"
 #include "oa_jt808.h"
+#include "oa_hw.h"
+#include "oa_sw.h"
 #include <stdio.h>
 #include <stdlib.h>
 oa_sms_context message;
