@@ -104,6 +104,7 @@ oa_char *p_keyword[] = {
  GPS,
  DEV_LOCK,
  UPDATE,
+ VERSA,
  CLRLOG,
  AUTHEN,
  RESTART,
@@ -738,6 +739,14 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 			}break;
 			case e_UPDATE:{
 				oa_strcat(enquire_temp, "doing update......");
+			}break;
+			case e_VERSA:{
+				oa_strcat(temp, "HW,");
+				oa_strcat(temp, OA_HW_VERSION_NO);
+				oa_strcat(temp, ";");
+				oa_strcat(enquire_temp, temp);
+				oa_strcat(enquire_temp, "SW,");
+				oa_strcat(enquire_temp, OA_SW_VERSION_NO);
 			}break;
 			case e_CLRLOG:{
 				oa_strcat(enquire_temp, "CLRLOG");
