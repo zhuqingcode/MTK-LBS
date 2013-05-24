@@ -35,6 +35,8 @@
 #include "oa_use_lock.h"
 #include "oa_platform.h"
 #include "oa_sms.h"
+#include "oa_sw.h"
+#include "oa_hw.h"
 extern oa_soc_set_parameter soc_cs;
 
 DEVICE_PARAMS dev_def_params =
@@ -105,8 +107,6 @@ DEVICE_PARAMS dev_def_params =
 	{"talent"},					//user name
 	{"talent"},					//pwd
 	{"mtk-lbs-beta v1.0.0"},				//program name
-	{"V 0.0.0.0.0"},        //v 00.00.00.00.00(last 2 bit is beta)
-	{"V 0.0.0"},          //v 00.00.00
 };
 
 DEVICE_PARAMS dev_now_params;
@@ -535,8 +535,8 @@ void print_key_dev_params(void)
 	Trace("UPIP						:%s", dev_now_params.update_server_ip);
 	Trace("UPPORT						:%d", dev_now_params.update_server_port);
 	Trace("ftp_prog_name					:%s", dev_now_params.ftp_prog_name);
-	Trace("software            :%s", dev_now_params.software);
-	Trace("hardware            :%s", dev_now_params.hardware);
+	Trace("software				:%s", OA_SW_VERSION_NO);
+	Trace("hardware				:%s", OA_HW_VERSION_NO);
 	Trace("------------------------------------------------------------------------");
 	
 }

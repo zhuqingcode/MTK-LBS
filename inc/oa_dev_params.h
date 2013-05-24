@@ -127,8 +127,6 @@ typedef struct
 	oa_uint8 ftpusr[FTP_MAX_LEN];
 	oa_uint8 ftppwd[FTP_MAX_LEN];
 	oa_uint8 ftp_prog_name[FTP_MAX_LEN];
-	oa_uint8 software[FTP_MAX_LEN];
-	oa_uint8 hardware[FTP_MAX_LEN];
 }DEVICE_PARAMS;
 
 extern oa_bool factory_set(void);

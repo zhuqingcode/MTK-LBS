@@ -27,11 +27,7 @@
 #ifndef __OA_SW_H__
 #define __OA_SW_H__
 
-#include "oa_type.h"
-#include "oa_api.h"
-
-
-#define OA_SW_VERSION_NO "MTK-LBS Software v1.0"
+#define OA_SW_VERSION_NO "V 00.00.00.00.00"
 
 
 #endif
