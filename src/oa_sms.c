@@ -190,7 +190,7 @@ void gps_extract(oa_char *enquire_temp){
 		tmp[10] = Pos_Inf.Longitude[7];
 		tmp[11] = Pos_Inf.Longitude[8];
 		//tmp[12] = '\"';
-		tmp[12] = '\"';
+		tmp[12] = '\'';
 		tmp[13] = ';';
 		oa_strcat(enquire_temp, tmp);
 		oa_memset(tmp, 0x0, sizeof(tmp));
