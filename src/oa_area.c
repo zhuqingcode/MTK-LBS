@@ -110,7 +110,7 @@ oa_bool has_areadata_dir(void)
 	}
 fail:
 	oa_fclose(handle);
-	oa_fdelete(BLINDDATA_DIR_CONF);
+	oa_fdelete(AREA_DIR_CONF);
 	return OA_FALSE;
 
 }
@@ -120,7 +120,7 @@ fail:
 *Return:		
 *Others:         
 *********************************************************/
-oa_bool reset_all_area_file(void)
+oa_bool reset_all_area_file(Area_Type_enum area_type)
 {
 	oa_int32 handle, ret;
 	
@@ -1175,9 +1175,9 @@ void oa_app_area(void *para)
 	u8 o_s_t;
 	static u8 o_s_alarm_period;
 
-	if (OA_TRUE == task_runed){
+	if (OA_FALSE == task_runed){
 		OA_DEBUG_USER("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>", __func__);
-		task_runed = OA_FALSE;
+		task_runed = OA_TRUE;
 	}
 	
 	ret = has_areadata_dir_n_c();

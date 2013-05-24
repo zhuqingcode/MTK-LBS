@@ -84,7 +84,8 @@ u8 SaveAreaData(u8 *pbuf,u8 area_type,u8 option,u16 *readlen)
 	if(option == 0x00)//更新指令？
 	{
 		//Reset_Area_ALL();//擦除所有信息	
-		reset_all_area_file();
+		//reset_all_area_file(area_type);
+		del_area_data(0/*has no effect*/, area_type, all_area);
 	}
 #if 0
 	if(area_manage.manage_vail_flag == 0xaa)//判断管理存储数据有效
