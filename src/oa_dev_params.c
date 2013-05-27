@@ -535,8 +535,8 @@ void print_key_dev_params(void)
 	Trace("UPIP						:%s", dev_now_params.update_server_ip);
 	Trace("UPPORT						:%d", dev_now_params.update_server_port);
 	Trace("ftp_prog_name					:%s", dev_now_params.ftp_prog_name);
-	Trace("software				:%s", OA_SW_VERSION_NO);
-	Trace("hardware				:%s", OA_HW_VERSION_NO);
+	Trace("software					:%s", OA_SW_VERSION_NO);
+	Trace("hardware					:%s", OA_HW_VERSION_NO);
 	Trace("------------------------------------------------------------------------");
 	
 }
