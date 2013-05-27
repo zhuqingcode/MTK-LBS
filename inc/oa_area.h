@@ -119,6 +119,6 @@ typedef enum
 {
 	area_inside,
 	area_outside,
-	area_outtime,
+	area_err,
 }area_status_enum;
 #endif

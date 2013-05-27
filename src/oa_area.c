@@ -1402,16 +1402,18 @@ u8 del_area_data(u32 area_id, Area_Type_enum area_type, del_option_enum del_opti
 fail:	oa_fclose(handle);    
 	return 1;
 }
-area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool *over_speed, u8 *o_s_time)
+/*********************************************************
+*Function:     area_inout_judge()
+*Description:  write area data to file
+*Return:		
+*Others:         
+*********************************************************/
+area_status_enum circle_area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool *over_speed, u8 *o_s_time)
 {
 	oa_bool ret;
 	u8 i, i_o, res;
 	circle_area_item circle_area_var;
-	rect_area_item rect_area_var;
-	poly_area_item poly_area_var;
 	Cir_Area_Desc circle_area_desc;
-	Poly_Area_Desc rect_area_desc;
-	Poly_Area_Desc poly_area_desc;
 
 	if (has_specific_file(CIRCLE_AREA_DATA)){
 		//handle circle area
@@ -1463,6 +1465,22 @@ area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool
 			}
 		}
 	}
+	
+	return area_outside;
+}
+
+/*********************************************************
+*Function:     area_inout_judge()
+*Description:  write area data to file
+*Return:		
+*Others:         
+*********************************************************/
+area_status_enum rect_area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool *over_speed, u8 *o_s_time)
+{
+	oa_bool ret;
+	u8 i, i_o, res;
+	rect_area_item rect_area_var;
+	Poly_Area_Desc rect_area_desc;
 	
 	if (has_specific_file(RECT_AREA_DATA)){
 		//handle rect area
@@ -1519,6 +1537,23 @@ area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool
 			}
 		}
 	}
+
+	return area_outside;
+}
+
+/*********************************************************
+*Function:     area_inout_judge()
+*Description:  write area data to file
+*Return:		
+*Others:         
+*********************************************************/
+area_status_enum poly_area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool *over_speed, u8 *o_s_time)
+{
+	oa_bool ret;
+	u8 i, i_o, res;
+	poly_area_item poly_area_var;
+	Poly_Area_Desc poly_area_desc;
+	
 	if (has_specific_file(POLY_AREA_DATA)){
 		//hande poly area
 		for (i=0; i<MAX_AREA_SUM; i++){
@@ -1574,6 +1609,199 @@ area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool
 		
 	return area_outside;
 }
+
+/*********************************************************
+*Function:     area_inout_judge()
+*Description:  write area data to file
+*Return:		
+*Others:         
+*********************************************************/
+area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool *over_speed, u8 *o_s_time)
+{
+	oa_bool ret;
+	u8 i, i_o, res;
+#if 0
+	circle_area_item circle_area_var;
+	rect_area_item rect_area_var;
+	poly_area_item poly_area_var;
+	Cir_Area_Desc circle_area_desc;
+	Poly_Area_Desc rect_area_desc;
+	Poly_Area_Desc poly_area_desc;
+#endif
+	area_status_enum a_ret;
+
+#if  0
+	if (has_specific_file(CIRCLE_AREA_DATA)){
+		//handle circle area
+		for (i=0; i<MAX_AREA_SUM; i++){
+			//read circle area data
+			ret = r_w_circle_area_data_file(&circle_area_var, file_read, i, none_area);
+			if (OA_TRUE == ret && circle_area_var.is_valid == valid){
+				//copy data
+				circle_area_desc.lat = circle_area_var.center_point_lat;
+				circle_area_desc.lon = circle_area_var.center_point_lon;
+				circle_area_desc.rad = circle_area_var.radius;
+				//compare
+				if (1 == circle_area_var.area_para.depend_time){
+					//rtc is ok?
+					if (time[0] == 0x0 && time[1] == 0x0 && time[2] == 0x0) continue;
+					//if it isn't day cycle, discard it. In other words,only handle day cycle case!!!
+					if (circle_area_var.start_time[0] != 0x0 || circle_area_var.stop_time[0] != 0x0
+						|| circle_area_var.start_time[1] != 0x0 || circle_area_var.stop_time[1] != 0x0
+						|| circle_area_var.start_time[2] != 0x0 || circle_area_var.stop_time[2] != 0x0) continue;
+					res = CompareTime(circle_area_var.start_time, circle_area_var.stop_time, time, 3);
+					if (0 == res) continue;
+					else if (1 == res){
+						i_o = Circular_Judge(lon, lat, &circle_area_desc);
+						//inside
+						if (1 == i_o){
+							if (circle_area_var.area_para.speed_limit){
+								if (speed > circle_area_var.max_speed){
+									*o_s_time = circle_area_var.continue_time;
+									*over_speed = OA_TRUE;	
+								}
+							}
+							return area_inside;
+						}
+					}
+				}
+				else{
+					i_o = Circular_Judge(lon, lat, &circle_area_desc);
+					//inside
+					if (1 == i_o){
+						if (circle_area_var.area_para.speed_limit){
+							if (speed > circle_area_var.max_speed){
+								*o_s_time = circle_area_var.continue_time;
+								*over_speed = OA_TRUE;	
+							}
+						}
+						return area_inside;
+					}
+				}
+			}
+		}
+	}
+#endif
+	a_ret = circle_area_inout_judge(lat, lon, time, speed, over_speed, o_s_time);
+	if (a_ret == area_inside) return area_inside;
+#if 0	
+	if (has_specific_file(RECT_AREA_DATA)){
+		//handle rect area
+		for (i=0; i<MAX_AREA_SUM; i++){
+			//read rect area data
+			ret = r_w_rect_area_data_file(&rect_area_var, file_read, i, none_area);
+			if (OA_TRUE == ret && rect_area_var.is_valid == valid){
+				//copy data
+				rect_area_desc.area_point[0].Lat = rect_area_var.left_up_lat;
+				rect_area_desc.area_point[0].Lon = rect_area_var.left_up_lon;
+				rect_area_desc.area_point[1].Lat = rect_area_var.left_up_lat;
+				rect_area_desc.area_point[1].Lon = rect_area_var.right_down_lon;
+				rect_area_desc.area_point[2].Lat = rect_area_var.right_down_lat;
+				rect_area_desc.area_point[2].Lon = rect_area_var.right_down_lon;
+				rect_area_desc.area_point[3].Lat = rect_area_var.right_down_lat;
+				rect_area_desc.area_point[3].Lon = rect_area_var.left_up_lon;
+				//compare	
+				if (1 == rect_area_var.area_para.depend_time){
+					//rtc is ok?
+					if (time[0] == 0x0 && time[1] == 0x0 && time[2] == 0x0) continue;
+					//if it isn't day cycle, discard it. In other words,only handle day cycle case!!!
+					if (rect_area_var.start_time[0] != 0x0 || rect_area_var.stop_time[0] != 0x0
+						|| rect_area_var.start_time[1] != 0x0 || rect_area_var.stop_time[1] != 0x0
+						|| rect_area_var.start_time[2] != 0x0 || rect_area_var.stop_time[2] != 0x0) continue;
+					res = CompareTime(rect_area_var.start_time, rect_area_var.stop_time, time, 3);
+					if (0 == res) continue;
+					else if (1 == res){
+						i_o = poly_Judge(lon, lat, &rect_area_desc, 4);
+						//inside
+						if (1 == i_o){
+							if (rect_area_var.area_para.speed_limit){
+								if (speed > rect_area_var.max_speed){
+									*o_s_time = rect_area_var.continue_time;
+									*over_speed = OA_TRUE;	
+								}
+							}
+							return area_inside;
+						}
+					}
+				}
+				else{
+					i_o = poly_Judge(lon, lat, &rect_area_desc, 4);
+					//inside
+					if (1 == i_o){
+						if (rect_area_var.area_para.speed_limit){
+							if (speed > rect_area_var.max_speed){
+								*o_s_time = rect_area_var.continue_time;
+								*over_speed = OA_TRUE;	
+							}
+						}
+						return area_inside;
+					}
+				}
+			}
+		}
+	}
+#endif
+	a_ret = rect_area_inout_judge(lat, lon, time, speed, over_speed, o_s_time);
+	if (a_ret == area_inside) return area_inside;
+#if 0
+	if (has_specific_file(POLY_AREA_DATA)){
+		//hande poly area
+		for (i=0; i<MAX_AREA_SUM; i++){
+			//read poly area data
+			ret = r_w_poly_area_data_file(&poly_area_var, file_read, i, none_area);
+			if (OA_TRUE == ret && poly_area_var.is_valid == valid){
+				u8 loop;
+				//copy data
+				for (loop=0; loop<poly_area_var.total_point; loop++){
+					poly_area_desc.area_point[loop].Lat = poly_area_var.vertax[loop].vertax_lat;
+					poly_area_desc.area_point[loop].Lon = poly_area_var.vertax[loop].vertax_lon;
+				}
+				//compare
+				if (1 == poly_area_var.area_para.depend_time){
+					//rtc is ok?
+					if (time[0] == 0x0 && time[1] == 0x0 && time[2] == 0x0) continue;
+					//if it isn't day cycle, discard it. In other words,only handle day cycle case!!!
+					if (poly_area_var.start_time[0] != 0x0 || poly_area_var.stop_time[0] != 0x0
+						|| poly_area_var.start_time[1] != 0x0 || poly_area_var.stop_time[1] != 0x0
+						|| poly_area_var.start_time[2] != 0x0 || poly_area_var.stop_time[2] != 0x0) continue;
+					res = CompareTime(poly_area_var.start_time, poly_area_var.stop_time, time, 3);
+					if (0 == res) continue;
+					else if (1 == res){
+						i_o = poly_Judge(lon, lat, &poly_area_desc, poly_area_var.total_point);
+						//inside
+						if (1 == i_o){
+							if (poly_area_var.area_para.speed_limit){
+								if (speed > poly_area_var.max_speed){
+									*o_s_time = poly_area_var.continue_time;
+									*over_speed = OA_TRUE;	
+								}
+							}
+							return area_inside;
+						}
+					}
+				}
+				else{
+					i_o = poly_Judge(lon, lat, &poly_area_desc, poly_area_var.total_point);
+					//inside
+					if (1 == i_o){
+						if (poly_area_var.area_para.speed_limit){
+							if (speed > poly_area_var.max_speed){
+								*o_s_time = poly_area_var.continue_time;
+								*over_speed = OA_TRUE;	
+							}
+						}
+						return area_inside;
+					}
+				}
+			}
+		}
+	}
+#endif
+	a_ret = poly_area_inout_judge(lat, lon, time, speed, over_speed, o_s_time);
+	if (a_ret == area_inside) return area_inside;
+	
+	return area_outside;
+}
 /*********************************************************
 *Function:     oa_app_area()
 *Description:  write area data to file
@@ -1589,7 +1817,7 @@ void oa_app_area(void *para)
 	u16 speed;
 	u8 time[6];
 	area_status_enum area_status;
-	static area_status_enum last_status = area_outtime;
+	static area_status_enum last_status = area_err;
 	static u8 area_alarm_period;
 	static oa_bool flag = OA_FALSE;
 	static oa_bool o_s_flag = OA_FALSE;
