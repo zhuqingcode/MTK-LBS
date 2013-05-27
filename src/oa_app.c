@@ -446,15 +446,15 @@ void oa_app_main(void)
 		//platform link task
 		oa_timer_start(OA_APP_SCHEDULER_ID, oa_app_plat_link, NULL, OA_APP_PLAT_LINK_1ST);
 		//platform data task
-		oa_timer_start(OA_TIMER_ID_4, oa_app_plat_data, NULL, OA_APP_PLAT_DATA);
+		oa_timer_start(OA_TIMER_ID_4, oa_app_plat_data, NULL, OA_APP_PLAT_DATA_1TIME);
 		//gps initial task:this task maybe is useless because the gps module desn't need initial
 //		oa_timer_start(OA_TIMER_ID_2, oa_app_gps_init, NULL, OA_GPS_SCHEDULER_1ST);
 		//just for test,when test ok ,comment it
 		oa_timer_start(OA_TIMER_ID_5, oa_app_gps, NULL, OA_GPS_SCHEDULER_1ST);//run per 500 millisecond
 		//blinddata task
-		oa_timer_start(OA_TIMER_ID_7, oa_app_blinddata, NULL, OA_APP_BLINDDATA);
+		oa_timer_start(OA_TIMER_ID_7, oa_app_blinddata, NULL, OA_APP_BLINDDATA_1TIME);
 		//schedule screen task, send mainly ,transplant from lbs@wjn
-		oa_timer_start(OA_TIMER_ID_8, App_TaskSScrnSendManage, NULL, SCHD_SCRN_TIME);
+		oa_timer_start(OA_TIMER_ID_8, App_TaskSScrnSendManage, NULL, SCHD_SCRN_1TIME);
 		//area judge task
 		oa_timer_start(OA_TIMER_ID_9, oa_app_area, NULL, OA_AREA_DETECT_1TIME);
 	}
