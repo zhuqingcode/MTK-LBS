@@ -125,6 +125,7 @@ u8 SaveAreaData(u8 *pbuf,u8 area_type,u8 option,u16 *readlen)
 	return 0;	
 #endif
 	write_area_data(pbuf, area_type, readlen);
+	DEBUG("out");
 }
 #if 0
 /*********************************************************
@@ -263,9 +264,9 @@ u8 DelAreaData(u8* pbuf,u8 areatype)
 		char_to_int(pbuf,&New_Area_ID);//获取新ID
 		ret = del_area_data(New_Area_ID, areatype, one_area);
 		if (ret == 0){
-			OA_DEBUG_USER("======delete area ok======");
+			DEBUG("======delete area ok======");
 		}
-		else OA_DEBUG_USER("======delete area failed======");
+		else DEBUG("======delete area failed======");
 #if 0
 		/*检查是否有相同存储ID的区域,如果有，无论下发指令是否为追加区域，一律对原区域信息做替换*/
 		SaveNum = CheckSameID(New_Area_ID,areatype);

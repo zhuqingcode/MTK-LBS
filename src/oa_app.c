@@ -456,7 +456,7 @@ void oa_app_main(void)
 		//schedule screen task, send mainly ,transplant from lbs@wjn
 		oa_timer_start(OA_TIMER_ID_8, App_TaskSScrnSendManage, NULL, SCHD_SCRN_TIME);
 		//area judge task
-		oa_timer_start(OA_TIMER_ID_9, oa_app_area, NULL, OA_AREA_DETECT_TIME);
+		oa_timer_start(OA_TIMER_ID_9, oa_app_area, NULL, OA_AREA_DETECT_1TIME);
 	}
 	else if (OA_TRUE == dev_is_locked)  //device is lock
 	{

@@ -95,6 +95,7 @@
 #define GPS "GPS"
 #define DEV_LOCK "dev_lock" //dev_lock:0 unlock device
 #define UPDATE "UPDATE"
+#define VERSA "VERSA"
 #define CLRLOG "CLRLOG"
 #define AUTHEN "AUTHEN"
 #define RESTART "RESTART"
@@ -174,6 +175,7 @@ typedef enum
 	e_GPS,
 	e_dev_lock,
 	e_UPDATE,
+	e_VERSA,
 	e_CLRLOG,
 	e_AUTHEN,
 	e_RESTART,
