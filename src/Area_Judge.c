@@ -124,8 +124,7 @@ u8 SaveAreaData(u8 *pbuf,u8 area_type,u8 option,u16 *readlen)
 	//OSSemPost(Area_Protect_Sem);
 	return 0;	
 #endif
-	write_area_data(pbuf, area_type, readlen);
-	DEBUG("out");
+	write_area_data(pbuf, area_type, readlen, option);
 }
 #if 0
 /*********************************************************

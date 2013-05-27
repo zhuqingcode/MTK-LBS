@@ -53,6 +53,7 @@ oa_bool has_specific_file(const oa_wchar *file_name)
 		return OA_TRUE;	
 	}
 }
+ #if 0
  /*********************************************************
 *Function:     has_areadata_dir_n_c()
 *Description:  if system desn't have area data directory,create it 
@@ -211,7 +212,6 @@ fail:
 	return OA_FALSE;
 
 }
-#if 0
 /*********************************************************
 *Function:     reset_all_area_data()
 *Description:  delete all the area data
@@ -274,7 +274,7 @@ oa_bool reset_all_area_file(Area_Type_enum area_type)
 *Return:		
 *Others:         
 *********************************************************/
-oa_bool r_w_circle_area_data_file(circle_area_item *p_item, r_w_enum r_w, u8 pos)
+oa_bool r_w_circle_area_data_file(circle_area_item *p_item, r_w_enum r_w, u8 pos, u8 option)
 {
 	oa_int32 handle, ret;
 	oa_bool ret_bool;
@@ -284,7 +284,7 @@ oa_bool r_w_circle_area_data_file(circle_area_item *p_item, r_w_enum r_w, u8 pos
 	u8 i;
 
 	//read area num manage file
-	if (NULL == p_item){
+	if (NULL == p_item || pos >= MAX_AREA_SUM){
 		DEBUG("params err!");
 		return OA_FALSE;
 	}
@@ -332,26 +332,40 @@ oa_bool r_w_circle_area_data_file(circle_area_item *p_item, r_w_enum r_w, u8 pos
 				return OA_FALSE;
 			}
 			else{
-				if (circle_area_var.area_id == p_item->area_id && circle_area_var.is_valid == valid){
-					DEBUG("same id!");
-					oa_fclose(handle);
-					return OA_FALSE;
-				}
 				
-				if (circle_area_var.is_valid == invalid){
-					oa_fseek(handle, offset, OA_FILE_BEGIN);
-					oa_memcpy(&circle_area_var, p_item, sizeof(circle_area_item));
-					ret = oa_fwrite(handle, &circle_area_var, sizeof(circle_area_item), &dummy_write);
-					if ((ret < 0) || (dummy_write != sizeof(circle_area_item))){
-						DEBUG("write err!");
+				if (add_area == option){
+					if (circle_area_var.is_valid == invalid){
+						oa_fseek(handle, offset, OA_FILE_BEGIN);
+						oa_memcpy(&circle_area_var, p_item, sizeof(circle_area_item));
+						ret = oa_fwrite(handle, &circle_area_var, sizeof(circle_area_item), &dummy_write);
+						if ((ret < 0) || (dummy_write != sizeof(circle_area_item))){
+							DEBUG("write err!");
+							oa_fclose(handle);
+							return OA_FALSE;
+						}
 						oa_fclose(handle);
-						return OA_FALSE;
+						return OA_TRUE;
 					}
-					oa_fclose(handle);
-					return OA_TRUE;
+				}
+				else if (alter_area == option){
+					if (circle_area_var.area_id == p_item->area_id && circle_area_var.is_valid == valid){
+						oa_fseek(handle, offset, OA_FILE_BEGIN);
+						oa_memcpy(&circle_area_var, p_item, sizeof(circle_area_item));
+						ret = oa_fwrite(handle, &circle_area_var, sizeof(circle_area_item), &dummy_write);
+						if ((ret < 0) || (dummy_write != sizeof(circle_area_item))){
+							DEBUG("write err!");
+							oa_fclose(handle);
+							return OA_FALSE;
+						}
+						oa_fclose(handle);
+						return OA_TRUE;
+					}
 				}
 			}
 		}
+
+		oa_fclose(handle);
+		return OA_FALSE;
 	}
 }
 /*********************************************************
@@ -360,7 +374,7 @@ oa_bool r_w_circle_area_data_file(circle_area_item *p_item, r_w_enum r_w, u8 pos
 *Return:		
 *Others:         
 *********************************************************/
-oa_bool r_w_rect_area_data_file(rect_area_item *p_item, r_w_enum r_w, u8 pos)
+oa_bool r_w_rect_area_data_file(rect_area_item *p_item, r_w_enum r_w, u8 pos, u8 option)
 {
 	oa_int32 handle, ret;
 	oa_bool ret_bool;
@@ -370,7 +384,7 @@ oa_bool r_w_rect_area_data_file(rect_area_item *p_item, r_w_enum r_w, u8 pos)
 	u8 i;
 
 	//read area num manage file
-	if (NULL == p_item){
+	if (NULL == p_item || pos >= MAX_AREA_SUM){
 		DEBUG("params err!");
 		return OA_FALSE;
 	}
@@ -418,26 +432,40 @@ oa_bool r_w_rect_area_data_file(rect_area_item *p_item, r_w_enum r_w, u8 pos)
 				return OA_FALSE;
 			}
 			else{
-				if (rect_area_var.area_id == p_item->area_id && rect_area_var.is_valid == valid){
-					DEBUG("same id!");
-					oa_fclose(handle);
-					return OA_FALSE;
-				}
 				
-				if (rect_area_var.is_valid == invalid){
-					oa_fseek(handle, offset, OA_FILE_BEGIN);
-					oa_memcpy(&rect_area_var, p_item, sizeof(rect_area_var));
-					ret = oa_fwrite(handle, &rect_area_var, sizeof(rect_area_var), &dummy_write);
-					if ((ret < 0) || (dummy_write != sizeof(rect_area_var))){
-						DEBUG("write err!");
+				if (add_area == option){
+					if (rect_area_var.is_valid == invalid){
+						oa_fseek(handle, offset, OA_FILE_BEGIN);
+						oa_memcpy(&rect_area_var, p_item, sizeof(rect_area_var));
+						ret = oa_fwrite(handle, &rect_area_var, sizeof(rect_area_var), &dummy_write);
+						if ((ret < 0) || (dummy_write != sizeof(rect_area_var))){
+							DEBUG("write err!");
+							oa_fclose(handle);
+							return OA_FALSE;
+						}
 						oa_fclose(handle);
-						return OA_FALSE;
+						return OA_TRUE;
 					}
-					oa_fclose(handle);
-					return OA_TRUE;
+				}
+				else if (alter_area == option){
+					if (rect_area_var.area_id == p_item->area_id && rect_area_var.is_valid == valid){
+						oa_fseek(handle, offset, OA_FILE_BEGIN);
+						oa_memcpy(&rect_area_var, p_item, sizeof(rect_area_var));
+						ret = oa_fwrite(handle, &rect_area_var, sizeof(rect_area_var), &dummy_write);
+						if ((ret < 0) || (dummy_write != sizeof(rect_area_var))){
+							DEBUG("write err!");
+							oa_fclose(handle);
+							return OA_FALSE;
+						}
+						oa_fclose(handle);
+						return OA_TRUE;
+					}
 				}
 			}
 		}
+
+		oa_fclose(handle);
+		return OA_FALSE;
 	}
 }
 /*********************************************************
@@ -446,7 +474,7 @@ oa_bool r_w_rect_area_data_file(rect_area_item *p_item, r_w_enum r_w, u8 pos)
 *Return:		
 *Others:         
 *********************************************************/
-oa_bool r_w_poly_area_data_file(poly_area_item *p_item, r_w_enum r_w, u8 pos)
+oa_bool r_w_poly_area_data_file(poly_area_item *p_item, r_w_enum r_w, u8 pos, u8 option)
 {
 	oa_int32 handle, ret;
 	oa_bool ret_bool;
@@ -456,7 +484,7 @@ oa_bool r_w_poly_area_data_file(poly_area_item *p_item, r_w_enum r_w, u8 pos)
 	u8 i;
 
 	//read area num manage file
-	if (NULL == p_item){
+	if (NULL == p_item || pos >= MAX_AREA_SUM){
 		DEBUG("params err!");
 		return OA_FALSE;
 	}
@@ -504,26 +532,40 @@ oa_bool r_w_poly_area_data_file(poly_area_item *p_item, r_w_enum r_w, u8 pos)
 				return OA_FALSE;
 			}
 			else{
-				if (poly_area_var.area_id == p_item->area_id && poly_area_var.is_valid == valid){
-					DEBUG("same id!");
-					oa_fclose(handle);
-					return OA_FALSE;
-				}
 				
-				if (poly_area_var.is_valid == invalid){
-					oa_fseek(handle, offset, OA_FILE_BEGIN);
-					oa_memcpy(&poly_area_var, p_item, sizeof(poly_area_var));
-					ret = oa_fwrite(handle, &poly_area_var, sizeof(poly_area_var), &dummy_write);
-					if ((ret < 0) || (dummy_write != sizeof(poly_area_var))){
-						DEBUG("write err!");
+				if (add_area == option){
+					if (poly_area_var.is_valid == invalid){
+						oa_fseek(handle, offset, OA_FILE_BEGIN);
+						oa_memcpy(&poly_area_var, p_item, sizeof(poly_area_var));
+						ret = oa_fwrite(handle, &poly_area_var, sizeof(poly_area_var), &dummy_write);
+						if ((ret < 0) || (dummy_write != sizeof(poly_area_var))){
+							DEBUG("write err!");
+							oa_fclose(handle);
+							return OA_FALSE;
+						}
 						oa_fclose(handle);
-						return OA_FALSE;
+						return OA_TRUE;
 					}
-					oa_fclose(handle);
-					return OA_TRUE;
+				}
+				else if (alter_area == option){
+					if (poly_area_var.area_id == p_item->area_id && poly_area_var.is_valid == valid){
+						oa_fseek(handle, offset, OA_FILE_BEGIN);
+						oa_memcpy(&poly_area_var, p_item, sizeof(poly_area_var));
+						ret = oa_fwrite(handle, &poly_area_var, sizeof(poly_area_var), &dummy_write);
+						if ((ret < 0) || (dummy_write != sizeof(poly_area_var))){
+							DEBUG("write err!");
+							oa_fclose(handle);
+							return OA_FALSE;
+						}
+						oa_fclose(handle);
+						return OA_TRUE;
+					}
 				}
 			}
 		}
+
+		oa_fclose(handle);
+		return OA_FALSE;
 	}
 }
 #if 0
@@ -573,7 +615,6 @@ oa_bool r_w_area_data_file(Area_Type_enum area_type, void *p_item, r_w_enum r_w,
 	if (handle < 0){
 		ret_bool = initial_specific_file(area_type);
 		if (OA_FALSE == ret_bool) return OA_FALSE;
-#if 0
 		/* create new file for setting. */
 		switch (area_type){
 			case Circular_Area:{
@@ -631,7 +672,6 @@ oa_bool r_w_area_data_file(Area_Type_enum area_type, void *p_item, r_w_enum r_w,
 				goto fail;
 			}break;
 		}
-#endif
 	}
 //#endif
 	DEBUG("jjjjjjjjjjjjjjj");
@@ -794,7 +834,7 @@ fail:	oa_fclose(handle);
 *Return:		
 *Others:         
 *********************************************************/
-oa_bool write_circle_area_data(u8 *buf, u16 *read_len)
+oa_bool write_circle_area_data(u8 *buf, u16 *read_len, u8 option)
 {
 	oa_int32 handle, ret, i;
 	u8 illegal = 0x0;
@@ -867,7 +907,7 @@ oa_bool write_circle_area_data(u8 *buf, u16 *read_len)
 	}
 	//-----------------------------------------------
 	circle_area_var.is_valid = valid;
-	ret = r_w_circle_area_data_file(&circle_area_var, file_write, 0/*has no effect*/);
+	ret = r_w_circle_area_data_file(&circle_area_var, file_write, 0/*has no effect*/, option);
 	if (OA_TRUE == ret) return OA_TRUE;	
 	else return OA_FALSE;
 }
@@ -878,7 +918,7 @@ oa_bool write_circle_area_data(u8 *buf, u16 *read_len)
 *Return:		
 *Others:         
 *********************************************************/
-oa_bool write_rect_area_data(u8 *buf, u16 *read_len)
+oa_bool write_rect_area_data(u8 *buf, u16 *read_len, u8 option)
 {
 	oa_int32 handle, ret, i;
 	u8 illegal = 0x0;
@@ -954,7 +994,7 @@ oa_bool write_rect_area_data(u8 *buf, u16 *read_len)
 	}
 	//-----------------------------------------------
 	rect_area_var.is_valid = valid;
-	ret = r_w_rect_area_data_file(&rect_area_var, file_write, 0/*has no effect*/);
+	ret = r_w_rect_area_data_file(&rect_area_var, file_write, 0/*has no effect*/, option);
 	if (OA_TRUE == ret) return OA_TRUE;	
 	else return OA_FALSE;
 }
@@ -964,7 +1004,7 @@ oa_bool write_rect_area_data(u8 *buf, u16 *read_len)
 *Return:		
 *Others:         
 *********************************************************/
-oa_bool write_poly_area_data(u8 *buf, u16 *read_len)
+oa_bool write_poly_area_data(u8 *buf, u16 *read_len, u8 option)
 {
 	oa_int32 handle, ret, i;
 	u8 illegal = 0x0;
@@ -1083,7 +1123,7 @@ oa_bool write_poly_area_data(u8 *buf, u16 *read_len)
 	}
 	//-----------------------------------------------
 	poly_area_var.is_valid = valid;
-	ret = r_w_poly_area_data_file(&poly_area_var, file_write, 0/*has no effect*/);
+	ret = r_w_poly_area_data_file(&poly_area_var, file_write, 0/*has no effect*/, option);
 	if (OA_TRUE == ret) return OA_TRUE;	
 	else return OA_FALSE;
 }
@@ -1093,7 +1133,7 @@ oa_bool write_poly_area_data(u8 *buf, u16 *read_len)
 *Return:		
 *Others:         
 *********************************************************/
-u8 write_area_data(u8 *buf, Area_Type_enum area_type, u16 *read_len)
+u8 write_area_data(u8 *buf, Area_Type_enum area_type, u16 *read_len, u8 option)
 {
 	oa_bool ret;
 	
@@ -1110,13 +1150,13 @@ u8 write_area_data(u8 *buf, Area_Type_enum area_type, u16 *read_len)
 #endif
 	switch (area_type){
 		case Circular_Area:{
-			ret = write_circle_area_data(buf, read_len);
+			ret = write_circle_area_data(buf, read_len, option);
 		}break;
 		case Rectangle_Area:{
-			ret = write_rect_area_data(buf, read_len);
+			ret = write_rect_area_data(buf, read_len, option);
 		}break;
 		case Poly_Area:{
-			ret = write_poly_area_data(buf, read_len);
+			ret = write_poly_area_data(buf, read_len, option);
 		}break;
 		default:{
 			DEBUG("area's type is err!");
@@ -1377,10 +1417,8 @@ area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool
 		//handle circle area
 		for (i=0; i<MAX_AREA_SUM; i++){
 			//read circle area data
-			ret = r_w_circle_area_data_file(&circle_area_var, file_read, i);
-			DEBUG("valid:0x%x", circle_area_var.is_valid);
+			ret = r_w_circle_area_data_file(&circle_area_var, file_read, i, none_area);
 			if (OA_TRUE == ret && circle_area_var.is_valid == valid){
-				DEBUG("aaaaaaaaaaaa");
 				//copy data
 				circle_area_desc.lat = circle_area_var.center_point_lat;
 				circle_area_desc.lon = circle_area_var.center_point_lon;
@@ -1389,17 +1427,14 @@ area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool
 				if (1 == circle_area_var.area_para.depend_time){
 					//rtc is ok?
 					if (time[0] == 0x0 && time[1] == 0x0 && time[2] == 0x0) continue;
-					DEBUG("666666666666");
 					//if it isn't day cycle, discard it. In other words,only handle day cycle case!!!
 					if (circle_area_var.start_time[0] != 0x0 || circle_area_var.stop_time[0] != 0x0
 						|| circle_area_var.start_time[1] != 0x0 || circle_area_var.stop_time[1] != 0x0
 						|| circle_area_var.start_time[2] != 0x0 || circle_area_var.stop_time[2] != 0x0) continue;
 					res = CompareTime(circle_area_var.start_time, circle_area_var.stop_time, time, 3);
-					DEBUG("77777777777");
 					if (0 == res) continue;
 					else if (1 == res){
 						i_o = Circular_Judge(lon, lat, &circle_area_desc);
-						DEBUG("88888888888");
 						//inside
 						if (1 == i_o){
 							if (circle_area_var.area_para.speed_limit){
@@ -1413,9 +1448,7 @@ area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool
 					}
 				}
 				else{
-					DEBUG("bbbbbbbbbbbbbb");
 					i_o = Circular_Judge(lon, lat, &circle_area_desc);
-					DEBUG("cccccccccccccc");
 					//inside
 					if (1 == i_o){
 						if (circle_area_var.area_para.speed_limit){
@@ -1435,7 +1468,7 @@ area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool
 		//handle rect area
 		for (i=0; i<MAX_AREA_SUM; i++){
 			//read rect area data
-			ret = r_w_rect_area_data_file(&rect_area_var, file_read, i);
+			ret = r_w_rect_area_data_file(&rect_area_var, file_read, i, none_area);
 			if (OA_TRUE == ret && rect_area_var.is_valid == valid){
 				//copy data
 				rect_area_desc.area_point[0].Lat = rect_area_var.left_up_lat;
@@ -1490,7 +1523,7 @@ area_status_enum area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa_bool
 		//hande poly area
 		for (i=0; i<MAX_AREA_SUM; i++){
 			//read poly area data
-			ret = r_w_poly_area_data_file(&poly_area_var, file_read, i);
+			ret = r_w_poly_area_data_file(&poly_area_var, file_read, i, none_area);
 			if (OA_TRUE == ret && poly_area_var.is_valid == valid){
 				u8 loop;
 				//copy data

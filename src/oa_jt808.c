@@ -2325,7 +2325,6 @@ static u8 set_round_area(u8 *pbuf, u16 buflen)
 		}
 		pbuf+=read_len;
 	}
-	DEBUG("out");
 	return 1;
 }
 /*********************************************************

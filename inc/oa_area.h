@@ -109,6 +109,14 @@ typedef enum
 
 typedef enum
 {
+	update_area = 0x0,
+	add_area,
+	alter_area,
+	none_area,
+}option_kinds_enum;
+
+typedef enum
+{
 	area_inside,
 	area_outside,
 	area_outtime,

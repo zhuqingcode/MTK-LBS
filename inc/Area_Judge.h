@@ -2,7 +2,7 @@
 #define _AREA_JUDGE_H_
 #include "oa_debug.h"
 
-#define MAX_AREA_SUM     (10)
+#define MAX_AREA_SUM     (24)
 #define MAX_AREA_POINTS  (128)
 #define AREA_PRINT_EN  	 (0)
 
