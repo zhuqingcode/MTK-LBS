@@ -30,6 +30,7 @@
 #include "oa_dev_params.h"
 #include "oa_jt808.h"
 #include "oa_platform.h"
+#include "oa_debug.h"
 #define PROTCL_JT808
 //#define GPS_INTVL 50	//50ticks gps任务运行间隔
 #define CHECK_GPS_ERR	(50)	//判断gps模块异常的时间
@@ -253,25 +254,29 @@ void oa_app_gps(void)
 			//------------------------Periodically reported---------------------------
 			if (dev_now_params.report_strategy == 0){//Periodically reported
 				if (upload_times * GPS_RUN_SECONDS >= dev_now_params.default_reporttime){
+					DEBUG("send one location packet!");
 					ret = handle_alarm_status(OA_FALSE, OA_FALSE, SET, OA_FALSE);//just send
 					if (ret == OA_TRUE)	upload_times = 0;
 				}
 			}
 			else if (dev_now_params.report_strategy == 1){//distance reported
 				if ((u32)(1000 * d_r_distance) >= dev_now_params.default_reportdistance){
-						ret = handle_alarm_status(OA_FALSE, OA_FALSE, SET, OA_FALSE);//just send
-						if (ret == OA_TRUE)	d_r_distance = 0.0;
+					DEBUG("send one location packet!");
+					ret = handle_alarm_status(OA_FALSE, OA_FALSE, SET, OA_FALSE);//just send
+					if (ret == OA_TRUE)	d_r_distance = 0.0;
 				}
 			}
 			else if (dev_now_params.report_strategy == 2){//Periodically reported & distance reported
 				if (upload_times * GPS_RUN_SECONDS >= dev_now_params.default_reporttime){
+					DEBUG("send one location packet!");
 					ret = handle_alarm_status(OA_FALSE, OA_FALSE, SET, OA_FALSE);//just send
 					if (ret == OA_TRUE)	upload_times = 0;
 				}
 
 				if ((u32)(1000 * d_r_distance) >= dev_now_params.default_reportdistance){
-						ret = handle_alarm_status(OA_FALSE, OA_FALSE, SET, OA_FALSE);//just send
-						if (ret == OA_TRUE)	d_r_distance = 0.0;
+					DEBUG("send one location packet!");
+					ret = handle_alarm_status(OA_FALSE, OA_FALSE, SET, OA_FALSE);//just send
+					if (ret == OA_TRUE)	d_r_distance = 0.0;
 				}
 
 			}

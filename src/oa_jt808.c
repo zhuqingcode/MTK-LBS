@@ -30,6 +30,7 @@
 #include "oa_jt808.h"
 #include "oa_enpacket_way.h"
 #include "oa_dev_params.h"
+#include "oa_debug.h"
 #include "oa_gps.h"
 #include "oa_platform.h"
 #include "oa_blinddata.h"
@@ -2742,7 +2743,7 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 				pbuf+=sizeof(MSG_HEAD);
 				U16Temp=Reallen-3-sizeof(MSG_HEAD);
 			}
-	
+			DEBUG("msgID:0x%x", ServmsgID);
 			JT808_ServReq_handle(ServmsgID, pbuf, U16Temp/*,sendbuf,sendbuflen*/);
 			return PLAT_REQ;
 		}

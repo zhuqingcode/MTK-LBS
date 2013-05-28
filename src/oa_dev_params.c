@@ -509,19 +509,58 @@ void params_to_soc_set(void)
 void print_key_dev_params(void)
 {
 	oa_char tmp[64] = {0x0};
+	
 	Trace("------------------------------device params-----------------------------");
-	Trace("server ip					:%s", dev_now_params.m_server_ip);
-	Trace("server tcp port				:%d", dev_now_params.server_tcp_port);
-	Trace("server udp port 				:%d", dev_now_params.server_udp_port);
-	Trace("LclTEL						:%s", dev_now_params.term_tel_num);
+	Trace("Hearttime					:%d", dev_now_params.heartbeat_interval);
+	Trace("RSP_TCP					:%d", dev_now_params.tcp_ack_timeout);
+	Trace("RSP_UDP					:%d", dev_now_params.udp_ack_timeout);
+	Trace("RSP_SMS					:%d", dev_now_params.sms_ack_timeout);
+	Trace("Retry_TCP					:%d", dev_now_params.tcp_retrans_times);
+	Trace("Retry_UDP					:%d", dev_now_params.udp_retrans_times);
+	Trace("Retry_SMS					:%d", dev_now_params.sms_retrans_times);
+	Trace("IP						:%s", dev_now_params.m_server_ip);
+	Trace("UDPPORT					:%d", dev_now_params.server_udp_port);
+	Trace("TCPPORT	 				:%d", dev_now_params.server_tcp_port);
+	Trace("TEL						:%s", dev_now_params.term_tel_num);
+	Trace("Rpt_strategy                        :%d", dev_now_params.report_strategy);
+	Trace("Rpttime_unlog                       :%d", dev_now_params.unlogin_reporttime);
+	Trace("Rpttime_sleep                       :%d", dev_now_params.sleep_reporttime);
+	Trace("Rpttime_alarm                       :%d", dev_now_params.urgent_reporttime);
+	Trace("Rpttime_def                       	 :%d", dev_now_params.default_reporttime);
+	Trace("Rptdis_unlog                       	 :%d", dev_now_params.unlogin_reportdistance);
+	Trace("Rptdis_sleep                       	 :%d", dev_now_params.default_reportdistance);
+	Trace("Rptdis_alarm                       	 :%d", dev_now_params.urgent_reportdistance);
+	Trace("Rptdis_def                       	 :%d", dev_now_params.default_reportdistance);
+	Trace("Rptcog                       	 	 :%d", dev_now_params.corner_reportangle);
+	Trace("servertel					:%s", dev_now_params.monitor_platform_num);
 	Trace("resettel					:%s", dev_now_params.reset_num);
 	Trace("factorysettel					:%s", dev_now_params.restore_factory_settings_num);
+	Trace("smstel							:%s", dev_now_params.monitor_platform_sms_num);
+	Trace("alarmsmstel					:%s", dev_now_params.terminal_sms_num);
+	oa_itoa(dev_now_params.alarm_mask, tmp, BI);
+	Trace("swh_alarmmask					:%s", tmp);
+	oa_itoa(dev_now_params.alarm_send_sms_mask, tmp, BI);
+	Trace("swh_alarmsms					:%s", tmp);
+	Trace("overspeed					:%d", dev_now_params.max_speed);
+	Trace("overspeedtime				:%d", dev_now_params.speed_duration);
+	Trace("tireddrivetime				:%d", dev_now_params.continuous_drive_time_threshold);
+	Trace("min_resttime					:%d", dev_now_params.min_rest_time);
+	Trace("max_parktime					:%d", dev_now_params.max_park_time);
+	Trace("provincID						:%d", dev_now_params.vehicle_province_id);
+	Trace("cityID							:%d", dev_now_params.vehicle_city_id);
+	Trace("carID							:%d", dev_now_params.vehicle_license);
+	Trace("carcolor					:%d", dev_now_params.plate_color);
+	Trace("UPIP						:%s", dev_now_params.update_server_ip);
+	Trace("UPPORT						:%d", dev_now_params.update_server_port);
+	Trace("ftp_prog_name					:%s", dev_now_params.ftp_prog_name);
+	
+	
 	Trace("man id						:%s", dev_now_params.manufacturers_id);
 	Trace("term model					:%s", dev_now_params.term_model);
 	Trace("term id					:%s", dev_now_params.term_id);
+	#if 0
 	Trace("car id						:%s", dev_now_params.vehicle_license);
 	Trace("plate_color					:%d", dev_now_params.plate_color);
-	Trace("hearttime					:%d", dev_now_params.heartbeat_interval);
 	Trace("continuous driving time			:%d", dev_now_params.continuous_drive_time_threshold);
 	Trace("min rest time					:%d", dev_now_params.min_rest_time);
 	Trace("max part time					:%d", dev_now_params.max_park_time);
@@ -535,6 +574,7 @@ void print_key_dev_params(void)
 	Trace("UPIP						:%s", dev_now_params.update_server_ip);
 	Trace("UPPORT						:%d", dev_now_params.update_server_port);
 	Trace("ftp_prog_name					:%s", dev_now_params.ftp_prog_name);
+	#endif
 	Trace("software					:%s", OA_SW_VERSION_NO);
 	Trace("hardware					:%s", OA_HW_VERSION_NO);
 	Trace("-----------------------------------------------------------------------");
