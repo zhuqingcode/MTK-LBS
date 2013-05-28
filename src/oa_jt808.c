@@ -2310,7 +2310,7 @@ static u8 set_round_area(u8 *pbuf, u16 buflen)
 	DEBUG("设置圆形区域");
 	option =  *pbuf++;
 	area_num = 	*pbuf++;
-	DEBUG("区域数目:%d", area_num);
+	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
 	if (area_num > MAX_AREA_SUM){
 		DEBUG("area num is too large");
 		return 1;
@@ -2355,7 +2355,7 @@ static u8 set_rect_area(u8 *pbuf, u16 buflen)
 	DEBUG("设置矩形区域");
 	option =  *pbuf++;
 	area_num = 	*pbuf++;
-	DEBUG("区域数目:%d", area_num);
+	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
 	if (area_num > MAX_AREA_SUM){
 		DEBUG("area num is too large");
 		return 1;
@@ -2401,7 +2401,7 @@ static u8 set_poly_area(u8 *pbuf, u16 buflen)
 	DEBUG("设置多边形区域");
 	option =  *pbuf++;
 	area_num = 	*pbuf++;
-	DEBUG("区域数目:%d", area_num);
+	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
 	if (area_num > MAX_AREA_SUM){
 		DEBUG("area num is too large");
 		return 1;
