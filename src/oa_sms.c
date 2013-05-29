@@ -248,15 +248,16 @@ ack_kind need_ack_check(oa_char *p)
 		}
 		if (*(p_SEMICOLON+1) == 'A' || *(p_SEMICOLON+1) == 'a')	return ack;
 		else if (*(p_SEMICOLON+1) == 'N' || *(p_SEMICOLON+1) == 'n')	return noack;
-		else if (*(p_SEMICOLON+1) == 0x0)	return ack;//this is only for schedule screen
+		else if (*(p_SEMICOLON+1) == 0x0)	return noack;
 		else{
 			Trace("(%s:%s:%d): format err!", __FILE__, __func__, __LINE__);
 			return ackerr;
 		}
 	}
 	else	{
-		
-		return noack;//p_set->need_ack = OA_FALSE;
+		Trace("(%s:%s:%d): format err!", __FILE__, __func__, __LINE__);
+		return ackerr;
+		//return noack;
 	}	
 }
 /*********************************************************
@@ -484,6 +485,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 		}
 		
 	}
+#if 0
 	else if (*p == SEMICOLON){//means enquiry
 		p_set->kind = enquire;
 	}
@@ -491,6 +493,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 		Trace("(%s:%s:%d): format err!", __FILE__, __func__, __LINE__);
 		return OA_FALSE;
 	}
+#endif
 	return OA_TRUE;
 }
 /*********************************************************
@@ -608,7 +611,8 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 		
 	}
 	#endif
-	if (p_set->kind == enquire || set == p_set->kind){//else if (p_set->kind == enquire){
+	//if (p_set->kind == enquire || set == p_set->kind){//else if (p_set->kind == enquire){
+	if (p_set->need_ack == OA_TRUE){
 		switch(key_kind){
 			case e_HB:{
 				sprintf(enquire_temp, "Hearttime:%d"/*very important here*/, dev_now_params.heartbeat_interval);
@@ -773,25 +777,31 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 
 		if (sms == which){
 			oa_sms_send_req(sms_send_feedback_func, message.deliver_num, enquire_temp, oa_strlen(enquire_temp), message.dcs);
+
 			oa_memcpy(sms_fail.data, enquire_temp, oa_strlen(enquire_temp));
 			sms_fail.len = oa_strlen(enquire_temp);
+			oa_memcpy(sms_fail.deliver_num, message.deliver_num, oa_strlen(message.deliver_num));
+			sms_fail.dcs = message.dcs;
 		}
 		else if (uart == which){
 			//handle uart here
 			oa_uart_write(OA_UART3, enquire_temp, oa_strlen(enquire_temp));
 		}
+		else if (scrn == which){
+			*p_fbk_len = oa_strlen(enquire_temp);
+			oa_memcpy(p_fbk, enquire_temp, *p_fbk_len);
+		}
 		
  	}
-
+#if 0
 	if (sms == which){
 		oa_memcpy(sms_fail.deliver_num, message.deliver_num, oa_strlen(message.deliver_num));
 		sms_fail.dcs = message.dcs;
 	}
 	else if (scrn == which){
-		*p_fbk_len = oa_strlen(enquire_temp);
-		oa_memcpy(p_fbk, enquire_temp, *p_fbk_len);
+		
 	}
-	
+#endif	
 	
 }
 /*********************************************************
