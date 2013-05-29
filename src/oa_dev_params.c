@@ -27,6 +27,8 @@
  ****************************************************************************/
 #include "oa_type.h"
 #include "oa_api.h"
+#include "oa_sw.h"
+#include "oa_hw.h"
 #include "oa_setting.h"
 #include "oa_dev_params.h"
 #include "oa_blinddata.h"
@@ -574,6 +576,7 @@ void print_key_dev_params(void)
 	Trace("UPIP						:%s", dev_now_params.update_server_ip);
 	Trace("UPPORT						:%d", dev_now_params.update_server_port);
 	Trace("ftp_prog_name					:%s", dev_now_params.ftp_prog_name);
+<<<<<<< HEAD
 	#endif
 	Trace("software					:%s", OA_SW_VERSION_NO);
 	Trace("hardware					:%s", OA_HW_VERSION_NO);

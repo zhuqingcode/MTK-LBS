@@ -31,7 +31,7 @@
 //------------customer code-------------
 #include "oa_jt808.h"
 #include "oa_platform.h"
-
+#include "oa_debug.h"
 extern ProtocolHandle sProtclHandl;
 extern oa_bool need_reconn;
 extern dev_control_type control_type;
@@ -368,6 +368,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 			Trace("0x%x", data[i]);
 		}
 	}
+	DEBUG("datalen:%d", len);
 	//gprs receive data analysis
 	ret = JT808_recv_analysis(data, len);
 	switch (ret){

@@ -28,7 +28,8 @@
 #ifndef _OA_LBS2MTK_H_
 #define _OA_LBS2MTK_H_
 #include "oa_type.h"
- #define SCHD_SCRN_TIME 1000
+#define SCHD_SCRN_TIME 1000
+#define SCHD_SCRN_1TIME 20000
 
 
 #define Sms_Ack_Enable		(u16)(1<<0)

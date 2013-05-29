@@ -135,6 +135,10 @@ void acc_status_detect(void *param)
 	oa_uint8 ret;
 	ret = oa_gpio_read(ACC_GPIO);
 	if (ret){//acc is on
+		//key shake
+		oa_sleep(10);
+		ret = oa_gpio_read(ACC_GPIO);
+		if (!ret) goto redoit;
 		if (ReadAlarmPara(StaSector1, STA_ACC_ON) == RESET){
 			WriteAlarmPara(SET, StaSector1, STA_ACC_ON);
 		}
@@ -142,6 +146,10 @@ void acc_status_detect(void *param)
 		acc_status = ACC_ON;
 	}
 	else{//acc is off
+		//key shake
+		oa_sleep(10);
+		ret = oa_gpio_read(ACC_GPIO);
+		if (ret) goto redoit; 
 		if (ReadAlarmPara(StaSector1, STA_ACC_ON) == SET){
 			WriteAlarmPara(RESET, StaSector1, STA_ACC_ON);
 		}
@@ -149,6 +157,7 @@ void acc_status_detect(void *param)
 		acc_status = ACC_OFF;
 	}
 
+redoit:
 	oa_timer_start(OA_TIMER_ID_6, acc_status_detect, NULL, OA_ACC_RUN);
 }
 /*********************************************************

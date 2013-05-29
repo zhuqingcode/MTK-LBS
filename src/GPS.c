@@ -83,24 +83,7 @@ static int diff_day (unsigned char* date1,unsigned char *date2 ); /*天数计算*/
 static int count_day ( int year, int month, int day, int flag );  /*天数计算*/
 #define leap(year) ((year%4==0&&year%100!=0)||(year%400==0))  /*闰年判断*/
 
-//---------------add by zq------------------
-/*********************************************************
-*Function:       BCDToDec(u8 * bcd,u8 len) 
-*Description:    将BCD码转换为整形
-*Calls:          无
-*Called By:      
-*Input:          bcd  数据数组
-				 len  bcd码数组长度
-*Output:         
-*Return:         成功返回0,
-*Others:         
-				 
-*********************************************************/
-unsigned char  BCDToDec(unsigned char BCD) 					//bcd码转为二进制
-{
- 	return(((BCD>> 4) & 0x0F) * 10 + (BCD & 0x0F));
-} 
-//-----------------------------------------
+
 /*********************************************************
 *Function:       GPS_DataAnaly()
 *Description:    GPS数据解析函数
@@ -2011,16 +1994,60 @@ u8 GetPosinf(u8 *Str,u8 Filed,u8 Mode)
 			Result=1;
 		break;
 		case GPSLat:
-			oa_memcpy(Str,Pos_Inf.Latitude,8);
-			Result=8;
+			if(Mode == 5)
+			{
+				u32 U32temp = 0;
+				float F32temp=0.0;
+				u8 cnt;
+
+				for(cnt=0;cnt<2;cnt++) //纬度,百万分之一度
+				{
+					U32temp=U32temp*10+Pos_Inf.Latitude[cnt]-'0';
+				}
+				for(cnt=2;cnt<8;cnt++) //纬度
+				{
+					F32temp=F32temp*10+Pos_Inf.Latitude[cnt]-'0';
+				}
+				F32temp=F32temp*10.0/6.0;
+				U32temp=U32temp*1000000+(u32)(F32temp);
+				oa_memcpy(Str,(u8*)&U32temp,4);
+				Result=4;
+			}
+			else{
+				oa_memcpy(Str,Pos_Inf.Latitude,8);
+				Result=8;
+			}
+			
 		break;
 		case GPSNInd:
 			*Str=Pos_Inf.North_Indicator;	
 			Result=1;
 		break;
 		case GPSLon:
-			oa_memcpy(Str,Pos_Inf.Longitude,9);
-			Result=9;
+			if(Mode == 5)
+			{
+				u32 U32temp = 0;
+				float F32temp=0.0;
+				u8 cnt;
+
+				for(cnt=0;cnt<3;cnt++) //纬度,百万分之一度
+				{
+					U32temp=U32temp*10+Pos_Inf.Longitude[cnt]-'0';
+				}
+				for(cnt=3;cnt<9;cnt++) //纬度
+				{
+					F32temp=F32temp*10+Pos_Inf.Longitude[cnt]-'0';
+				}
+				F32temp=F32temp*10.0/6.0;
+				U32temp=U32temp*1000000+(u32)(F32temp);
+				oa_memcpy(Str,(u8*)&U32temp,4);
+				Result=4;
+			}
+			else{
+				oa_memcpy(Str,Pos_Inf.Longitude,9);
+				Result=9;
+			}
+			
 		break;
 		case GPSEInd:
 			*Str=Pos_Inf.East_Indicator;	
@@ -2077,7 +2104,7 @@ u8 GetPosinf(u8 *Str,u8 Filed,u8 Mode)
 		case GPSSpeed:
 			if(Mode==ASC_Code)
 			{
-				Result=ceil( Pos_Inf.Speed	 );
+				Result=ceil( Pos_Inf.Speed);
 				*Str++=Result/100%10+'0';
 				*Str++=Result/10%10+'0';
 				*Str++=Result%10+'0';
@@ -2085,8 +2112,8 @@ u8 GetPosinf(u8 *Str,u8 Filed,u8 Mode)
 			}
 			else
 			{
-				oa_memcpy(Str,&Pos_Inf.Speed,sizeof(float));
-				Result=sizeof(float);	
+				oa_memcpy(Str,&Pos_Inf.Speed,/*sizeof(float)*/sizeof(u16));
+				Result=/*sizeof(float)*/sizeof(u16);	
 			}
 		break;	
 	}
