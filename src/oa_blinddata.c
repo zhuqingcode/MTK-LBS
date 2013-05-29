@@ -60,6 +60,7 @@ oa_bool has_blinddata_manage_file(manage_struct *p_m_s)
 		if ((ret < 0) || (dummy_write != sizeof(manage_struct)))
 		{
 			Trace("(%s:%s:%d):Init manage file failed!", __FILE__,  __func__, __LINE__);
+			oa_fclose(handle);
 			return OA_FALSE;
 		}
 		Trace("(%s:%s:%d):Create manage file ok!", __FILE__,  __func__, __LINE__);
@@ -107,6 +108,7 @@ oa_bool has_blinddata_manage_1file(manage_struct *p_m_s)
 		if ((ret < 0) || (dummy_write != sizeof(manage_struct)))
 		{
 			Trace("(%s:%s:%d):Init manage file failed!", __FILE__,  __func__, __LINE__);
+			oa_fclose(handle);
 			return OA_FALSE;
 		}
 		Trace("(%s:%s:%d):Create manage file ok!", __FILE__,  __func__, __LINE__);

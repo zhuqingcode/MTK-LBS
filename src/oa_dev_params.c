@@ -27,6 +27,8 @@
  ****************************************************************************/
 #include "oa_type.h"
 #include "oa_api.h"
+#include "oa_sw.h"
+#include "oa_hw.h"
 #include "oa_setting.h"
 #include "oa_dev_params.h"
 #include "oa_blinddata.h"

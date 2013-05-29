@@ -31,7 +31,7 @@
 //------------customer code-------------
 #include "oa_jt808.h"
 #include "oa_platform.h"
-
+#include "oa_debug.h"
 extern ProtocolHandle sProtclHandl;
 extern oa_bool need_reconn;
 extern dev_control_type control_type;
