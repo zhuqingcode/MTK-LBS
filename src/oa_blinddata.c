@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 extern DEV_PLAT_PARAS dev_running;
+u16 total_write;
+u16 total_read;
 oa_bool has_blinddata_dir(void);
  /*********************************************************
 *Function:     has_blinddata_manage_file()
@@ -119,6 +121,7 @@ oa_bool has_blinddata_manage_1file(manage_struct *p_m_s)
 		oa_fclose(handle); 
 		return OA_FALSE;
 	}
+	
 	oa_memcpy(p_m_s, &manage_data, sizeof(manage_struct));
 	oa_fclose(handle);    
 	return OA_TRUE;
@@ -380,7 +383,9 @@ oa_bool write_blinddata_to_1file(u8 *buf, u16 len)
 		Trace("(%s:%s:%d):handle manage file err!", __FILE__,  __func__, __LINE__);
 		return OA_FALSE;
 	}
-
+	//debuf info
+	total_write = manage_data.write_index+1;
+	
 	handle = oa_fopen(DATANAME_1FILE);
 	if (handle < 0){
 		/* create new file for setting. */
@@ -522,7 +527,8 @@ oa_bool read_blinddata_from_1file(u8 *buf, u16 *p_len)
 		Trace("(%s:%s:%d):handle manage file err!", __FILE__,  __func__, __LINE__);
 		return OA_FALSE;
 	}
-
+	//debuf info
+	total_read = manage_data.read_index+1;
 	//Trace("(%s:%s:%d):w_index:%d,r_index:%d", __FILE__,  __func__, __LINE__, manage_data.write_index,manage_data.read_index);
 	if (manage_data.read_index >= manage_data.write_index){//read overflow:means no data
 		if (manage_data.write_overflow == OA_FALSE){//case:|.....w_p.....r_p.......|
@@ -657,8 +663,9 @@ oa_bool oa_app_blinddata(void)
 		ret_len = escape_copy_to_send(blind_buf, data_len);
 		//Trace("(%s:%s:%d): ret_len:%d!", __FILE__, __func__, __LINE__, ret_len);
 		if (ret_len > 0){
-			oa_soc_send_req();//check datas in buffer & send	
-			Trace("(%s:%s:%d): send one blinddata packet!", __FILE__, __func__, __LINE__);
+			oa_soc_send_req();//check datas in buffer & send
+			print_rtc_time();
+			Trace("send one blinddata packet!total send num:%d", total_read);
 		}
 		
 

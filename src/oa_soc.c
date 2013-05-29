@@ -361,6 +361,13 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 	// received gprs data
 	oa_uint8 ret;
 	//OA_DEBUG_USER("(%s:%s:%d):len=%d", __FILE__, __func__, __LINE__, len);
+	//debuf info
+	{
+		u16 i;
+		for(i=0; i<len; i++){
+			Trace("0x%x", data[i]);
+		}
+	}
 	//gprs receive data analysis
 	ret = JT808_recv_analysis(data, len);
 	switch (ret){

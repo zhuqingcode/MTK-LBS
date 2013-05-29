@@ -255,6 +255,7 @@ void oa_app_gps(void)
 			if (dev_now_params.report_strategy == 0){//Periodically reported
 				if (upload_times * GPS_RUN_SECONDS >= dev_now_params.default_reporttime){
 					DEBUG("send one location packet!");
+					print_rtc_time();
 					ret = handle_alarm_status(OA_FALSE, OA_FALSE, SET, OA_FALSE);//just send
 					if (ret == OA_TRUE)	upload_times = 0;
 				}

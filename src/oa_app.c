@@ -324,6 +324,7 @@ void oa_app_plat_data(void *param)
 					soc_ret = oa_soc_send_req();
 					if (build_ret == soc_ret){
 						hbeat_counter = 0;
+						print_rtc_time();
 						Trace("(%s:%s:%d): send one heartbeat packet", __FILE__, __func__, __LINE__);
 					}
 				}

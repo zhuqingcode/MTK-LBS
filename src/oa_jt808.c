@@ -2618,7 +2618,9 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 			memcpy(rsp.SeqId, pbuf, 2);
 			pbuf+=2;
 			rsp.Rslt = *pbuf;
-
+			//debug info
+			Trace("register ack:0x%x", REGISTERS_rsp);
+			Trace("rsp result:0x%x", rsp.Rslt);
 			Write_ProtclHandl(eRsp2DevReq, (u8 *)&rsp, sizeof(LBS_PlatComRsp));	
 			switch (rsp.Rslt){
 				case RspOK:{
@@ -2709,8 +2711,12 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 #endif
 		case PLAT_COMMON_rsp:{ //平台通用应答
 			LBS_PlatComRsp rsp;
+			u16 temp;
 			pbuf+=sizeof(MSG_HEAD);
 			memcpy(&rsp, pbuf, sizeof(LBS_PlatComRsp));
+			//debug info
+			char_to_short(&rsp.MsgId[0], &temp);
+			Trace("platform common ack:DevReqmsgID:0x%4x, rsp result:0x%x", temp, rsp.Rslt);
 			Write_ProtclHandl(eRsp2DevReq, (u8 *)&rsp, sizeof(LBS_PlatComRsp));	
 			return PLAT_COMMON_ACK;
 		}
@@ -4897,7 +4903,15 @@ u16 escape_copy_to_send(u8 *buf, u16 len)
 	//对标示头和尾之外的包数据进行转义
 	JT808_dataChg(1, buf+1, len-2, &U16Temp);
 	len = U16Temp+2; //total data length
-	
+	//debug info
+	{
+		u16 i;
+		Trace("sendlen:%d", len);
+		Trace("data:");
+		for (i=0; i<len; i++){
+			Trace("0x%x", buf[i]);
+		}
+	}
 	real_len = oa_write_buffer_force_noinit(g_soc_context.gprs_tx, buf, len);
 	if (real_len < len)
 	{
@@ -4992,6 +5006,7 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 *Return:        0:wrong others:right
 *Others:         
 *********************************************************/
+extern u16 total_write;
 u16 DevReq2ServPackag_build_blind(u16 ReqMsgId) //即时上传数据
 {
 	u8 pbuf[DATA_MAX_LEN] = 0;
@@ -5014,6 +5029,10 @@ u16 DevReq2ServPackag_build_blind(u16 ReqMsgId) //即时上传数据
 			#endif
 			//ret = write_blinddata(pbuf, U16Temp);
 			ret = write_blinddata_to_1file(pbuf, U16Temp);
+			if (OA_TRUE == ret){
+				print_rtc_time();
+				Trace("write one blinddata packet!total write num:%d", total_write);
+			}
 			return ret;
 			
 		}
