@@ -29,7 +29,7 @@
 #define __DEBUG__ 
 
 #ifdef __DEBUG__  
-#define DEBUG(format,...) OA_DEBUG_USER(" "__FILE__" %s %d : "format"", __func__, __LINE__, ##__VA_ARGS__)
+#define DEBUG(format,...) OA_DEBUG_USER("("__FILE__" %s %d):"format"", __func__, __LINE__, ##__VA_ARGS__)
 #else  
 #define DEBUG(format,...)  
 #endif  
