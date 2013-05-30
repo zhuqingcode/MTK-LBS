@@ -553,26 +553,26 @@ void print_key_dev_params(void)
 	
 	DEBUG_N("------------------------------device params-----------------------------");
 	DEBUG_N("Hearttime					:%d", dev_now_params.heartbeat_interval);
-	DEBUG_N("RSP_TCP					:%d", dev_now_params.tcp_ack_timeout);
-	DEBUG_N("RSP_UDP					:%d", dev_now_params.udp_ack_timeout);
-	DEBUG_N("RSP_SMS					:%d", dev_now_params.sms_ack_timeout);
+	DEBUG_N("RSP_TCP						:%d", dev_now_params.tcp_ack_timeout);
+	DEBUG_N("RSP_UDP						:%d", dev_now_params.udp_ack_timeout);
+	DEBUG_N("RSP_SMS						:%d", dev_now_params.sms_ack_timeout);
 	DEBUG_N("Retry_TCP					:%d", dev_now_params.tcp_retrans_times);
 	DEBUG_N("Retry_UDP					:%d", dev_now_params.udp_retrans_times);
 	DEBUG_N("Retry_SMS					:%d", dev_now_params.sms_retrans_times);
 	DEBUG_N("IP						:%s", dev_now_params.m_server_ip);
-	DEBUG_N("UDPPORT					:%d", dev_now_params.server_udp_port);
-	DEBUG_N("TCPPORT	 				:%d", dev_now_params.server_tcp_port);
+	DEBUG_N("UDPPORT						:%d", dev_now_params.server_udp_port);
+	DEBUG_N("TCPPORT	 					:%d", dev_now_params.server_tcp_port);
 	DEBUG_N("TEL						:%s", dev_now_params.term_tel_num);
 	DEBUG_N("Rpt_strategy                        		:%d", dev_now_params.report_strategy);
 	DEBUG_N("Rpttime_unlog                       		:%d", dev_now_params.unlogin_reporttime);
 	DEBUG_N("Rpttime_sleep                       		:%d", dev_now_params.sleep_reporttime);
-	DEBUG_N("Rpttime_alarm                      	 		:%d", dev_now_params.urgent_reporttime);
-	DEBUG_N("Rpttime_def                       	 		:%d", dev_now_params.default_reporttime);
-	DEBUG_N("Rptdis_unlog                       	 		:%d", dev_now_params.unlogin_reportdistance);
-	DEBUG_N("Rptdis_sleep                       	 		:%d", dev_now_params.default_reportdistance);
-	DEBUG_N("Rptdis_alarm                       	 		:%d", dev_now_params.urgent_reportdistance);
-	DEBUG_N("Rptdis_def                       	 		:%d", dev_now_params.default_reportdistance);
-	DEBUG_N("Rptcog                       	 	 		:%d", dev_now_params.corner_reportangle);
+	DEBUG_N("Rpttime_alarm                      	 	:%d", dev_now_params.urgent_reporttime);
+	DEBUG_N("Rpttime_def                       	 	:%d", dev_now_params.default_reporttime);
+	DEBUG_N("Rptdis_unlog                       	 	:%d", dev_now_params.unlogin_reportdistance);
+	DEBUG_N("Rptdis_sleep                       	 	:%d", dev_now_params.default_reportdistance);
+	DEBUG_N("Rptdis_alarm                       	 	:%d", dev_now_params.urgent_reportdistance);
+	DEBUG_N("Rptdis_def                       	 	:%d", dev_now_params.default_reportdistance);
+	DEBUG_N("Rptcog                       	 	 	:%d", dev_now_params.corner_reportangle);
 	DEBUG_N("servertel					:%s", dev_now_params.monitor_platform_num);
 	DEBUG_N("resettel					:%s", dev_now_params.reset_num);
 	DEBUG_N("factorysettel					:%s", dev_now_params.restore_factory_settings_num);
@@ -598,7 +598,7 @@ void print_key_dev_params(void)
 	
 	DEBUG_N("man id						:%s", dev_now_params.manufacturers_id);
 	DEBUG_N("term model					:%s", dev_now_params.term_model);
-	DEBUG_N("term id					:%s", dev_now_params.term_id);
+	DEBUG_N("term id						:%s", dev_now_params.term_id);
 	#if 0
 	DEBUG_N("car id						:%s", dev_now_params.vehicle_license);
 	DEBUG_N("plate_color					:%d", dev_now_params.plate_color);

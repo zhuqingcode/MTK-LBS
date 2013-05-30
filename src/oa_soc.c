@@ -143,7 +143,7 @@ void oa_soc_state_check(void)
 	if (g_soc_context.state == OA_SOC_STATE_ONLINE){
 		if (check_counter >= 50){
 			check_counter = 0;
-			DEBUG(" I am online");
+			DEBUG("I am online");
 		}
 		return;	
 	}
@@ -273,7 +273,7 @@ oa_int16 oa_soc_send_req(void)
 
 		if (ret >= OA_SOC_SUCCESS)
 		{
-			GPRS_DEBUG("%s:sock_id=%d send ok len=%d",__func__,g_soc_context.socket_id,ret);
+			DEBUG("%s:sock_id=%d send ok len=%d",__func__,g_soc_context.socket_id,ret);
 
 			//if send success,dummy read to delete
 			len = oa_read_buffer_noinit(g_soc_context.gprs_tx, 
@@ -285,7 +285,7 @@ oa_int16 oa_soc_send_req(void)
 			
 			if (ret < len)
 			{
-				GPRS_DEBUG(" send data is not equal!");
+				DEBUG(" send data is not equal!");
 			}
 			return ret;
 			//----------------end------------------
@@ -298,14 +298,14 @@ oa_int16 oa_soc_send_req(void)
 		else if (ret == OA_SOC_WOULDBLOCK)
 		{
 			g_soc_context.is_blocksend = OA_TRUE;
-			GPRS_DEBUG("%s:sock_id=%d send block waiting!",__func__,g_soc_context.socket_id);
+			DEBUG("%s:sock_id=%d send block waiting!",__func__,g_soc_context.socket_id);
 			//wait for sending result , care event OA_SOC_WRITE in callback function oa_soc_notify_ind
 			return 0;
 		}
 		else
 		{
 			//ERROR!.
-			GPRS_DEBUG("%s:sock_id=%d send fail ret=%d!",__func__,g_soc_context.socket_id,ret);
+			DEBUG("%s:sock_id=%d send fail ret=%d!",__func__,g_soc_context.socket_id,ret);
 			//oa_soc_close_req();//commend by zq
 			return 0;
 		}
