@@ -1486,6 +1486,9 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 		case e_UPDATE:{
 			p_set->act_kind = update;
 		}break;
+		case e_VERSA:{
+
+		}break;
 		case e_RESTART:{
 			p_set->act_kind = reset;
 		}break;

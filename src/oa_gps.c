@@ -327,18 +327,18 @@ void oa_app_gps(void)
 				//WriteAlarmPara(RESET,StaSector1,STA_GPS_FIXED);
 				handle_alarm_status(StaSector1, STA_GPS_FIXED, RESET, OA_TRUE);
 		}
-		if (result & UBX_CFG_RST_OK){
+		if (result &UBX_CFG_RST_OK){
 			DEBUG(" UBX_CFG_RST_OK!");
 		}
-		if (result & UBX_CFG_MSG_OK){
-			DEBUG(" UBX_CFG_MSG_OK!");
+		if (result &UBX_CFG_MSG_OK){
+			DEBUG("UBX_CFG_MSG_OK!");
 		}
 		if (result & NMEA_GGA_OK){//高度定位OK
 //				GPS_GetPosition(&gps_info);
 //				DEBUG(PrintDebug," Height: %d\r\n",gps_info.Height);
 		}
 		else if (result & NMEA_GGA_UNFIXED){
-			DEBUG(" NMEA_GGA_UNFIXED!");
+			DEBUG("NMEA_GGA_UNFIXED!");
 		}
 	}
 
