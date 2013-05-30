@@ -90,7 +90,7 @@ void oa_app_plat_link(void *para)
 	oa_uint16 soc_ret;
 	
 	if (OA_TRUE == task_runed){
-		DEBUG("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>");
+		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		task_runed = OA_FALSE;
 	}
 	//避免重复进行某一步操作
@@ -235,7 +235,7 @@ void oa_app_plat_data(void *param)
 	oa_uint16 soc_ret;
 	static oa_bool send_before_close = OA_TRUE;
 	if (OA_TRUE == task_runed){
-		DEBUG("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>", __func__);
+		DEBUG("<<<<<<<<<<<<<task is running......>>>>>>>>>>>>>", __func__);
 		task_runed = OA_FALSE;
 	}
 	
@@ -423,7 +423,7 @@ void oa_app_main(void)
 	if (OA_TRUE == first_run)
 	{
 		//DEBUG(OA_SW_VERSION_NO);
-		DEBUG("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>", __func__);
+		DEBUG("<<<<<<<<<<<<<task is running......>>>>>>>>>>>>>", __func__);
 		//device params initial
 		dev_params_init();
 		//just print key params

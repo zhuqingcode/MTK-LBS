@@ -121,7 +121,7 @@ void oa_app_gps(void)
 	}
 #endif
 	if (OA_TRUE == task_runed){
-		DEBUG("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>");
+		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		mile_stat_init();//init here
 		task_runed = OA_FALSE;
 	}

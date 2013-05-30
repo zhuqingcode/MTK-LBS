@@ -651,7 +651,7 @@ oa_bool oa_app_blinddata(void)
 	static oa_bool task_runed = OA_TRUE;
 	
 	if (OA_TRUE == task_runed){
-		DEBUG("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>");
+		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		task_runed = OA_FALSE;
 	}
 	

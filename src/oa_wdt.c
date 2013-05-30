@@ -41,7 +41,7 @@ void oa_app_wdt(void)
 	static oa_bool task_runed = OA_TRUE;
 	if (OA_TRUE == task_runed)
 	{
-		DEBUG("task %s is running......");
+		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		task_runed = OA_FALSE;
 	}
 	oa_timer_start(OA_TIMER_ID_1, oa_app_wdt, NULL, OA_WDT_SCHEDULER_PERIOD);

@@ -1826,7 +1826,7 @@ void oa_app_area(void *para)
 	static u8 o_s_alarm_period;
 
 	if (OA_FALSE == task_runed){
-		OA_DEBUG_USER("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>", __func__);
+		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		task_runed = OA_TRUE;
 	}
 #if 0

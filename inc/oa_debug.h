@@ -31,14 +31,16 @@
 #define DEBUG_N 2
 
 
-#define DEBUG_LEVEL DEBUG_K
+#define DEBUG_LEVEL DEBUG_U
 
 #if (DEBUG_K == DEBUG_LEVEL)
 #define DEBUG(format,...) OA_DEBUG_USER("("__FILE__" %s %d):"format"\r\n", __func__, __LINE__, ##__VA_ARGS__)
-#define DEBUG_N(format,...) OA_DEBUG_USER(""format"\r\n", __func__, __LINE__, ##__VA_ARGS__)
+#define DEBUG_N(format,...) OA_DEBUG_USER(""format"\r\n", ##__VA_ARGS__)
 #elif (DEBUG_U == DEBUG_LEVEL)
-#define DEBUG(format,...) OA_DEBUG_USER(""format"\r\n", __func__, __LINE__, ##__VA_ARGS__)
+#define DEBUG(format,...) OA_DEBUG_USER(""format"\r\n", ##__VA_ARGS__)
+#define DEBUG_N(format,...) OA_DEBUG_USER(""format"\r\n", ##__VA_ARGS__)
 #elif (DEBUG_N == DEBUG_LEVEL)
 #define DEBUG(format,...)
+#define DEBUG_N(format,...)
 #endif
 #endif

@@ -5120,11 +5120,12 @@ u16 escape_copy_to_send(u8 *buf, u16 len)
 	//debug info
 	{
 		u16 i;
-		DEBUG("sendlen:%d", len);
-		DEBUG("data:");
+		DEBUG("sendlen:%d data:", len);
 		for (i=0; i<len; i++){
-			DEBUG("0x%x", buf[i]);
+			OA_DEBUG_USER("%02x ", buf[i]);
 		}
+		DEBUG();
+		
 	}
 	real_len = oa_write_buffer_force_noinit(g_soc_context.gprs_tx, buf, len);
 	if (real_len < len)
