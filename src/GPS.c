@@ -18,6 +18,7 @@
 #include "oa_type.h"
 #include "oa_gps.h"
 #include "oa_api.h"
+#include "oa_debug.h"
 #include <math.h>
 extern gps_data_struct gps_data;
 #define CheckParam1(param1) ((param1) == NULL)
@@ -511,7 +512,7 @@ u32 GPS_DataAnaly(void)
 								int i;
 								//GPSHandle.GPS_INF.Speed=(u16)((GPSHandle.Speed_Temp*1852)/(1000*( pow(10,GPSHandle.dot)+0.0)));//(GPSHandle.Speed_Temp*1852)/1000/( pow(10,GPSHandle.dot));//(float)
 								GPSHandle.GPS_INF.Speed=(u16)((GPSHandle.Speed_Temp*1852)/(1000*( powme(10,GPSHandle.dot)+0.0)));//(GPSHandle.Speed_Temp*1852)/1000/( pow(10,GPSHandle.dot));//(float)
-								//Trace("Speed_Temp:%u dot:%u pow:%d", GPSHandle.Speed_Temp, GPSHandle.dot, powme(10,GPSHandle.dot));
+								//DEBUG("Speed_Temp:%u dot:%u pow:%d", GPSHandle.Speed_Temp, GPSHandle.dot, powme(10,GPSHandle.dot));
 								
 							}
 							GPSHandle.CntTemp++;	
@@ -1441,7 +1442,7 @@ u8 GPS_GetPosition(STRUCT_RMC *gps_info)
 	if (CheckParam1(gps_info))
 	{
 		#if GPS_PRINT
-		//Trace("((%s:%s:%d):): params err!", __FILE__, __func__, __LINE__);	
+		//DEBUG("((%s:%s:%d):): params err!", __FILE__, __func__, __LINE__);	
 		#endif
 		return 1;
 	}
@@ -1468,7 +1469,7 @@ u8 GPS_GetTime(u8 *TimeStr)
 	if (CheckParam1(TimeStr))
 	{
 		#if GPS_PRINT
-		//Trace("((%s:%s:%d):): params err!", __FILE__, __func__, __LINE__);	
+		//DEBUG("((%s:%s:%d):): params err!", __FILE__, __func__, __LINE__);	
 		#endif
 		return 1;
 	}
@@ -1499,7 +1500,7 @@ u8 GetPosinfASC(u8 *Str,u8 StrSize,u8 *Strlen,u8 Filed)
 	if (CheckParam2(Str,Strlen))
 	{
 		#if GPS_PRINT
-		//Trace("((%s:%s:%d):): params err!", __FILE__, __func__, __LINE__);	
+		//DEBUG("((%s:%s:%d):): params err!", __FILE__, __func__, __LINE__);	
 		#endif
 		return 1;
 	}
@@ -1659,24 +1660,24 @@ FP32 GPS_IntvlDistanc(void)
 	u8 Time[6];
 	u8 err;
 	u8 flag=0;//正确标志
-/*	//Trace(PrintDebug,"Latitude:%c%c%c%c%c%c%c%c,Longitude:%c%c%c%c%c%c%c%c%c!\r\n",GPSHandle.GPS_INF.Latitude[0],
+/*	//DEBUG(PrintDebug,"Latitude:%c%c%c%c%c%c%c%c,Longitude:%c%c%c%c%c%c%c%c%c!\r\n",GPSHandle.GPS_INF.Latitude[0],
 	GPSHandle.GPS_INF.Latitude[1],GPSHandle.GPS_INF.Latitude[2],GPSHandle.GPS_INF.Latitude[3],GPSHandle.GPS_INF.Latitude[4],
 	GPSHandle.GPS_INF.Latitude[5],GPSHandle.GPS_INF.Latitude[6],GPSHandle.GPS_INF.Latitude[7],GPSHandle.GPS_INF.Longitude[0],GPSHandle.GPS_INF.Longitude[1],
 	GPSHandle.GPS_INF.Longitude[2],GPSHandle.GPS_INF.Longitude[3],GPSHandle.GPS_INF.Longitude[4],GPSHandle.GPS_INF.Longitude[5],GPSHandle.GPS_INF.Longitude[6],
 	GPSHandle.GPS_INF.Longitude[7],GPSHandle.GPS_INF.Longitude[8]);
-	//Trace(PrintDebug,"Time:%x %x %x %x %x %x!\r\n",GPSHandle.GPS_INF.Time[0],GPSHandle.GPS_INF.Time[1],GPSHandle.GPS_INF.Time[2],GPSHandle.GPS_INF.Time[3],GPSHandle.GPS_INF.Time[4],GPSHandle.GPS_INF.Time[5]);
-	//Trace(PrintDebug,"Height:%d\r\n",GPSHandle.GPS_INF.Height);
+	//DEBUG(PrintDebug,"Time:%x %x %x %x %x %x!\r\n",GPSHandle.GPS_INF.Time[0],GPSHandle.GPS_INF.Time[1],GPSHandle.GPS_INF.Time[2],GPSHandle.GPS_INF.Time[3],GPSHandle.GPS_INF.Time[4],GPSHandle.GPS_INF.Time[5]);
+	//DEBUG(PrintDebug,"Height:%d\r\n",GPSHandle.GPS_INF.Height);
 */
 	if(GPS_GetFixStatus() == 0)	   //如果在定位状态
 	{
 		#if GPS_PRINT
-		//Trace(PrintDevDebug,"计算距离!\r\n");
+		//DEBUG(PrintDevDebug,"计算距离!\r\n");
 		#endif
 		if(GPSHandle.Old_Lon==0&&GPSHandle.Old_Lat==0)//首次定位
 		{
 			GPSHandle.Oldcog=GPSHandle.GPS_INF.COG;
 			#if GPS_PRINT
-			//Trace(PrintDevDebug,"First Locall Time:%lu!\r\n",GPSHandle.Unfixed_Cnt);
+			//DEBUG(PrintDevDebug,"First Locall Time:%lu!\r\n",GPSHandle.Unfixed_Cnt);
 			#endif
 			//OSSemPend(GPS_DataSem,0,&err);
 			GPSHandle.Old_Lon=GPS_Local_Change(GPSHandle.GPS_INF,1) ;
@@ -1703,7 +1704,7 @@ FP32 GPS_IntvlDistanc(void)
 				if(GPSHandle.Fixed_Cnt>DISTANCE_FRQ)
 				{
 					#if GPS_PRINT
-					//Trace(PrintDevDebug,"超时,通过经纬度计算距离!\r\n");
+					//DEBUG(PrintDevDebug,"超时,通过经纬度计算距离!\r\n");
 					#endif
 					GPSHandle.Speed_Distance=GPS2Point_Distance(GPSHandle.New_Lon,GPSHandle.New_Lat,GPSHandle.Old_Lon,GPSHandle.Old_Lat);
 					//该方式取得的里程均速大于180km/h，取180
@@ -1725,7 +1726,7 @@ FP32 GPS_IntvlDistanc(void)
 					{
 						GPSHandle.Speed_Distance=((GPSHandle.GPS_INF.Speed+GPSHandle.Last_Speed)/2.0)*GPSHandle.Fixed_Cnt/3600.0;//两点平均速度计算fixed_cnt内里程					
 						#if GPS_PRINT
-						//Trace(PrintDevDebug,"FIX_CNT:%d,Distance:%.02f\r\n",GPSHandle.Fixed_Cnt,GPSHandle.Speed_Distance);
+						//DEBUG(PrintDevDebug,"FIX_CNT:%d,Distance:%.02f\r\n",GPSHandle.Fixed_Cnt,GPSHandle.Speed_Distance);
 						#endif	
 					}
 				}
@@ -1735,7 +1736,7 @@ FP32 GPS_IntvlDistanc(void)
 				GPSHandle.Speed_Distance=0;//时间有误
 				flag=1;
 				#if GPS_PRINT
-				//Trace(PrintDevDebug,"GPS时间有误\r\n");
+				//DEBUG(PrintDevDebug,"GPS时间有误\r\n");
 				#endif	
 			}
 			/*若无问题,更新旧数据*/
@@ -1752,7 +1753,7 @@ FP32 GPS_IntvlDistanc(void)
 	else
 	{
 		#if GPS_PRINT
-		//Trace(PrintDevDebug,"未定位!不统计里程\r\n");
+		//DEBUG(PrintDevDebug,"未定位!不统计里程\r\n");
 		#endif
 		return 0;
 	}			
@@ -1796,7 +1797,7 @@ u8 GPS_GetAntaStatus(void)
 		GPSHandle.GPS_INF.Ant_Status=GPS_ANT_OPEN;
 		UpdatePos(&(GPSHandle.GPS_INF),ANTUPDATE);
 		#if GPS_PRINT
-		//Trace(PrintDevDebug,"GPS ANANT OPEN!\r\n");
+		//DEBUG(PrintDevDebug,"GPS ANANT OPEN!\r\n");
 		#endif
 		return 1;	
 	}
@@ -2192,7 +2193,7 @@ u8 GPS_SW_Init(void)
 	
 
 	#if GPS_PRINT
-	//Trace(PrintError,"GPS停机\r\n"); 
+	//DEBUG(PrintError,"GPS停机\r\n"); 
 	#endif
 //	if (GPS_SendSem==0)
 //	{
@@ -2216,7 +2217,7 @@ u8 GPS_SW_Init(void)
 	if (GPS_Wait_Return(UBX_CFG_RST_OK,UBX_CFG_RST_ERROR,10))	  
 	{
 		#if GPS_PRINT
-		//Trace(PrintError,"GPS模块初始化失败!\r\n");
+		//DEBUG(PrintError,"GPS模块初始化失败!\r\n");
 		#endif
 		return 1;
 	}
@@ -2224,19 +2225,19 @@ u8 GPS_SW_Init(void)
     for( i=0;i<GPDTM+1;i++)
     {
     	#if GPS_PRINT
-		//Trace(PrintDevDebug,"GPS关闭NMEA输出\r\n");
+		//DEBUG(PrintDevDebug,"GPS关闭NMEA输出\r\n");
 		#endif
 		GPS_CFG_MSG(NMEA_GP,i,0x00);	   //0x40
 		if (GPS_Wait_Return(UBX_CFG_MSG_OK,UBX_CFG_MSG_ERROR,10))
 		{
 			#if GPS_PRINT
-			//Trace(PrintError,"GPS模块初始化失败!\r\n");
+			//DEBUG(PrintError,"GPS模块初始化失败!\r\n");
 			#endif
 			return 1;
 		}
     }
 /*	#if GPS_PRINT
-	//Trace(PrintInfo,"GPS关闭NMEA输出\r\n");
+	//DEBUG(PrintInfo,"GPS关闭NMEA输出\r\n");
 	#endif
 	GPS_CFG_MSG(NMEA_GP,GPGPQ,0x00);
 	j=10;								   //0x02
@@ -2246,48 +2247,48 @@ u8 GPS_SW_Init(void)
 		OSTimeDly(50);
 	}
 	#if GPS_PRINT
-	//Trace(PrintInfo,"GPS关闭NMEA输出\r\n");
+	//DEBUG(PrintInfo,"GPS关闭NMEA输出\r\n");
 	#endif
 	GPS_CFG_MSG(NMEA_GP,GPTXT,0x00);
 	if (GPS_Wait_Return(UBX_CFG_MSG_OK,UBX_CFG_MSG_ERROR,10))
 	{
 		#if GPS_PRINT
-		//Trace(PrintInfo,"GPS模块初始化失败!\r\n");
+		//DEBUG(PrintInfo,"GPS模块初始化失败!\r\n");
 		#endif
 		return 1;
 	}
    */
 	/*打开GPRMC字段和GPGGA字段输出*/
 	#if GPS_PRINT
-	//Trace(PrintDevDebug,"GPS开启NMEA输出\r\n");
+	//DEBUG(PrintDevDebug,"GPS开启NMEA输出\r\n");
 	#endif
     GPS_CFG_MSG(NMEA_GP,GPRMC,0x01);
 	if (GPS_Wait_Return(UBX_CFG_MSG_OK,UBX_CFG_MSG_ERROR,10))
 	{
 		#if GPS_PRINT
-		//Trace(PrintError,"GPS模块初始化失败!\r\n");
+		//DEBUG(PrintError,"GPS模块初始化失败!\r\n");
 		#endif
 		return 1;
 	}
 	#if GPS_PRINT
-	//Trace(PrintDevDebug,"GPS开启NMEA输出\r\n");
+	//DEBUG(PrintDevDebug,"GPS开启NMEA输出\r\n");
 	#endif
     GPS_CFG_MSG(NMEA_GP,GPGGA,0x01);
 	if (GPS_Wait_Return(UBX_CFG_MSG_OK,UBX_CFG_MSG_ERROR,10))
 	{
 		#if GPS_PRINT
-		//Trace(PrintError,"GPS模块初始化失败!\r\n");
+		//DEBUG(PrintError,"GPS模块初始化失败!\r\n");
 		#endif
 		return 1;
 	}
 	#if GPS_PRINT
-	//Trace(PrintDevDebug,"GPS 启动\r\n");
+	//DEBUG(PrintDevDebug,"GPS 启动\r\n");
 	#endif
 	GPS_CFG_NAV_SET();	//设置内部寄存器  设置防止漂移参数等
 	if (GPS_Wait_Return(UBX_NAV_MSG_OK,UBX_CFG_RST_ERROR,10))
 	{
 		#if GPS_PRINT
-		//Trace(PrintDevDebug,"GPS模块初始化失败!\r\n");
+		//DEBUG(PrintDevDebug,"GPS模块初始化失败!\r\n");
 		#endif
 		return 1;
 	}
@@ -2295,13 +2296,13 @@ u8 GPS_SW_Init(void)
 	if (GPS_Wait_Return(UBX_CFG_RST_OK,UBX_CFG_RST_ERROR,10))
 	{
 		#if GPS_PRINT
-		//Trace(PrintDevDebug,"GPS模块初始化失败!\r\n");
+		//DEBUG(PrintDevDebug,"GPS模块初始化失败!\r\n");
 		#endif
 		return 1;
 	}
 	//OSTimeDly(30);     /*延时，等待GPS启动*/
 	#if GPS_PRINT
-	//Trace(PrintDevDebug,"GPS NAV设置\r\n");
+	//DEBUG(PrintDevDebug,"GPS NAV设置\r\n");
 	#endif
 #endif
 	return 0;
@@ -2723,12 +2724,12 @@ void GPS_Send_Data( u8 *Str,u8 Length)
 #endif
 	if (NULL == Str || Length == 0)
 	{
-		Trace("err:((%s:%s:%d):):", __FILE__, __func__, __LINE__);
+		DEBUG("paras err");
 		return;
 	}
 	if (OA_FALSE == oa_uart_write(GPS_COM, Str, Length))
 	{
-		Trace("err:((%s:%s:%d):):", __FILE__, __func__, __LINE__);
+		DEBUG("paras err");
 		return;
 	}
 }

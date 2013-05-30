@@ -39,6 +39,8 @@
 #include "oa_sms.h"
 #include "oa_sw.h"
 #include "oa_hw.h"
+#include "oa_debug.h"
+
 extern oa_soc_set_parameter soc_cs;
 
 DEVICE_PARAMS dev_def_params =
@@ -133,12 +135,12 @@ oa_bool clear_miles(void)
 	oa_fseek(handle, 0, OA_FILE_BEGIN);
 	ret = oa_fwrite(handle, &mileage, sizeof(TOTAL_MILE), &dummy_write);
 	if ((ret < 0) || (dummy_write != sizeof(TOTAL_MILE))){
-		OA_DEBUG_USER("(%s:%s:%d):Init mileage file failed!", __FILE__,  __func__, __LINE__);
+		DEBUG("Init mileage file failed!");
 		return OA_FALSE;
 	}
 	ret = oa_fclose(handle);
 	if (ret < 0){
-		OA_DEBUG_USER("(%s:%s:%d):close file err!", __FILE__,  __func__, __LINE__);
+		DEBUG("close file err!");
 		oa_fdelete(MILEAGE_FILE);
 		return OA_FALSE;
 	}
@@ -160,7 +162,7 @@ oa_bool del_authcode(void)
 		//delete files about miles
 		ret = oa_fdelete(AUTHEN_FILE);
 		if (ret < 0){
-			Trace("(%s:%s:%d): delete file:authen_file.ini err!", __FILE__, __func__, __LINE__);
+			DEBUG("delete file:authen_file.ini err!");
 			return OA_FALSE;
 		}
 	}
@@ -182,7 +184,7 @@ oa_bool del_blinddata(void)
 		//delete files about blinddata
 		ret = oa_fdelete(BLINDDATA_DIR_CONF);
 		if (ret < 0){
-			Trace("(%s:%s:%d): delete file:blinddata_dir_conf.ini err!", __FILE__, __func__, __LINE__);
+			DEBUG("delete file:blinddata_dir_conf.ini err!");
 			return OA_FALSE;
 		}
 	}
@@ -193,7 +195,7 @@ oa_bool del_blinddata(void)
 		//delete files about blinddata
 		ret = oa_fdelete(DATANAME_1FILE);
 		if (ret < 0){
-			Trace("(%s:%s:%d): delete file:c:\\blinddata.dir\\data err!", __FILE__, __func__, __LINE__);
+			DEBUG("delete file:c:\\blinddata.dir\\data err!");
 			return OA_FALSE;
 		}
 	}
@@ -204,7 +206,7 @@ oa_bool del_blinddata(void)
 		//delete files about blinddata
 		ret = oa_fdelete(MANAGE_FILE);
 		if (ret < 0){
-			Trace("(%s:%s:%d): delete file:c:\\blinddata.dir\\manage_file.ini err!", __FILE__, __func__, __LINE__);
+			DEBUG("delete file:c:\\blinddata.dir\\manage_file.ini err!");
 			return OA_FALSE;
 		}
 	}
@@ -212,7 +214,7 @@ oa_bool del_blinddata(void)
 	
 	ret = oa_fremoveDir(BLINDDATA_DIRNAME);
 	if (ret < 0){
-		Trace("(%s:%s:%d): delete file:blinddata.dir err!", __FILE__, __func__, __LINE__);
+		DEBUG("delete file:blinddata.dir err!");
 		return OA_FALSE;
 	}
 
@@ -235,7 +237,7 @@ oa_bool del_rec(void)
 		//delete files about miles
 		ret = oa_fdelete(MILEAGE_FILE);
 		if (ret < 0){
-			Trace("(%s:%s:%d): delete file:total_miles.ini err!", __FILE__, __func__, __LINE__);
+			DEBUG("delete file:total_miles.ini err!");
 			return OA_FALSE;
 		}
 	}
@@ -246,7 +248,7 @@ oa_bool del_rec(void)
 		//delete files about auther code
 		ret = oa_fdelete(AUTHEN_FILE);
 		if (ret < 0){
-			Trace("(%s:%s:%d): delete file:authen_file.ini err!", __FILE__, __func__, __LINE__);
+			DEBUG("delete file:authen_file.ini err!");
 			return OA_FALSE;
 		}
 	}
@@ -269,7 +271,7 @@ oa_bool del_some_files(void)
 		//delete files about blinddata
 		ret = oa_fdelete(BLINDDATA_DIR_CONF);
 		if (ret < 0){
-			Trace("(%s:%s:%d): delete file:blinddata_dir_conf.ini err!", __FILE__, __func__, __LINE__);
+			DEBUG("delete file:blinddata_dir_conf.ini err!");
 			return OA_FALSE;
 		}
 	}
@@ -280,7 +282,7 @@ oa_bool del_some_files(void)
 		//delete files about blinddata
 		ret = oa_fdelete(DATANAME_1FILE);
 		if (ret < 0){
-			Trace("(%s:%s:%d): delete file:c:\\blinddata.dir\\data err!", __FILE__, __func__, __LINE__);
+			DEBUG("delete file:c:\\blinddata.dir\\data err!");
 			return OA_FALSE;
 		}
 	}
@@ -291,7 +293,7 @@ oa_bool del_some_files(void)
 		//delete files about blinddata
 		ret = oa_fdelete(MANAGE_FILE);
 		if (ret < 0){
-			Trace("(%s:%s:%d): delete file:c:\\blinddata.dir\\manage_file.ini err!", __FILE__, __func__, __LINE__);
+			DEBUG("delete file:c:\\blinddata.dir\\manage_file.ini err!");
 			return OA_FALSE;
 		}
 	}
@@ -299,7 +301,7 @@ oa_bool del_some_files(void)
 	
 	ret = oa_fremoveDir(BLINDDATA_DIRNAME);
 	if (ret < 0){
-		Trace("(%s:%s:%d): delete file:blinddata.dir err!", __FILE__, __func__, __LINE__);
+		DEBUG("delete file:blinddata.dir err!");
 		return OA_FALSE;
 	}
 
@@ -309,7 +311,7 @@ oa_bool del_some_files(void)
 		//delete files about device parameters
 		ret = oa_fdelete(DEV_PARAMS_FILE);
 		if (ret < 0){
-			Trace("(%s:%s:%d): delete file:dev_paras.ini err!", __FILE__, __func__, __LINE__);
+			DEBUG("delete file:dev_paras.ini err!");
 			return OA_FALSE;
 		}
 	}
@@ -320,7 +322,7 @@ oa_bool del_some_files(void)
 		//delete files about device parameters
 		ret = oa_fdelete(OA_SOC_SETTING_FILE);
 		if (ret < 0){
-			Trace("(%s:%s:%d): delete file:soc_setting.ini err!", __FILE__, __func__, __LINE__);
+			DEBUG("delete file:soc_setting.ini err!");
 			return OA_FALSE;
 		}
 	}
@@ -331,7 +333,7 @@ oa_bool del_some_files(void)
 		//delete files about miles
 		ret = oa_fdelete(MILEAGE_FILE);
 		if (ret < 0){
-			Trace("(%s:%s:%d): delete file:total_miles.ini err!", __FILE__, __func__, __LINE__);
+			DEBUG("delete file:total_miles.ini err!");
 			return OA_FALSE;
 		}
 	}
@@ -342,7 +344,7 @@ oa_bool del_some_files(void)
 		//delete files about use bock
 		ret = oa_fdelete(USE_LOCK_FILE);
 		if (ret < 0){
-			Trace("(%s:%s:%d): delete file:use_lock.ini err!", __FILE__, __func__, __LINE__);
+			DEBUG("delete file:use_lock.ini err!");
 			return OA_FALSE;
 		}
 	}
@@ -353,7 +355,7 @@ oa_bool del_some_files(void)
 		//delete files about auther code
 		ret = oa_fdelete(AUTHEN_FILE);
 		if (ret < 0){
-			Trace("(%s:%s:%d): delete file:authen_file.ini err!", __FILE__, __func__, __LINE__);
+			DEBUG("delete file:authen_file.ini err!");
 			return OA_FALSE;
 		}
 	}
@@ -375,7 +377,7 @@ oa_bool factory_set(void)
 	handle = oa_fopen(DEV_PARAMS_FILE);
 	if (handle < 0)
 	{
-		OA_DEBUG_USER("factory setting failed!");
+		DEBUG("factory setting failed!");
 		return OA_FALSE;
 	}
 
@@ -384,7 +386,7 @@ oa_bool factory_set(void)
 	ret = oa_fwrite(handle, &dev_def_params, sizeof(dev_def_params), &dummy_write);
 	if ((ret < 0) || (dummy_write != sizeof(dev_def_params)))
 	{
-		OA_DEBUG_USER("factory setting write err!");
+		DEBUG("factory setting write err!");
 		return OA_FALSE;
 	}
 
@@ -393,11 +395,11 @@ oa_bool factory_set(void)
 	oa_bool ret;
 	ret = del_some_files();
 	if (ret == OA_TRUE){
-		OA_DEBUG_USER("factory setting ok!");
+		DEBUG("factory setting ok!");
 		oa_module_restart(NULL);
 	}
 	else{
-		OA_DEBUG_USER("factory setting err!");
+		DEBUG("factory setting err!");
 	}
 	
 	return OA_TRUE;
@@ -421,18 +423,18 @@ oa_bool dev_params_init(void)
 		/* hope never return here. */
 		if (handle < 0)
 		{
-			OA_DEBUG_USER("Create dev params file failed!");
+			DEBUG("Create dev params file failed!");
 			return OA_FALSE;
 		}
 
 		ret = oa_fwrite(handle, &dev_def_params, sizeof(dev_def_params), &dummy_write);
 		if ((ret < 0) || (dummy_write != sizeof(dev_def_params)))
 		{
-			OA_DEBUG_USER("Init dev params file failed!");
+			DEBUG("Init dev params file failed!");
 			return OA_FALSE;
 		}
 
-		OA_DEBUG_USER("Create dev params file ok!");    
+		DEBUG("Create dev params file ok!");    
 
 		
 	}
@@ -442,14 +444,14 @@ oa_bool dev_params_init(void)
 	if ((ret < 0) || (dummy_read != sizeof(dev_now_params))) goto fail;
 
 	oa_fclose(handle);
-	OA_DEBUG_USER("dev params init ok!");    
+	DEBUG("dev params init ok!");    
 	return OA_TRUE;
 
 	fail:
 	//need delete the file and reset here..
 	oa_fclose(handle);
 	oa_fdelete(DEV_PARAMS_FILE);
-	OA_DEBUG_USER("dev params init err!");    
+	DEBUG("dev params init err!");    
 	return OA_FALSE;
 }
 /*********************************************************
@@ -466,7 +468,7 @@ oa_bool dev_params_save(void)
 	handle = oa_fopen(DEV_PARAMS_FILE);
 	if (handle < 0)
 	{
-		OA_DEBUG_USER("open err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+		DEBUG("open err ");
 		return OA_FALSE;
 	}
 	
@@ -474,7 +476,7 @@ oa_bool dev_params_save(void)
 	ret = oa_fwrite(handle, &dev_now_params, sizeof(dev_now_params), &dummy_write);
 	if ((ret < 0) || (dummy_write != sizeof(dev_now_params)))
 	{
-		OA_DEBUG_USER("write dev params file failed!");
+		DEBUG("write dev params file failed!");
 		oa_fclose(handle);
 		return OA_FALSE;
 	}
@@ -500,7 +502,7 @@ void params_to_soc_set(void)
 		soc_cs.port = dev_now_params.server_udp_port;
 	}
 	
-	OA_DEBUG_USER("dev params to soc ok!");
+	DEBUG("dev params to soc ok!");
 }
 /*********************************************************
 *Function:      params_to_soc_set()
@@ -512,73 +514,73 @@ void print_key_dev_params(void)
 {
 	oa_char tmp[64] = {0x0};
 	
-	Trace("------------------------------device params-----------------------------");
-	Trace("Hearttime					:%d", dev_now_params.heartbeat_interval);
-	Trace("RSP_TCP					:%d", dev_now_params.tcp_ack_timeout);
-	Trace("RSP_UDP					:%d", dev_now_params.udp_ack_timeout);
-	Trace("RSP_SMS					:%d", dev_now_params.sms_ack_timeout);
-	Trace("Retry_TCP					:%d", dev_now_params.tcp_retrans_times);
-	Trace("Retry_UDP					:%d", dev_now_params.udp_retrans_times);
-	Trace("Retry_SMS					:%d", dev_now_params.sms_retrans_times);
-	Trace("IP						:%s", dev_now_params.m_server_ip);
-	Trace("UDPPORT					:%d", dev_now_params.server_udp_port);
-	Trace("TCPPORT	 				:%d", dev_now_params.server_tcp_port);
-	Trace("TEL						:%s", dev_now_params.term_tel_num);
-	Trace("Rpt_strategy                        		:%d", dev_now_params.report_strategy);
-	Trace("Rpttime_unlog                       		:%d", dev_now_params.unlogin_reporttime);
-	Trace("Rpttime_sleep                       		:%d", dev_now_params.sleep_reporttime);
-	Trace("Rpttime_alarm                      	 		:%d", dev_now_params.urgent_reporttime);
-	Trace("Rpttime_def                       	 		:%d", dev_now_params.default_reporttime);
-	Trace("Rptdis_unlog                       	 		:%d", dev_now_params.unlogin_reportdistance);
-	Trace("Rptdis_sleep                       	 		:%d", dev_now_params.default_reportdistance);
-	Trace("Rptdis_alarm                       	 		:%d", dev_now_params.urgent_reportdistance);
-	Trace("Rptdis_def                       	 		:%d", dev_now_params.default_reportdistance);
-	Trace("Rptcog                       	 	 		:%d", dev_now_params.corner_reportangle);
-	Trace("servertel					:%s", dev_now_params.monitor_platform_num);
-	Trace("resettel					:%s", dev_now_params.reset_num);
-	Trace("factorysettel					:%s", dev_now_params.restore_factory_settings_num);
-	Trace("smstel						:%s", dev_now_params.monitor_platform_sms_num);
-	Trace("alarmsmstel					:%s", dev_now_params.terminal_sms_num);
+	DEBUG_N("------------------------------device params-----------------------------");
+	DEBUG_N("Hearttime					:%d", dev_now_params.heartbeat_interval);
+	DEBUG_N("RSP_TCP					:%d", dev_now_params.tcp_ack_timeout);
+	DEBUG_N("RSP_UDP					:%d", dev_now_params.udp_ack_timeout);
+	DEBUG_N("RSP_SMS					:%d", dev_now_params.sms_ack_timeout);
+	DEBUG_N("Retry_TCP					:%d", dev_now_params.tcp_retrans_times);
+	DEBUG_N("Retry_UDP					:%d", dev_now_params.udp_retrans_times);
+	DEBUG_N("Retry_SMS					:%d", dev_now_params.sms_retrans_times);
+	DEBUG_N("IP						:%s", dev_now_params.m_server_ip);
+	DEBUG_N("UDPPORT					:%d", dev_now_params.server_udp_port);
+	DEBUG_N("TCPPORT	 				:%d", dev_now_params.server_tcp_port);
+	DEBUG_N("TEL						:%s", dev_now_params.term_tel_num);
+	DEBUG_N("Rpt_strategy                        		:%d", dev_now_params.report_strategy);
+	DEBUG_N("Rpttime_unlog                       		:%d", dev_now_params.unlogin_reporttime);
+	DEBUG_N("Rpttime_sleep                       		:%d", dev_now_params.sleep_reporttime);
+	DEBUG_N("Rpttime_alarm                      	 		:%d", dev_now_params.urgent_reporttime);
+	DEBUG_N("Rpttime_def                       	 		:%d", dev_now_params.default_reporttime);
+	DEBUG_N("Rptdis_unlog                       	 		:%d", dev_now_params.unlogin_reportdistance);
+	DEBUG_N("Rptdis_sleep                       	 		:%d", dev_now_params.default_reportdistance);
+	DEBUG_N("Rptdis_alarm                       	 		:%d", dev_now_params.urgent_reportdistance);
+	DEBUG_N("Rptdis_def                       	 		:%d", dev_now_params.default_reportdistance);
+	DEBUG_N("Rptcog                       	 	 		:%d", dev_now_params.corner_reportangle);
+	DEBUG_N("servertel					:%s", dev_now_params.monitor_platform_num);
+	DEBUG_N("resettel					:%s", dev_now_params.reset_num);
+	DEBUG_N("factorysettel					:%s", dev_now_params.restore_factory_settings_num);
+	DEBUG_N("smstel						:%s", dev_now_params.monitor_platform_sms_num);
+	DEBUG_N("alarmsmstel					:%s", dev_now_params.terminal_sms_num);
 	oa_itoa(dev_now_params.alarm_mask, tmp, BI);
-	Trace("swh_alarmmask					:%s", tmp);
+	DEBUG_N("swh_alarmmask					:%s", tmp);
 	oa_itoa(dev_now_params.alarm_send_sms_mask, tmp, BI);
-	Trace("swh_alarmsms					:%s", tmp);
-	Trace("overspeed					:%d", dev_now_params.max_speed);
-	Trace("overspeedtime					:%d", dev_now_params.speed_duration);
-	Trace("tireddrivetime					:%d", dev_now_params.continuous_drive_time_threshold);
-	Trace("min_resttime					:%d", dev_now_params.min_rest_time);
-	Trace("max_parktime					:%d", dev_now_params.max_park_time);
-	Trace("provincID					:%d", dev_now_params.vehicle_province_id);
-	Trace("cityID						:%d", dev_now_params.vehicle_city_id);
-	Trace("carID						:%d", dev_now_params.vehicle_license);
-	Trace("carcolor					:%d", dev_now_params.plate_color);
-	Trace("UPIP						:%s", dev_now_params.update_server_ip);
-	Trace("UPPORT						:%d", dev_now_params.update_server_port);
-	Trace("ftp_prog_name					:%s", dev_now_params.ftp_prog_name);
+	DEBUG_N("swh_alarmsms					:%s", tmp);
+	DEBUG_N("overspeed					:%d", dev_now_params.max_speed);
+	DEBUG_N("overspeedtime					:%d", dev_now_params.speed_duration);
+	DEBUG_N("tireddrivetime					:%d", dev_now_params.continuous_drive_time_threshold);
+	DEBUG_N("min_resttime					:%d", dev_now_params.min_rest_time);
+	DEBUG_N("max_parktime					:%d", dev_now_params.max_park_time);
+	DEBUG_N("provincID					:%d", dev_now_params.vehicle_province_id);
+	DEBUG_N("cityID						:%d", dev_now_params.vehicle_city_id);
+	DEBUG_N("carID						:%d", dev_now_params.vehicle_license);
+	DEBUG_N("carcolor					:%d", dev_now_params.plate_color);
+	DEBUG_N("UPIP						:%s", dev_now_params.update_server_ip);
+	DEBUG_N("UPPORT						:%d", dev_now_params.update_server_port);
+	DEBUG_N("ftp_prog_name					:%s", dev_now_params.ftp_prog_name);
 	
 	
-	Trace("man id						:%s", dev_now_params.manufacturers_id);
-	Trace("term model					:%s", dev_now_params.term_model);
-	Trace("term id					:%s", dev_now_params.term_id);
+	DEBUG_N("man id						:%s", dev_now_params.manufacturers_id);
+	DEBUG_N("term model					:%s", dev_now_params.term_model);
+	DEBUG_N("term id					:%s", dev_now_params.term_id);
 	#if 0
-	Trace("car id						:%s", dev_now_params.vehicle_license);
-	Trace("plate_color					:%d", dev_now_params.plate_color);
-	Trace("continuous driving time			:%d", dev_now_params.continuous_drive_time_threshold);
-	Trace("min rest time					:%d", dev_now_params.min_rest_time);
-	Trace("max part time					:%d", dev_now_params.max_park_time);
-	Trace("default report time				:%d", dev_now_params.default_reporttime);
-	Trace("max speed					:%d", dev_now_params.max_speed);
+	DEBUG_N("car id						:%s", dev_now_params.vehicle_license);
+	DEBUG_N("plate_color					:%d", dev_now_params.plate_color);
+	DEBUG_N("continuous driving time			:%d", dev_now_params.continuous_drive_time_threshold);
+	DEBUG_N("min rest time					:%d", dev_now_params.min_rest_time);
+	DEBUG_N("max part time					:%d", dev_now_params.max_park_time);
+	DEBUG_N("default report time				:%d", dev_now_params.default_reporttime);
+	DEBUG_N("max speed					:%d", dev_now_params.max_speed);
 	oa_itoa(dev_now_params.alarm_mask, tmp, BI);
-	Trace("swh_alarmmask					:%s", tmp);
+	DEBUG_N("swh_alarmmask					:%s", tmp);
 	oa_itoa(dev_now_params.alarm_send_sms_mask, tmp, BI);
-	Trace("swh_alarmsms					:%s", tmp);
-	Trace("alarmsmstel					:%s", dev_now_params.terminal_sms_num);
-	Trace("UPIP						:%s", dev_now_params.update_server_ip);
-	Trace("UPPORT						:%d", dev_now_params.update_server_port);
-	Trace("ftp_prog_name					:%s", dev_now_params.ftp_prog_name);
+	DEBUG_N("swh_alarmsms					:%s", tmp);
+	DEBUG_N("alarmsmstel					:%s", dev_now_params.terminal_sms_num);
+	DEBUG_N("UPIP						:%s", dev_now_params.update_server_ip);
+	DEBUG_N("UPPORT						:%d", dev_now_params.update_server_port);
+	DEBUG_N("ftp_prog_name					:%s", dev_now_params.ftp_prog_name);
 	#endif
-	Trace("software					:%s", OA_SW_VERSION_NO);
-	Trace("hardware					:%s", OA_HW_VERSION_NO);
-	Trace("-----------------------------------------------------------------------");
+	DEBUG_N("software					:%s", OA_SW_VERSION_NO);
+	DEBUG_N("hardware					:%s", OA_HW_VERSION_NO);
+	DEBUG_N("-----------------------------------------------------------------------");
 	
 }

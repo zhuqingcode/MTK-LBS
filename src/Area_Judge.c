@@ -289,9 +289,9 @@ u8 DelAreaData(u8* pbuf,u8 areatype)
 	{
 		ret = del_area_data(0/*has no effects*/, areatype, all_area);
 		if (ret == 0){
-			OA_DEBUG_USER("======delete area ok======");
+			DEBUG("======delete area ok======");
 		}
-		else OA_DEBUG_USER("======delete area failed======");
+		else DEBUG("======delete area failed======");
 #if 0
 		OSSemPend(Area_Protect_Sem,0,&err);
 		if(err != OS_ERR_NONE)

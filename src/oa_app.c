@@ -43,6 +43,8 @@
 #include "oa_blinddata.h"
 #include "oa_lbs2mtk.h"
 #include "oa_area.h"
+#include "oa_debug.h"
+
 DEV_PLAT_PARAS dev_running =
 {
 	PLAT_SOC_INIT,
@@ -88,7 +90,7 @@ void oa_app_plat_link(void *para)
 	oa_uint16 soc_ret;
 	
 	if (OA_TRUE == task_runed){
-		OA_DEBUG_USER("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>", __func__);
+		DEBUG("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>");
 		task_runed = OA_FALSE;
 	}
 	//避免重复进行某一步操作
@@ -96,28 +98,28 @@ void oa_app_plat_link(void *para)
 		switch (dev_running.next_step){
 			case PLAT_SOC_INIT:{
 				if (oa_sim_network_is_valid()){
-					OA_DEBUG_USER("GSM network init finished!");
+					DEBUG("GSM network init finished!");
 					/*soc init*/
 					oa_soc_init();//soc paras & callback register
 					oa_soc_state_check();//check & connect
 					dev_running.plat_switch = OA_FALSE;
 				}
 				else{
-					OA_DEBUG_USER("sim network is invalue!");
+					DEBUG("sim network is invalue!");
 					break;
 				}
 				break;
 			}
 			case PLAT_RECONN:{
 				if (oa_sim_network_is_valid()){
-					//OA_DEBUG_USER("GSM network init finished!");
+					//DEBUG("GSM network init finished!");
 					/*soc init*/
 					//oa_soc_init();//soc paras & callback register
 					oa_soc_state_check();//check & connect
 					dev_running.plat_switch = OA_FALSE;
 				}
 				else{
-					OA_DEBUG_USER("sim network is invalue!");
+					DEBUG("sim network is invalue!");
 					break;
 				}
 				break;
@@ -128,7 +130,7 @@ void oa_app_plat_link(void *para)
 				}
 				build_ret = DevReq2ServPackag_build(REGISTERS);
 				if (!build_ret){
-					OA_DEBUG_USER("(%s:%s:%d): build register packet err!", __FILE__, __func__, __LINE__);
+					DEBUG("build register packet err!");
 					break;
 				}
 				else{
@@ -146,7 +148,7 @@ void oa_app_plat_link(void *para)
 				}
 				build_ret = DevReq2ServPackag_build(LOGIN);
 				if (!build_ret){
-					OA_DEBUG_USER("(%s:%s:%d): build login packet err!", __FILE__, __func__, __LINE__);
+					DEBUG("build login packet err!");
 					break;
 				}
 				else{
@@ -164,7 +166,7 @@ void oa_app_plat_link(void *para)
 				}
 				build_ret = DevReq2ServPackag_build(UNREGISTERS);
 				if (!build_ret){
-					OA_DEBUG_USER("(%s:%s:%d): build unlogin packet err!", __FILE__, __func__, __LINE__);
+					DEBUG("build unlogin packet err!");
 					break;
 				}
 				else{
@@ -182,14 +184,14 @@ void oa_app_plat_link(void *para)
 	else{//detect is online/offline
 		if (dev_running.plat_check_value == OA_TRUE){
 			if (oa_sim_network_is_valid()){
-				//Trace("(%s:%s:%d): acc_status:%d acc_short_conning:%d", __FILE__, __func__, __LINE__,acc_status,acc_short_conning);
+				//Trace(" acc_status:%d acc_short_conning:%d",acc_status,acc_short_conning);
 				if ((acc_status == ACC_ON) || (acc_short_conning == OA_TRUE)){//acc is on
-					//Trace("(%s:%s:%d): check soc status!", __FILE__, __func__, __LINE__);
+					//Trace(" check soc status!");
 					oa_soc_state_check();//check & connect
 				}
 			}
 			else{
-				OA_DEBUG_USER("(%s:%s:%d): sim network is invalue!", __FILE__, __func__, __LINE__);
+				DEBUG("sim network is invalue!");
 			}
 		}
 	}
@@ -203,7 +205,7 @@ void oa_app_plat_link(void *para)
 		//sim and network is invalid, can driver network event
 		if(!first_valid)
 		{
-			OA_DEBUG_USER("GSM network init finished!");
+			DEBUG("GSM network init finished!");
 			/*soc init*/
 			oa_soc_init();
 			first_valid = OA_TRUE;
@@ -213,7 +215,7 @@ void oa_app_plat_link(void *para)
 	}
 
 	//ret = oa_network_get_signal_level();
-	//OA_DEBUG_USER("oa_network_get_signal_level = %d", ret);
+	//DEBUG("oa_network_get_signal_level = %d", ret);
 	//oa_uart_send_at_cmd_req("AT+REG?\r\n", oa_strlen("AT+REG?\r\n"));
 	oa_timer_start(OA_APP_SCHEDULER_ID, oa_app_plat_link, NULL, OA_APP_SCHEDULER_PERIOD);
 	#endif
@@ -233,7 +235,7 @@ void oa_app_plat_data(void *param)
 	oa_uint16 soc_ret;
 	static oa_bool send_before_close = OA_TRUE;
 	if (OA_TRUE == task_runed){
-		OA_DEBUG_USER("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>", __func__);
+		DEBUG("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>", __func__);
 		task_runed = OA_FALSE;
 	}
 	
@@ -251,15 +253,15 @@ void oa_app_plat_data(void *param)
 				if (build_ret > 0){
 					soc_ret = oa_soc_send_req();//check datas in buffer & send, concern it send ok.
 					if (soc_ret == build_ret){
-						Trace("(%s:%s:%d): send the last packet before closing soc!!!", __FILE__, __func__, __LINE__);
+						Trace("send the last packet before closing soc!!!");
 						send_before_close = OA_FALSE;
 					}
 					else{
-						Trace("(%s:%s:%d): send data is not equal!", __FILE__, __func__, __LINE__);
+						Trace("send data is not equal!");
 					}
 				}
 				else{
-					Trace("(%s:%s:%d): build packet err!", __FILE__, __func__, __LINE__);
+					Trace("build packet err!");
 				}
 
 			}
@@ -267,7 +269,7 @@ void oa_app_plat_data(void *param)
 			if (send_before_close == OA_FALSE){
 				//close socket
 				if (oa_soc_close_req()){//after testing it doesn't cause "oa_soc_notify_ind_user_callback" 
-					Trace("(%s:%s:%d):I close soc by myself for acc is off",__FILE__, __func__, __LINE__);
+					Trace("I close soc by myself for acc is off",__FILE__, __func__, __LINE__);
 					dev_running.plat_status = OFFLINE;
 					send_before_close = OA_TRUE;
 				}
@@ -283,29 +285,29 @@ void oa_app_plat_data(void *param)
 					acc_short_conning = OA_FALSE;
 				}
 				else{
-					Trace("(%s:%s:%d): send data is not equal!", __FILE__, __func__, __LINE__);
+					Trace("send data is not equal!");
 				}
 			}
 			else{
-				Trace("(%s:%s:%d): build packet err!", __FILE__, __func__, __LINE__);
+				Trace("build packet err!");
 			}
 			
 		}
 		
 		//acc off time > sleep_reporttime & dev is offline
-		//Trace("(%s:%s:%d):sleep_reporttime:%u", __FILE__, __func__, __LINE__,dev_now_params.sleep_reporttime);
+		//Trace("sleep_reporttime:%u",dev_now_params.sleep_reporttime);
 		if (dev_now_params.sleep_reporttime >=  PLAT_DATA_SECOND){//avoid sleep_reporttime is too short
 			if (acc_counter * PLAT_DATA_SECOND >= dev_now_params.sleep_reporttime && 
 				dev_running.plat_status == OFFLINE){
 				acc_counter = 0;
-				Trace("(%s:%s:%d):I'm doing soc connect for a period", __FILE__, __func__, __LINE__);
+				Trace("I'm doing soc connect for a period");
 				oa_soc_state_check();//check & connect = A lengthy process of asynchronous, so we can not wait here
 				acc_short_conning = OA_TRUE;
 			}
 			
 		}
 		else{
-			OA_DEBUG_USER("(%s:%s:%d): sleep_reporttime is too short!", __FILE__, __func__, __LINE__);
+			DEBUG("sleep_reporttime is too short!");
 		}
 	}
 	else if (acc_status == ACC_ON){
@@ -320,14 +322,14 @@ void oa_app_plat_data(void *param)
 			if (hbeat_counter * PLAT_DATA_SECOND >= dev_now_params.heartbeat_interval){
 				build_ret = DevReq2ServPackag_build(HEART_BEAT);//build heartbeats packets & fill buffer with it
 				if (!build_ret){
-					Trace("(%s:%s:%d): build heartbeat packet err!", __FILE__, __func__, __LINE__);
+					Trace("build heartbeat packet err!");
 				}
 				else{
 					soc_ret = oa_soc_send_req();
 					if (build_ret == soc_ret){
 						hbeat_counter = 0;
 						print_rtc_time();
-						Trace("(%s:%s:%d): send one heartbeat packet", __FILE__, __func__, __LINE__);
+						Trace("send one heartbeat packet");
 					}
 				}
 			}
@@ -370,11 +372,11 @@ void oa_app_init(void)
 	ret = oa_uart_init(OA_UART1);
 	if (OA_TRUE == ret)
 	{
-		OA_DEBUG_USER("UART1 init OK!");
+		DEBUG("UART1 init OK!");
 	}
 	else
 	{
-		OA_DEBUG_USER("UART1 init ERR!");
+		DEBUG("UART1 init ERR!");
 	}
 #endif
 #ifdef USE_UART2
@@ -382,11 +384,11 @@ void oa_app_init(void)
 	ret = oa_uart_init(OA_UART2);
 	if (OA_TRUE == ret)
 	{
-		OA_DEBUG_USER("UART2 init OK!");
+		DEBUG("UART2 init OK!");
 	}
 	else
 	{
-		OA_DEBUG_USER("UART2 init ERR!");
+		DEBUG("UART2 init ERR!");
 	}
 #endif
 #ifdef USE_UART3
@@ -394,17 +396,17 @@ void oa_app_init(void)
 	ret = oa_uart_init(OA_UART3);
 	if (OA_TRUE == ret)
 	{
-		OA_DEBUG_USER("UART3 init OK!");
+		DEBUG("UART3 init OK!");
 	}
 	else
 	{
-		OA_DEBUG_USER("UART3 init ERR!");
+		DEBUG("UART3 init ERR!");
 	}
 #endif
 	//GPIO init
 	oa_gpio_set();
-	OA_DEBUG_USER("Hardware Init End");
-	OA_DEBUG_USER(OA_HW_VERSION_NO);
+	DEBUG("Hardware Init End");
+	DEBUG(OA_HW_VERSION_NO);
 	return;
 }
 /*********************************************************
@@ -420,8 +422,8 @@ void oa_app_main(void)
 	
 	if (OA_TRUE == first_run)
 	{
-		//OA_DEBUG_USER(OA_SW_VERSION_NO);
-		OA_DEBUG_USER("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>", __func__);
+		//DEBUG(OA_SW_VERSION_NO);
+		DEBUG("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>", __func__);
 		//device params initial
 		dev_params_init();
 		//just print key params
@@ -461,7 +463,7 @@ void oa_app_main(void)
 	}
 	else if (OA_TRUE == dev_is_locked)  //device is lock
 	{
-		OA_DEBUG_USER("device is locked!Please activate it.");
+		DEBUG("device is locked!Please activate it.");
 		//app main restart
 		oa_timer_start(OA_TIMER_ID_3, oa_app_main, NULL, OA_MAIN_SCHEDULER_PERIOD);
 	}

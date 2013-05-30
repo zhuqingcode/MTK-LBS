@@ -143,7 +143,7 @@ void oa_soc_state_check(void)
 	if (g_soc_context.state == OA_SOC_STATE_ONLINE){
 		if (check_counter >= 50){
 			check_counter = 0;
-			OA_DEBUG_USER("(%s:%s:%d): I am online", __FILE__, __func__, __LINE__);
+			OA_DEBUG_USER(" I am online");
 		}
 		return;	
 	}
@@ -157,7 +157,7 @@ void oa_soc_state_check(void)
 	}
 	else{
 		g_soc_context.recon_counter = 0;
-		//OA_DEBUG_USER("(%s:%s:%d): not ready for connect or doing connecting", __FILE__, __func__, __LINE__);
+		//OA_DEBUG_USER(" not ready for connect or doing connecting");
 	}
 #if 0
 	if(++check_counter>10 && g_soc_context.state == OA_SOC_STATE_ONLINE)
@@ -285,7 +285,7 @@ oa_int16 oa_soc_send_req(void)
 			
 			if (ret < len)
 			{
-				GPRS_DEBUG("(%s:%s:%d): send data is not equal!", __FILE__, __func__, __LINE__);
+				GPRS_DEBUG(" send data is not equal!");
 			}
 			return ret;
 			//----------------end------------------
@@ -312,7 +312,7 @@ oa_int16 oa_soc_send_req(void)
 	}
 	else
 	{
-		//OA_DEBUG_USER("(%s:%s:%d): no data in send buffer", __FILE__, __func__, __LINE__);
+		//OA_DEBUG_USER(" no data in send buffer");
 		return -1;
 	}
 }
@@ -333,7 +333,7 @@ oa_bool oa_soc_close_req( void )
 
 	if (g_soc_context.state == OA_SOC_STATE_OFFLINE)
 	{
-		OA_DEBUG_USER("(%s:%s:%d): socket is already closed!", __FILE__, __func__, __LINE__);
+		OA_DEBUG_USER(" socket is already closed!");
 		return OA_TRUE;
 	}
 
@@ -360,13 +360,15 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 {
 	// received gprs data
 	oa_uint8 ret;
-	//OA_DEBUG_USER("(%s:%s:%d):len=%d", __FILE__, __func__, __LINE__, len);
+	//OA_DEBUG_USER("len=%d", len);
 	//debuf info
 	{
 		u16 i;
+		DEBUG_N("receive len:%d data:", len);
 		for(i=0; i<len; i++){
-			Trace("0x%x", data[i]);
+			OA_DEBUG_USER("%02x ", data[i]);
 		}
+		DEBUG();
 	}
 	//gprs receive data analysis
 	ret = JT808_recv_analysis(data, len);
@@ -391,7 +393,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 					}
 					//case unreg
 					else if (dev_running.doing_what == unreg && dev_running.plat_status == ONLINE){
-						Trace("(%s:%s:%d):unreg ok!", __FILE__, __func__, __LINE__);
+						DEBUG("unreg ok!");
 						#if 0
 						dev_running.plat_switch = OA_TRUE;//if unreg ok, go to reg,authen and so on
 						dev_running.plat_status = OFFLINE;
@@ -408,13 +410,13 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 				case RspMsgerr:
 				case RspUnsurport:{
 					//case authen
-					Trace("(%s:%s:%d):plat common ack fail : %d", __FILE__, __func__, __LINE__, ret);
+					DEBUG("plat common ack fail : %d", ret);
 					if (dev_running.doing_what == authen && dev_running.plat_status == OFFLINE){
 						dev_running.plat_switch = OA_TRUE;//if authen err, do it again
 						dev_running.authen_err_time++;
 						if (dev_running.authen_err_time >= AUTHEN_ERR_MAX_TIMES){
 							dev_running.authen_err_time = 0;
-							Trace("(%s:%s:%d):authen err too many times!", __FILE__, __func__, __LINE__);
+							DEBUG("authen err too many times!");
 						}
 					}
 					//case unreg
@@ -435,12 +437,12 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 		break;
 		
 		case RspPackgerr:{
-			OA_DEBUG_USER("(%s:%s:%d): plat ack err", __FILE__, __func__, __LINE__);
+			OA_DEBUG_USER(" plat ack err");
 		}
 		break;
 		case PLAT_REQ:{
 			//do something here
-			//Trace("(%s:%s:%d):plat request!", __FILE__, __func__, __LINE__);
+			//DEBUG("plat request!");
 			if (need_reconn == OA_TRUE){
 				need_reconn = OA_FALSE;
 				do_soc_reconn();
@@ -449,11 +451,11 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 			if (none != control_type){
 				switch (control_type){
 					case wireless_update:{
-						Trace("(%s:%s:%d):doesn't support!",__FILE__, __func__, __LINE__);
+						DEBUG("doesn't support!");
 					}
 					break;
 					case conn_to_specified_server:{
-						Trace("(%s:%s:%d):doesn't support!",__FILE__, __func__, __LINE__);
+						DEBUG("doesn't support!");
 					}
 					break;
 					case term_powerdown:{
@@ -578,7 +580,7 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 			oa_bool ret;
 			// the socket is closed by remote server, use soc_close to close local socketID, else will lead OA_SOC_LIMIT_RESOURCE
 			//also callded by powerdown!
-			OA_DEBUG_USER("(%s:%s:%d):sock_id=%d close causeid=%d",__FILE__, __func__, __LINE__, soc_notify->socket_id,soc_notify->error_cause);
+			OA_DEBUG_USER("sock_id=%d close causeid=%d", soc_notify->socket_id,soc_notify->error_cause);
 			if (oa_soc_close_req()){
 				if (dev_running.plat_status == ONLINE){
 					dev_running.plat_status = OFFLINE;
@@ -588,14 +590,14 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 				dev_running.next_step = PLAT_SOC_INIT;
 			}
 			else{
-				OA_DEBUG_USER("(%s:%s:%d): soc close err!", __FILE__, __func__, __LINE__);
+				OA_DEBUG_USER(" soc close err!");
 			}
 			 
 			break;
 		}
 	        
 		case OA_SOC_ACCEPT:{
-			OA_DEBUG_USER("(%s:%s:%d):sock_id=%d accept",__FILE__, __func__, __LINE__, soc_notify->socket_id);
+			OA_DEBUG_USER("sock_id=%d accept", soc_notify->socket_id);
 		}
 		break;
 		    

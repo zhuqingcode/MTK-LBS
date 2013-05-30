@@ -27,6 +27,7 @@
 #include "oa_type.h"
 #include "oa_api.h"
 #include "oa_use_lock.h"
+#include "oa_debug.h"
 
 USE_LOCK def_use_lock = 
 {
@@ -49,7 +50,7 @@ oa_bool use_unlock(void)
 	handle = oa_fopen(USE_LOCK_FILE);
 	if (handle < 0)
 	{
-		OA_DEBUG_USER("use unlock failed!");
+		DEBUG("use unlock failed!");
 		return OA_FALSE;
 	}
 
@@ -58,12 +59,12 @@ oa_bool use_unlock(void)
 	ret = oa_fwrite(handle, &now_use_lock, sizeof(now_use_lock), &dummy_write);
 	if ((ret < 0) || (dummy_write != sizeof(now_use_lock)))
 	{
-		OA_DEBUG_USER("use unlock write err!");
+		DEBUG("use unlock write err!");
 		return OA_FALSE;
 	}
 
 	oa_fclose(handle);
-	OA_DEBUG_USER("use unlock ok!");
+	DEBUG("use unlock ok!");
 	return OA_TRUE;
 }
 /*********************************************************
@@ -103,18 +104,18 @@ oa_bool use_lock(void)
 		/* hope never return here. */
 		if (handle < 0)
 		{
-			OA_DEBUG_USER("Create use lock file failed!");
+			DEBUG("Create use lock file failed!");
 			return OA_FALSE;
 		}
 
 		ret = oa_fwrite(handle, &def_use_lock, sizeof(def_use_lock), &dummy_write);
 		if ((ret < 0) || (dummy_write != sizeof(def_use_lock)))
 		{
-			OA_DEBUG_USER("Init use lock file failed!");
+			DEBUG("Init use lock file failed!");
 			return OA_FALSE;
 		}
 
-		OA_DEBUG_USER("Create use lock file ok!");    
+		DEBUG("Create use lock file ok!");    
 
 		oa_fseek(handle, 0, OA_FILE_BEGIN);
 	}

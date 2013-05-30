@@ -37,7 +37,7 @@
 #include "SchedulScrn.h"
 #include "Area_Judge.h"
 #include "oa_debug.h"
-#define PRINT_SAMEPARA	Trace("(%s:%s:%d): this parameter is same as the original, so I do nothing...", __FILE__, __func__, __LINE__)
+#define PRINT_SAMEPARA	DEBUG(" this parameter is same as the original, so I do nothing...")
 #define PORT_MAX 65535
 extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
@@ -72,7 +72,7 @@ oa_bool term_reg_enpacket(oa_uint8 *buf, oa_uint16 *p_len)
 {
 	if (NULL == buf || NULL == p_len)
 	{
-		OA_DEBUG_USER("err:(%s:%s:%d):", __FILE__, __func__,__LINE__);
+		OA_DEBUG_USER("err:", __FILE__, __func__,__LINE__);
 		return OA_FALSE;
 	}
 	*p_len = 0;
@@ -683,7 +683,7 @@ u8 JT808_dataChg(u8 flag, u8 *pstr, u16 strlen, u16 *Destlen)
 
 	if(pstr==NULL || strlen==0)
 	{
-		Trace("turning parameter error!pstr=%x,stringlen=%d",pstr,strlen);
+		DEBUG("turning parameter error!pstr=%x,stringlen=%d",pstr,strlen);
 		return 1;
 	}
 
@@ -869,7 +869,7 @@ u8 WriteLbsCfgPara(Enum_CtrlCfgPara CfgPara, u8 *pValue,u8 len,UpdateModeEnum Up
 		case eIP:
 		case eIP_sub:
 			if(!ISAscIPValid(pValue,len)){
-				Trace("(%s:%s:%d):here", __FILE__, __func__, __LINE__);
+				DEBUG("here");
 				return 1;
 			}
 				
@@ -968,7 +968,7 @@ u8 WriteLbsCfgPara(Enum_CtrlCfgPara CfgPara, u8 *pValue,u8 len,UpdateModeEnum Up
 	//参数设置
 	//OSSemPend(HXCfgParaSem,0,&err);
 if (UpdateMode == UpdateOnly){
-	Trace("(%s:%s:%d):parameters id:0x%X", __FILE__, __func__, __LINE__, CfgPara);
+	DEBUG("parameters id:02x%X", CfgPara);
 	switch(CfgPara)
 	{
 		#if 0
@@ -984,7 +984,7 @@ if (UpdateMode == UpdateOnly){
 			//Mem_Copy((u8 *)&LbsCfgStruct.ServPort_udp,pValue,len);
 			//Mem_Copy((u8 *)&LbsCfgStruct.SubservPort_udp,pValue,len);
 			u32 tmp;
-			Trace("(%s:%s:%d):set UdpPort", __FILE__, __func__, __LINE__);
+			DEBUG("set UdpPort");
 			if (len == 4){
 				oa_memcpy((u8 *)&tmp, pValue, len);
 				if (tmp <= PORT_MAX){
@@ -998,13 +998,13 @@ if (UpdateMode == UpdateOnly){
 					}
 				}
 				else{
-					Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+					DEBUG("param err ");
 				}
 				//oa_memcpy((u8 *)&dev_now_params.server_udp_port, pValue, len);
 				//need_reconn = OA_TRUE;
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		}
 		break;
@@ -1012,7 +1012,7 @@ if (UpdateMode == UpdateOnly){
 			//Mem_Copy((u8 *)&LbsCfgStruct.ServPort_tcp,pValue,len);
 			//Mem_Copy((u8 *)&LbsCfgStruct.SubservPort_tcp,pValue,len);
 			u32 tmp;
-			Trace("(%s:%s:%d):set TcpPort", __FILE__, __func__, __LINE__);
+			DEBUG("set TcpPort");
 			if (len == 4){
 				oa_memcpy((u8 *)&tmp, pValue, len);
 				if (tmp <= PORT_MAX){
@@ -1026,11 +1026,11 @@ if (UpdateMode == UpdateOnly){
 					}
 				}
 				else{
-					Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+					DEBUG("param err ");
 				}
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 			#if 0
 			if (len == 4){
@@ -1038,7 +1038,7 @@ if (UpdateMode == UpdateOnly){
 				need_reconn = OA_TRUE;
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 			#endif
 			}
@@ -1048,7 +1048,7 @@ if (UpdateMode == UpdateOnly){
 			//Mem_Copy(LbsCfgStruct.ServIP,pValue,len);
 			//LbsCfgStruct.ServIP[len]='\0';
 			u8 ip_tmp[SERVER_IP_MAX_LEN] = {0x0};
-			Trace("(%s:%s:%d):set ip", __FILE__, __func__, __LINE__);
+			DEBUG("set ip");
 			if (len <=  SERVER_IP_MAX_LEN){
 				oa_memcpy(ip_tmp, pValue, len);
 				if (oa_strlen(dev_now_params.m_server_ip) == len){
@@ -1075,7 +1075,7 @@ if (UpdateMode == UpdateOnly){
 				#endif
 			}
 			else{
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 			}
 		break;
@@ -1113,44 +1113,44 @@ if (UpdateMode == UpdateOnly){
 			u8 tel_tmp[TERM_TEL_NUM_MAX_LEN] = {0x0};
 			//LbsCfgStruct.LclTELlen=len;
 			//Mem_Copy(LbsCfgStruct.LclTEL,pValue,len);
-			Trace("(%s:%s:%d):set LclTEL", __FILE__, __func__, __LINE__);
+			DEBUG("set LclTEL");
 			if (len <= TERM_TEL_NUM_MAX_LEN){
 				oa_memset(&dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
 				oa_memcpy((u8 *)&dev_now_params.term_tel_num, pValue, len);
 			}
 			else{
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		}
 		break;
 		case eHtTime:
 			//Mem_Copy((u8 *)&LbsCfgStruct.HB_time,pValue,len);	//	comment for 808 test
-			Trace("(%s:%s:%d):set hearttime", __FILE__, __func__, __LINE__);
+			DEBUG("set hearttime");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.heartbeat_interval, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eTcptime:
 			//Mem_Copy((u8 *)&LbsCfgStruct.rsp_time_tcp,pValue,len);
-			Trace("(%s:%s:%d):Tcptime", __FILE__, __func__, __LINE__);
+			DEBUG("Tcptime");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.tcp_ack_timeout, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eTcpnum:
 			//Mem_Copy((u8 *)&LbsCfgStruct.rsp_num_tcp,pValue,len);
-			Trace("(%s:%s:%d):Tcpnum", __FILE__, __func__, __LINE__);
+			DEBUG("Tcpnum");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.tcp_retrans_times, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		#if 0
@@ -1163,28 +1163,28 @@ if (UpdateMode == UpdateOnly){
 		#endif
 		case eSMSTime:
 			//Mem_Copy((u8 *)&LbsCfgStruct.rsp_time_sms,pValue,len);
-			Trace("(%s:%s:%d):SMSTime", __FILE__, __func__, __LINE__);
+			DEBUG("SMSTime");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.sms_ack_timeout, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eSMSNum:
 			//Mem_Copy((u8 *)&LbsCfgStruct.rsp_num_sms,pValue,len);
-			Trace("(%s:%s:%d):SMSNum", __FILE__, __func__, __LINE__);
+			DEBUG("SMSNum");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.sms_retrans_times, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eRptStrategy:{
 			//Mem_Copy((u8 *)&LbsCfgStruct.ReportStrategy,pValue,len);
 			u32 tmp;
-			Trace("(%s:%s:%d):RptStrategy", __FILE__, __func__, __LINE__);
+			DEBUG("RptStrategy");
 
 			if (len == 4){
 				oa_memcpy((u8 *)&tmp, pValue, len);
@@ -1192,118 +1192,118 @@ if (UpdateMode == UpdateOnly){
 				
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		}
 		break;
 		case eRptType:{
 			//Mem_Copy((u8 *)&LbsCfgStruct.ReportType,pValue,len);
 			u32 tmp;
-			Trace("(%s:%s:%d):RptType", __FILE__, __func__, __LINE__);
+			DEBUG("RptType");
 			if (len == 4){
 				oa_memcpy((u8 *)&tmp, pValue, len);
 				if (tmp == 0 || tmp == 1)	oa_memcpy((u8 *)&dev_now_params.report_type, pValue, len);
 				
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		}
 		break;
 		case eRpttime_def:
 			//Mem_Copy((u8 *)&LbsCfgStruct.DefaultReportTime,pValue,len);
-			Trace("(%s:%s:%d):Rpttime_def", __FILE__, __func__, __LINE__);
+			DEBUG("Rpttime_def");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.default_reporttime, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eRpttime_unlog:
 			//Mem_Copy((u8 *)&LbsCfgStruct.unLoginReportTime,pValue,len);
-			Trace("(%s:%s:%d):Rpttime_unlog", __FILE__, __func__, __LINE__);
+			DEBUG("Rpttime_unlog");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.unlogin_reporttime, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eRpttime_sleep:
 			//Mem_Copy((u8 *)&LbsCfgStruct.sleepReportTime,pValue,len);
-			Trace("(%s:%s:%d):Rpttime_sleep", __FILE__, __func__, __LINE__);
+			DEBUG("Rpttime_sleep");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.sleep_reporttime, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eRpttime_emergency:
 			//Mem_Copy((u8 *)&LbsCfgStruct.UrgentReportTime,pValue,len);
-			Trace("(%s:%s:%d):Rpttime_emergency", __FILE__, __func__, __LINE__);
+			DEBUG("Rpttime_emergency");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.urgent_reporttime, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eRptDistanc_def:	
 			//Mem_Copy((u8 *)&LbsCfgStruct.DefaultReportDistanc,pValue,len);
-			Trace("(%s:%s:%d):RptDistanc_def", __FILE__, __func__, __LINE__);
+			DEBUG("RptDistanc_def");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.default_reportdistance, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eRptDistanc_sleep:
 			//Mem_Copy((u8 *)&LbsCfgStruct.sleepReportDistanc,pValue,len);	
-			Trace("(%s:%s:%d):RptDistanc_sleep", __FILE__, __func__, __LINE__);
+			DEBUG("RptDistanc_sleep");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.sleep_reportdistance, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eRptDistanc_unlog:
 			//Mem_Copy((u8 *)&LbsCfgStruct.unLoginReportDistanc,pValue,len);
-			Trace("(%s:%s:%d):RptDistanc_unlog", __FILE__, __func__, __LINE__);
+			DEBUG("RptDistanc_unlog");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.unlogin_reportdistance, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eRptDistanc_emergency:
 			//Mem_Copy((u8 *)&LbsCfgStruct.UrgentReportDistanc,pValue,len);
-			Trace("(%s:%s:%d):RptDistanc_emergency", __FILE__, __func__, __LINE__);
+			DEBUG("RptDistanc_emergency");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.urgent_reportdistance, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eRptCog:
 			//Mem_Copy((u8 *)&LbsCfgStruct.ReportCog,pValue,len);
-			Trace("(%s:%s:%d):RptCog", __FILE__, __func__, __LINE__);
+			DEBUG("RptCog");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.corner_reportangle, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eServTel:
 			//LbsCfgStruct.ServTellen=len;
 			//Mem_Copy(LbsCfgStruct.ServTel,pValue,len);
-			Trace("(%s:%s:%d):ServTel", __FILE__, __func__, __LINE__);
+			DEBUG("ServTel");
 			if (len <= TEL_NUM_MAX_LEN)
 			{
 				oa_memset(&dev_now_params.monitor_platform_num, 0x0, sizeof(dev_now_params.monitor_platform_num));
@@ -1311,25 +1311,25 @@ if (UpdateMode == UpdateOnly){
 			}
 			else
 			{
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eResetTel:
 			//LbsCfgStruct.ResetTellen=len;
 			//Mem_Copy(LbsCfgStruct.ResetTel,pValue,len);
-			Trace("(%s:%s:%d):ResetTel", __FILE__, __func__, __LINE__);
+			DEBUG("ResetTel");
 			if (len <= TEL_NUM_MAX_LEN){
 				oa_memset(&dev_now_params.reset_num, 0x0, 	sizeof(dev_now_params.reset_num));
 				oa_memcpy((u8 *)&dev_now_params.reset_num, pValue, len);
 			}
 			else{
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eFactryTel:
 			//LbsCfgStruct.FactySetTellen=len;
 			//Mem_Copy(LbsCfgStruct.FactySetTel,pValue,len);
-			Trace("(%s:%s:%d):FactryTel", __FILE__, __func__, __LINE__);
+			DEBUG("FactryTel");
 			if (len <= TEL_NUM_MAX_LEN){
 				oa_memset(&dev_now_params.restore_factory_settings_num, 
 																	0x0, 
@@ -1337,13 +1337,13 @@ if (UpdateMode == UpdateOnly){
 				oa_memcpy((u8 *)&dev_now_params.restore_factory_settings_num, pValue, len);
 			}
 			else{
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eSMSTel:
 			//LbsCfgStruct.ServSMSTellen=len;
 			//Mem_Copy(LbsCfgStruct.ServSMSTel,pValue,len);
-			Trace("(%s:%s:%d):SMSTel", __FILE__, __func__, __LINE__);
+			DEBUG("SMSTel");
 			if (len <= TEL_NUM_MAX_LEN)
 			{
 				oa_memset(&dev_now_params.monitor_platform_sms_num, 0x0, sizeof(dev_now_params.monitor_platform_sms_num));
@@ -1351,19 +1351,19 @@ if (UpdateMode == UpdateOnly){
 			}
 			else
 			{
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eAlarmSMSTel:
 			//LbsCfgStruct.AlarmSMSTellen=len;
 			//Mem_Copy(LbsCfgStruct.AlarmSMSTel,pValue,len);
-			Trace("(%s:%s:%d):AlarmSMSTel", __FILE__, __func__, __LINE__);
+			DEBUG("AlarmSMSTel");
 			if (len <= TEL_NUM_MAX_LEN){
 				oa_memset(&dev_now_params.terminal_sms_num, 0x0, 	sizeof(dev_now_params.terminal_sms_num));
 				oa_memcpy((u8 *)&dev_now_params.terminal_sms_num, pValue, len);
 			}
 			else{
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		#if 0
@@ -1387,22 +1387,22 @@ if (UpdateMode == UpdateOnly){
 		#endif
 		case eAlarmmaskword:
 			//Mem_Copy((u8 *)&LbsCfgStruct.AlarmMaskWord,pValue,len);
-			Trace("(%s:%s:%d):Alarmmaskword", __FILE__, __func__, __LINE__);
+			DEBUG("Alarmmaskword");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.alarm_mask, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case etxtSMSAlarm:
 			//Mem_Copy((u8 *)&LbsCfgStruct.AlarmSMStextFlag,pValue,len);
-			Trace("(%s:%s:%d):txtSMSAlarm", __FILE__, __func__, __LINE__);
+			DEBUG("txtSMSAlarm");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.alarm_send_sms_mask, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		#if 0
@@ -1418,53 +1418,53 @@ if (UpdateMode == UpdateOnly){
 		#endif
 		case eOverspeed:
 			//Mem_Copy((u8 *)&LbsCfgStruct.OverSpeed,pValue,len);
-			Trace("(%s:%s:%d):Overspeed", __FILE__, __func__, __LINE__);
+			DEBUG("Overspeed");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.max_speed, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eOverspeedtime:
 			//Mem_Copy((u8 *)&LbsCfgStruct.OverSpeedTime,pValue,len);
-			Trace("(%s:%s:%d):Overspeedtime", __FILE__, __func__, __LINE__);
+			DEBUG("Overspeedtime");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.speed_duration, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eDrivTime:
 			//Mem_Copy((u8 *)&LbsCfgStruct.MaxDriveTime,pValue,len);
-			Trace("(%s:%s:%d):DrivTime", __FILE__, __func__, __LINE__);
+			DEBUG("DrivTime");
 			if (len == 4){
 				
 				oa_memcpy((u8 *)&dev_now_params.continuous_drive_time_threshold, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eDrivTime_day:
 			//Mem_Copy((u8 *)&LbsCfgStruct.MaxDriveTime_day,pValue,len);
-			Trace("(%s:%s:%d):DrivTime_day", __FILE__, __func__, __LINE__);
+			DEBUG("DrivTime_day");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.day_add_drive_time_threshold, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eRestTime_min:
 			//Mem_Copy((u8 *)&LbsCfgStruct.MinRestTime,pValue,len);
-			Trace("(%s:%s:%d):RestTime_min", __FILE__, __func__, __LINE__);
+			DEBUG("RestTime_min");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.min_rest_time, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eStopcarTime_max:
@@ -1475,12 +1475,12 @@ if (UpdateMode == UpdateOnly){
 				WriteAlarmPara(RESET,StaAlarm0,ALARM_OVERTIME_PARKING);
 			}
 			#endif
-			Trace("(%s:%s:%d):StopcarTime_max", __FILE__, __func__, __LINE__);
+			DEBUG("StopcarTime_max");
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.max_park_time, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		#if 0
@@ -1502,13 +1502,13 @@ if (UpdateMode == UpdateOnly){
 		break;
 		#endif
 		case eOdometer: //里程表精度
-			Trace("(%s:%s:%d):Odometer", __FILE__, __func__, __LINE__);
+			DEBUG("Odometer");
 			//Mem_Copy((u8 *)&LbsCfgStruct.Odometer,pValue,len);		
 			if (len == 4){
 				oa_memcpy((u8 *)&dev_now_params.vehicle_odometer, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case ePrivic:
@@ -1516,42 +1516,42 @@ if (UpdateMode == UpdateOnly){
 			//char_to_short(pValue,&U16Temp);
 			Mem_Copy((u8 *)&LbsCfgStruct.ProvinceId,pValue,len);	
 			#endif
-			Trace("(%s:%s:%d):Privic", __FILE__, __func__, __LINE__);
+			DEBUG("Privic");
 			if (len == 2){
 				oa_memcpy((u8 *)&dev_now_params.vehicle_province_id, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eCity:
 			//Mem_Copy((u8 *)&LbsCfgStruct.CityId,pValue,len);
-			Trace("(%s:%s:%d):City", __FILE__, __func__, __LINE__);
+			DEBUG("City");
 			if (len == 2){
 				oa_memcpy((u8 *)&dev_now_params.vehicle_city_id, pValue, len);
 			}
 			else {
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eCarid:
 			//LbsCfgStruct.CarIdlen=len;
 			//Mem_Copy(LbsCfgStruct.CarId,pValue,len);
-			Trace("(%s:%s:%d):Carid", __FILE__, __func__, __LINE__);
+			DEBUG("Carid");
 			if (len <= VEHICLE_LICENCE_MAX_LEN){
 				oa_memset(&dev_now_params.vehicle_license, 0x0, 	sizeof(dev_now_params.vehicle_license));
 				oa_memcpy((u8 *)&dev_now_params.vehicle_license, pValue, len);
 			}
 			else{
-				Trace("param err (%s:%s:%d):", __FILE__, __func__, __LINE__);
+				DEBUG("param err ");
 			}
 		break;
 		case eCarclor:
-			Trace("(%s:%s:%d):Carclor", __FILE__, __func__, __LINE__);
+			DEBUG("Carclor");
 			//LbsCfgStruct.CarIdColor=*pValue;
 			dev_now_params.plate_color = *pValue;
 		break;
-		default:{Trace("(%s:%s:%d):not support!", __FILE__, __func__, __LINE__);}
+		default:{DEBUG("not support!");}
 		break;
 	}
 }
@@ -1562,13 +1562,13 @@ if (UpdateMode == UpdateOnly){
 		Flash_Write_Buffer((u8 *)&LbsCfgStruct,sizeof(STRUCT_LBS_CFG),SERV_CTRLCFG_ADDR,Write_Mode);	//写入配置	
 		#endif
 		oa_bool ret;
-		//Trace("(%s:%s:%d):traceing!", __FILE__, __func__, __LINE__);
+		//DEBUG("traceing!");
 		ret = dev_params_save();
 		if (ret == OA_TRUE){
 			print_key_dev_params();
 		}
 		else{
-			Trace("(%s:%s:%d):save dev parameters err!", __FILE__, __func__, __LINE__);
+			DEBUG("save dev parameters err!");
 		}
 		//msybe need reconnect!!!
 		
@@ -1722,7 +1722,7 @@ u8 ParaConvertandSet(Enum_CtrlCfgPara paramID,u8 *Srcval,u8 len,u16 *devAct)
 			if(4!=len)
 				return 1;
 			char_to_int(Srcval,&U32Temp);
-			//Trace("(%s:%s:%d): set params!", __FILE__, __func__, __LINE__);
+			//DEBUG(" set params!");
 			WriteLbsCfgPara(paramID,(u8 *)&U32Temp,4,UpdateOnly); //不保存，所有参数完成再后保存到flash
 		break;
 #if 0
@@ -1793,7 +1793,7 @@ static u8 ServReq_SetParam(u8 *pbuf, const u16 buflen)
 	u8 sta=1;
 	if(pbuf==NULL)
 	{
-		Trace("check_set_dev_param param error!");
+		DEBUG("check_set_dev_param param error!");
 		return 1;
 	}
 	//空参数列表
@@ -1866,14 +1866,14 @@ u8 JT808MsgRsp_Send(u16 DevMsgId,u16 totalPackt,u16 SubPackt/*,u8 *Sendbuf,u16 S
 #if 0
 	if(Sendbuf==NULL)
 	{
-		Trace("JT808MsgRsp_Send param error!");
+		DEBUG("JT808MsgRsp_Send param error!");
 		return RspErrOther;
 	}
 #endif
 
 	if (0 == JT808Msg_Build(DevMsgId, totalPackt, SubPackt, pbuf, DATA_MAX_LEN, &U16Temp)){	
 		if (U16Temp > DATA_MAX_LEN){
-			OA_DEBUG_USER("(%s:%s:%d): data is too long!", __FILE__, __func__, __LINE__);
+			OA_DEBUG_USER(" data is too long!");
 			return RspErrOther;
 		}
 
@@ -1884,7 +1884,7 @@ u8 JT808MsgRsp_Send(u16 DevMsgId,u16 totalPackt,u16 SubPackt/*,u8 *Sendbuf,u16 S
 		return 0;
 	}
 	else{
-		Trace("(%s:%s:%d): pacakge build error!", __FILE__, __func__, __LINE__);
+		DEBUG(" pacakge build error!");
 		return RspErrOther; 
 	}
 
@@ -1904,12 +1904,12 @@ u8 JT808MsgRsp_Send(u16 DevMsgId,u16 totalPackt,u16 SubPackt/*,u8 *Sendbuf,u16 S
 			#if 0
 			{//TEST
 			u16 test;
-			Trace(PrintDebug,"终端RSP发送包 %d!\r\n",Senddatalen);
+			DEBUG(PrintDebug,"终端RSP发送包 %d!\r\n",Senddatalen);
 			for(test=0;test<Senddatalen;test++)
 			{
-			Trace(PrintInfo,"0x%02x ",*(pbuf+test));
+			DEBUG(PrintInfo,"0x%02x ",*(pbuf+test));
 			}
-			Trace(PrintInfo,"\r\n");
+			DEBUG(PrintInfo,"\r\n");
 			}
 			#endif	
 /* 发送包 */
@@ -1973,7 +1973,7 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 	u8 step=0;
 	if(pmsgbody==NULL)
 	{
-		Trace("(%s:%s:%d):LBS_DevCtlreq commandId error!",__FILE__, __func__, __LINE__);
+		DEBUG("LBS_DevCtlreq commandId error!",__FILE__, __func__, __LINE__);
 		return 1;
 	}
 	if(msgbodylen==0)
@@ -2075,7 +2075,7 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 		}
 		case eDevPowoff_Ctrl:	//终端关机
 		{
-			Trace("(%s:%s:%d):power down", __FILE__, __func__, __LINE__);
+			DEBUG("power down");
 			control_type = term_powerdown;
 			break;
 		}
@@ -2084,7 +2084,7 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 		{
 			//参数保存flash
 			//WriteLinkTaskPara(ActionResetLbs,ActionTypePara,SET);
-			Trace("(%s:%s:%d):term reset", __FILE__, __func__, __LINE__);
+			DEBUG("term reset");
 			control_type = term_reset;
 			break;
 		}
@@ -2174,7 +2174,7 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 		default:
 		{
 	
-			Trace("(%s:%s:%d):LBS_DevCtlreq commandId error!",__FILE__, __func__, __LINE__);
+			DEBUG("LBS_DevCtlreq commandId error!",__FILE__, __func__, __LINE__);
 			return 0;
 		}
 	}
@@ -2196,11 +2196,11 @@ static u8 ServReq_GetPositionData_Period(u8 *pmsgbody, u16 msgbodylen)
 {	
 	if((pmsgbody==NULL)||(msgbodylen<2))
 	{
-		Trace("check_track_location_ctl param error!\r\n");
+		DEBUG("check_track_location_ctl param error!\r\n");
 		return 1;
 	}
-	Trace("Period position trace:");
-	Trace("    Inteval is    0x%02x%02x    Limit time is 0x%02x%02x%02x%02x",*pmsgbody,
+	DEBUG("Period position trace:");
+	DEBUG("    Inteval is    0x%02x%02x    Limit time is 0x%02x%02x%02x%02x",*pmsgbody,
 	*(pmsgbody+1),*(pmsgbody+2),*(pmsgbody+3),*(pmsgbody+4),*(pmsgbody+5));
 	Write_ProtclHandl(e_TrackLocationCtlreq, pmsgbody,msgbodylen);
 	return 0;
@@ -2224,8 +2224,8 @@ static u8 ServReq_Textinfo(u8 *pbuf, u16 buflen)
 	
 	if((pbuf==NULL)||(buflen==0))
 	{
-		//Trace(PrintInfo,"check_text_download param error!\r\n");
-		Trace("(%s:%s:%d):check_text_download param error!", __FILE__, __func__, __LINE__);
+		//DEBUG(PrintInfo,"check_text_download param error!\r\n");
+		DEBUG("check_text_download param error!");
 		return 1;
 	}
 	
@@ -2303,11 +2303,11 @@ static u8 set_round_area(u8 *pbuf, u16 buflen)
 
 	if((pbuf==NULL)||(buflen==0))
 	{
-		//Trace(PrintInfo,"check_car_ctl param error!\r\n");
+		//DEBUG(PrintInfo,"check_car_ctl param error!\r\n");
 		DEBUG("check_car_ctl param error!");
 		return 1;
 	}
-	//Trace(PrintDebug,"设置圆形区域\r\n");
+	//DEBUG(PrintDebug,"设置圆形区域\r\n");
 	DEBUG("设置圆形区域");
 	option =  *pbuf++;
 	area_num = 	*pbuf++;
@@ -2348,11 +2348,11 @@ static u8 set_rect_area(u8 *pbuf, u16 buflen)
 
 	if((pbuf==NULL)||(buflen==0))
 	{
-		//Trace(PrintInfo,"check_car_ctl param error!\r\n");
+		//DEBUG(PrintInfo,"check_car_ctl param error!\r\n");
 		DEBUG("check_car_ctl param error!");
 		return 1;
 	}
-	//Trace(PrintDebug,"设置矩形区域\r\n");
+	//DEBUG(PrintDebug,"设置矩形区域\r\n");
 	DEBUG("设置矩形区域");
 	option =  *pbuf++;
 	area_num = 	*pbuf++;
@@ -2394,11 +2394,11 @@ static u8 set_poly_area(u8 *pbuf, u16 buflen)
 
 	if((pbuf==NULL)||(buflen==0))
 	{
-		//Trace(PrintInfo,"check_car_ctl param error!\r\n");
+		//DEBUG(PrintInfo,"check_car_ctl param error!\r\n");
 		DEBUG("check_car_ctl param error!");
 		return 1;
 	}
-	//Trace(PrintDebug,"设置多边形区域\r\n");
+	//DEBUG(PrintDebug,"设置多边形区域\r\n");
 	DEBUG("设置多边形区域");
 	option =  *pbuf++;
 	area_num = 	*pbuf++;
@@ -2437,11 +2437,11 @@ static u8 del_area_message(u8 *pbuf, u16 buflen,u8 area_type)
 
 	if((pbuf==NULL)||(buflen==0))
 	{
-		//Trace(PrintInfo,"check_car_ctl param error!\r\n");
+		//DEBUG(PrintInfo,"check_car_ctl param error!\r\n");
 		DEBUG("check_car_ctl param error!");
 		return 1;
 	}
-	//Trace(PrintDebug,"删除区域信息\r\n");
+	//DEBUG(PrintDebug,"删除区域信息\r\n");
 	DEBUG("删除区域信息");
 	area_num = 	*pbuf++;
 	if (area_num > MAX_AREA_SUM){
@@ -2485,21 +2485,21 @@ u8 JT808_ServReq_handle(u16 ServReqMsgid,u8 *msgbody,u16 msgbodylen/*,u8 *sendbu
 	oa_bool need_reconn = OA_FALSE;
 	if(msgbody==NULL)
 	{
-		Trace("(%s:%s:%d): check_msg_rsp parameter error!", __FILE__, __func__, __LINE__);
+		DEBUG(" check_msg_rsp parameter error!");
 		return RspErrOther;
 	}
 	//消息体处理
 	//JT808_ServReq_MSG();
 	switch(ServReqMsgid){
 		case SET_DEV_PARAM:{//platform request to set device paramaters & device ack common 
-			//Trace("(%s:%s:%d): Recieve parameter-setting requry from moniter server.", __FILE__, __func__, __LINE__);
+			//DEBUG(" Recieve parameter-setting requry from moniter server.");
 			status = ServReq_SetParam(msgbody,msgbodylen);	//处理
 			Write_ProtclHandl(eRsp2ServSeq,&status,1); //peijl_20120918 添加：请求处理结果
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/); //PEIJL_130109 修改
 			break;
 		}
 		case GET_DEV_PARAM:{//platform request to get device paramaters
-			Trace("(%s:%s:%d): Recieve parameter-getting requry from moniter srever.", __FILE__, __func__, __LINE__);
+			DEBUG(" Recieve parameter-getting requry from moniter srever.");
 			JT808MsgRsp_Send(GET_DEV_PARAM_rsp,1,0/*,sendbuf,sendbuflen*/);
 			break;
 		}
@@ -2708,10 +2708,10 @@ u8 JT808_ServReq_handle(u16 ServReqMsgid,u8 *msgbody,u16 msgbodylen/*,u8 *sendbu
 			{	STRUCT_CALLCARORDER *p=(STRUCT_CALLCARORDER*)sendbuf;
 				Read_ProtclHandl(e_CallcarInfoOrder,sendbuf,&sendbuflen);
 //				gOrderInOperatflag=2;
-				Trace(PrintDebug,"---------tel len:%d \r\n",strlen(p->OrderTel));
+				DEBUG(PrintDebug,"---------tel len:%d \r\n",strlen(p->OrderTel));
 				p->OrderContent[p->OrderContentlen]='\0'; 
-				Trace(PrintDebug,"---------内容长度:%d \r\n",p->OrderContentlen); 
-				Trace(PrintDebug,"---------内容:%s \r\n",p->OrderContent); 
+				DEBUG(PrintDebug,"---------内容长度:%d \r\n",p->OrderContentlen); 
+				DEBUG(PrintDebug,"---------内容:%s \r\n",p->OrderContent); 
 				SchedulScrn_CallforcarInfoSend("8888888888",10,p->OrderTel,strlen(p->OrderTel),p->OrderContent,p->OrderContentlen); //ID固定
 			}
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0,sendbuf,sendbuflen);
@@ -2743,7 +2743,7 @@ u8 JT808_ServReq_handle(u16 ServReqMsgid,u8 *msgbody,u16 msgbodylen/*,u8 *sendbu
 		#endif
 		default:
 		{
-			Trace("(%s:%s:%d): Server MsgId error:%04x!", __FILE__, __func__, __LINE__, ServReqMsgid);
+			DEBUG(" Server MsgId error:%04x!", ServReqMsgid);
 			status=3;
 			Write_ProtclHandl(eRsp2ServSeq,&status,1);
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
@@ -2777,45 +2777,45 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 	if(0)
 	{
 	u16 test;
-	Trace(PrintDebug,"Raw Server data:!\r\n"); 	
+	DEBUG(PrintDebug,"Raw Server data:!\r\n"); 	
 	for(test=0;test<datalen;test++)
-		Trace(PrintDebug,"%02x ",*(data+test));
-	Trace(PrintInfo,"\r\n");	
+		DEBUG(PrintDebug,"%02x ",*(data+test));
+	DEBUG(PrintInfo,"\r\n");	
 	}
 #endif
 	if(NULL==data || datalen==0)  //协议最小长度未定义 ？？？
 		return RspPackgerr;	
 	//标示头尾判断
 	if(*data!=0x7e || *(data+datalen-1)!=0x7e){
-		Trace("(%s:%s:%d): 0x7e is bad!!!", __FILE__, __func__, __LINE__);
+		DEBUG(" 0x7e is bad!!!");
 		return RspPackgerr;	
 	}
 		
 	//反转义还原数据
 	if(JT808_dataChg(0, data+1, datalen-2, &Reallen)){
-		Trace("(%s:%s:%d): turning parameter error", __FILE__, __func__, __LINE__);
+		DEBUG(" turning parameter error");
 		return RspPackgerr;
 	}
 	Reallen += 2; //加上标示头尾
 #if 0
 	if(0){
 	u8 test;
-	Trace(PrintDebug,"Server data after translition:!\r\n"); 	
+	DEBUG(PrintDebug,"Server data after translition:!\r\n"); 	
 	for(test=0;test<Reallen;test++)
-		Trace(PrintDebug,"%02x ",*(data+test));
-	Trace(PrintInfo,"\r\n");
+		DEBUG(PrintDebug,"%02x ",*(data+test));
+	DEBUG(PrintInfo,"\r\n");
 	}
 #endif
 	//msgid有效性判断
 	char_to_short(data+1, &ServmsgID);
 	if (!ISPrtclServMsg(ServmsgID)){
-		Trace("(%s:%s:%d): Unknown server message ID!", __FILE__, __func__, __LINE__);
+		DEBUG(" Unknown server message ID!");
 		return RspPackgerr;
 	}
 	//校验位判断
 	if (!XOR_Check(data+1,Reallen-3,&temp)){
 		if (temp!=*(data+Reallen-2)){
-			Trace("(%s:%s:%d): Server data xor err!", __FILE__, __func__, __LINE__); 	
+			DEBUG(" Server data xor err!"); 	
 			return RspPackgerr;
 		}
 	}
@@ -2833,8 +2833,8 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 			pbuf+=2;
 			rsp.Rslt = *pbuf;
 			//debug info
-			Trace("register ack:0x%x", REGISTERS_rsp);
-			Trace("rsp result:0x%x", rsp.Rslt);
+			DEBUG("register ack:0x%04x", REGISTERS_rsp);
+			DEBUG("rsp result:0x%x", rsp.Rslt);
 			Write_ProtclHandl(eRsp2DevReq, (u8 *)&rsp, sizeof(LBS_PlatComRsp));	
 			switch (rsp.Rslt){
 				case RspOK:{
@@ -2845,25 +2845,25 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 						return PLAT_TREMREG_ACK;	
 					}
 					else{
-						Trace("(%s:%s:%d): no authentication code", __FILE__, __func__, __LINE__);
+						DEBUG(" no authentication code");
 						return RspPackgerr;
 					}
 				}
 				break;
 				case RspError:
 				case RspUnsurport:{
-					Trace("(%s:%s:%d): has already registered:%d", __FILE__, __func__, __LINE__, rsp.Rslt);
+					DEBUG(" has already registered:%d", rsp.Rslt);
 					return PLAT_TREMREG_ACK;
 				}
 				break;
 				case RspMsgerr:
 				case RspAlarmCheck:{
-					Trace("(%s:%s:%d): database has no info:%d", __FILE__, __func__, __LINE__, rsp.Rslt);
+					DEBUG(" database has no info:%d", rsp.Rslt);
 					return RspPackgerr;
 				}
 				break;
 				default:{
-					Trace("(%s:%s:%d): Rsp packet err!", __FILE__, __func__, __LINE__);
+					DEBUG(" Rsp packet err!");
 					return RspPackgerr;
 				}break;
 			}
@@ -2886,7 +2886,7 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 					
 				}
 				else{
-					Trace("(%s:%s:%d): no authentication code", __FILE__, __func__, __LINE__);
+					DEBUG(" no authentication code");
 					return RspPackgerr;
 				}
 			}
@@ -2902,7 +2902,7 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 		case REPORT_MEDIA_DATA_rsp:	//多媒体数据上传应答
 		{
 			LBS_PlatComRsp rsp;
-			Trace("Recieve Result of media data uploading."); 	
+			DEBUG("Recieve Result of media data uploading."); 	
 			memcpy(rsp.MsgId,pbuf,2);
 			pbuf+=sizeof(MSG_HEAD);
 			pbuf+=4; //media id无效
@@ -2915,7 +2915,7 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 		//	if(Reallen-3-5-sizeof(MSG_HEAD)>0)
 			//包列表---协议未定 ？？？				
 				rsp.Rslt=1;//失败
-				Trace(PrintInfo,"Media data report failed!\r\n"); 	
+				DEBUG(PrintInfo,"Media data report failed!\r\n"); 	
 			}
 			Write_ProtclHandl(eRsp2DevReq,(u8 *)&rsp,sizeof(LBS_PlatComRsp));
 			OSSemPost(JT808_ReqRspSem);
@@ -2930,7 +2930,7 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 			memcpy(&rsp, pbuf, sizeof(LBS_PlatComRsp));
 			//debug info
 			char_to_short(&rsp.MsgId[0], &temp);
-			Trace("platform common ack:DevReqmsgID:0x%4x, rsp result:0x%x", temp, rsp.Rslt);
+			DEBUG("platform common ack:DevReqmsgID:0x%04x, rsp result:0x%x", temp, rsp.Rslt);
 			Write_ProtclHandl(eRsp2DevReq, (u8 *)&rsp, sizeof(LBS_PlatComRsp));	
 			return PLAT_COMMON_ACK;
 		}
@@ -2997,10 +2997,10 @@ u8 JT808_PrtclAnaly(u8 *data,u16 datalen,u8 *sendbuf,u16 sendbuflen)
 	if(0)
 	{
 	u16 test;
-	Trace(PrintDebug,"Raw Server data:!\r\n"); 	
+	DEBUG(PrintDebug,"Raw Server data:!\r\n"); 	
 	for(test=0;test<datalen;test++)
-		Trace(PrintDebug,"%02x ",*(data+test));
-	Trace(PrintInfo,"\r\n");	
+		DEBUG(PrintDebug,"%02x ",*(data+test));
+	DEBUG(PrintInfo,"\r\n");	
 	}
 #endif
 	if(NULL==data || datalen==0)  //协议最小长度未定义 ？？？
@@ -3011,24 +3011,24 @@ u8 JT808_PrtclAnaly(u8 *data,u16 datalen,u8 *sendbuf,u16 sendbuflen)
 	//反转义还原数据
 	if(JT808_dataChg(0, data+1, datalen-2, &Reallen))
 	{
-		Trace("turning parameter error");
+		DEBUG("turning parameter error");
 		return RspPackgerr;
 	}
 	Reallen+=2; //加上标示头尾
 #if 0
 	if(0){
 	u8 test;
-	Trace(PrintDebug,"Server data after translition:!\r\n"); 	
+	DEBUG(PrintDebug,"Server data after translition:!\r\n"); 	
 	for(test=0;test<Reallen;test++)
-		Trace(PrintDebug,"%02x ",*(data+test));
-	Trace(PrintInfo,"\r\n");
+		DEBUG(PrintDebug,"%02x ",*(data+test));
+	DEBUG(PrintInfo,"\r\n");
 	}
 #endif
 	//msgid有效性判断
 	char_to_short(data+1, &ServmsgID);
 	if(!ISPrtclServMsg(ServmsgID))
 	{
-		Trace("Unknown server message ID!");
+		DEBUG("Unknown server message ID!");
 		return RspPackgerr;
 	}
 	//校验位判断
@@ -3036,7 +3036,7 @@ u8 JT808_PrtclAnaly(u8 *data,u16 datalen,u8 *sendbuf,u16 sendbuflen)
 	{
 		if(temp!=*(data+Reallen-2))	
 		{
-			Trace("Server data xor err!"); 	
+			DEBUG("Server data xor err!"); 	
 			return RspPackgerr;
 		}
 	}
@@ -3073,14 +3073,14 @@ u8 JT808_PrtclAnaly(u8 *data,u16 datalen,u8 *sendbuf,u16 sendbuflen)
 			}
 			Write_ProtclHandl(eRsp2DevReq,(u8 *)&rsp,sizeof(LBS_PlatComRsp));	
 //			OSSemPost(JT808_ReqRspSem);
-			Trace("Recieve Registed result."); 	
+			DEBUG("Recieve Registed result."); 	
 		}
 		break;
 		#if 0
 		case REPORT_MEDIA_DATA_rsp:	//多媒体数据上传应答
 		{
 			LBS_PlatComRsp rsp;
-			Trace("Recieve Result of media data uploading."); 	
+			DEBUG("Recieve Result of media data uploading."); 	
 			memcpy(rsp.MsgId,pbuf,2);
 			pbuf+=sizeof(MSG_HEAD);
 			pbuf+=4; //media id无效
@@ -3093,7 +3093,7 @@ u8 JT808_PrtclAnaly(u8 *data,u16 datalen,u8 *sendbuf,u16 sendbuflen)
 		//	if(Reallen-3-5-sizeof(MSG_HEAD)>0)
 			//包列表---协议未定 ？？？				
 				rsp.Rslt=1;//失败
-				Trace(PrintInfo,"Media data report failed!\r\n"); 	
+				DEBUG(PrintInfo,"Media data report failed!\r\n"); 	
 			}
 			Write_ProtclHandl(eRsp2DevReq,(u8 *)&rsp,sizeof(LBS_PlatComRsp));
 			OSSemPost(JT808_ReqRspSem);
@@ -3103,14 +3103,14 @@ u8 JT808_PrtclAnaly(u8 *data,u16 datalen,u8 *sendbuf,u16 sendbuflen)
 		case PLAT_COMMON_rsp: //平台通用应答
 		{
 			LBS_PlatComRsp rsp;
-			Trace("Recieve common-response form moniter server."); 	
+			DEBUG("Recieve common-response form moniter server."); 	
 			pbuf+=sizeof(MSG_HEAD);
 			memcpy(&rsp,pbuf,sizeof(LBS_PlatComRsp));
 			Write_ProtclHandl(eRsp2DevReq,(u8 *)&rsp,sizeof(LBS_PlatComRsp));	
-			Trace("Server common reply:\r\n"); 	
-			Trace("DevReqID    0x%02x%02x\r\n",*pbuf,*(pbuf+1)); 	
-			Trace("    DevReqmsgID 0x%02x%02x\r\n",*(pbuf+2),*(pbuf+3)); 	
-			Trace("    Rsp result  %02x\r\n",*(pbuf+4)); 	
+			DEBUG("Server common reply:\r\n"); 	
+			DEBUG("DevReqID    0x%02x%02x\r\n",*pbuf,*(pbuf+1)); 	
+			DEBUG("    DevReqmsgID 0x%02x%02x\r\n",*(pbuf+2),*(pbuf+3)); 	
+			DEBUG("    Rsp result  %02x\r\n",*(pbuf+4)); 	
 			//OSSemPost(JT808_ReqRspSem);
 		}
 		break;
@@ -3578,7 +3578,7 @@ static u8  dev_login_buildbody(u8 *pbuf, u16 *pbuflen)
 		Flash_Read_Buffer(&len,1,DEV_AUTHEN_LEN_ADDR);
 		if(len>AUTHENMAXLEN)
 		{
-			Trace(PrintError,"Error authen in flash!!\r\n");
+			DEBUG(PrintError,"Error authen in flash!!\r\n");
 			*pbuflen=0;
 			return 1;
 		}
@@ -4196,19 +4196,19 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 		oa_uint32 dummy_read;
 		handle = oa_fopen(MILEAGE_FILE);
 		if (handle < 0){
-			Trace("(%s:%s:%d):mileage file open err!", __FILE__, __func__, __LINE__);
+			DEBUG("mileage file open err!");
 			alarmflag = 0;//var name is bad here
 		}
 		else{
 			ret = oa_fread(handle, &temp, sizeof(TOTAL_MILE), &dummy_read);
 			if ((ret < 0) || (dummy_read != sizeof(TOTAL_MILE))) {
-				OA_DEBUG_USER("(%s:%s:%d):read mileage err!", __FILE__, __func__, __LINE__);
+				OA_DEBUG_USER("read mileage err!");
 				alarmflag = 0;
 			}
 			alarmflag = temp.total_mileage;
 			ret = oa_fclose(handle);
 			if (ret < 0){
-				OA_DEBUG_USER("(%s:%s:%d):close file err!", __FILE__,  __func__, __LINE__);
+				OA_DEBUG_USER("close file err!", __FILE__,  __func__, __LINE__);
 				oa_fdelete(MILEAGE_FILE);
 			}
 		}
@@ -4610,7 +4610,7 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 #endif
 		default:
 		{
-			Trace("(%s:%s:%d): msg_ID  err", __FILE__, __func__, __LINE__);
+			DEBUG(" msg_ID  err");
 			return 1;
 		}
 	}
@@ -4679,7 +4679,7 @@ u8 JT808Msg_Build(u16 DevMsgId,u16 totalPackt,u16 SubPackt,u8 *Sendbuf,u16 Sendb
 	u16 U16Temp = 0;
 	
 	if (!ISPrtclDevMsg(DevMsgId)||Sendbuf==NULL||Senddatalen==NULL||Sendbuflen==0){
-		Trace("(%s:%s:%d): JT808Msg_Build parameter error!", __FILE__, __func__, __LINE__);
+		DEBUG(" JT808Msg_Build parameter error!");
 		return 1;
 	}
 	pbuf = Sendbuf;
@@ -4713,7 +4713,7 @@ u8 JT808Msg_Build(u16 DevMsgId,u16 totalPackt,u16 SubPackt,u8 *Sendbuf,u16 Sendb
 	//创建消息体!!!
 	status = BuildMsgbody(DevMsgId,pbuf, &U16Temp,totalPackt, SubPackt);
 	if (status){
-		Trace("(%s:%s:%d): BuildMsgbody error, status=%d!", __FILE__, __func__, __LINE__, status);
+		DEBUG(" BuildMsgbody error, status=%d!", status);
 		return 1;
 	}
 	//赋值消息体属性的长度
@@ -4804,82 +4804,82 @@ u8 AlarmHandle(u32 ALARM_DEF/*,u8 *Str*/)
 		switch(ALARM_DEF)
 		{
 			case ALARM_EMERGENCY_k:
-				Trace("ALARMtype:%d", ALARM_EMERGENCY_k);
+				DEBUG("ALARMtype:%d", ALARM_EMERGENCY_k);
 			break;
 			case ALARM_OVER_SPEED:
-				Trace("ALARMtype:%d", ALARM_OVER_SPEED);
+				DEBUG("ALARMtype:%d", ALARM_OVER_SPEED);
 			break;
 			case ALARM_DRIVE_TIRED:
-				Trace("ALARMtype:%d", ALARM_DRIVE_TIRED);
+				DEBUG("ALARMtype:%d", ALARM_DRIVE_TIRED);
 			break;
 			case ALARM_PRE_k:
-				Trace("ALARMtype:%d", ALARM_PRE_k);
+				DEBUG("ALARMtype:%d", ALARM_PRE_k);
 			break;
 			case ALARM_GNSS_ERR:
-				Trace("ALARMtype:%d", ALARM_GNSS_ERR);
+				DEBUG("ALARMtype:%d", ALARM_GNSS_ERR);
 			break;
 			case ALARM_GNSS_ANTENNA:
-				Trace("ALARMtype:%d", ALARM_GNSS_ANTENNA);
+				DEBUG("ALARMtype:%d", ALARM_GNSS_ANTENNA);
 			break;
 			case ALARM_GNSS_SHORT_CIRCUIT:
-				Trace("ALARMtype:%d", ALARM_GNSS_SHORT_CIRCUIT);
+				DEBUG("ALARMtype:%d", ALARM_GNSS_SHORT_CIRCUIT);
 			break;
 			case ALARM_POWER_UNDERVOLTAGE:
-				Trace("ALARMtype:%d终端主电源欠压");
+				DEBUG("ALARMtype:%d终端主电源欠压");
 			break;
 			case ALARM_POWER_BROWN:
-				Trace("ALARMtype:%d终端主电源掉电");
+				DEBUG("ALARMtype:%d终端主电源掉电");
 			break;
 			case ALARM_DISPLAY_ERR:
-				Trace("ALARMtype:%dLCD或显示屏故障");
+				DEBUG("ALARMtype:%dLCD或显示屏故障");
 			break;
 			case ALARM_TTS_ERR:
-				Trace("ALARMtype:%dTTS告警");
+				DEBUG("ALARMtype:%dTTS告警");
 			break;
 			case ALARM_CAMERA_ERR:
-				Trace("ALARMtype:%d摄像头故障");
+				DEBUG("ALARMtype:%d摄像头故障");
 			break;
 			case ALARM_DRIVE_OVERTIME:
-				Trace("ALARMtype:%d当天累计驾驶超时");
+				DEBUG("ALARMtype:%d当天累计驾驶超时");
 			break;
 			case ALARM_OVERTIME_PARKING:
-				Trace("ALARMtype:%d超时停车");
+				DEBUG("ALARMtype:%d超时停车");
 			break;
 			case ALARM_ENTER_AREA:
-				Trace("ALARMtype:%d进出区域报警");
+				DEBUG("ALARMtype:%d进出区域报警");
 			break;
 			case ALARM_TOUCH_LINE_k:
-				Trace("ALARMtype:%d进出路线报警!\r\n");
+				DEBUG("ALARMtype:%d进出路线报警!\r\n");
 			break;
 			case ALARM_DRIVE_SHORT_LONG_k:
-				Trace("ALARMtype:%d路段行驶时间不足或过长!\r\n");
+				DEBUG("ALARMtype:%d路段行驶时间不足或过长!\r\n");
 			break;
 			case ALARM_DRIVE_DEVIATE:
-				Trace("ALARMtype:%d路线偏离报警!\r\n");
+				DEBUG("ALARMtype:%d路线偏离报警!\r\n");
 			break;
 			case ALARM_VSS_ERR:
-				Trace("ALARMtype:%d车辆VSS报警!\r\n");
+				DEBUG("ALARMtype:%d车辆VSS报警!\r\n");
 			break;
 			case ALARM_OIL_ERR:
-				Trace("ALARMtype:%d油量异常报警!\r\n");
+				DEBUG("ALARMtype:%d油量异常报警!\r\n");
 			break;
 			case ALARM_STEAL:
-				Trace("ALARMtype:%d车辆被盗!\r\n");
+				DEBUG("ALARMtype:%d车辆被盗!\r\n");
 			break;
 			case ALARM_START_ILLEGAL_k:
-				Trace("ALARMtype:%d车辆非法点火!\r\n");
+				DEBUG("ALARMtype:%d车辆非法点火!\r\n");
 			break;
 			case ALARM_MOVE_ILLEGAL_k:
-				Trace("ALARMtype:%d车辆非法位移!\r\n");
+				DEBUG("ALARMtype:%d车辆非法位移!\r\n");
 			break;
 			case ALARM_ROLLOVER:
-				Trace("ALARMtype:%d车辆侧翻报警!\r\n");
+				DEBUG("ALARMtype:%d车辆侧翻报警!\r\n");
 			break;
 			default:
-				Trace("ALARMtype:%d车辆报警!\r\n");
+				DEBUG("ALARMtype:%d车辆报警!\r\n");
 			break;
 		}
-		Trace("!\r\n");
+		DEBUG("!\r\n");
 		#endif
 
 		
@@ -5077,9 +5077,9 @@ u8 *getEmptybuf()
 	}
 	if(i<UPDATA_BUFNUM)
 	{
-//		Trace(PrintDebug,"position data index：\r\n");	
+//		DEBUG(PrintDebug,"position data index：\r\n");	
 //		for(i=0;i<POSQUEUE_BUFNUM;i++)
-//			Trace(PrintDebug,"%d\r\n",posbufindex[i]);	
+//			DEBUG(PrintDebug,"%d\r\n",posbufindex[i]);	
 		return (u8 *)(ServUpdatabuf[j]);
 	}
 	else
@@ -5100,7 +5100,7 @@ u16 escape_copy_to_send(u8 *buf, u16 len)
 	
 	if (NULL == buf || len == 0)
 	{
-		OA_DEBUG_USER("(%s:%s:%d): buf/len err", __FILE__, __func__, __LINE__);
+		OA_DEBUG_USER(" buf/len err");
 		return 0;
 	}
 	//给包加上流水号,流水号第加
@@ -5110,7 +5110,7 @@ u16 escape_copy_to_send(u8 *buf, u16 len)
 	//校验，除标示头尾和校验本身
 	if (1 == XOR_Check(buf+1, len-3,(buf+len-2)))
 	{
-		OA_DEBUG_USER("(%s:%s:%d): XOR err", __FILE__, __func__, __LINE__);
+		OA_DEBUG_USER(" XOR err");
 		return 0;
 	}
 
@@ -5120,16 +5120,16 @@ u16 escape_copy_to_send(u8 *buf, u16 len)
 	//debug info
 	{
 		u16 i;
-		Trace("sendlen:%d", len);
-		Trace("data:");
+		DEBUG("sendlen:%d", len);
+		DEBUG("data:");
 		for (i=0; i<len; i++){
-			Trace("0x%x", buf[i]);
+			DEBUG("0x%x", buf[i]);
 		}
 	}
 	real_len = oa_write_buffer_force_noinit(g_soc_context.gprs_tx, buf, len);
 	if (real_len < len)
 	{
-		OA_DEBUG_USER("(%s:%s:%d): write err", __FILE__, __func__, __LINE__);
+		OA_DEBUG_USER(" write err");
 	}
 	return real_len;
 }
@@ -5154,7 +5154,7 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 		{
 			if (U16Temp > DATA_MAX_LEN)
 			{
-				OA_DEBUG_USER("(%s:%s:%d): data is too long!", __FILE__, __func__, __LINE__);
+				OA_DEBUG_USER(" data is too long!");
 				return 0;
 			}
 			#if 0
@@ -5176,13 +5176,13 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 		}
 		else
 		{	
-			Trace("(%s:%s:%d): build package error.", __FILE__, __func__, __LINE__);
+			DEBUG(" build package error.");
 			return 0;
 		}
 	}
 	else
 	{
-		OA_DEBUG_USER("(%s:%s:%d): no empty buffer!", __FILE__, __func__, __LINE__);
+		OA_DEBUG_USER(" no empty buffer!");
 		return 0;
 	}
 //盲区数据暂时不管
@@ -5195,7 +5195,7 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 		ReadAllBitAlarmPara(StaSector1,&Temp); //peijl_20121018 添加：只gps定位时，位置数据存盲区
 		if(Temp&STA_GPS_FIXED)
 		{
-		Trace(PrintDebug,"DevReq2Serv Queue is full.So save position-data to Blind-position flash.\r\n");
+		DEBUG(PrintDebug,"DevReq2Serv Queue is full.So save position-data to Blind-position flash.\r\n");
 		BlinddataBuild_save2Flash(REPORT_LOCATION);
 		}
 		return ActionOK;
@@ -5204,12 +5204,12 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 	{
 		u8 err;
 		u32 Temp;
-		Trace(PrintDebug,"DevReq2Serv Queue is full.So save student-data to flash of Blind area.\r\n");
+		DEBUG(PrintDebug,"DevReq2Serv Queue is full.So save student-data to flash of Blind area.\r\n");
 		BlinddataBuild_save2Flash(STADENTDATA_REPPORT);
 		return ActionOK;
 	}
 	else //其他数据丢弃
-	{	Trace(PrintDebug,"DevReq2Serv Queue is full.\r\n");
+	{	DEBUG(PrintDebug,"DevReq2Serv Queue is full.\r\n");
 		return ActionError;
 	}
 #endif
@@ -5232,7 +5232,7 @@ u16 DevReq2ServPackag_build_blind(u16 ReqMsgId) //即时上传数据
 		//if (0 == JT808Msg_Build(ReqMsgId,1,0,pbuf+2,sizeof(ServUpdatabuf[0])-2,&U16Temp))
 		if (0 == JT808Msg_Build(ReqMsgId, 1, 0, pbuf, DATA_MAX_LEN, &U16Temp)){
 			if (U16Temp > DATA_MAX_LEN){
-				OA_DEBUG_USER("(%s:%s:%d): data is too long!", __FILE__, __func__, __LINE__);
+				OA_DEBUG_USER(" data is too long!");
 				return OA_FALSE;
 			}
 			#if 0
@@ -5245,18 +5245,18 @@ u16 DevReq2ServPackag_build_blind(u16 ReqMsgId) //即时上传数据
 			ret = write_blinddata_to_1file(pbuf, U16Temp);
 			if (OA_TRUE == ret){
 				print_rtc_time();
-				Trace("write one blinddata packet!total write num:%d", total_write);
+				DEBUG("write one blinddata packet!total write num:%d", total_write);
 			}
 			return ret;
 			
 		}
 		else{	
-			Trace("(%s:%s:%d): build package error.", __FILE__, __func__, __LINE__);
+			DEBUG(" build package error.");
 			return OA_FALSE;
 		}
 	}
 	else{
-		OA_DEBUG_USER("(%s:%s:%d): no empty buffer!", __FILE__, __func__, __LINE__);
+		OA_DEBUG_USER(" no empty buffer!");
 		return OA_FALSE;
 	}
 

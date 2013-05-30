@@ -17,6 +17,7 @@
 #include "SchedulScrn.h"
 #include "oa_type.h"
 #include "oa_api.h"
+#include "oa_debug.h"
 /*#include "Hardware.h"*/
 /*****************************************/
 extern uart_struct uart_contain;

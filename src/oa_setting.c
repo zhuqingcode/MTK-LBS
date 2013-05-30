@@ -27,7 +27,7 @@
 #include "oa_type.h"
 #include "oa_api.h"
 #include "oa_setting.h"
-
+#include "oa_debug.h"
 
 
 #define OA_SOC_SET_NULL_SIGN "@@@"

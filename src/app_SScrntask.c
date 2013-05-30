@@ -8,6 +8,8 @@
 #include "app_conf.h"
 #include "SchedulScrn.h"
 #include "oa_lbs2mtk.h"
+#include "oa_debug.h"
+
 extern STRUCT_RMC Pos_Inf;
 extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 acc_status;
@@ -186,7 +188,7 @@ void app_CentersmsAckAction(u16 Action,u8 *Sendbuf, u8 buflen)
 	//if(Action&Sms_Ack_Enable)
 	{ //调度屏常短信回复 peijl_2010808
 //		OSTimeDly(30); //等待连续两次向调度屏发送时间间隔
-		Trace("(%s %s %d):SchedulScrn_Task: Send reply message to schedul screen.\r\n",__FILE__, __func__, __LINE__);
+		DEBUG("SchedulScrn_Task: Send reply message to schedul screen.");
 		if(Action&CHINESE_SMS_ENABLE)  //中文短信
 		{
 			u8 time[6]={0};
@@ -194,9 +196,9 @@ void app_CentersmsAckAction(u16 Action,u8 *Sendbuf, u8 buflen)
 			SScrn_SMS_Send('C',"####",4,time,Sendbuf,buflen);
 		#else
 			if(ActionOK!=SScrn_SMS_Send(TELSMS_PDU_CMD,"0",1,time,Sendbuf,buflen))
-				Trace("(%s %s %d):SchedulScrn_Task:Send Unicode Ack-Sms failed!\r\n",__FILE__, __func__, __LINE__);
+				DEBUG("SchedulScrn_Task:Send Unicode Ack-Sms failed!");
 			else
-				Trace("(%s %s %d):SchedulScrn_Task:Send Unicode Ack-Sms message successfully.\r\n",__FILE__, __func__, __LINE__);		
+				DEBUG("SchedulScrn_Task:Send Unicode Ack-Sms message successfully.");		
 		#endif
 		}
 		else
@@ -206,9 +208,9 @@ void app_CentersmsAckAction(u16 Action,u8 *Sendbuf, u8 buflen)
 			SScrn_SMS_Send('E',"####",4,time,Sendbuf,buflen);
 		#else
 			if(ActionOK!=SScrn_CenterSMS_Send(Sendbuf,buflen))
-				Trace("(%s %s %d):SchedulScrn_Task:Send Ack-Sms failed!",__FILE__, __func__, __LINE__);		
+				DEBUG("SchedulScrn_Task:Send Ack-Sms failed!");		
 			else
-				Trace("(%s %s %d):SchedulScrn_Task:Send Ascall Ack-Sms message successfully.",__FILE__, __func__, __LINE__);		
+				DEBUG("SchedulScrn_Task:Send Ascall Ack-Sms message successfully.");		
 		#endif
 		}
 	}
@@ -425,7 +427,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	if (pSchedulScrnHandle->Cmdtype != SCCRN_UNEXP_CMD 
 		&& pSchedulScrnHandle->Cmdtype != SCCRN_TIME_OUT
 		&& pSchedulScrnHandle->Cmdtype != SCCRN_ERROR_RETURN)
-		Trace("(%s:%s:%d):SchedulScrn_Task:sscreen protocal cmd: 0x%02x",__FILE__, __func__, __LINE__, pSchedulScrnHandle->Cmdtype);
+		DEBUG("(%s:%s:%d):SchedulScrn_Task:sscreen protocal cmd: 0x%02x", pSchedulScrnHandle->Cmdtype);
 	else		return;
 	
 	if (pSchedulScrnHandle->ScrnType == SchedulScrn){
@@ -464,7 +466,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 				pSchedulScrnHandle->len3 = strlen("非辅助短信！");
 				Mem_Copy(pSchedulScrnHandle->DataBuf2, "非辅助短信！", pSchedulScrnHandle->len3);
 				if (ActionOK != SScrn_CenterSMS_Send(pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3))
-					Trace("(%s:%s:%d):SchedulScrn_Task:Send Ack-Sms failed", __FILE__, __func__, __LINE__);
+					DEBUG("(%s:%s:%d):SchedulScrn_Task:Send Ack-Sms failed", __FILE__, __func__, __LINE__);
 			}
 			else if(pSchedulScrnHandle->Status == ActionOK)//正确解析
 			{
@@ -544,8 +546,8 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 			if(!SScrn_GetResult(pSchedulScrnHandle->TelNum, sizeof(pSchedulScrnHandle->TelNum), 
 												&pSchedulScrnHandle->len, SET_LOCAL_TEL_CMD,0)){
 				pSchedulScrnHandle->TelNum[pSchedulScrnHandle->len]='\0';
-				Trace("(%s:%s:%d):SchedulScrn_Task:\r\n");
-				Trace("(%s:%s:%d):Set local tel %s\r\n", __FILE__, __func__, __LINE__, pSchedulScrnHandle->TelNum);
+				DEBUG("(%s:%s:%d):SchedulScrn_Task:");
+				DEBUG("(%s:%s:%d):Set local tel %s", __FILE__, __func__, __LINE__, pSchedulScrnHandle->TelNum);
 				
 				ReadLbsCfgPara(eLclTEL,pSchedulScrnHandle->DataBuf2,&pSchedulScrnHandle->U8Temp);
 				if((pSchedulScrnHandle->U8Temp==pSchedulScrnHandle->len)&&(memcmp(pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->TelNum,pSchedulScrnHandle->len)==0))

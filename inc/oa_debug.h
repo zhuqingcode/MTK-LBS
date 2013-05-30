@@ -26,11 +26,19 @@
  ****************************************************************************/
 #ifndef __OA_DEBUG_H__
 #define __OA_DEBUG_H__
-#define __DEBUG__ 
+#define DEBUG_K 0
+#define DEBUG_U 1
+#define DEBUG_N 2
 
-#ifdef __DEBUG__  
-#define DEBUG(format,...) OA_DEBUG_USER("("__FILE__" %s %d):"format"", __func__, __LINE__, ##__VA_ARGS__)
-#else  
-#define DEBUG(format,...)  
-#endif  
+
+#define DEBUG_LEVEL DEBUG_K
+
+#if (DEBUG_K == DEBUG_LEVEL)
+#define DEBUG(format,...) OA_DEBUG_USER("("__FILE__" %s %d):"format"\r\n", __func__, __LINE__, ##__VA_ARGS__)
+#define DEBUG_N(format,...) OA_DEBUG_USER(""format"\r\n", __func__, __LINE__, ##__VA_ARGS__)
+#elif (DEBUG_U == DEBUG_LEVEL)
+#define DEBUG(format,...) OA_DEBUG_USER(""format"\r\n", __func__, __LINE__, ##__VA_ARGS__)
+#elif (DEBUG_N == DEBUG_LEVEL)
+#define DEBUG(format,...)
+#endif
 #endif

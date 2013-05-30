@@ -27,7 +27,7 @@
 #include "oa_type.h"
 #include "oa_api.h"
 #include "oa_wdt.h"
-
+#include "oa_debug.h"
 /*********************************************************
 *Function:      oa_app_wdt()
 *Description:  fill the watchdog
@@ -41,7 +41,7 @@ void oa_app_wdt(void)
 	static oa_bool task_runed = OA_TRUE;
 	if (OA_TRUE == task_runed)
 	{
-		OA_DEBUG_USER("task %s is running......", __FILE__, __func__);
+		DEBUG("task %s is running......");
 		task_runed = OA_FALSE;
 	}
 	oa_timer_start(OA_TIMER_ID_1, oa_app_wdt, NULL, OA_WDT_SCHEDULER_PERIOD);

@@ -29,6 +29,8 @@
 #include "oa_uart.h"
 #include "oa_gps.h"
 #include "oa_sms.h"
+#include "oa_debug.h"
+
 extern oa_uint8 KEYWORDS_SIZE;
 /*****************************************************************/
 /*-----------------For uart port configure----------------------------*/
@@ -85,7 +87,7 @@ gps_data_struct gps_data = {
 void oa_app_uart1_recv( void * param, oa_uint32 len)
 {
 	char * pBuf = (char *)param;
-	//OA_DEBUG_USER("%s:len=%d,pBuf=%s", __FILE__, __func__,len, pBuf );
+	//DEBUG("%s:len=%d,pBuf=%s", __FILE__, __func__,len, pBuf );
 }
 
 /*****************************************************************
@@ -96,15 +98,15 @@ void oa_app_uart1_recv( void * param, oa_uint32 len)
 void oa_app_uart2_recv( void * param, oa_uint32 len)
 {
 	oa_uint8 * pBuf = (oa_uint8 *)param;
-	//OA_DEBUG_USER("%s:%d->%s", __FILE__, __func__, len, (oa_char*)pBuf);
+	//DEBUG("%s:%d->%s", __FILE__, __func__, len, (oa_char*)pBuf);
 	//oa_write_buffer_force_noinit(g_soc_context.gprs_tx, pBuf, len);
 	//handle gps data
 	//......
-	//OA_DEBUG_USER("(%s:%s:%d):len=%d", __FILE__, __func__, __LINE__, len);
-	//OA_DEBUG_USER("%s\n", (oa_char *)pBuf);
+	//DEBUG("(%s:%s:%d):len=%d", __FILE__, __func__, __LINE__, len);
+	//DEBUG("%s\n", (oa_char *)pBuf);
 	if (len >= OA_UART_BUFFER_SIZE)
 	{
-		//OA_DEBUG_USER("(%s:%s:%d):gps data is too long", __FILE__, __func__, __LINE__);
+		//DEBUG("(%s:%s:%d):gps data is too long", __FILE__, __func__, __LINE__);
 		oa_memset(gps_data.buffer, 0x0, OA_UART_BUFFER_SIZE);
 		oa_memcpy(gps_data.buffer, pBuf, OA_UART_BUFFER_SIZE);
 		gps_data.data_len = OA_UART_BUFFER_SIZE;
@@ -121,8 +123,8 @@ void oa_app_uart2_recv( void * param, oa_uint32 len)
 		//oa_app_gps();
 	}
 #if 0
-	OA_DEBUG_USER("%s",  (oa_char *)pBuf);
-	OA_DEBUG_USER("len : %d", len);
+	DEBUG("%s",  (oa_char *)pBuf);
+	DEBUG("len : %d", len);
 #endif
 }
 
@@ -137,7 +139,7 @@ void oa_app_uart3_recv( void * param, oa_uint32 len)
 	
 	if (len > UART3_MAX_SIZE)
 	{
-		OA_DEBUG_USER("uart data is too long");
+		DEBUG("uart data is too long");
 		return;
 	}
 	else
