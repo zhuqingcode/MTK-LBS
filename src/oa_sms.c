@@ -837,6 +837,7 @@ void dev_action_handle(keyword_context *p_set)
 		case clr_log:{
 			clear_miles();
 			del_blinddata();
+			del_areadata();
 		}break;
 		case clr_authcode:{
 			if (OFFLINE == dev_running.plat_status)	break;

@@ -223,6 +223,53 @@ oa_bool del_blinddata(void)
 	
 }
 /*********************************************************
+*Function:      del_miles()
+*Description:   delete authen code
+*Return:         oa_bool
+*Others:         
+*********************************************************/
+oa_bool del_areadata(void)
+{
+	oa_int32 ret, handle;
+
+	handle = oa_fopen(CIRCLE_AREA_DATA);
+	if (handle >= 0){//exist
+		oa_fclose(handle);
+		//delete files about blinddata
+		ret = oa_fdelete(CIRCLE_AREA_DATA);
+		if (ret < 0){
+			DEBUG("delete file:circle_area_data err!");
+			return OA_FALSE;
+		}
+	}
+		
+	handle = oa_fopen(RECT_AREA_DATA);
+	if (handle >= 0){//exist
+		oa_fclose(handle);
+		//delete files about blinddata
+		ret = oa_fdelete(RECT_AREA_DATA);
+		if (ret < 0){
+			DEBUG("delete file:rect_area_data err!");
+			return OA_FALSE;
+		}
+	}
+
+	handle = oa_fopen(POLY_AREA_DATA);
+	if (handle >= 0){//exist
+		oa_fclose(handle);
+		//delete files about blinddata
+		ret = oa_fdelete(POLY_AREA_DATA);
+		if (ret < 0){
+			DEBUG("delete file:poly_area_data err!");
+			return OA_FALSE;
+		}
+	}
+
+	return OA_TRUE;
+	
+}
+
+/*********************************************************
 *Function:      del_rec()
 *Description:   delete miliage & anthcode
 *Return:         oa_bool

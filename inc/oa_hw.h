@@ -53,5 +53,16 @@
 #define ACC_ON 1
 #define ACC_OFF 0
 #define OA_ACC_RUN 10000
+
+#if 0
+afficial hw definition
+#define GPS_AADET 3//gpio3
+#define GPS_EN 18//gpio18
+#define KEY 7//gpio7
+#define ACC 4//gpio4
+#define ALARM0 17//gpio17
+#define ALARM1 12//gpio12
+#define ALARM_OUT//gpio11
+#endif
 extern void acc_status_detect(void *param);
 #endif
