@@ -28,8 +28,8 @@
 #define __OA_AREA_H__
 #include "oa_type.h"
 #include "Area_Judge.h"
-#define AREA_DIR_CONF L"area_dir_conf.ini"
-#define AREA_DIRNAME L"area.dir"
+//#define AREA_DIR_CONF L"area_dir_conf.ini"
+//#define AREA_DIRNAME L"area.dir"
 //#define CIRCLE_AREA_DATA L"c:\\area.dir\\circle_area_data"
 //#define RECT_AREA_DATA L"c:\\area.dir\\rect_area_data"
 //#define PLOY_AREA_DATA L"c:\\area.dir\\ploy_area_data"

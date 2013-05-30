@@ -29,6 +29,8 @@
 #include "oa_at.h"
 #include "oa_platform.h"
 #include "oa_dev_params.h"
+#include "oa_debug.h"
+
 extern DEVICE_PARAMS dev_now_params;
 extern void do_reset(void);
 extern void do_factory_set(void);

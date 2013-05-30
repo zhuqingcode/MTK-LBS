@@ -40,6 +40,7 @@
 #include "oa_sw.h"
 #include "oa_hw.h"
 #include "oa_debug.h"
+#include "oa_area.h"
 
 extern oa_soc_set_parameter soc_cs;
 
@@ -359,6 +360,42 @@ oa_bool del_some_files(void)
 			return OA_FALSE;
 		}
 	}
+
+	handle = oa_fopen(CIRCLE_AREA_DATA);
+	if (handle >= 0){
+		oa_fclose(handle);
+		//delete files about auther code
+		ret = oa_fdelete(CIRCLE_AREA_DATA);
+		if (ret < 0){
+			DEBUG("delete file:circle_area_data err!");
+			return OA_FALSE;
+		}
+	}
+
+	handle = oa_fopen(RECT_AREA_DATA);
+	if (handle >= 0){
+		oa_fclose(handle);
+		//delete files about auther code
+		ret = oa_fdelete(RECT_AREA_DATA);
+		if (ret < 0){
+			DEBUG("delete file:rect_area_data err!");
+			return OA_FALSE;
+		}
+	}
+
+	handle = oa_fopen(POLY_AREA_DATA);
+	if (handle >= 0){
+		oa_fclose(handle);
+		//delete files about auther code
+		ret = oa_fdelete(POLY_AREA_DATA);
+		if (ret < 0){
+			DEBUG("delete file:poly_area_data err!");
+			return OA_FALSE;
+		}
+	}
+
+	
+	
 	return OA_TRUE;
 }
 
