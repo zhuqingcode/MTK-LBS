@@ -9,6 +9,7 @@
 #include "SchedulScrn.h"
 #include "oa_lbs2mtk.h"
 #include "oa_debug.h"
+
 extern STRUCT_RMC Pos_Inf;
 extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 acc_status;
@@ -465,7 +466,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 				pSchedulScrnHandle->len3 = strlen("非辅助短信！");
 				Mem_Copy(pSchedulScrnHandle->DataBuf2, "非辅助短信！", pSchedulScrnHandle->len3);
 				if (ActionOK != SScrn_CenterSMS_Send(pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3))
-					DEBUG("SchedulScrn_Task:Send Ack-Sms failed", __FILE__, __func__, __LINE__);
+					DEBUG("SchedulScrn_Task:Send Ack-Sms failed");
 			}
 			else if(pSchedulScrnHandle->Status == ActionOK)//正确解析
 			{

@@ -35,6 +35,8 @@
 #include "oa_platform.h"
 #include "oa_lbs2mtk.h"
 #include "oa_jt808.h"
+#include "oa_debug.h"
+
 extern DEVICE_PARAMS dev_now_params;
 extern USE_LOCK now_use_lock;
 extern oa_uint8 acc_status;
@@ -1230,7 +1232,7 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 	e_keyword key_ret = e_none;
 	keyword_context set = {0x0};
 	oa_uint8 e_i;
-	Trace("(%s:%s:%d): sms:%s len:%d", __FILE__, __func__, __LINE__, p_sms, sms_len);
+	DEBUG("sms:%s len:%d", p_sms, sms_len);
 	//do not support multiple sms
 	for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
 		

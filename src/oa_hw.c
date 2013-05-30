@@ -28,6 +28,7 @@
 #include "oa_api.h"
 #include "oa_hw.h"
 #include "oa_jt808.h"
+#include "oa_debug.h"
 //#define OA_GPIO_EINT_01 27
 oa_bool sos_handle_polarity_0 = OA_TRUE;
 /*do not modify it*/
@@ -47,7 +48,7 @@ void oa_tst_eint_hisr(void)
 	oa_uint8 eint_level;
 	static oa_uint8 first_reverse = OA_FALSE;
 	/*only a test trace, better not to print any traces in EINT HISR.*/
-	//OA_DEBUG_USER("%s,oa_tst_eint_hisr called: %d", __FILE__, __func__,sos_handle_polarity_0);
+	//DEBUG("%s,oa_tst_eint_hisr called: %d", __FILE__, __func__,sos_handle_polarity_0);
 	eint_level =oa_gpio_read(eint_gpio_map_tb[OA_CUR_TEST_EINT_NO]);
 	if(eint_level == 0)
 	{
@@ -63,12 +64,12 @@ void oa_tst_eint_hisr(void)
 	  && (g_first_pullup_flag == OA_TRUE))
 	{
 		//dummy func
-		OA_DEBUG_USER("dummy eint func for test");
+		DEBUG("dummy eint func for test");
 	}
 	else
 	{
 		//add eint handle func
-		OA_DEBUG_USER("%s,eint_level:%d,soa_tst_eint_hisr polarity: %d", __FILE__, __func__,eint_level,sos_handle_polarity_0);
+		DEBUG("%s,eint_level:%d,soa_tst_eint_hisr polarity: %d", __FILE__, __func__,eint_level,sos_handle_polarity_0);
 	}
 	oa_eint_set_polarity(OA_CUR_TEST_EINT_NO, sos_handle_polarity_0);
 }
@@ -97,7 +98,7 @@ void oa_gpio_set(void)
 		sos_handle_polarity_0 = 0;
 	}    
 
-	//OA_DEBUG_USER("sos_handle_polarity_0: %d", sos_handle_polarity_0);
+	//DEBUG("sos_handle_polarity_0: %d", sos_handle_polarity_0);
 
 	oa_gpio_mode_setup(eint_gpio_map_tb[OA_CUR_TEST_EINT_NO], eint_data_map_tb[OA_CUR_TEST_EINT_NO]);
 	oa_gpio_init(0,eint_gpio_map_tb[OA_CUR_TEST_EINT_NO]);
@@ -135,6 +136,10 @@ void acc_status_detect(void *param)
 	oa_uint8 ret;
 	ret = oa_gpio_read(ACC_GPIO);
 	if (ret){//acc is on
+		//key shake
+		oa_sleep(10);
+		ret = oa_gpio_read(ACC_GPIO);
+		if (!ret) goto redoit;
 		if (ReadAlarmPara(StaSector1, STA_ACC_ON) == RESET){
 			WriteAlarmPara(SET, StaSector1, STA_ACC_ON);
 		}
@@ -142,6 +147,10 @@ void acc_status_detect(void *param)
 		acc_status = ACC_ON;
 	}
 	else{//acc is off
+		//key shake
+		oa_sleep(10);
+		ret = oa_gpio_read(ACC_GPIO);
+		if (ret) goto redoit; 
 		if (ReadAlarmPara(StaSector1, STA_ACC_ON) == SET){
 			WriteAlarmPara(RESET, StaSector1, STA_ACC_ON);
 		}
@@ -149,6 +158,7 @@ void acc_status_detect(void *param)
 		acc_status = ACC_OFF;
 	}
 
+redoit:
 	oa_timer_start(OA_TIMER_ID_6, acc_status_detect, NULL, OA_ACC_RUN);
 }
 /*********************************************************

@@ -29,9 +29,17 @@
 #include "oa_dev_params.h"
 #include "oa_platform.h"
 #include "oa_hw.h"
+#include "oa_debug.h"
+
 extern DEVICE_PARAMS dev_now_params;
 extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 acc_status;
+/*********************************************************
+*Function:     handle_alarm_status()
+*Description:  handle alarm status
+*Return:		
+*Others:         
+*********************************************************/
 oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, oa_bool flag)
 {
 
@@ -41,13 +49,13 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 	oa_uint16 soc_ret;
 	
 	if (part >= StatusNum){
-		Trace("(%s:%s:%d): params err!", __FILE__, __func__, __LINE__);
+		DEBUG("params err!");
 		return OA_FALSE;
 	}
 	if (flag == OA_TRUE){
 		alarm_flag = dev_now_params.alarm_mask;
 		if (alarm_flag & alarm_bit){//alarm is masked
-			Trace("(%s:%s:%d): this alarm is masked!", __FILE__, __func__, __LINE__);
+			DEBUG("this alarm is masked!");
 			return OA_TRUE;
 		}
 		else{//alarm is unmasked
@@ -75,7 +83,7 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 			if (build_ret > 0){
 				soc_ret = oa_soc_send_req();//check datas in buffer & send, concern it send ok.
 				if (soc_ret != build_ret){
-					Trace("(%s:%s:%d): send data is not equal!", __FILE__, __func__, __LINE__);
+					DEBUG("send data is not equal!");
 					return OA_FALSE;
 				}
 				else{
@@ -83,7 +91,7 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 				}
 			}
 			else{
-				Trace("(%s:%s:%d): build packet err!", __FILE__, __func__, __LINE__);
+				DEBUG("build packet err!");
 				return OA_FALSE;
 			}
 			
@@ -107,7 +115,7 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 		if (build_ret > 0){
 			soc_ret = oa_soc_send_req();//check datas in buffer & send, concern it send ok.
 			if (soc_ret != build_ret){
-				Trace("(%s:%s:%d): send data is not equal!", __FILE__, __func__, __LINE__);
+				DEBUG("send data is not equal!");
 				return OA_FALSE;
 			}
 			else{
@@ -115,7 +123,7 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 			}
 		}
 		else{
-			Trace("(%s:%s:%d): build packet err!", __FILE__, __func__, __LINE__);
+			DEBUG("build packet err!");
 			return OA_FALSE;
 		}
 	}

@@ -31,7 +31,7 @@
 //------------customer code-------------
 #include "oa_jt808.h"
 #include "oa_platform.h"
-
+#include "oa_debug.h"
 extern ProtocolHandle sProtclHandl;
 extern oa_bool need_reconn;
 extern dev_control_type control_type;
@@ -130,7 +130,7 @@ void oa_soc_fill_addr_struct(void)
 
 void oa_soc_set_apn_cb(oa_bool result)
 {
-      OA_DEBUG_USER("%s:set apn ok! %s, %s, %s", __FILE__, __func__, g_soc_context.apn_info.apn, g_soc_context.apn_info.userName, g_soc_context.apn_info.password);
+      DEBUG("%s:set apn ok! %s, %s, %s", __FILE__, __func__, g_soc_context.apn_info.apn, g_soc_context.apn_info.userName, g_soc_context.apn_info.password);
       g_soc_context.can_connect = OA_TRUE;
 }
 
@@ -143,7 +143,7 @@ void oa_soc_state_check(void)
 	if (g_soc_context.state == OA_SOC_STATE_ONLINE){
 		if (check_counter >= 50){
 			check_counter = 0;
-			OA_DEBUG_USER("(%s:%s:%d): I am online", __FILE__, __func__, __LINE__);
+			DEBUG("I am online");
 		}
 		return;	
 	}
@@ -157,7 +157,7 @@ void oa_soc_state_check(void)
 	}
 	else{
 		g_soc_context.recon_counter = 0;
-		//OA_DEBUG_USER("(%s:%s:%d): not ready for connect or doing connecting", __FILE__, __func__, __LINE__);
+		//DEBUG(" not ready for connect or doing connecting");
 	}
 #if 0
 	if(++check_counter>10 && g_soc_context.state == OA_SOC_STATE_ONLINE)
@@ -197,21 +197,21 @@ void oa_soc_connect_req(void)
 	      else
 	      {
 			//invalid sock_type, return
-			OA_DEBUG_USER("%s:sock_type invalid!", __func__);
+			DEBUG("%s:sock_type invalid!", __func__);
 			return;
 	      }
 
 	      if (g_soc_context.socket_id >= 0)
 	      {
-		  	OA_DEBUG_USER("%s:sock_id=%d create ok!", __func__,g_soc_context.socket_id);
+		  	DEBUG("%s:sock_id=%d create ok!", __func__,g_soc_context.socket_id);
 	      }
 		else if (g_soc_context.socket_id < 0)
 		{
-			OA_DEBUG_USER("%s:socket create err!", __func__);
+			DEBUG("%s:socket create err!", __func__);
 			return;
 		}
 
-	      OA_DEBUG_USER("Ready to connect:addr=%s,port=%d,soc_type=%d,addr_type=%d", 
+	      DEBUG("Ready to connect:addr=%s,port=%d,soc_type=%d,addr_type=%d", 
 	                               g_soc_context.soc_addr.addr, 
 	                               g_soc_context.soc_addr.port, 
 	                               g_soc_context.soc_addr.sock_type,
@@ -223,13 +223,13 @@ void oa_soc_connect_req(void)
 
 	      if(ret == OA_SOC_WOULDBLOCK)
 	      {  
-			OA_DEBUG_USER("%s:sock_id=%d connect block waiting!",__func__,g_soc_context.socket_id);
+			DEBUG("%s:sock_id=%d connect block waiting!",__func__,g_soc_context.socket_id);
 			//wait for connect indication.will received asynchronous info in oa_soc_notify_ind
 			g_soc_context.state = OA_SOC_STATE_CONNECT;
 	      }
 	      else if(ret == OA_SOC_SUCCESS)
 	      {
-			OA_DEBUG_USER("%s:sock_id=%d connect ok!", __func__,g_soc_context.socket_id);
+			DEBUG("%s:sock_id=%d connect ok!", __func__,g_soc_context.socket_id);
 			//socket already connected
 			//oa_sleep(100); //just connected need delay 100ms then send gprs data, else may lost data
 			g_soc_context.state = OA_SOC_STATE_ONLINE;
@@ -240,7 +240,7 @@ void oa_soc_connect_req(void)
 	      }
 	      else
 	      {
-			OA_DEBUG_USER("%s:sock_id=%d connect fail ret=%d!",__func__,g_soc_context.socket_id,ret);
+			DEBUG("%s:sock_id=%d connect fail ret=%d!",__func__,g_soc_context.socket_id,ret);
 			oa_soc_close_req();
 	      }
 	  }
@@ -273,7 +273,7 @@ oa_int16 oa_soc_send_req(void)
 
 		if (ret >= OA_SOC_SUCCESS)
 		{
-			GPRS_DEBUG("%s:sock_id=%d send ok len=%d",__func__,g_soc_context.socket_id,ret);
+			DEBUG("%s:sock_id=%d send ok len=%d",__func__,g_soc_context.socket_id,ret);
 
 			//if send success,dummy read to delete
 			len = oa_read_buffer_noinit(g_soc_context.gprs_tx, 
@@ -285,7 +285,7 @@ oa_int16 oa_soc_send_req(void)
 			
 			if (ret < len)
 			{
-				GPRS_DEBUG("(%s:%s:%d): send data is not equal!", __FILE__, __func__, __LINE__);
+				DEBUG(" send data is not equal!");
 			}
 			return ret;
 			//----------------end------------------
@@ -298,21 +298,21 @@ oa_int16 oa_soc_send_req(void)
 		else if (ret == OA_SOC_WOULDBLOCK)
 		{
 			g_soc_context.is_blocksend = OA_TRUE;
-			GPRS_DEBUG("%s:sock_id=%d send block waiting!",__func__,g_soc_context.socket_id);
+			DEBUG("%s:sock_id=%d send block waiting!",__func__,g_soc_context.socket_id);
 			//wait for sending result , care event OA_SOC_WRITE in callback function oa_soc_notify_ind
 			return 0;
 		}
 		else
 		{
 			//ERROR!.
-			GPRS_DEBUG("%s:sock_id=%d send fail ret=%d!",__func__,g_soc_context.socket_id,ret);
+			DEBUG("%s:sock_id=%d send fail ret=%d!",__func__,g_soc_context.socket_id,ret);
 			//oa_soc_close_req();//commend by zq
 			return 0;
 		}
 	}
 	else
 	{
-		//OA_DEBUG_USER("(%s:%s:%d): no data in send buffer", __FILE__, __func__, __LINE__);
+		//DEBUG(" no data in send buffer");
 		return -1;
 	}
 }
@@ -320,7 +320,7 @@ oa_int16 oa_soc_send_req(void)
 
 void oa_soc_can_reconnect_again(void* param)
 {
-	OA_DEBUG_USER("%s called", __func__);
+	DEBUG("%s called", __func__);
 	g_soc_context.can_connect = OA_TRUE;
 }
 
@@ -333,7 +333,7 @@ oa_bool oa_soc_close_req( void )
 
 	if (g_soc_context.state == OA_SOC_STATE_OFFLINE)
 	{
-		OA_DEBUG_USER("(%s:%s:%d): socket is already closed!", __FILE__, __func__, __LINE__);
+		DEBUG(" socket is already closed!");
 		return OA_TRUE;
 	}
 
@@ -342,7 +342,7 @@ oa_bool oa_soc_close_req( void )
 
 	if (ret)//close err!
 	{
-		OA_DEBUG_USER("%s:socket_id=%d,ret=%d", __func__,g_soc_context.socket_id, ret);
+		DEBUG("%s:socket_id=%d,ret=%d", __func__,g_soc_context.socket_id, ret);
 		return OA_FALSE;
 	}
 
@@ -360,13 +360,16 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 {
 	// received gprs data
 	oa_uint8 ret;
-	//OA_DEBUG_USER("(%s:%s:%d):len=%d", __FILE__, __func__, __LINE__, len);
+	//DEBUG("len=%d", len);
 	//debuf info
 	{
 		u16 i;
+		DEBUG();
+		DEBUG_N("receive len:%d data:", len);
 		for(i=0; i<len; i++){
-			Trace("0x%x", data[i]);
+			OA_DEBUG_USER("%02x ", data[i]);
 		}
+		DEBUG();
 	}
 	//gprs receive data analysis
 	ret = JT808_recv_analysis(data, len);
@@ -391,7 +394,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 					}
 					//case unreg
 					else if (dev_running.doing_what == unreg && dev_running.plat_status == ONLINE){
-						Trace("(%s:%s:%d):unreg ok!", __FILE__, __func__, __LINE__);
+						DEBUG("unreg ok!");
 						#if 0
 						dev_running.plat_switch = OA_TRUE;//if unreg ok, go to reg,authen and so on
 						dev_running.plat_status = OFFLINE;
@@ -408,13 +411,13 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 				case RspMsgerr:
 				case RspUnsurport:{
 					//case authen
-					Trace("(%s:%s:%d):plat common ack fail : %d", __FILE__, __func__, __LINE__, ret);
+					DEBUG("plat common ack fail : %d", ret);
 					if (dev_running.doing_what == authen && dev_running.plat_status == OFFLINE){
 						dev_running.plat_switch = OA_TRUE;//if authen err, do it again
 						dev_running.authen_err_time++;
 						if (dev_running.authen_err_time >= AUTHEN_ERR_MAX_TIMES){
 							dev_running.authen_err_time = 0;
-							Trace("(%s:%s:%d):authen err too many times!", __FILE__, __func__, __LINE__);
+							DEBUG("authen err too many times!");
 						}
 					}
 					//case unreg
@@ -435,12 +438,12 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 		break;
 		
 		case RspPackgerr:{
-			OA_DEBUG_USER("(%s:%s:%d): plat ack err", __FILE__, __func__, __LINE__);
+			DEBUG(" plat ack err");
 		}
 		break;
 		case PLAT_REQ:{
 			//do something here
-			//Trace("(%s:%s:%d):plat request!", __FILE__, __func__, __LINE__);
+			//DEBUG("plat request!");
 			if (need_reconn == OA_TRUE){
 				need_reconn = OA_FALSE;
 				do_soc_reconn();
@@ -449,11 +452,11 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 			if (none != control_type){
 				switch (control_type){
 					case wireless_update:{
-						Trace("(%s:%s:%d):doesn't support!",__FILE__, __func__, __LINE__);
+						DEBUG("doesn't support!");
 					}
 					break;
 					case conn_to_specified_server:{
-						Trace("(%s:%s:%d):doesn't support!",__FILE__, __func__, __LINE__);
+						DEBUG("doesn't support!");
 					}
 					break;
 					case term_powerdown:{
@@ -497,7 +500,7 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 
 	//if other application's socket id, ignore it.
 	if(soc_notify->socket_id != g_soc_context.socket_id){
-		OA_DEBUG_USER("%s:sock_id=%d unknow, event_type=%d!",__FILE__, __func__,soc_notify->socket_id,soc_notify->event_type);    
+		DEBUG("%s:sock_id=%d unknow, event_type=%d!",__FILE__, __func__,soc_notify->socket_id,soc_notify->event_type);    
 		return;
 	}
     
@@ -507,14 +510,14 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 			if (soc_notify->result == OA_TRUE){
 				  g_soc_context.is_blocksend = OA_FALSE;
 				 //resend the data ,else will lost data
-				  OA_DEBUG_USER("%s:sock_id=%d resend!",__FILE__, __func__,soc_notify->socket_id);
+				  DEBUG("%s:sock_id=%d resend!",__FILE__, __func__,soc_notify->socket_id);
 				  //oa_soc_send_req( );//comment by zq
 				  //-----------customer code-----------
 				  oa_soc_send_req();
 				  //---------------end----------------
 			}
 			else{
-				 OA_DEBUG_USER("%s:sock_id=%d send fail err=%d!",__FILE__, __func__,soc_notify->socket_id,soc_notify->error_cause);
+				 DEBUG("%s:sock_id=%d send fail err=%d!",__FILE__, __func__,soc_notify->socket_id,soc_notify->error_cause);
 				 oa_soc_close_req( );
 			}     
 		   
@@ -529,19 +532,19 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 			        memset(gprs_rx_buffer, 0 , (OA_MAX_SOC_RCV_BUFLEN*sizeof(oa_uint8))); 
 			        //received gprs data, read data for protocol
 			        ret = oa_soc_recv(soc_notify->socket_id , (oa_uint8*)gprs_rx_buffer, OA_MAX_SOC_RCV_BUFLEN, 0);
-			        OA_DEBUG_USER("%s:sock_id=%d read ok len=%d", __func__,soc_notify->socket_id,ret);
+			        DEBUG("%s:sock_id=%d read ok len=%d", __func__,soc_notify->socket_id,ret);
 
 			        if(ret > 0){   
 			            // read data length=ret, 
 					oa_soc_gprs_recv((oa_uint8*)gprs_rx_buffer, ret);
 			        }
 			        else{
-					OA_DEBUG_USER("%s:sock_id=%d read err!",__func__,soc_notify->socket_id);
+					DEBUG("%s:sock_id=%d read err!",__func__,soc_notify->socket_id);
 			        }  
 			//         }while(ret>0); //Make sure use  do{...}while  to read out all received data.
 			}
 			else{
-				OA_DEBUG_USER("%s:sock_id=%d read fail err=%d!",__func__,soc_notify->socket_id,soc_notify->error_cause);
+				DEBUG("%s:sock_id=%d read fail err=%d!",__func__,soc_notify->socket_id,soc_notify->error_cause);
 				oa_soc_close_req( );
 			}     
 			break;
@@ -550,7 +553,7 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 		case OA_SOC_CONNECT:{
 			if (soc_notify->result == OA_TRUE){
 				oa_bool ret;
-				OA_DEBUG_USER("%s:sock_id=%d connect ok!",__func__,soc_notify->socket_id);
+				DEBUG("%s:sock_id=%d connect ok!",__func__,soc_notify->socket_id);
 				//if connect OK, goto query gprs_tx data and send
 				//oa_sleep(100); //just connected need delay 100ms then send gprs data, else may lost data
 				g_soc_context.state = OA_SOC_STATE_ONLINE;
@@ -568,7 +571,7 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 				}
 			}
 			else{
-				OA_DEBUG_USER("%s:sock_id=%d connect fail err=%d!",__func__,soc_notify->socket_id,soc_notify->error_cause);
+				DEBUG("%s:sock_id=%d connect fail err=%d!",__func__,soc_notify->socket_id,soc_notify->error_cause);
 				oa_soc_close_req( );
 			}
 			break;
@@ -578,7 +581,7 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 			oa_bool ret;
 			// the socket is closed by remote server, use soc_close to close local socketID, else will lead OA_SOC_LIMIT_RESOURCE
 			//also callded by powerdown!
-			OA_DEBUG_USER("(%s:%s:%d):sock_id=%d close causeid=%d",__FILE__, __func__, __LINE__, soc_notify->socket_id,soc_notify->error_cause);
+			DEBUG("sock_id=%d close causeid=%d", soc_notify->socket_id,soc_notify->error_cause);
 			if (oa_soc_close_req()){
 				if (dev_running.plat_status == ONLINE){
 					dev_running.plat_status = OFFLINE;
@@ -588,14 +591,14 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 				dev_running.next_step = PLAT_SOC_INIT;
 			}
 			else{
-				OA_DEBUG_USER("(%s:%s:%d): soc close err!", __FILE__, __func__, __LINE__);
+				DEBUG(" soc close err!");
 			}
 			 
 			break;
 		}
 	        
 		case OA_SOC_ACCEPT:{
-			OA_DEBUG_USER("(%s:%s:%d):sock_id=%d accept",__FILE__, __func__, __LINE__, soc_notify->socket_id);
+			DEBUG("sock_id=%d accept", soc_notify->socket_id);
 		}
 		break;
 		    

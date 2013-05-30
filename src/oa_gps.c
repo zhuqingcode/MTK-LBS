@@ -65,7 +65,7 @@ static u8 ISGpsAntOK()
 			DevReq2ServPackag_build(REPORT_LOCATION); //告警产生一包位置汇报
 #elif PROTCL_HX54
 			WriteAlarmPara(SET,StaAlarm0,ALARM_GNSS_ANTENNA);	//告警
-			Trace(PrintInfo,"GPS task:Gps antenna alarm!\r\n");
+			DEBUG(PrintInfo,"GPS task:Gps antenna alarm!\r\n");
 #endif
 		}
 		return 0;
@@ -75,7 +75,7 @@ static u8 ISGpsAntOK()
 		if(ReadAlarmPara(StaAlarm0,ALARM_GNSS_ANTENNA)==SET)
 		{
 			WriteAlarmPara(RESET,StaAlarm0,ALARM_GNSS_ANTENNA);	//取消告警
-			Trace(PrintInfo,"GPS task:Gps antenna is ok.\r\n");
+			DEBUG(PrintInfo,"GPS task:Gps antenna is ok.\r\n");
 		}
 		return 0;
 	}
@@ -121,7 +121,7 @@ void oa_app_gps(void)
 	}
 #endif
 	if (OA_TRUE == task_runed){
-		OA_DEBUG_USER("<<<<<<<<<<<<<task %s is running......>>>>>>>>>>>>>", __func__);
+		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		mile_stat_init();//init here
 		task_runed = OA_FALSE;
 	}
@@ -140,7 +140,7 @@ void oa_app_gps(void)
 	//ISGpsAntOK();
 	ret = gps_ana_detect();
 	if (OA_FALSE == ret){//gps ana is off
-		Trace("gps ana is off");
+		DEBUG("gps ana is off");
 		handle_alarm_status(StaAlarm0, ALARM_GNSS_ANTENNA, SET, OA_TRUE);
 	}
 	else	{//gps ana is on
@@ -151,7 +151,7 @@ void oa_app_gps(void)
 	}
 	//gps data analysis:mileage statistics, speed alarm, driver fatigue,cog and so on.
 	result = GPS_DataAnaly();//update gps datas
-//	Trace("(%s:%s:%d):result:0x%X", __FILE__,  __func__, __LINE__, result);
+//	DEBUG("result:0x%X", __FILE__,  __func__, __LINE__, result);
 	if (result & GPS_NO_DATA){//analysis gps data failed for 30s, module status must be changed to broken 
 		if (ModelCnt * GPS_RUN_SECONDS < CHECK_GPS_ERR){
 			ModelCnt++;							
@@ -165,7 +165,7 @@ void oa_app_gps(void)
 		if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){//cancel this alarm, upload instantly
 			//WriteAlarmPara(RESET, StaAlarm0, ALARM_GNSS_ERR);
 			handle_alarm_status(StaAlarm0, ALARM_GNSS_ERR, RESET, OA_TRUE);
-			Trace("(%s:%s:%d): Gps model is OK.", __FILE__,  __func__, __LINE__);
+			DEBUG("Gps model is OK.");
 		}
 		//clear it
 		if (ModelCnt > 0) ModelCnt = 0;
@@ -173,15 +173,15 @@ void oa_app_gps(void)
 			GPS_GetPosition(&gps_info);//copy gps data into 'gps_info'
 			//just for printing
 			if (infoprintCnt++ >= 15){
-				Trace(" Time: %x %x %x %x:%x:%x ",gps_info.Time[0],gps_info.Time[1],gps_info.Time[2],gps_info.Time[3],gps_info.Time[4],gps_info.Time[5]);
-				Trace(" Latitude: %c%c%c°%c%c%c%c%c%c′",gps_info.North_Indicator,gps_info.Latitude[0],
+				DEBUG("Time: %x %x %x %x:%x:%x ",gps_info.Time[0],gps_info.Time[1],gps_info.Time[2],gps_info.Time[3],gps_info.Time[4],gps_info.Time[5]);
+				DEBUG("Latitude: %c%c%c°%c%c%c%c%c%c′",gps_info.North_Indicator,gps_info.Latitude[0],
 				gps_info.Latitude[1],gps_info.Latitude[2],gps_info.Latitude[3],gps_info.Latitude[4],
 				gps_info.Latitude[5],gps_info.Latitude[6],gps_info.Latitude[7]);
-				Trace(" Longitude: %c%c%c%c°%c%c%c%c%c%c′",gps_info.East_Indicator,gps_info.Longitude[0],gps_info.Longitude[1],
+				DEBUG("Longitude: %c%c%c%c°%c%c%c%c%c%c′",gps_info.East_Indicator,gps_info.Longitude[0],gps_info.Longitude[1],
 				gps_info.Longitude[2],gps_info.Longitude[3],gps_info.Longitude[4],gps_info.Longitude[5],gps_info.Longitude[6],
 				gps_info.Longitude[7],gps_info.Longitude[8]);
-				Trace(" COG: %d; Speed: %d (km/h)  ",gps_info.COG,gps_info.Speed);
-				Trace(" Height: %d",gps_info.Height);
+				DEBUG("COG: %d; Speed: %d (km/h)  ",gps_info.COG,gps_info.Speed);
+				DEBUG("Height: %d",gps_info.Height);
 				infoprintCnt = 0;
 			}
 			//set location flag
@@ -210,7 +210,7 @@ void oa_app_gps(void)
 				{
 					COGcnt = 0;
 					Oldcog = gps_info.COG;
-					Trace("(%s:%s:%d): Old Cog: %d km", __FILE__,  __func__, __LINE__, Oldcog);
+					DEBUG(" Old Cog: %d km", __FILE__,  __func__, __LINE__, Oldcog);
 					DevReq2ServPackag_build(REPORT_LOCATION);
 				}	
 			}
@@ -226,7 +226,7 @@ void oa_app_gps(void)
 			//gps_info.Speed = MAX_SPEED;//just for test
 			if (speed > MAX_SPEED || gps_info.Speed > MAX_SPEED){
 				gps_info.Speed = MAX_SPEED;
-				Trace("(%s:%s:%d): speed max!", __FILE__, __func__, __LINE__);
+				DEBUG(" speed max!");
 			}
 			
 			if (gps_info.Speed > speed){//handle this alarm & upload instantly
@@ -234,7 +234,7 @@ void oa_app_gps(void)
 			}
 			else if (gps_info.Speed <= speed){
 				if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET){
-					//WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm & don't upload instantly
+					//WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 					handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, RESET, OA_TRUE);
 				}
 			}
@@ -290,7 +290,7 @@ void oa_app_gps(void)
 				}
 				
 				if (driver_time * GPS_RUN_SECONDS > dev_now_params.continuous_drive_time_threshold){
-					Trace("(%s:%s:%d): fatigue driving!", __FILE__, __func__, __LINE__);
+					DEBUG("fatigue driving!");
 					ret = handle_alarm_status(StaAlarm0, ALARM_DRIVE_TIRED, SET, OA_TRUE);
 					if (ret == OA_TRUE)	driver_time = 0;
 					
@@ -321,30 +321,31 @@ void oa_app_gps(void)
 			//---------------------------------------------------------------------
 		}
 		else if (result & NMEA_RMC_UNFIXED){
-			Trace("(%s:%s:%d): NMEA_RMC_UNFIXED!", __FILE__,  __func__, __LINE__);
+			DEBUG(" NMEA_RMC_UNFIXED!");
 			//设置未定位标志
 			if (ReadAlarmPara(StaSector1,STA_GPS_FIXED) == SET)
 				//WriteAlarmPara(RESET,StaSector1,STA_GPS_FIXED);
 				handle_alarm_status(StaSector1, STA_GPS_FIXED, RESET, OA_TRUE);
 		}
-		if (result & UBX_CFG_RST_OK){
-			Trace("(%s:%s:%d): UBX_CFG_RST_OK!", __FILE__,  __func__, __LINE__);
+		if (result &UBX_CFG_RST_OK){
+			DEBUG(" UBX_CFG_RST_OK!");
 		}
-		if (result & UBX_CFG_MSG_OK){
-			Trace("(%s:%s:%d): UBX_CFG_MSG_OK!", __FILE__,  __func__, __LINE__);
+		if (result &UBX_CFG_MSG_OK){
+			DEBUG("UBX_CFG_MSG_OK!");
 		}
 		if (result & NMEA_GGA_OK){//高度定位OK
 //				GPS_GetPosition(&gps_info);
-//				Trace(PrintDebug," Height: %d\r\n",gps_info.Height);
+//				DEBUG(PrintDebug," Height: %d\r\n",gps_info.Height);
 		}
 		else if (result & NMEA_GGA_UNFIXED){
-			Trace("(%s:%s:%d): NMEA_GGA_UNFIXED!", __FILE__,  __func__, __LINE__);
+			DEBUG("NMEA_GGA_UNFIXED!");
 		}
 	}
 
 redo : oa_timer_start(OA_TIMER_ID_5, oa_app_gps, NULL, OA_GPS_SCHEDULER_PERIOD);//run per 500 millisecond
 	return;
 }
+#if 0
 /*********************************************************
 *Function:      oa_app_gps_init()
 *Description:  handle the gps initial
@@ -440,14 +441,14 @@ void oa_app_gps_init(void)
 		}
 		else if (result & UnResponse)
 		{
-			Trace("err %s step : %d", __FILE__, __func__, gps_init_step);
+			DEBUG("err %s step : %d", __FILE__, __func__, gps_init_step);
 			goto redoit;
 		}
 	}
 	
 	if (gps_init_step == 0x10)/*finish gps initial*/
 	{
-		Trace("gps initial ok!");
+		DEBUG("gps initial ok!");
 		oa_timer_stop(OA_TIMER_ID_2);
 		oa_timer_start(OA_TIMER_ID_3, oa_app_gps, NULL, OA_GPS_SCHEDULER_PERIOD);//run per 500 millisecond
 		return;
@@ -456,4 +457,4 @@ void oa_app_gps_init(void)
 redoit : oa_timer_start(OA_TIMER_ID_2, oa_app_gps_init, NULL, OA_GPS_SCHEDULER_PERIOD);//run per 500 millisecond
 	return;	
 }
-
+#endif

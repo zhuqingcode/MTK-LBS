@@ -25,6 +25,7 @@
  *
  ****************************************************************************/
  #include "oa_type.h"
+ #include "oa_debug.h"
  /*********************************************************
 *Function:     digit_check()
 *Description:  digit_check
@@ -59,7 +60,7 @@
  {
 	oa_uint8 i;
 	if (NULL == src || len == 0){
-		Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+		DEBUG(" paras err!");
 		return OA_FALSE;
 	}
 
@@ -106,7 +107,7 @@
  {
 	oa_uint8 i;
 	if (NULL == src || len == 0){
-		Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+		DEBUG(" paras err!");
 		return OA_FALSE;
 	}
 
@@ -130,7 +131,7 @@
  {
 	oa_uint8 i;
 	if (NULL == src || len == 0){
-		Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+		DEBUG(" paras err!");
 		return OA_FALSE;
 	}
 

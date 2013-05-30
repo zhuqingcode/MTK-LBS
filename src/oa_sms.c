@@ -36,6 +36,8 @@
 #include "oa_jt808.h"
 #include "oa_hw.h"
 #include "oa_sw.h"
+#include "oa_debug.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 oa_sms_context message;
@@ -184,7 +186,6 @@ void gps_extract(oa_char *enquire_temp){
 		tmp[2] = Pos_Inf.Longitude[0];
 		tmp[3] = Pos_Inf.Longitude[1];
 		tmp[4] = Pos_Inf.Longitude[2];
-		//tmp[5] = '\'';
 		tmp[5] = '$';
 		tmp[6] = Pos_Inf.Longitude[3];
 		tmp[7] = Pos_Inf.Longitude[4];
@@ -192,7 +193,6 @@ void gps_extract(oa_char *enquire_temp){
 		tmp[9] = Pos_Inf.Longitude[6];
 		tmp[10] = Pos_Inf.Longitude[7];
 		tmp[11] = Pos_Inf.Longitude[8];
-		//tmp[12] = '\"';
 		tmp[12] = '\'';
 		tmp[13] = ';';
 		oa_strcat(enquire_temp, tmp);
@@ -237,25 +237,25 @@ ack_kind need_ack_check(oa_char *p)
 {
 	oa_char *p_SEMICOLON = NULL; 
 	if (NULL == p){
-		Trace("(%s:%s:%d): err!", __FILE__, __func__, __LINE__);
+		DEBUG(" err!");
 		return ackerr;
 	}
 	p_SEMICOLON = oa_strchr(p, SEMICOLON);
 	if (p_SEMICOLON != NULL){
 		if (0x0 != *(p_SEMICOLON+2)){
-			Trace("(%s:%s:%d): format err!", __FILE__, __func__, __LINE__);
+			DEBUG(" format err!");
 			return ackerr;
 		}
 		if (*(p_SEMICOLON+1) == 'A' || *(p_SEMICOLON+1) == 'a')	return ack;
 		else if (*(p_SEMICOLON+1) == 'N' || *(p_SEMICOLON+1) == 'n')	return noack;
 		else if (*(p_SEMICOLON+1) == 0x0)	return noack;
 		else{
-			Trace("(%s:%s:%d): format err!", __FILE__, __func__, __LINE__);
+			DEBUG(" format err!");
 			return ackerr;
 		}
 	}
 	else	{
-		Trace("(%s:%s:%d): format err!", __FILE__, __func__, __LINE__);
+		DEBUG(" format err!");
 		return ackerr;
 		//return noack;
 	}	
@@ -274,7 +274,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 	oa_char temp[128] = {0x0};
 	oa_uint8 copy_len = 0;
 	if (NULL == p_key || e_len == 0 || p_set == NULL){
-		Trace("(%s:%s:%d): err!", __FILE__, __func__, __LINE__);
+		DEBUG(" err!");
 		return OA_FALSE;
 	}
 	if (sms == which) copy_len = message.len;
@@ -298,7 +298,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 					p_set->context.con_int = oa_atoi(temp);
 				}
 				else{
-					Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+					DEBUG(" paras err!");
 					return OA_FALSE;
 				}
 			}break;
@@ -309,7 +309,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 					oa_memcpy(p_set->context.con_ch, temp, oa_strlen(temp));
 				}
 				else{
-					Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+					DEBUG(" paras err!");
 					return OA_FALSE;
 				}
 			}break;
@@ -322,12 +322,12 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 						p_set->context.con_int = tmp;
 					}
 					else{
-						Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+						DEBUG(" paras err!");
 						return OA_FALSE;
 					}
 				}
 				else{
-					Trace("(%s:%s:%d): format err!", __FILE__, __func__, __LINE__);
+					DEBUG(" format err!");
 					return OA_FALSE;
 				}
 			}break;
@@ -339,12 +339,12 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 				if (oa_is_phone_addr_str(temp, oa_strlen(temp))){
 					if (oa_strlen(temp) < TEL_NUM_MAX_LEN)	oa_memcpy(p_set->context.con_ch, temp, oa_strlen(temp));
 					else{
-						Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+						DEBUG(" paras err!");
 						return OA_FALSE;
 					}
 				}
 				else{
-					Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+					DEBUG(" paras err!");
 					return OA_FALSE;
 				}
 			}break;
@@ -354,12 +354,12 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 					tmp = oa_atoi(temp);
 					if (tmp < Rpt_strategy_max_num)	p_set->context.con_int = tmp;
 					else{
-						Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+						DEBUG(" paras err!");
 						return OA_FALSE;
 					}
 				}
 				else{
-					Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+					DEBUG(" paras err!");
 					return OA_FALSE;
 				}
 			}break;
@@ -373,7 +373,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 					p_set->context.con_int = oa_atoi(temp);
 				}
 				else{
-					Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+					DEBUG(" paras err!");
 					return OA_FALSE;
 				}
 			}break;
@@ -381,17 +381,17 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 			case e_swh_alarmmask:{
 				if (digit01_string_check(temp, oa_strlen(temp))){
 					if (oa_strlen(temp) <= ALARMBIT_MAX_LEN){
-						//Trace("(%s:%s:%d): temp:%s!", __FILE__, __func__, __LINE__, temp);
+						//DEBUG(" temp:%s!", temp);
 						p_set->context.con_int = atobi(temp, oa_strlen(temp));
-						//Trace("(%s:%s:%d): p_set->context.con_int:%u!", __FILE__, __func__, __LINE__, p_set->context.con_int);
+						//DEBUG(" p_set->context.con_int:%u!", p_set->context.con_int);
 					}	
 					else{
-						Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+						DEBUG(" paras err!");
 						return OA_FALSE;
 					}
 				}
 				else{
-					Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+					DEBUG(" paras err!");
 					return OA_FALSE;
 				}
 			}break;
@@ -400,12 +400,12 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 				if (oa_is_digit_str(temp, oa_strlen(temp))){
 					p_set->context.con_int = oa_atoi(temp);
 					if (p_set->context.con_int > 65535){
-						Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+						DEBUG(" paras err!");
 						return OA_FALSE;
 					}
 				}
 				else{
-					Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+					DEBUG(" paras err!");
 					return OA_FALSE;
 				}
 			}break;
@@ -414,7 +414,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 					oa_memcpy(p_set->context.con_ch, temp, oa_strlen(temp));
 				}
 				else{
-					Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+					DEBUG(" paras err!");
 					return OA_FALSE;
 				}
 			}break;
@@ -422,7 +422,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 				if (oa_is_digit_str(temp, oa_strlen(temp))){
 					p_set->context.con_int = oa_atoi(temp);
 					if (p_set->context.con_int > 4){
-						Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+						DEBUG(" paras err!");
 						return OA_FALSE;
 					}
 				}
@@ -432,19 +432,19 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 				if (digit_alpha_check(temp, oa_strlen(temp))){
 					if (oa_strlen(temp) < FTP_MAX_LEN)		oa_memcpy(p_set->context.con_ch, temp, oa_strlen(temp));
 					else{
-						Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+						DEBUG(" paras err!");
 						return OA_FALSE;
 					}
 				}
 				else{
-					Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+					DEBUG(" paras err!");
 					return OA_FALSE;
 				}
 			}break;
 			case e_UPPROG_NAME:{
 				if (oa_strlen(temp) < FTP_MAX_LEN)		oa_memcpy(p_set->context.con_ch, temp, oa_strlen(temp));
 				else{
-					Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+					DEBUG(" paras err!");
 					return OA_FALSE;
 				}
 			}break;
@@ -457,9 +457,9 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 			case e_dev_lock:{
 				if (oa_is_digit_str(temp, oa_strlen(temp))){
 					p_set->context.con_int = oa_atoi(temp);
-					Trace("(%s:%s:%d): dev unlock!", __FILE__, __func__, __LINE__);
+					DEBUG(" dev unlock!");
 					if (p_set->context.con_int != UNLOCK){//only for unlock 
-						Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+						DEBUG(" paras err!");
 						return OA_FALSE;
 					}
 				}
@@ -468,18 +468,18 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 				if (oa_strlen(temp) == DEVID_LEN){
 					if (cap_digit_alpha_check(temp, oa_strlen(temp)))	oa_memcpy(p_set->context.con_ch, temp, DEVID_LEN);
 					else{
-						Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+						DEBUG(" paras err!");
 						return OA_FALSE;
 					}
 				}
 				else{
-					Trace("(%s:%s:%d): paras err!", __FILE__, __func__, __LINE__);
+					DEBUG(" paras err!");
 					return OA_FALSE;
 				}
 			}break;
 			default:{
-				Trace("(%s:%s:%d): e_kind:%d", __FILE__, __func__, __LINE__, e_kind);
-				Trace("(%s:%s:%d): not support!", __FILE__, __func__, __LINE__);
+				DEBUG(" e_kind:%d", e_kind);
+				DEBUG(" not support!");
 				return OA_FALSE;
 			}break;
 		}
@@ -490,7 +490,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 		p_set->kind = enquire;
 	}
 	else{
-		Trace("(%s:%s:%d): format err!", __FILE__, __func__, __LINE__);
+		DEBUG(" format err!");
 		return OA_FALSE;
 	}
 #endif
@@ -513,27 +513,27 @@ e_keyword lookfor_keywords_loop(u8 *p_sms, u16 sms_len, keyword_context *p_set, 
 //	oa_uint8 e_i;
 	
 	if (NULL == p_set || e_i == e_none){
-		Trace("(%s:%s:%d): p_set err!", __FILE__, __func__, __LINE__);
+		DEBUG(" p_set err!");
 		return e_none;
 	}
 	
 	if (sms == which){
 		if (NULL == p_set || e_i == e_none){
-			Trace("(%s:%s:%d): p_set err!", __FILE__, __func__, __LINE__);
+			DEBUG(" p_set err!");
 			return e_none;
 		}
 		p_key = oa_strstr(message.data, p_keyword[e_i]);
 	}
 	else if (uart == which){
 		if (NULL == p_set || e_i == e_none){
-			Trace("(%s:%s:%d): p_set err!", __FILE__, __func__, __LINE__);
+			DEBUG(" p_set err!");
 			return e_none;
 		}
 		p_key = oa_strstr(uart_contain.buf, p_keyword[e_i]);
 	}
 	else if (scrn == which){
 		if (NULL == p_set || NULL == p_sms || sms_len > 255){
-			Trace("(%s:%s:%d): p_set err!", __FILE__, __func__, __LINE__);
+			DEBUG(" p_set err!");
 			return e_none;
 		}
 		oa_memcpy(temp, p_sms, sms_len);
@@ -576,11 +576,11 @@ e_keyword lookfor_keywords_loop(u8 *p_sms, u16 sms_len, keyword_context *p_set, 
 void sms_send_feedback_func(os_sms_result send_ret)
 {
 	if (OA_SMS_OK != send_ret){
-		Trace("(%s:%s:%d): sms send err:%d......send again", __FILE__, __func__, __LINE__, send_ret);
+		DEBUG(" sms send err:%d......send again", send_ret);
 		oa_sms_send_req(sms_send_feedback_func, sms_fail.deliver_num, sms_fail.data, sms_fail.len, sms_fail.dcs);
 	}
 	else if (OA_SMS_OK == send_ret){
-		Trace("(%s:%s:%d): sms send ok", __FILE__, __func__, __LINE__);
+		DEBUG(" sms send ok");
 		oa_memset(&sms_fail, 0x0, sizeof(sms_fail));
 	}
 }
@@ -683,7 +683,7 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 			case e_swh_alarmsms:{
 				oa_char tmp[33] = {0x0};
 				oa_itoa(dev_now_params.alarm_send_sms_mask, tmp, BI);
-				//Trace("(%s:%s:%d): temp:%s!", __FILE__, __func__, __LINE__, tmp);
+				//DEBUG(" temp:%s!", tmp);
 				oa_strcat(enquire_temp, "swh_alarmsms:");
 				oa_strcat(enquire_temp, tmp);
 			}break;
@@ -814,7 +814,7 @@ void dev_action_handle(keyword_context *p_set)
 {
 	oa_bool ret;
 	if (NULL == p_set){
-		Trace("(%s:%s:%d): p_set err!", __FILE__, __func__, __LINE__);
+		DEBUG(" p_set err!");
 		return;
 	}
 	
@@ -1024,10 +1024,10 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 					}
 				}
 				else{//not equal
-					//Trace("(%s:%s:%d): oa_strlen(p_set->context.con_ch):%d!", __FILE__, __func__, __LINE__, oa_strlen(p_set->context.con_ch));
+					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
 					oa_memset(dev_now_params.m_server_ip, 0x0, sizeof(dev_now_params.m_server_ip));
 					oa_memcpy(dev_now_params.m_server_ip, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					//Trace("(%s:%s:%d): m_server_ip:%s!", __FILE__, __func__, __LINE__, dev_now_params.m_server_ip);
+					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
 					p_set->act_kind = reconn;
 				}
 			}		
@@ -1369,10 +1369,10 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 					}
 				}
 				else{//not equal
-					//Trace("(%s:%s:%d): oa_strlen(p_set->context.con_ch):%d!", __FILE__, __func__, __LINE__, oa_strlen(p_set->context.con_ch));
+					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
 					oa_memset(dev_now_params.update_server_ip, 0x0, sizeof(dev_now_params.update_server_ip));
 					oa_memcpy(dev_now_params.update_server_ip, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					//Trace("(%s:%s:%d): m_server_ip:%s!", __FILE__, __func__, __LINE__, dev_now_params.m_server_ip);
+					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
 					p_set->act_kind = para_save;
 				}
 			}	
@@ -1408,10 +1408,10 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 					}
 				}
 				else{//not equal
-					//Trace("(%s:%s:%d): oa_strlen(p_set->context.con_ch):%d!", __FILE__, __func__, __LINE__, oa_strlen(p_set->context.con_ch));
+					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
 					oa_memset(dev_now_params.ftpusr, 0x0, sizeof(dev_now_params.ftpusr));
 					oa_memcpy(dev_now_params.ftpusr, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					//Trace("(%s:%s:%d): m_server_ip:%s!", __FILE__, __func__, __LINE__, dev_now_params.m_server_ip);
+					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
 					p_set->act_kind = para_save;
 				}
 			}
@@ -1433,10 +1433,10 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 					}
 				}
 				else{//not equal
-					//Trace("(%s:%s:%d): oa_strlen(p_set->context.con_ch):%d!", __FILE__, __func__, __LINE__, oa_strlen(p_set->context.con_ch));
+					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
 					oa_memset(dev_now_params.ftppwd, 0x0, sizeof(dev_now_params.ftppwd));
 					oa_memcpy(dev_now_params.ftppwd, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					//Trace("(%s:%s:%d): m_server_ip:%s!", __FILE__, __func__, __LINE__, dev_now_params.m_server_ip);
+					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
 					p_set->act_kind = para_save;
 				}
 			}
@@ -1458,10 +1458,10 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 					}
 				}
 				else{//not equal
-					//Trace("(%s:%s:%d): oa_strlen(p_set->context.con_ch):%d!", __FILE__, __func__, __LINE__, oa_strlen(p_set->context.con_ch));
+					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
 					oa_memset(dev_now_params.ftp_prog_name, 0x0, sizeof(dev_now_params.ftp_prog_name));
 					oa_memcpy(dev_now_params.ftp_prog_name, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					//Trace("(%s:%s:%d): m_server_ip:%s!", __FILE__, __func__, __LINE__, dev_now_params.m_server_ip);
+					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
 					p_set->act_kind = para_save;
 				}
 			}
@@ -1485,6 +1485,9 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 		}break;
 		case e_UPDATE:{
 			p_set->act_kind = update;
+		}break;
+		case e_VERSA:{
+
 		}break;
 		case e_RESTART:{
 			p_set->act_kind = reset;
@@ -1512,10 +1515,10 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 			}
 		}break;
 		case e_none:{
-			Trace("(%s:%s:%d): not support!", __FILE__, __func__, __LINE__);
+			DEBUG(" not support!");
 		}break;
 		default:{
-			Trace("(%s:%s:%d): not support!", __FILE__, __func__, __LINE__);
+			DEBUG(" not support!");
 			break;
 		}
 	}
@@ -1581,7 +1584,7 @@ void oa_app_sms(void)
 	for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
 		key_ret = lookfor_keywords_loop(NULL, 0, &set, e_i, sms);
 		if (e_none == key_ret){
-			//Trace("(%s:%s:%d): not support!", __FILE__, __func__, __LINE__);
+			//DEBUG(" not support!");
 			continue;
 		}
 		handle_keyword(NULL, NULL, NULL, key_ret, &set, sms);
@@ -1589,9 +1592,9 @@ void oa_app_sms(void)
 	}
 	#if 0
 	key_ret = lookfor_keywords_loop(&set);//lookfor_keywords(&set);
-	//Trace("(%s:%s:%d): key_ret:%d!", __FILE__, __func__, __LINE__,key_ret);
+	//DEBUG(" key_ret:%d!",key_ret);
 	if (e_none == key_ret){
-		Trace("(%s:%s:%d): not support!", __FILE__, __func__, __LINE__);
+		DEBUG(" not support!");
 		return;
 	}
 	handle_keyword(key_ret, &set);

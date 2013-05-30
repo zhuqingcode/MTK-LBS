@@ -24,11 +24,13 @@
  *   zhuqing.
  *
  ****************************************************************************/
- #include "oa_type.h"
+#include "oa_type.h"
 #include "oa_api.h"
 #include "oa_at.h"
 #include "oa_platform.h"
 #include "oa_dev_params.h"
+#include "oa_debug.h"
+
 extern DEV_PLAT_PARAS dev_running;
 extern DEVICE_PARAMS dev_now_params;
 #define POWEROFF_TIME 2000
@@ -47,7 +49,7 @@ void do_reset(void)
 			dev_running.plat_status = OFFLINE;
 		}
 	}
-	Trace("someone let me reset myself , so..., goodbye......");
+	DEBUG("someone let me reset myself , so..., goodbye......");
 	oa_sleep(POWEROFF_TIME);
 	oa_module_restart(NULL);
 }
@@ -66,7 +68,7 @@ void do_factory_set(void)
 			dev_running.plat_status = OFFLINE;
 		}
 	}
-	Trace("someone let me restore the factory settings , so..., goodbye......");
+	DEBUG("someone let me restore the factory settings , so..., goodbye......");
 	oa_sleep(POWEROFF_TIME);
 	factory_set();
 }
@@ -85,7 +87,7 @@ void do_powerdown(void)
 			dev_running.plat_status = OFFLINE;
 		}
 	}
-	Trace("someone let me powerdown myself, so..., goodbye......in 3 second");
+	DEBUG("someone let me powerdown myself, so..., goodbye......in 3 second");
 	oa_sleep(POWEROFF_TIME);//delay just for tcp 
 	oa_power_shutdown(NULL);
 }
@@ -155,7 +157,7 @@ void do_soc_reconn(void)
 		oa_soc_send_req();//send last packet before close soc	
 		//close socket
 		if (oa_soc_close_req()){//after testing it doesn't cause "oa_soc_notify_ind_user_callback" 
-			Trace("(%s:%s:%d):I close soc in order to reconnect!",__FILE__, __func__, __LINE__);
+			DEBUG("I close soc in order to reconnect!");
 			dev_running.plat_status = OFFLINE;
 			dev_running.plat_switch = OA_TRUE;
 			dev_running.next_step = PLAT_RECONN;
@@ -178,7 +180,7 @@ void just_reconn(void)
 		oa_soc_send_req();//send last packet before close soc	
 		//close socket
 		if (oa_soc_close_req()){//after testing it doesn't cause "oa_soc_notify_ind_user_callback" 
-			Trace("(%s:%s:%d):I close soc in order to reconnect!",__FILE__, __func__, __LINE__);
+			DEBUG("I close soc in order to reconnect!");
 			dev_running.plat_status = OFFLINE;
 			dev_running.plat_switch = OA_TRUE;
 			dev_running.next_step = PLAT_RECONN;
@@ -200,7 +202,7 @@ void just_close_soc(void)
 		oa_soc_send_req();//send last packet before close soc	
 		//close socket
 		if (oa_soc_close_req()){//after testing it doesn't cause "oa_soc_notify_ind_user_callback" 
-			Trace("(%s:%s:%d):I close soc and do not reconnect!",__FILE__, __func__, __LINE__);
+			DEBUG("I close soc and do not reconnect!");
 			dev_running.plat_status = OFFLINE;
 			//dev_running.plat_switch = OA_TRUE;
 			//dev_running.next_step = PLAT_RECONN;
@@ -230,6 +232,6 @@ void ftp_update(void)
 	oa_strcat(para, dev_now_params.ftp_prog_name);
 	oa_strcat(para, ",0");//8:print download bar & restart after finish
 	//oa_strcat(para, ",openatdll.dll,0");
-	Trace("update param:%s", para);
+	DEBUG("update param:%s", para);
 	oa_start_ftp_upgrade(para);
 }

@@ -28,6 +28,8 @@
 #include "oa_api.h"
 #include "oa_at.h"
 #include "oa_sms.h"
+#include "oa_debug.h"
+
 /*--------BEG: Customer code----------*/
 extern oa_sms_context message;
  extern oa_uint8 at_fedbak_buf[AT_FEDBAK_MAX_LEN];
@@ -46,7 +48,7 @@ extern oa_sms_context message;
 /*****************************************************************/
 oa_bool oa_app_execute_custom_at_cmd(oa_char* pStr, oa_uint16 len)
 {
-    OA_DEBUG_USER("%s: len=%d@@%s", __FILE__, __func__, len, pStr);
+    DEBUG("len=%d@@%s", len, pStr);
     /*Example: [AT+OPENAT=GPRS:0,www.3322.org,0.0.0.0,2011#]
     * if use domain, set ip:0.0.0.0, or system will use ip for primitive.
     */
@@ -83,7 +85,7 @@ oa_bool oa_app_execute_custom_at_cmd(oa_char* pStr, oa_uint16 len)
         g_soc_param.connct_type = curType;
 
         oa_soc_setting_save();
-        OA_DEBUG_USER(  "GPRS parameter set: %d, %s, %s, %d", 
+        DEBUG("GPRS parameter set: %d, %s, %s, %d", 
                         g_soc_param.connct_type, g_soc_param.serve_host_name,
                         g_soc_param.serve_ipaddr, g_soc_param.port);
 
@@ -98,7 +100,7 @@ oa_bool oa_app_execute_custom_at_cmd(oa_char* pStr, oa_uint16 len)
 // on tone playing callback
 oa_bool oa_app_on_tone_play_req(oa_uint16 playtone)
 {
-	OA_DEBUG_USER("%s:%d", __FILE__, __func__,playtone);
+	DEBUG("%d", playtone);
 
 	return OA_TRUE;
 
@@ -127,9 +129,9 @@ void oa_app_at_rsp_recv(oa_uint16 len, oa_uint8 *pStr)
 {
 	
 #ifdef AT_RECV_PRINT
-	OA_DEBUG_USER("[--------------------");
-    	OA_DEBUG_USER("%s", pStr);
-	OA_DEBUG_USER("--------------------]");
+	DEBUG("[--------------------");
+    	DEBUG("%s", pStr);
+	DEBUG("--------------------]");
 #endif
 	//handle AT feedback
 	oa_memset(at_fedbak_buf, 0x0, sizeof(at_fedbak_buf));
@@ -140,13 +142,13 @@ void oa_app_at_rsp_recv(oa_uint16 len, oa_uint8 *pStr)
 	}
 	else
 	{
-		OA_DEBUG_USER("ERR in %s", __FILE__, __func__);
+		DEBUG("ERR!");
 	}
 }
 
 void oa_app_power_shutdown(void* param)
 {
-	OA_DEBUG_USER("(%s:%s:%d): power down! good bye!", __FILE__, __func__, __LINE__);
+	DEBUG("power down! good bye!");
 	//oa_soc_close_req();
 	oa_power_shutdown(NULL);
 }
@@ -177,13 +179,13 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 {
 
 #ifdef DBG_SMS
-	OA_DEBUG_USER("SMS received:deliver_num=%s,timestamp=%d-%d-%d-%d:%d:%d,dcs=%d,len=%d,data=%s",\
+	DEBUG("SMS received:deliver_num=%s,timestamp=%d-%d-%d-%d:%d:%d,dcs=%d,len=%d,data=%s",\
 	deliver_num,*(timestamp+0),*(timestamp+1),*(timestamp+2),*(timestamp+3),*(timestamp+4),*(timestamp+5),dcs,len,data);
 #endif
 	oa_memset(&message, 0x0, sizeof(message));//reset message
 	if(dcs == OA_SMSAL_DEFAULT_DCS){
 		/*handle ascii sms text.*/
-		//OA_DEBUG_USER("SMS TXT: %s", data);
+		//DEBUG("SMS TXT: %s", data);
 		
 	}
 	else if(dcs == OA_SMSAL_UCS2_DCS){
@@ -201,13 +203,13 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 			}
 		}
 	#endif
-		Trace("(%s:%s:%d): unicode not support!", __FILE__, __func__, __LINE__);
+		Trace("unicode not support!");
 		return OA_TRUE; //do not handle & delete it
 	}
 	else{
 		/*handle 8-bit sms text.*/
 		//²ÊÐÅ
-		OA_DEBUG_USER("8-bit sms text!!!");
+		DEBUG("8-bit sms text!!!");
 		return OA_TRUE; //do not handle & delete it
 	}
 	//copy message 
@@ -218,7 +220,7 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 			oa_strcpy(message.deliver_num, deliver_num);
 		}
 		else{
-			OA_DEBUG_USER("ERR : deliver number");
+			DEBUG("ERR : deliver number");
 			return OA_TRUE;//do not handle & delete it
 		}
 		
@@ -228,7 +230,7 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 			message.len = len;
 		}
 		else{
-			OA_DEBUG_USER("ERR : len > SMS_DATA_MAX_LEN");
+			DEBUG("ERR : len > SMS_DATA_MAX_LEN");
 			return OA_TRUE;//do not handle & delete it
 		}
 		
@@ -236,7 +238,7 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 		oa_app_sms();//handle the sms
 	}
 	else{
-		OA_DEBUG_USER("ERR in %s", __FILE__, __func__);
+		DEBUG("ERR!");
 	}
 	return OA_TRUE;/*delete current SMS from memory*/
 	//return OA_FALSE;/*do not delete this SMS, user can handle it*/

@@ -28,6 +28,8 @@
 #include "oa_api.h"
 #include "oa_gps.h"
 #include "oa_platform.h"
+#include "oa_debug.h"
+
 extern DEV_PLAT_PARAS dev_running;
 /*********************************************************
 *Function:      mile_stat_init()
@@ -47,22 +49,22 @@ oa_bool mile_stat_init(void)
 		handle = oa_fcreate(MILEAGE_FILE);
 		/* hope never return here. */
 		if (handle < 0){
-			OA_DEBUG_USER("(%s:%s:%d):Create mileage file failed!", __FILE__,  __func__, __LINE__);
+			DEBUG("Create mileage file failed!");
 			return OA_FALSE;
 		}
 		mileage.total_mileage = 0;
 		ret = oa_fwrite(handle, &mileage, sizeof(TOTAL_MILE), &dummy_write);
 		if ((ret < 0) || (dummy_write != sizeof(TOTAL_MILE))){
-			OA_DEBUG_USER("(%s:%s:%d):Init mileage file failed!", __FILE__,  __func__, __LINE__);
+			DEBUG("Init mileage file failed!");
 			return OA_FALSE;
 		}
-		OA_DEBUG_USER("(%s:%s:%d):Create mileage file ok!", __FILE__,  __func__, __LINE__);    
+		DEBUG("Create mileage file ok!");    
 	}
 	
 	
 	ret = oa_fclose(handle);
 	if (ret < 0){
-		OA_DEBUG_USER("(%s:%s:%d):close file err!", __FILE__,  __func__, __LINE__);
+		DEBUG("close file err!");
 		oa_fdelete(MILEAGE_FILE);
 		return OA_FALSE;
 	}
@@ -87,41 +89,41 @@ oa_bool mile_stat_add(FP32 p_mile)
 		handle = oa_fcreate(MILEAGE_FILE);
 		/* hope never return here. */
 		if (handle < 0){
-			OA_DEBUG_USER("(%s:%s:%d):Create mileage file failed!", __FILE__,  __func__, __LINE__);
+			DEBUG("Create mileage file failed!", __FILE__,  __func__, __LINE__);
 			return OA_FALSE;
 		}
 		mileage.total_mileage = 0;
 		ret = oa_fwrite(handle, &mileage, sizeof(TOTAL_MILE), &dummy_write);
 		if ((ret < 0) || (dummy_write != sizeof(TOTAL_MILE))){
-			OA_DEBUG_USER("(%s:%s:%d):Init mileage file failed!", __FILE__,  __func__, __LINE__);
+			DEBUG("Init mileage file failed!", __FILE__,  __func__, __LINE__);
 			return OA_FALSE;
 		}
-		OA_DEBUG_USER("(%s:%s:%d):Create mileage file ok!", __FILE__,  __func__, __LINE__);
+		DEBUG("Create mileage file ok!", __FILE__,  __func__, __LINE__);
 		#endif
 		return OA_FALSE;
 	}
 	oa_fseek(handle, 0, OA_FILE_BEGIN);
 	ret = oa_fread(handle, &mileage, sizeof(TOTAL_MILE), &dummy_read);
-	//OA_DEBUG_USER("after read total_mileage:%d", mileage.total_mileage);
+	//DEBUG("after read total_mileage:%d", mileage.total_mileage);
 	if ((ret < 0) || (dummy_read != sizeof(TOTAL_MILE))){
-		OA_DEBUG_USER("(%s:%s:%d):read mileage err!", __FILE__,  __func__, __LINE__);
+		DEBUG("read mileage err!");
 		oa_fclose(handle);
 		return OA_FALSE;
 	}
-	//OA_DEBUG_USER("give to func total_mileage:%f", p_mile);
+	//DEBUG("give to func total_mileage:%f", p_mile);
 	mileage.total_mileage += (u32)(p_mile * 10.0);//floor//cut off dot part
 	oa_fseek(handle, 0, OA_FILE_BEGIN);//<do not forget!!!>
 	//just for debug
-	//OA_DEBUG_USER("(%s:%s:%d):total_mileage:%d", __FILE__,  __func__, __LINE__, mileage.total_mileage);
+	//DEBUG("total_mileage:%d", __FILE__,  __func__, __LINE__, mileage.total_mileage);
 	ret = oa_fwrite(handle, &mileage, sizeof(TOTAL_MILE), &dummy_write);
 	if ((ret < 0) || (dummy_write != sizeof(TOTAL_MILE))){
-		OA_DEBUG_USER("(%s:%s:%d):calculate mileage err!", __FILE__,  __func__, __LINE__);
+		DEBUG("calculate mileage err!");
 		oa_fclose(handle);
 		return OA_FALSE;
 	}
 	ret = oa_fclose(handle);
 	if (ret < 0){
-		OA_DEBUG_USER("(%s:%s:%d):close file err!", __FILE__,  __func__, __LINE__);
+		DEBUG("close file err!");
 		oa_fdelete(MILEAGE_FILE);
 		return OA_FALSE;
 	}
@@ -163,7 +165,7 @@ oa_bool authen_code_handle(oa_uint8 *code_buf, oa_uint8 code_len)
 	
 	if (NULL == code_buf || code_len == 0)
 	{
-		OA_DEBUG_USER("(%s:%s:%d): arg err", __FILE__, __func__, __LINE__);
+		DEBUG(" arg err");
 		return OA_FALSE;
 	}
 	
@@ -175,18 +177,18 @@ oa_bool authen_code_handle(oa_uint8 *code_buf, oa_uint8 code_len)
 		/* hope never return here. */
 		if (handle < 0)
 		{
-			OA_DEBUG_USER("(%s:%s:%d): Create authen file failed!", __FILE__, __func__, __LINE__);
+			DEBUG(" Create authen file failed!");
 			return OA_FALSE;
 		}
 		oa_memset(&authen, 0x0, sizeof(AUTHEN_STRUCT));
 		ret = oa_fwrite(handle, &authen, sizeof(AUTHEN_STRUCT), &dummy_write);
 		if ((ret < 0) || (dummy_write != sizeof(AUTHEN_STRUCT)))
 		{
-			OA_DEBUG_USER("(%s:%s:%d): Init authen file failed!", __FILE__, __func__, __LINE__);
+			DEBUG(" Init authen file failed!");
 			return OA_FALSE;
 		}
 
-		OA_DEBUG_USER("(%s:%s:%d): Create authen file ok!", __FILE__, __func__, __LINE__);    
+		DEBUG(" Create authen file ok!");    
 	}
 
 	oa_memset(&authen, 0x0, sizeof(AUTHEN_STRUCT));
@@ -197,7 +199,7 @@ oa_bool authen_code_handle(oa_uint8 *code_buf, oa_uint8 code_len)
 	}
 	else
 	{
-		OA_DEBUG_USER("(%s:%s:%d): code is too long!", __FILE__, __func__, __LINE__);
+		DEBUG(" code is too long!");
 		oa_fclose(handle);
 		return OA_FALSE;
 	}
@@ -207,7 +209,7 @@ oa_bool authen_code_handle(oa_uint8 *code_buf, oa_uint8 code_len)
 	ret = oa_fwrite(handle, &authen, sizeof(AUTHEN_STRUCT), &dummy_write);
 	if ((ret < 0) || (dummy_write != sizeof(AUTHEN_STRUCT)))
 	{
-		OA_DEBUG_USER("(%s:%s:%d): write authen file failed!", __FILE__, __func__, __LINE__);
+		DEBUG(" write authen file failed!");
 		oa_fclose(handle);
 		return OA_FALSE;
 	}
@@ -230,14 +232,14 @@ oa_bool read_authen_code(oa_uint8 *code_buf, oa_uint16 *p_code_len)
 	
 	if (NULL == code_buf || p_code_len == NULL)
 	{
-		OA_DEBUG_USER("(%s:%s:%d): arg err", __FILE__, __func__, __LINE__);
+		DEBUG(" arg err");
 		return OA_FALSE;
 	}
 
 	handle = oa_fopen(AUTHEN_FILE);
 	if (handle < 0)
 	{
-		OA_DEBUG_USER("(%s:%s:%d): open err", __FILE__, __func__, __LINE__);
+		DEBUG(" open err");
 		return OA_FALSE;
 	}
 
@@ -246,7 +248,7 @@ oa_bool read_authen_code(oa_uint8 *code_buf, oa_uint16 *p_code_len)
 	ret = oa_fread(handle, &authen, sizeof(AUTHEN_STRUCT), &dummy_read);
 	if ((ret < 0) || (dummy_read != sizeof(AUTHEN_STRUCT)))
 	{
-		OA_DEBUG_USER("(%s:%s:%d): read err", __FILE__, __func__, __LINE__);
+		DEBUG(" read err");
 		oa_fclose(handle);
 		return OA_FALSE;
 	}
@@ -270,14 +272,14 @@ oa_bool save_authen_code(oa_uint8 *code_buf, oa_uint8 code_len)
 	
 	if (NULL == code_buf || code_len == 0)
 	{
-		OA_DEBUG_USER("(%s:%s:%d): arg err", __FILE__, __func__, __LINE__);
+		DEBUG(" arg err");
 		return OA_FALSE;
 	}
 
 	handle = oa_fopen(AUTHEN_FILE);
 	if (handle < 0)
 	{
-		OA_DEBUG_USER("(%s:%s:%d): open err", __FILE__, __func__, __LINE__);
+		DEBUG(" open err");
 		return OA_FALSE;
 	}
 
@@ -290,7 +292,7 @@ oa_bool save_authen_code(oa_uint8 *code_buf, oa_uint8 code_len)
 	}
 	else
 	{
-		OA_DEBUG_USER("(%s:%s:%d): code is too long!", __FILE__, __func__, __LINE__);
+		DEBUG(" code is too long!");
 		oa_fclose(handle);
 		return OA_FALSE;
 	}
@@ -300,7 +302,7 @@ oa_bool save_authen_code(oa_uint8 *code_buf, oa_uint8 code_len)
 	ret = oa_fwrite(handle, &authen, sizeof(AUTHEN_STRUCT), &dummy_write);
 	if ((ret < 0) || (dummy_write != sizeof(AUTHEN_STRUCT)))
 	{
-		OA_DEBUG_USER("(%s:%s:%d): write authen file failed!", __FILE__, __func__, __LINE__);
+		DEBUG(" write authen file failed!");
 		oa_fclose(handle);
 		return OA_FALSE;
 	}

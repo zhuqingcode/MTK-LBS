@@ -29,6 +29,8 @@
 #include "oa_at.h"
 #include "oa_platform.h"
 #include "oa_dev_params.h"
+#include "oa_debug.h"
+
 extern DEVICE_PARAMS dev_now_params;
 extern void do_reset(void);
 extern void do_factory_set(void);
@@ -58,27 +60,27 @@ call_kind is_specific_num(void)
 					oa_memcpy(ring_num, p_QUOTES+1, len);
 				}
 				else{
-					Trace("(%s:%s:%d): err ring number is too long!", __FILE__, __func__, __LINE__);
+					DEBUG("err ring number is too long!");
 					return call_err;
 				}
 			}
 			else{
-				Trace("(%s:%s:%d): err in extract ring number!", __FILE__, __func__, __LINE__);
+				DEBUG("err in extract ring number!");
 				return call_err;
 			}
 		}
 		else{
-			Trace("(%s:%s:%d): err in extract ring number!", __FILE__, __func__, __LINE__);
+			DEBUG("err in extract ring number!");
 			return call_err;
 		}
 
 		if (!oa_is_phone_addr_str(ring_num, len)){//maybe it is 025-88888888-8888, it destn't work
-			Trace("(%s:%s:%d): invalid ring number!", __FILE__, __func__, __LINE__);
+			DEBUG("invalid ring number!");
 			return call_err;
 		}
 
 		if (!oa_strncmp(ring_num, dev_now_params.reset_num, oa_strlen(ring_num))){
-			Trace("(%s:%s:%d): reset ring!", __FILE__, __func__, __LINE__);
+			DEBUG("reset ring!");
 			return call_reset;
 		}	
 		else if (!oa_strncmp(ring_num, dev_now_params.restore_factory_settings_num, oa_strlen(ring_num)))	return call_factory_set;
@@ -101,8 +103,8 @@ void oa_app_at(void)
 {
 	call_kind ret = call_err;
 #ifdef AT_FEDBAK_PRINT
-	OA_DEBUG_USER("%s called", __FILE__, __func__);
-	OA_DEBUG_USER("%s", at_fedbak_buf);
+	DEBUG();
+	DEBUG("%s", at_fedbak_buf);
 #endif
 	//handle at feedback
 	if (NULL != oa_strstr((oa_char *)at_fedbak_buf, RING_CLIP)){
@@ -111,8 +113,8 @@ void oa_app_at(void)
 		switch (ret){
 			#if 0
 			oa_hang_up_calls(NULL);
-			OA_DEBUG_USER("Strange numbers is calling me......");
-			OA_DEBUG_USER("so I will restart myself, goodbye......");
+			DEBUG("Strange numbers is calling me......");
+			DEBUG("so I will restart myself, goodbye......");
 			oa_module_restart(NULL);
 			#endif
 			case call_reset:{
