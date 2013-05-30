@@ -432,6 +432,8 @@ void oa_app_main(void)
 		params_to_soc_set();//change 'soc_cs' value
 		//callback function register
 		callback_func_reg();
+		//run sms backgrade
+		oa_sms_handler();
 		first_run = OA_FALSE;
 	}
 	
