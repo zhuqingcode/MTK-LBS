@@ -184,9 +184,9 @@ void oa_app_plat_link(void *para)
 	else{//detect is online/offline
 		if (dev_running.plat_check_value == OA_TRUE){
 			if (oa_sim_network_is_valid()){
-				//Trace(" acc_status:%d acc_short_conning:%d",acc_status,acc_short_conning);
+				//DEBUG(" acc_status:%d acc_short_conning:%d",acc_status,acc_short_conning);
 				if ((acc_status == ACC_ON) || (acc_short_conning == OA_TRUE)){//acc is on
-					//Trace(" check soc status!");
+					//DEBUG(" check soc status!");
 					oa_soc_state_check();//check & connect
 				}
 			}
@@ -253,15 +253,15 @@ void oa_app_plat_data(void *param)
 				if (build_ret > 0){
 					soc_ret = oa_soc_send_req();//check datas in buffer & send, concern it send ok.
 					if (soc_ret == build_ret){
-						Trace("send the last packet before closing soc!!!");
+						DEBUG("send the last packet before closing soc!!!");
 						send_before_close = OA_FALSE;
 					}
 					else{
-						Trace("send data is not equal!");
+						DEBUG("send data is not equal!");
 					}
 				}
 				else{
-					Trace("build packet err!");
+					DEBUG("build packet err!");
 				}
 
 			}
@@ -269,7 +269,7 @@ void oa_app_plat_data(void *param)
 			if (send_before_close == OA_FALSE){
 				//close socket
 				if (oa_soc_close_req()){//after testing it doesn't cause "oa_soc_notify_ind_user_callback" 
-					Trace("I close soc by myself for acc is off",__FILE__, __func__, __LINE__);
+					DEBUG("I close soc by myself for acc is off",__FILE__, __func__, __LINE__);
 					dev_running.plat_status = OFFLINE;
 					send_before_close = OA_TRUE;
 				}
@@ -285,22 +285,22 @@ void oa_app_plat_data(void *param)
 					acc_short_conning = OA_FALSE;
 				}
 				else{
-					Trace("send data is not equal!");
+					DEBUG("send data is not equal!");
 				}
 			}
 			else{
-				Trace("build packet err!");
+				DEBUG("build packet err!");
 			}
 			
 		}
 		
 		//acc off time > sleep_reporttime & dev is offline
-		//Trace("sleep_reporttime:%u",dev_now_params.sleep_reporttime);
+		//DEBUG("sleep_reporttime:%u",dev_now_params.sleep_reporttime);
 		if (dev_now_params.sleep_reporttime >=  PLAT_DATA_SECOND){//avoid sleep_reporttime is too short
 			if (acc_counter * PLAT_DATA_SECOND >= dev_now_params.sleep_reporttime && 
 				dev_running.plat_status == OFFLINE){
 				acc_counter = 0;
-				Trace("I'm doing soc connect for a period");
+				DEBUG("I'm doing soc connect for a period");
 				oa_soc_state_check();//check & connect = A lengthy process of asynchronous, so we can not wait here
 				acc_short_conning = OA_TRUE;
 			}
@@ -322,14 +322,14 @@ void oa_app_plat_data(void *param)
 			if (hbeat_counter * PLAT_DATA_SECOND >= dev_now_params.heartbeat_interval){
 				build_ret = DevReq2ServPackag_build(HEART_BEAT);//build heartbeats packets & fill buffer with it
 				if (!build_ret){
-					Trace("build heartbeat packet err!");
+					DEBUG("build heartbeat packet err!");
 				}
 				else{
 					soc_ret = oa_soc_send_req();
 					if (build_ret == soc_ret){
 						hbeat_counter = 0;
 						print_rtc_time();
-						Trace("send one heartbeat packet");
+						DEBUG("send one heartbeat packet");
 					}
 				}
 			}

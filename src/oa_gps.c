@@ -165,7 +165,7 @@ void oa_app_gps(void)
 		if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){//cancel this alarm, upload instantly
 			//WriteAlarmPara(RESET, StaAlarm0, ALARM_GNSS_ERR);
 			handle_alarm_status(StaAlarm0, ALARM_GNSS_ERR, RESET, OA_TRUE);
-			DEBUG(" Gps model is OK.");
+			DEBUG("Gps model is OK.");
 		}
 		//clear it
 		if (ModelCnt > 0) ModelCnt = 0;
