@@ -269,7 +269,7 @@ void oa_app_plat_data(void *param)
 			if (send_before_close == OA_FALSE){
 				//close socket
 				if (oa_soc_close_req()){//after testing it doesn't cause "oa_soc_notify_ind_user_callback" 
-					DEBUG("I close soc by myself for acc is off",__FILE__, __func__, __LINE__);
+					DEBUG("I close soc by myself for acc is off");
 					dev_running.plat_status = OFFLINE;
 					send_before_close = OA_TRUE;
 				}
