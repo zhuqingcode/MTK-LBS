@@ -30,13 +30,15 @@
 #include "oa_llist.h"
 #include "oa_at-p.h"
 #include "oa_sms-p.h"
+#include "oa_debug.h"
 //#include "oa_protocol.h"
 
 #define SMS_DEBUG 2
 /*oa_trace_on_uart OR oa_trace_on_at*/
 #if (SMS_DEBUG == 2)
-#define SMS_DEBUG_L2(...)
-#define SMS_DEBUG_L1 OA_DEBUG_USER
+//#define SMS_DEBUG_L2(...)
+#define SMS_DEBUG_L2 DEBUG
+#define SMS_DEBUG_L1 DEBUG//OA_DEBUG_USER
 #elif(SMS_DEBUG == 1)
 #define SMS_DEBUG_L2(...)
 #define SMS_DEBUG_L1(...)
@@ -467,12 +469,13 @@ void oa_sms_initial_by_at_cmd(void)
 //handler function for scheduler
 void oa_sms_handler(void)
 {
-    llist_head *sendHead = &g_at_sms_send_pend_list;
+	
+	llist_head *sendHead = &g_at_sms_send_pend_list;
     llist_head *revcHead = &g_at_sms_recv_pend_list;
     
     SMS_DEBUG_L2("[OA]SCH: goto oa_sms_handler.");
     SMS_DEBUG_L2("[OA]SMS: check list %d %d %d \n", oa_at_busy(), llist_empty(sendHead), g_current_pend_state);
-    
+
     if(oa_at_busy() || oa_is_in_call()) return;
 
     //shuold we receive sms before send sms?
@@ -494,7 +497,6 @@ void oa_sms_handler(void)
         }
     }
 
-	oa_timer_start(OA_TIMER_ID_10, oa_sms_handler, NULL, 1000);
 }
 
 //send raw data
@@ -1717,10 +1719,29 @@ oa_sms_send_buf_struct g_oa_sms_send_buf={0};
 void oa_sms_init(void)
 {
     /*注册接收短消息的回调函数*/
-    oa_sms_rcv_ind_register(oa_sms_rcv_ind_handler);
+    //oa_sms_rcv_ind_register(oa_sms_rcv_ind_handler);
     //开机删除短消息内存
 	//oa_at_cmd_demo("at+cmgd=0,4\r\n");
 	//oa_at_cmd_demo_submit();
+	    /*shuold be coverd be at-response*/
+    //strcpy(sms_protocol_toa, "+8613122135713");
+    //strcpy(sms_protocol_sca, "+8613800210500");
+
+    /*sms send-recv pend init*/
+    INIT_LLIST_HEAD(&g_at_sms_send_pend_list);
+    INIT_LLIST_HEAD(&g_at_sms_recv_pend_list);
+    sms_pend_count = 0;
+
+    /*buffer for protocol*/
+    g_sms_pro_rx = oa_create_param_buffer(sms_protocol_buf, sizeof(sms_protocol_buf));
+    oa_memset(g_sms_pro_rx->buf, 0x00, 256);
+
+    /*toggle for sms handler*/
+    g_at_sms_pend_toggle = OA_TRUE;
+    
+    oa_sms_set_current_sms(NULL);
+    SMS_DEBUG_L2("oa_sms_initial OK!");
+    return;
 }
 
 /*new example to send SMS*/

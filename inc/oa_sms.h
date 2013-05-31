@@ -184,7 +184,7 @@ typedef enum
 }e_keyword;
 typedef enum
 {
-	set = 0x0,
+	set = 0x1,
 	enquire,
 	control,
 }command_kind;

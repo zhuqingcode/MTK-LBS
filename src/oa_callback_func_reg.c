@@ -263,10 +263,8 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 
 	oa_key_register(OA_KEY_POWER, OA_KEY_LONGPRESS, oa_app_power_shutdown);   
 
-#ifdef SMS_CALLBACK
 	//register sms receive callback function
 	oa_sms_rcv_ind_register(oa_sms_rcv_ind_handler);
-#endif
 
 	oa_at_init();
 	oa_sms_init();

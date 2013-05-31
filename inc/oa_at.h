@@ -29,7 +29,7 @@
 #include "oa_type.h"
 #include "oa_api.h"
 #define AT_FEDBAK_MAX_LEN 512
-#define AT_RECV_PRINT
+//#define AT_RECV_PRINT
 //#define CUSTOM_AT
 #define TEST_NUM "138xxxxxxxx" //just for test
 #define RING_CLIP "+CLIP: "

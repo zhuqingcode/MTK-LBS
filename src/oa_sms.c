@@ -121,25 +121,29 @@ oa_uint8 KEYWORDS_SIZE = sizeof(p_keyword)/4;
 *Return:        void
 *Others:         
 *********************************************************/
-nb_kind telecom_num_check(oa_char *nb, oa_uint8 nb_len)
+nb_kind telecom_num_check(oa_char *nb)
 {
-	if (NULL == nb || nb_len >= SMS_NUM_MAX_LEN){
+	if (NULL == nb){
 		DEBUG("paras err!");
 		return err_nb;
 	}
-
+#if 0
 	if(nb[3] == '1'){
 		if (nb[4] == '3' || nb[4] == '5' || nb[4] == '8'){
 			if (nb[5] == '3' || nb[5] == '0' || nb[5] == '9'){
 				return tele_nb;
 			}
+			else return mobe_nb;
 		}
 		else return mobe_nb;
 	}
 	else{
 		return err_nb;
 	}
-	
+#endif
+	if ((!oa_strncmp(nb, "133", 3)) || (!oa_strncmp(nb, "153", 3)) 
+		|| (!oa_strncmp(nb, "180", 3)) || (!oa_strncmp(nb, "189", 3)) )	return tele_nb;
+	else return mobe_nb;
 }
 /*********************************************************
 *Function:      status_extract()
@@ -800,12 +804,17 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 				oa_strcat(enquire_temp, "not support!");
 			}break;
 		}
-
+		
 		if (sms == which){
-			if (tele_nb == telecom_num_check(message.deliver_num, oa_strlen(message.deliver_num))){
+			oa_char nb_tmp[4] = {0x0};
+			oa_strncpy(nb_tmp, &message.deliver_num[3], 3);
+			if (tele_nb == telecom_num_check(nb_tmp)){
+				DEBUG("111111111");
+				DEBUG("enquire_temp:%s nb:%s", enquire_temp, message.deliver_num);
 				oa_sms_test_dfalp(enquire_temp, message.deliver_num);
+				DEBUG("222222222");
 			}
-			else if (err_nb != telecom_num_check(message.deliver_num, oa_strlen(message.deliver_num))){
+			else if (err_nb != telecom_num_check(nb_tmp)){
 				oa_sms_send_req(sms_send_feedback_func, message.deliver_num, enquire_temp, oa_strlen(enquire_temp), message.dcs);
 				oa_memcpy(sms_fail.data, enquire_temp, oa_strlen(enquire_temp));
 				sms_fail.len = oa_strlen(enquire_temp);
