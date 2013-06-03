@@ -37,8 +37,8 @@
 /*oa_trace_on_uart OR oa_trace_on_at*/
 #if (SMS_DEBUG == 2)
 //#define SMS_DEBUG_L2(...)
-#define SMS_DEBUG_L2 DEBUG
-#define SMS_DEBUG_L1 DEBUG//OA_DEBUG_USER
+#define SMS_DEBUG_L2 //DEBUG
+#define SMS_DEBUG_L1 //DEBUG//OA_DEBUG_USER
 #elif(SMS_DEBUG == 1)
 #define SMS_DEBUG_L2(...)
 #define SMS_DEBUG_L1(...)

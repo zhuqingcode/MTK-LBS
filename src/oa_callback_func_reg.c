@@ -139,7 +139,7 @@ void oa_app_at_rsp_recv(oa_uint16 len, oa_uint8 *pStr)
 	{
 		oa_memcpy(at_fedbak_buf, pStr, len);
 		//oa_app_at();
-		oa_at_response_parse(pStr, len);
+		oa_at_response_handler(pStr, len);
 	}
 	else
 	{
@@ -263,9 +263,11 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 
 	oa_key_register(OA_KEY_POWER, OA_KEY_LONGPRESS, oa_app_power_shutdown);   
 
-	//register sms receive callback function
-	oa_sms_rcv_ind_register(oa_sms_rcv_ind_handler);
+	
 
 	oa_at_init();
 	oa_sms_init();
+
+	//register sms receive callback function
+	oa_sms_rcv_ind_register(oa_sms_rcv_ind_handler);
  }

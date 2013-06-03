@@ -410,8 +410,8 @@ void oa_app_init(void)
 	return;
 }
 void oa_sms_demo(void *param){
-	static oa_bool first_valid = OA_FALSE;
 	
+	static oa_bool first_valid = OA_FALSE;
 	if(oa_sim_network_is_valid())
 	{
 		//sim and network is invalid, can driver network event
@@ -423,7 +423,7 @@ void oa_sms_demo(void *param){
 		
 		oa_sms_handler();
 	}
-
+	
 	oa_timer_start(OA_TIMER_ID_10, oa_sms_demo, NULL, 1000);
 }
 
@@ -464,6 +464,7 @@ void oa_app_main(void)
 	{
 		//application initial, mainly about socket
 		oa_app_init();
+
 		//watchdog task
 //		oa_timer_start(OA_TIMER_ID_1, oa_app_wdt, NULL, OA_WDT_SCHEDULER_PERIOD);
 		//acc status detect
