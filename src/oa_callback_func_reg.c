@@ -29,7 +29,7 @@
 #include "oa_at.h"
 #include "oa_sms.h"
 #include "oa_debug.h"
-
+#include "oa_at-p.h"
 /*--------BEG: Customer code----------*/
 extern oa_sms_context message;
  extern oa_uint8 at_fedbak_buf[AT_FEDBAK_MAX_LEN];
@@ -138,7 +138,8 @@ void oa_app_at_rsp_recv(oa_uint16 len, oa_uint8 *pStr)
 	if (len < AT_FEDBAK_MAX_LEN && NULL != pStr)
 	{
 		oa_memcpy(at_fedbak_buf, pStr, len);
-		oa_app_at();
+		//oa_app_at();
+		oa_at_response_handler(pStr, len);
 	}
 	else
 	{
@@ -251,9 +252,10 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 
  void callback_func_reg(void)
  {
+#ifdef AT_CALLBACK
 	/*AT command callback*/
 	oa_atf_rsp_callback_register(oa_app_at_rsp_recv);
-
+#endif
 	//执行特殊定制的AT指令
 #ifdef CUSTOM_AT
 	oa_cust_cmd_register(oa_app_execute_custom_at_cmd);
@@ -261,8 +263,11 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 
 	oa_key_register(OA_KEY_POWER, OA_KEY_LONGPRESS, oa_app_power_shutdown);   
 
-#ifdef SMS_CALLBACK
+	
+
+	oa_at_init();
+	oa_sms_init();
+
 	//register sms receive callback function
 	oa_sms_rcv_ind_register(oa_sms_rcv_ind_handler);
-#endif
  }

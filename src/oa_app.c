@@ -409,6 +409,24 @@ void oa_app_init(void)
 	DEBUG(OA_HW_VERSION_NO);
 	return;
 }
+void oa_sms_demo(void *param){
+	
+	static oa_bool first_valid = OA_FALSE;
+	if(oa_sim_network_is_valid())
+	{
+		//sim and network is invalid, can driver network event
+		if(!first_valid)
+		{
+		    oa_sms_initial_by_at_cmd();
+		    first_valid = OA_TRUE;
+		}
+		
+		oa_sms_handler();
+	}
+	
+	oa_timer_start(OA_TIMER_ID_10, oa_sms_demo, NULL, 1000);
+}
+
 /*********************************************************
 *Function:     oa_app_main()
 *Description:  application entry     
@@ -432,6 +450,10 @@ void oa_app_main(void)
 		params_to_soc_set();//change 'soc_cs' value
 		//callback function register
 		callback_func_reg();
+		//just 4 pdu sms
+		//oa_sms_initial_by_at_cmd();
+		//run sms backgrade
+		oa_timer_start(OA_TIMER_ID_10, oa_sms_demo, NULL, 1000);
 		first_run = OA_FALSE;
 	}
 	
@@ -442,6 +464,7 @@ void oa_app_main(void)
 	{
 		//application initial, mainly about socket
 		oa_app_init();
+
 		//watchdog task
 //		oa_timer_start(OA_TIMER_ID_1, oa_app_wdt, NULL, OA_WDT_SCHEDULER_PERIOD);
 		//acc status detect
