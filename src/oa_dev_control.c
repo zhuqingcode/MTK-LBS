@@ -159,12 +159,14 @@ void do_soc_reconn(void)
 		if (oa_soc_close_req()){//after testing it doesn't cause "oa_soc_notify_ind_user_callback" 
 			DEBUG("I close soc in order to reconnect!");
 			dev_running.plat_status = OFFLINE;
-			dev_running.plat_switch = OA_TRUE;
-			dev_running.next_step = PLAT_RECONN;
 		}
 	}
+
 	oa_sleep(POWEROFF_TIME);
 	do_something_before_reconn();
+	dev_running.plat_switch = OA_TRUE;
+	dev_running.next_step = PLAT_RECONN;
+	DEBUG("do reconnect!");
 }
 /*********************************************************
 *Function:     just_reconn()
@@ -182,11 +184,13 @@ void just_reconn(void)
 		if (oa_soc_close_req()){//after testing it doesn't cause "oa_soc_notify_ind_user_callback" 
 			DEBUG("I close soc in order to reconnect!");
 			dev_running.plat_status = OFFLINE;
-			dev_running.plat_switch = OA_TRUE;
-			dev_running.next_step = PLAT_RECONN;
+			
 		}
 	}
+	dev_running.plat_switch = OA_TRUE;
+	dev_running.next_step = PLAT_RECONN;
 	oa_sleep(POWEROFF_TIME);
+	DEBUG("do reconnect!");
 }
 /*********************************************************
 *Function:     just_close_soc()
