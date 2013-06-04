@@ -882,6 +882,7 @@ void dev_action_handle(keyword_context *p_set)
 		case clr_authcode:{
 			ret = del_authcode();
 			if (OA_TRUE == ret){
+				DEBUG("delete authen ok");
 				if (OFFLINE == dev_running.plat_status){
 					dev_running.next_step = PLAT_DEV_REG;
 					dev_running.plat_switch = OA_TRUE;
