@@ -29,7 +29,7 @@
 #include "oa_type.h"
 #include "oa_api.h"
 
-#define SMS_CALLBACK
+//#define SMS_CALLBACK
 #define DBG_SMS
 #define SMS_HANDLE_DELAY 1000//ms
 #define SMS_NUM_MAX_LEN 32
@@ -243,6 +243,13 @@ typedef struct
 	action_kind act_kind;
 }keyword_context;
 
+typedef enum
+{
+	err_nb,
+	tele_nb,
+	mobe_nb,
+	uni_nb,
+}nb_kind;
 extern void oa_app_sms(void);
 #endif
 

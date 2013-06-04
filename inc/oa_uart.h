@@ -28,7 +28,7 @@
 #define __OA_UART_H__
 #include "oa_type.h"
 #include "oa_api.h"
-//#define AT_PS                 	//AT命令口
+#define AT_PS                 	//AT命令口
 #define USE_UART2			//串口二
 #define USE_UART3			//串口三
 #define SCHE_SCRN
