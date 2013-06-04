@@ -807,14 +807,14 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 		
 		if (sms == which){
 			oa_char nb_tmp[4] = {0x0};
+			nb_kind nb = err_nb;
 			oa_strncpy(nb_tmp, &message.deliver_num[3], 3);
-			if (tele_nb == telecom_num_check(nb_tmp)){
-				DEBUG("111111111");
-				DEBUG("enquire_temp:%s nb:%s", enquire_temp, message.deliver_num);
+			nb = telecom_num_check(nb_tmp);
+			if (tele_nb == nb){
+				//DEBUG("enquire_temp:%s nb:%s", enquire_temp, message.deliver_num);
 				oa_sms_test_dfalp(enquire_temp, message.deliver_num);
-				DEBUG("222222222");
 			}
-			else if (err_nb != telecom_num_check(nb_tmp)){
+			else if (err_nb != nb){
 				oa_sms_send_req(sms_send_feedback_func, message.deliver_num, enquire_temp, oa_strlen(enquire_temp), message.dcs);
 				oa_memcpy(sms_fail.data, enquire_temp, oa_strlen(enquire_temp));
 				sms_fail.len = oa_strlen(enquire_temp);
@@ -880,20 +880,31 @@ void dev_action_handle(keyword_context *p_set)
 			del_areadata();
 		}break;
 		case clr_authcode:{
-			if (OFFLINE == dev_running.plat_status)	break;
-
 			ret = del_authcode();
-			if (OA_TRUE == ret){//if you delete authcode, you must unregsiter & reg again
-				dev_running.next_step = PLAT_DEV_UNREG;
-				dev_running.plat_switch = OA_TRUE;
+			if (OA_TRUE == ret){
+				if (OFFLINE == dev_running.plat_status){
+					dev_running.next_step = PLAT_DEV_REG;
+					dev_running.plat_switch = OA_TRUE;
+				}		
+				else if (ONLINE == dev_running.plat_status){//if you delete authcode, you must unregsiter & reg again
+					dev_running.next_step = PLAT_DEV_UNREG;
+					dev_running.plat_switch = OA_TRUE;
+				}
 			}
 		}break;
 		case update_authcode:{
 			ret = save_authen_code((oa_uint8 *)p_set->context.con_ch, 
 										oa_strlen(p_set->context.con_ch));
 			if (OA_TRUE == ret){//if you update authcode, you must unregsiter & reg again
-				dev_running.next_step = PLAT_DEV_UNREG;
-				dev_running.plat_switch = OA_TRUE;
+				if (ONLINE == dev_running.plat_status){
+					dev_running.next_step = PLAT_DEV_UNREG;
+					dev_running.plat_switch = OA_TRUE;
+				}
+				else if (OFFLINE == dev_running.plat_status){
+					dev_running.next_step = PLAT_DEV_LOGIN;
+					dev_running.plat_switch = OA_TRUE;
+				}
+				
 			}
 		}break;
 		default:break;

@@ -416,8 +416,14 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 						dev_running.plat_switch = OA_TRUE;//if authen err, do it again
 						dev_running.authen_err_time++;
 						if (dev_running.authen_err_time >= AUTHEN_ERR_MAX_TIMES){
+							oa_bool tmp;
 							dev_running.authen_err_time = 0;
-							DEBUG("authen err too many times!");
+							DEBUG("authen err too many times!so delete authen automatically");
+							tmp = del_authcode();
+							if (OA_TRUE == tmp){
+								dev_running.next_step = PLAT_DEV_REG;
+								dev_running.plat_switch = OA_TRUE;
+							}
 						}
 					}
 					//case unreg
