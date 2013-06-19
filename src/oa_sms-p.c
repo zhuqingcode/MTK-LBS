@@ -462,6 +462,9 @@ void oa_sms_initial_by_at_cmd(void)
     oa_at_cmd_demo("at+cnmi=2,2,0,0,1\r\n");
     
     oa_at_cmd_demo("at+csca?\r\n");/*get SCA number*/
+	//delete all sms in model
+	DEBUG("delete all sms");
+	oa_at_cmd_demo("at+cmgd=1,4\r\n");
     /*if the last init-at-cmd respond, we start a timer to run our test func to send sms*/
     oa_at_cmd_demo_submit();
 }
