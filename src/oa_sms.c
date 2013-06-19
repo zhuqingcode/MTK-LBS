@@ -606,11 +606,18 @@ e_keyword lookfor_keywords_loop(u8 *p_sms, u16 sms_len, keyword_context *p_set, 
 void sms_send_feedback_func(os_sms_result send_ret)
 {
 	if (OA_SMS_OK != send_ret){
-		DEBUG(" sms send err:%d......send again", send_ret);
+		DEBUG("sms send err:%d......send again", send_ret);
 		oa_sms_send_req(sms_send_feedback_func, sms_fail.deliver_num, sms_fail.data, sms_fail.len, sms_fail.dcs);
 	}
 	else if (OA_SMS_OK == send_ret){
-		DEBUG(" sms send ok");
+		DEBUG("sms send ok");
+		//oa_at_cmd_demo("at+cpms?\r\n");
+		//oa_at_cmd_demo_submit();
+		//delete it
+		oa_at_cmd_demo("at+cmgd=1,4\r\n");
+		oa_at_cmd_demo_submit();
+		//oa_at_cmd_demo("at+cpms?\r\n");
+		//oa_at_cmd_demo_submit();
 		oa_memset(&sms_fail, 0x0, sizeof(sms_fail));
 	}
 }
@@ -1647,9 +1654,6 @@ void oa_app_sms(void)
 	}
 	OA_DEBUG_USER("deliver_num: %s", message.deliver_num);
 #endif
-	//delete all read sms in model
-	DEBUG("delete all read sms");
-	oa_at_cmd_demo("at+cmgd=1,1\r\n");
 	//do not support multiple sms
 	for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
 		key_ret = lookfor_keywords_loop(NULL, 0, &set, e_i, sms);
