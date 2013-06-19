@@ -606,11 +606,18 @@ e_keyword lookfor_keywords_loop(u8 *p_sms, u16 sms_len, keyword_context *p_set, 
 void sms_send_feedback_func(os_sms_result send_ret)
 {
 	if (OA_SMS_OK != send_ret){
-		DEBUG(" sms send err:%d......send again", send_ret);
+		DEBUG("sms send err:%d......send again", send_ret);
 		oa_sms_send_req(sms_send_feedback_func, sms_fail.deliver_num, sms_fail.data, sms_fail.len, sms_fail.dcs);
 	}
 	else if (OA_SMS_OK == send_ret){
-		DEBUG(" sms send ok");
+		DEBUG("sms send ok");
+		//oa_at_cmd_demo("at+cpms?\r\n");
+		//oa_at_cmd_demo_submit();
+		//delete it
+		oa_at_cmd_demo("at+cmgd=1,4\r\n");
+		oa_at_cmd_demo_submit();
+		//oa_at_cmd_demo("at+cpms?\r\n");
+		//oa_at_cmd_demo_submit();
 		oa_memset(&sms_fail, 0x0, sizeof(sms_fail));
 	}
 }
@@ -673,7 +680,7 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 				sprintf(enquire_temp, "TCPPORT:%d"/*very important here*/, dev_now_params.server_tcp_port);
 			}break;
 			case e_UDPPORT:{
-				sprintf(enquire_temp, "UDPPORT:%d"/*very important here*/, dev_now_params.server_tcp_port);
+				sprintf(enquire_temp, "UDPPORT:%d"/*very important here*/, dev_now_params.server_udp_port);
 			}break;
 			case e_TEL:{
 				oa_strcat(enquire_temp, "TEL:");
@@ -1095,6 +1102,20 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 				}
 				else{
 					dev_now_params.server_tcp_port = p_set->context.con_int;
+					p_set->act_kind = reconn;
+				}
+			}	
+		}break;
+		case e_UDPPORT:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.server_udp_port == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+
+				}
+				else{
+					dev_now_params.server_udp_port = p_set->context.con_int;
 					p_set->act_kind = reconn;
 				}
 			}	
@@ -1652,6 +1673,6 @@ void oa_app_sms(void)
 	}
 	handle_keyword(key_ret, &set);
 	#endif
-
+	
 	return;
 }

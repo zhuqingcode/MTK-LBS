@@ -183,6 +183,14 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 	DEBUG("SMS received:deliver_num=%s,timestamp=%d-%d-%d-%d:%d:%d,dcs=%d,len=%d,data=%s",\
 	deliver_num,*(timestamp+0),*(timestamp+1),*(timestamp+2),*(timestamp+3),*(timestamp+4),*(timestamp+5),dcs,len,data);
 #endif
+	//oa_at_cmd_demo("at+cpms?\r\n");
+	//oa_at_cmd_demo_submit();
+	//delete it
+	oa_at_cmd_demo("at+cmgd=1,4\r\n");
+	oa_at_cmd_demo_submit();
+	//oa_at_cmd_demo("at+cpms?\r\n");
+	//oa_at_cmd_demo_submit();
+	
 	oa_memset(&message, 0x0, sizeof(message));//reset message
 	if(dcs == OA_SMSAL_DEFAULT_DCS){
 		/*handle ascii sms text.*/
@@ -241,7 +249,10 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 	else{
 		DEBUG("ERR!");
 	}
-	return OA_TRUE;/*delete current SMS from memory*/
+
+	
+	
+	return OA_TRUE;/*delete current SMS from memory*///<it is error here!!!>
 	//return OA_FALSE;/*do not delete this SMS, user can handle it*/
 	/*Warning: if user return OA_FALSE to save current sms in memory, 
 	he should pay attention to the memory capacity. 
