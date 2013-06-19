@@ -673,7 +673,7 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 				sprintf(enquire_temp, "TCPPORT:%d"/*very important here*/, dev_now_params.server_tcp_port);
 			}break;
 			case e_UDPPORT:{
-				sprintf(enquire_temp, "UDPPORT:%d"/*very important here*/, dev_now_params.server_tcp_port);
+				sprintf(enquire_temp, "UDPPORT:%d"/*very important here*/, dev_now_params.server_udp_port);
 			}break;
 			case e_TEL:{
 				oa_strcat(enquire_temp, "TEL:");
@@ -1095,6 +1095,20 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 				}
 				else{
 					dev_now_params.server_tcp_port = p_set->context.con_int;
+					p_set->act_kind = reconn;
+				}
+			}	
+		}break;
+		case e_UDPPORT:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.server_udp_port == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+
+				}
+				else{
+					dev_now_params.server_udp_port = p_set->context.con_int;
 					p_set->act_kind = reconn;
 				}
 			}	
