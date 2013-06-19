@@ -68,15 +68,9 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 			
 			
 			if (dev_running.plat_status == OFFLINE){
-				if (acc_status == ACC_ON){//blind data
-					ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
-					if (!ret)	return OA_TRUE;
-					else return OA_FALSE;
-					
-				}
-				else{
-					return OA_FALSE;
-				}
+				ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
+				if (!ret)	return OA_TRUE;
+				else return OA_FALSE;
 			}
 			
 			build_ret = DevReq2ServPackag_build(REPORT_LOCATION);//upload instantly<!!!>
@@ -100,15 +94,9 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 	else{
 
 		if (dev_running.plat_status == OFFLINE){
-				if (acc_status == ACC_ON){//blind data
-					ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
-					if (!ret)	return OA_TRUE;
-					else return OA_FALSE;
-					
-				}
-				else{
-					return OA_FALSE;
-				}
+			ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
+			if (!ret)	return OA_TRUE;
+			else return OA_FALSE;
 		}
 		
 		build_ret = DevReq2ServPackag_build(REPORT_LOCATION);

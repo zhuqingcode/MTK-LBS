@@ -184,11 +184,7 @@ void oa_app_plat_link(void *para)
 	else{//detect is online/offline
 		if (dev_running.plat_check_value == OA_TRUE){
 			if (oa_sim_network_is_valid()){
-				//DEBUG(" acc_status:%d acc_short_conning:%d",acc_status,acc_short_conning);
-				if ((acc_status == ACC_ON) || (acc_short_conning == OA_TRUE)){//acc is on
-					//DEBUG(" check soc status!");
-					oa_soc_state_check();//check & connect
-				}
+				oa_soc_state_check();//check & connect
 			}
 			else{
 				DEBUG("sim network is invalue!");
@@ -238,7 +234,7 @@ void oa_app_plat_data(void *param)
 		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		task_runed = OA_FALSE;
 	}
-	
+#if 0	
 	if (acc_status == ACC_OFF){//do something when acc is off
 		acc_counter++;
 
@@ -310,14 +306,12 @@ void oa_app_plat_data(void *param)
 			DEBUG("sleep_reporttime is too short!");
 		}
 	}
-	else if (acc_status == ACC_ON){
+	else if (acc_status == ACC_ON)
+#endif
+	{
 		//do something when acc is on
 		hbeat_counter++;
 		
-		if (acc_counter > 0){
-			acc_counter = 0;
-		}
-
 		if (dev_running.plat_status == ONLINE){
 			if (hbeat_counter * PLAT_DATA_SECOND >= dev_now_params.heartbeat_interval){
 				build_ret = DevReq2ServPackag_build(HEART_BEAT);//build heartbeats packets & fill buffer with it
