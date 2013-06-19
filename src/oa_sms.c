@@ -1633,6 +1633,9 @@ void oa_app_sms(void)
 	}
 	OA_DEBUG_USER("deliver_num: %s", message.deliver_num);
 #endif
+	//delete all read sms in model
+	DEBUG("delete all read sms");
+	oa_at_cmd_demo("at+cmgd=1,1\r\n");
 	//do not support multiple sms
 	for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
 		key_ret = lookfor_keywords_loop(NULL, 0, &set, e_i, sms);
@@ -1652,6 +1655,6 @@ void oa_app_sms(void)
 	}
 	handle_keyword(key_ret, &set);
 	#endif
-
+	
 	return;
 }
