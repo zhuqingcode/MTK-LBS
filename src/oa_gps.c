@@ -110,7 +110,7 @@ void oa_app_gps(void)
 	static u8 upload_times;
 	static u32 driver_time;
 	static u32 relax_time;
-	static oa_bool vehicle_status;//OA_FALSE:park,OA_TRUE:driving
+	static u32 park_times = 0;
 	static oa_bool fatigue = OA_FALSE;//fatigue check 
 	oa_uint16 build_ret;
 	oa_uint16 soc_ret;
@@ -227,7 +227,7 @@ void oa_app_gps(void)
 			//gps_info.Speed = MAX_SPEED;//just for test
 			if (speed > MAX_SPEED || gps_info.Speed > MAX_SPEED){
 				gps_info.Speed = MAX_SPEED;
-				DEBUG(" speed max!");
+				DEBUG("speed max!");
 			}
 			
 			if (gps_info.Speed > speed){//handle this alarm & upload instantly
@@ -240,6 +240,23 @@ void oa_app_gps(void)
 				}
 			}
 			//--------------------------------------------------------------------
+			//--------------------------over time park------------------------------
+			if (0 == gps_info.Speed){
+				park_times++;
+				if (park_times * GPS_RUN_SECONDS >= dev_now_params.max_park_time){
+					if (ReadAlarmPara(StaAlarm0, ALARM_OVERTIME_PARKING) == RESET){
+						handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
+						DEBUG("overtime park");
+					}
+				}
+			}
+			else if (gps_info.Speed > 0){
+				if (park_times > 0)	park_times = 0;
+				if (ReadAlarmPara(StaAlarm0, ALARM_OVERTIME_PARKING) == SET){
+					ret = handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, RESET, OA_TRUE);
+					DEBUG("cancel overtime park");
+				}
+			}
 			//--------------------------mileage statistis-----------------------------
 			IntvlDistanc += GPS_IntvlDistanc(); //km
 			d_r_distance = IntvlDistanc;//just for distance report
@@ -322,14 +339,14 @@ void oa_app_gps(void)
 			//---------------------------------------------------------------------
 		}
 		else if (result & NMEA_RMC_UNFIXED){
-			DEBUG(" NMEA_RMC_UNFIXED!");
+			DEBUG("NMEA_RMC_UNFIXED!");
 			//设置未定位标志
 			if (ReadAlarmPara(StaSector1,STA_GPS_FIXED) == SET)
 				//WriteAlarmPara(RESET,StaSector1,STA_GPS_FIXED);
 				handle_alarm_status(StaSector1, STA_GPS_FIXED, RESET, OA_TRUE);
 		}
 		if (result &UBX_CFG_RST_OK){
-			DEBUG(" UBX_CFG_RST_OK!");
+			DEBUG("UBX_CFG_RST_OK!");
 		}
 		if (result &UBX_CFG_MSG_OK){
 			DEBUG("UBX_CFG_MSG_OK!");

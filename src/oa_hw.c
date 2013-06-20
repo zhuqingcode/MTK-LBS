@@ -134,30 +134,57 @@ void acc_status_detect(void *param)
 {
 	//detect acc status on/off
 	oa_uint8 ret;
+	static oa_bool ugent_last = OA_FALSE;
+	
 	ret = oa_gpio_read(ACC_GPIO);
 	if (ret){//acc is on
 		//key shake
 		oa_sleep(10);
 		ret = oa_gpio_read(ACC_GPIO);
-		if (!ret) goto redoit;
-		if (ReadAlarmPara(StaSector1, STA_ACC_ON) == RESET){
-			WriteAlarmPara(SET, StaSector1, STA_ACC_ON);
-		}
-//		Trace("(%s:%s:%d): acc on", __FILE__, __func__, __LINE__);
-		acc_status = ACC_ON;
+		if (ret){
+			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == RESET){
+				WriteAlarmPara(SET, StaSector1, STA_ACC_ON);
+			}
+			acc_status = ACC_ON;
+		}	
 	}
 	else{//acc is off
 		//key shake
 		oa_sleep(10);
 		ret = oa_gpio_read(ACC_GPIO);
-		if (ret) goto redoit; 
-		if (ReadAlarmPara(StaSector1, STA_ACC_ON) == SET){
-			WriteAlarmPara(RESET, StaSector1, STA_ACC_ON);
+		if (!ret){
+			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == SET){
+				WriteAlarmPara(RESET, StaSector1, STA_ACC_ON);
+			}
+			acc_status = ACC_OFF;
 		}
-//		Trace("(%s:%s:%d): acc off", __FILE__, __func__, __LINE__);
-		acc_status = ACC_OFF;
 	}
-
+	//ugent alarm detect
+	ret = oa_gpio_read(KEY_GPIO);
+	if (ret){
+		//key shake
+		oa_sleep(10);
+		ret = oa_gpio_read(KEY_GPIO);
+		if (ret){
+			if (ugent_last == OA_TRUE){
+				if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == RESET){
+					handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
+				}
+			}
+			ugent_last = OA_TRUE;
+		}
+	}
+	else{
+		//key shake
+		oa_sleep(10);
+		ret = oa_gpio_read(KEY_GPIO);
+		if (!ret){
+			if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == SET){
+				handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, RESET, OA_TRUE);
+			}
+			ugent_last = OA_FALSE;
+		}
+	}
 redoit:
 	oa_timer_start(OA_TIMER_ID_6, acc_status_detect, NULL, OA_ACC_RUN);
 }
