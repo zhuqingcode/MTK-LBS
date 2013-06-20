@@ -1306,10 +1306,10 @@ if (UpdateMode == UpdateOnly){
 			//LbsCfgStruct.ServTellen=len;
 			//Mem_Copy(LbsCfgStruct.ServTel,pValue,len);
 			DEBUG("ServTel");
-			if (len <= TEL_NUM_MAX_LEN)
+			if (len < TEL_NUM_MAX_LEN)
 			{
-				oa_memset(&dev_now_params.monitor_platform_num, 0x0, sizeof(dev_now_params.monitor_platform_num));
-				oa_memcpy((u8 *)&dev_now_params.monitor_platform_num, pValue, len);
+				oa_memset(dev_now_params.monitor_platform_num, 0x0, TEL_NUM_MAX_LEN);
+				oa_memcpy(dev_now_params.monitor_platform_num, pValue, len);
 			}
 			else
 			{
@@ -1320,9 +1320,9 @@ if (UpdateMode == UpdateOnly){
 			//LbsCfgStruct.ResetTellen=len;
 			//Mem_Copy(LbsCfgStruct.ResetTel,pValue,len);
 			DEBUG("ResetTel");
-			if (len <= TEL_NUM_MAX_LEN){
-				oa_memset(&dev_now_params.reset_num, 0x0, 	sizeof(dev_now_params.reset_num));
-				oa_memcpy((u8 *)&dev_now_params.reset_num, pValue, len);
+			if (len < TEL_NUM_MAX_LEN){
+				oa_memset(dev_now_params.reset_num, 0x0, TEL_NUM_MAX_LEN);
+				oa_memcpy(dev_now_params.reset_num, pValue, len);
 			}
 			else{
 				DEBUG("param err ");
@@ -1332,11 +1332,9 @@ if (UpdateMode == UpdateOnly){
 			//LbsCfgStruct.FactySetTellen=len;
 			//Mem_Copy(LbsCfgStruct.FactySetTel,pValue,len);
 			DEBUG("FactryTel");
-			if (len <= TEL_NUM_MAX_LEN){
-				oa_memset(&dev_now_params.restore_factory_settings_num, 
-																	0x0, 
-						sizeof(dev_now_params.restore_factory_settings_num));
-				oa_memcpy((u8 *)&dev_now_params.restore_factory_settings_num, pValue, len);
+			if (len < TEL_NUM_MAX_LEN){
+				oa_memset(dev_now_params.restore_factory_settings_num, 0x0, TEL_NUM_MAX_LEN);
+				oa_memcpy(dev_now_params.restore_factory_settings_num, pValue, len);
 			}
 			else{
 				DEBUG("param err ");
@@ -1346,10 +1344,10 @@ if (UpdateMode == UpdateOnly){
 			//LbsCfgStruct.ServSMSTellen=len;
 			//Mem_Copy(LbsCfgStruct.ServSMSTel,pValue,len);
 			DEBUG("SMSTel");
-			if (len <= TEL_NUM_MAX_LEN)
+			if (len < TEL_NUM_MAX_LEN)
 			{
-				oa_memset(&dev_now_params.monitor_platform_sms_num, 0x0, sizeof(dev_now_params.monitor_platform_sms_num));
-				oa_memcpy((u8 *)&dev_now_params.monitor_platform_sms_num, pValue, len);
+				oa_memset(dev_now_params.monitor_platform_sms_num, 0x0, TEL_NUM_MAX_LEN);
+				oa_memcpy(dev_now_params.monitor_platform_sms_num, pValue, len);
 			}
 			else
 			{
@@ -1360,9 +1358,9 @@ if (UpdateMode == UpdateOnly){
 			//LbsCfgStruct.AlarmSMSTellen=len;
 			//Mem_Copy(LbsCfgStruct.AlarmSMSTel,pValue,len);
 			DEBUG("AlarmSMSTel");
-			if (len <= TEL_NUM_MAX_LEN){
-				oa_memset(&dev_now_params.terminal_sms_num, 0x0, 	sizeof(dev_now_params.terminal_sms_num));
-				oa_memcpy((u8 *)&dev_now_params.terminal_sms_num, pValue, len);
+			if (len < TEL_NUM_MAX_LEN){
+				oa_memset(dev_now_params.terminal_sms_num, 0x0, TEL_NUM_MAX_LEN);
+				oa_memcpy(dev_now_params.terminal_sms_num, pValue, len);
 			}
 			else{
 				DEBUG("param err ");
@@ -1540,8 +1538,8 @@ if (UpdateMode == UpdateOnly){
 			//LbsCfgStruct.CarIdlen=len;
 			//Mem_Copy(LbsCfgStruct.CarId,pValue,len);
 			DEBUG("Carid");
-			if (len <= VEHICLE_LICENCE_MAX_LEN){
-				oa_memset(dev_now_params.vehicle_license, 0x0, 	sizeof(dev_now_params.vehicle_license));
+			if (len < VEHICLE_LICENCE_MAX_LEN){
+				oa_memset(dev_now_params.vehicle_license, 0x0, 	VEHICLE_LICENCE_MAX_LEN);
 				oa_memcpy(dev_now_params.vehicle_license, pValue, len);
 			}
 			else{

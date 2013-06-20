@@ -636,7 +636,7 @@ void print_key_dev_params(void)
 	DEBUG_N("max_parktime					:%d", dev_now_params.max_park_time);
 	DEBUG_N("provincID					:%d", dev_now_params.vehicle_province_id);
 	DEBUG_N("cityID						:%d", dev_now_params.vehicle_city_id);
-	DEBUG_N("carID						:%d", dev_now_params.vehicle_license);
+	DEBUG_N("carID						:%s", dev_now_params.vehicle_license);
 	DEBUG_N("carcolor					:%d", dev_now_params.plate_color);
 	DEBUG_N("UPIP						:%s", dev_now_params.update_server_ip);
 	DEBUG_N("UPPORT						:%d", dev_now_params.update_server_port);
