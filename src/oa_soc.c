@@ -458,7 +458,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 			if (none != control_type){
 				switch (control_type){
 					case wireless_update:{
-						DEBUG("doesn't support!");
+						ftp_update();
 					}
 					break;
 					case conn_to_specified_server:{

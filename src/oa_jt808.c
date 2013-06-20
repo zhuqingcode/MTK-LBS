@@ -1986,6 +1986,7 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 	switch(cmd)
 	{
 		case eOnlineUpgrad_Ctrl:{
+			DEBUG("wireless_updata");
 			control_type = wireless_update;
 			break;
 		}
