@@ -69,7 +69,7 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 			
 			if (dev_running.plat_status == OFFLINE){
 				ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
-				if (!ret)	return OA_TRUE;
+				if (ret)	return OA_TRUE;
 				else return OA_FALSE;
 			}
 			
@@ -95,7 +95,7 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 
 		if (dev_running.plat_status == OFFLINE){
 			ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
-			if (!ret)	return OA_TRUE;
+			if (ret)	return OA_TRUE;
 			else return OA_FALSE;
 		}
 		
