@@ -803,7 +803,7 @@ u8 ISStrTelValid(u8 *Tel,u8 len)
 		if((*Tel<'0')||(*Tel>'9'))
 			return OA_FALSE;
 	}
-	return OA_FALSE;
+	return OA_TRUE;
 }
 u8 WriteLbsCfgPara(Enum_CtrlCfgPara CfgPara, u8 *pValue,u8 len,UpdateModeEnum UpdateMode)
 {
@@ -859,8 +859,10 @@ u8 WriteLbsCfgPara(Enum_CtrlCfgPara CfgPara, u8 *pValue,u8 len,UpdateModeEnum Up
 		case eAlarmSMSTel:
 		case eMonitTel:
 		case eSpeclSMSTel:
-			if(len>TELMAXLEN)
+			if(len>TELMAXLEN){
+				DEBUG("number is err!");
 				return 1;
+			}
 		break;
 		case eCarid: 
 			if(len>CarIDMAXLEN)
@@ -968,7 +970,7 @@ u8 WriteLbsCfgPara(Enum_CtrlCfgPara CfgPara, u8 *pValue,u8 len,UpdateModeEnum Up
 	//参数设置
 	//OSSemPend(HXCfgParaSem,0,&err);
 if (UpdateMode == UpdateOnly){
-	DEBUG("parameters id:02x%X", CfgPara);
+	DEBUG("parameters id:0x%04X", CfgPara);
 	switch(CfgPara)
 	{
 		#if 0
@@ -1539,8 +1541,8 @@ if (UpdateMode == UpdateOnly){
 			//Mem_Copy(LbsCfgStruct.CarId,pValue,len);
 			DEBUG("Carid");
 			if (len <= VEHICLE_LICENCE_MAX_LEN){
-				oa_memset(&dev_now_params.vehicle_license, 0x0, 	sizeof(dev_now_params.vehicle_license));
-				oa_memcpy((u8 *)&dev_now_params.vehicle_license, pValue, len);
+				oa_memset(dev_now_params.vehicle_license, 0x0, 	sizeof(dev_now_params.vehicle_license));
+				oa_memcpy(dev_now_params.vehicle_license, pValue, len);
 			}
 			else{
 				DEBUG("param err ");
@@ -1654,8 +1656,11 @@ u8 ParaConvertandSet(Enum_CtrlCfgPara paramID,u8 *Srcval,u8 len,u16 *devAct)
 		case eAlarmSMSTel:
 		case eMonitTel:
 		case eSpeclSMSTel:
-			if(!ISStrTelValid(Srcval,len))
+			if(!ISStrTelValid(Srcval,len)){
+				DEBUG("number err!");
 				return 1;
+			}
+				
 			WriteLbsCfgPara(paramID,Srcval,len,UpdateOnly);
 		break;
 		case eCarid:   //peijl_130220 修改：车辆基本参数改变时，要先注销再重注册
@@ -5245,7 +5250,7 @@ u16 DevReq2ServPackag_build_blind(u16 ReqMsgId) //即时上传数据
 			//ret = write_blinddata(pbuf, U16Temp);
 			ret = write_blinddata_to_1file(pbuf, U16Temp);
 			if (OA_TRUE == ret){
-				print_rtc_time();
+				//print_rtc_time();
 				DEBUG("write one blinddata packet!total write num:%d", total_write);
 			}
 			return ret;

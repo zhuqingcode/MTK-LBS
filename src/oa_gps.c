@@ -135,7 +135,7 @@ void oa_app_gps(void)
 			goto redo;
 		}
 	}
-	
+#if 0	
 	//gps antenna status detect 
 	//ISGpsAntOK();
 	ret = gps_ana_detect();
@@ -149,6 +149,7 @@ void oa_app_gps(void)
 		}
 		
 	}
+#endif
 	//gps data analysis:mileage statistics, speed alarm, driver fatigue,cog and so on.
 	result = GPS_DataAnaly();//update gps datas
 //	DEBUG("result:0x%X", __FILE__,  __func__, __LINE__, result);
