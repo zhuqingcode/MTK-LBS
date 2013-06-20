@@ -168,7 +168,7 @@ void acc_status_detect(void *param)
 		if (ret){
 			if (ugent_last == OA_TRUE){
 				if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == RESET){
-					handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
+					handle_alarm_status(StaAlarm0, ALARM_EMERGENCY_k, SET, OA_TRUE);
 				}
 			}
 			ugent_last = OA_TRUE;
@@ -180,7 +180,7 @@ void acc_status_detect(void *param)
 		ret = oa_gpio_read(KEY_GPIO);
 		if (!ret){
 			if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == SET){
-				handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, RESET, OA_TRUE);
+				handle_alarm_status(StaAlarm0, ALARM_EMERGENCY_k, RESET, OA_TRUE);
 			}
 			ugent_last = OA_FALSE;
 		}
