@@ -261,6 +261,7 @@ u8 DelAreaData(u8* pbuf,u8 areatype)
 		}
 #endif
 		char_to_int(pbuf,&New_Area_ID);//获取新ID
+		DEBUG("区域ID:%d", New_Area_ID);
 		ret = del_area_data(New_Area_ID, areatype, one_area);
 		if (ret == 0){
 			DEBUG("======delete area ok======");
@@ -287,6 +288,7 @@ u8 DelAreaData(u8* pbuf,u8 areatype)
 	}
 	else  //删除所有同一类区域
 	{
+		DEBUG("删除所有区域");
 		ret = del_area_data(0/*has no effects*/, areatype, all_area);
 		if (ret == 0){
 			DEBUG("======delete area ok======");

@@ -273,8 +273,8 @@ oa_int16 oa_soc_send_req(void)
 
 		if (ret >= OA_SOC_SUCCESS)
 		{
-			DEBUG("%s:sock_id=%d send ok len=%d",__func__,g_soc_context.socket_id,ret);
-
+			//DEBUG("%s:sock_id=%d send ok len=%d",__func__,g_soc_context.socket_id,ret);
+			DEBUG("---send ok len=%d",ret);
 			//if send success,dummy read to delete
 			len = oa_read_buffer_noinit(g_soc_context.gprs_tx, 
 			    							g_soc_context.gprs_tx_pending_data,
@@ -364,7 +364,6 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 	//debuf info
 	{
 		u16 i;
-		DEBUG();
 		DEBUG_N("receive len:%d data:", len);
 		for(i=0; i<len; i++){
 			OA_DEBUG_USER("%02x ", data[i]);
@@ -538,8 +537,8 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 			        memset(gprs_rx_buffer, 0 , (OA_MAX_SOC_RCV_BUFLEN*sizeof(oa_uint8))); 
 			        //received gprs data, read data for protocol
 			        ret = oa_soc_recv(soc_notify->socket_id , (oa_uint8*)gprs_rx_buffer, OA_MAX_SOC_RCV_BUFLEN, 0);
-			        DEBUG("%s:sock_id=%d read ok len=%d", __func__,soc_notify->socket_id,ret);
-
+			        //DEBUG("%s:sock_id=%d read ok len=%d", __func__,soc_notify->socket_id,ret);
+				DEBUG("+++read ok len=%d", ret);
 			        if(ret > 0){   
 			            // read data length=ret, 
 					oa_soc_gprs_recv((oa_uint8*)gprs_rx_buffer, ret);

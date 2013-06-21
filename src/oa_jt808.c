@@ -2312,9 +2312,25 @@ static u8 set_round_area(u8 *pbuf, u16 buflen)
 		return 1;
 	}
 	//DEBUG(PrintDebug,"设置圆形区域\r\n");
-	DEBUG("设置圆形区域");
+	
 	option =  *pbuf++;
 	area_num = 	*pbuf++;
+
+	switch (option){
+		case 0:{
+			DEBUG("设置圆形区域:更新");
+		}break;
+		case 1:{
+			DEBUG("设置圆形区域:追加");
+		}break;
+		case 2:{
+			DEBUG("设置圆形区域:修改");
+		}break;
+		default:{
+			DEBUG("设置圆形区域:错误");
+		}break;
+	}
+	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
 	if (area_num > MAX_AREA_SUM){
 		DEBUG("area num is too large");
@@ -2357,9 +2373,24 @@ static u8 set_rect_area(u8 *pbuf, u16 buflen)
 		return 1;
 	}
 	//DEBUG(PrintDebug,"设置矩形区域\r\n");
-	DEBUG("设置矩形区域");
 	option =  *pbuf++;
 	area_num = 	*pbuf++;
+	
+	switch (option){
+		case 0:{
+			DEBUG("设置矩形区域:更新");
+		}break;
+		case 1:{
+			DEBUG("设置矩形区域:追加");
+		}break;
+		case 2:{
+			DEBUG("设置矩形区域:修改");
+		}break;
+		default:{
+			DEBUG("设置矩形区域:错误");
+		}break;
+	}
+	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
 	if (area_num > MAX_AREA_SUM){
 		DEBUG("area num is too large");
@@ -2403,9 +2434,24 @@ static u8 set_poly_area(u8 *pbuf, u16 buflen)
 		return 1;
 	}
 	//DEBUG(PrintDebug,"设置多边形区域\r\n");
-	DEBUG("设置多边形区域");
 	option =  *pbuf++;
 	area_num = 	*pbuf++;
+
+	switch (option){
+		case 0:{
+			DEBUG("设置多边形区域:更新");
+		}break;
+		case 1:{
+			DEBUG("设置多边形区域:追加");
+		}break;
+		case 2:{
+			DEBUG("设置多边形区域:修改");
+		}break;
+		default:{
+			DEBUG("设置多边形区域:错误");
+		}break;
+	}
+	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
 	if (area_num > MAX_AREA_SUM){
 		DEBUG("area num is too large");
@@ -2445,13 +2491,28 @@ static u8 del_area_message(u8 *pbuf, u16 buflen,u8 area_type)
 		DEBUG("check_car_ctl param error!");
 		return 1;
 	}
-	//DEBUG(PrintDebug,"删除区域信息\r\n");
-	DEBUG("删除区域信息");
+	
 	area_num = 	*pbuf++;
 	if (area_num > MAX_AREA_SUM){
 		DEBUG("area num is too large");
 		return 1;
 	}
+
+	switch (area_type){
+		case Circular_Area:{
+			DEBUG("删除圆形区域数目:%d", area_num);
+		}break;
+		case Rectangle_Area:{
+			DEBUG("删除矩形区域数目:%d", area_num);
+		}break;
+		case Poly_Area:{
+			DEBUG("删除多边形区域数目:%d", area_num);
+		}break;
+		default:{
+			DEBUG("删除区域出错");
+		}break;
+	}
+	
 	if(area_num)
 	{
 		for(i=0;i<area_num;i++)
