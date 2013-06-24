@@ -86,6 +86,7 @@ u8 SaveAreaData(u8 *pbuf,u8 area_type,u8 option,u16 *readlen)
 		//Reset_Area_ALL();//擦除所有信息	
 		//reset_all_area_file(area_type);
 		del_area_data(0/*has no effect*/, area_type, all_area);
+		option = 1;//删除后更新变为追加
 	}
 #if 0
 	if(area_manage.manage_vail_flag == 0xaa)//判断管理存储数据有效
@@ -261,6 +262,7 @@ u8 DelAreaData(u8* pbuf,u8 areatype)
 		}
 #endif
 		char_to_int(pbuf,&New_Area_ID);//获取新ID
+		DEBUG("区域ID:%d", New_Area_ID);
 		ret = del_area_data(New_Area_ID, areatype, one_area);
 		if (ret == 0){
 			DEBUG("======delete area ok======");
@@ -287,6 +289,7 @@ u8 DelAreaData(u8* pbuf,u8 areatype)
 	}
 	else  //删除所有同一类区域
 	{
+		DEBUG("删除所有区域");
 		ret = del_area_data(0/*has no effects*/, areatype, all_area);
 		if (ret == 0){
 			DEBUG("======delete area ok======");

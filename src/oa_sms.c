@@ -89,6 +89,7 @@ oa_char *p_keyword[] = {
  overspeed,
  overspeedtime,
  tireddrivetime,
+ daydrivetime,
  min_resttime,
  max_parktime,
  provincID,
@@ -397,6 +398,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 			case e_Rpttime_def:
 			case e_overspeed:
 			case e_min_resttime:
+			case e_daydrivetime:
 			case e_tireddrivetime:
 			case e_max_parktime:{
 				if (oa_is_digit_str(temp, oa_strlen(temp))){
@@ -735,6 +737,9 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 			}break;
 			case e_max_parktime:{
 				sprintf(enquire_temp, "max_parktime:%d", dev_now_params.max_park_time);
+			}break;
+			case e_daydrivetime:{
+				sprintf(enquire_temp, "daydrivetime:%d", dev_now_params.day_add_drive_time_threshold);
 			}break;
 			case e_tireddrivetime:{
 				sprintf(enquire_temp, "tireddrivetime:%d", dev_now_params.continuous_drive_time_threshold);
@@ -1321,6 +1326,19 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 				}
 				else{
 					dev_now_params.speed_duration = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_daydrivetime:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.day_add_drive_time_threshold == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.day_add_drive_time_threshold = p_set->context.con_int;
 					p_set->act_kind = para_save;
 				}
 			}

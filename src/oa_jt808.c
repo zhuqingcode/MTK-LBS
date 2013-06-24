@@ -803,7 +803,7 @@ u8 ISStrTelValid(u8 *Tel,u8 len)
 		if((*Tel<'0')||(*Tel>'9'))
 			return OA_FALSE;
 	}
-	return OA_FALSE;
+	return OA_TRUE;
 }
 u8 WriteLbsCfgPara(Enum_CtrlCfgPara CfgPara, u8 *pValue,u8 len,UpdateModeEnum UpdateMode)
 {
@@ -859,8 +859,10 @@ u8 WriteLbsCfgPara(Enum_CtrlCfgPara CfgPara, u8 *pValue,u8 len,UpdateModeEnum Up
 		case eAlarmSMSTel:
 		case eMonitTel:
 		case eSpeclSMSTel:
-			if(len>TELMAXLEN)
+			if(len>TELMAXLEN){
+				DEBUG("number is err!");
 				return 1;
+			}
 		break;
 		case eCarid: 
 			if(len>CarIDMAXLEN)
@@ -968,7 +970,7 @@ u8 WriteLbsCfgPara(Enum_CtrlCfgPara CfgPara, u8 *pValue,u8 len,UpdateModeEnum Up
 	//参数设置
 	//OSSemPend(HXCfgParaSem,0,&err);
 if (UpdateMode == UpdateOnly){
-	DEBUG("parameters id:02x%X", CfgPara);
+	DEBUG("parameters id:0x%04X", CfgPara);
 	switch(CfgPara)
 	{
 		#if 0
@@ -1304,10 +1306,10 @@ if (UpdateMode == UpdateOnly){
 			//LbsCfgStruct.ServTellen=len;
 			//Mem_Copy(LbsCfgStruct.ServTel,pValue,len);
 			DEBUG("ServTel");
-			if (len <= TEL_NUM_MAX_LEN)
+			if (len < TEL_NUM_MAX_LEN)
 			{
-				oa_memset(&dev_now_params.monitor_platform_num, 0x0, sizeof(dev_now_params.monitor_platform_num));
-				oa_memcpy((u8 *)&dev_now_params.monitor_platform_num, pValue, len);
+				oa_memset(dev_now_params.monitor_platform_num, 0x0, TEL_NUM_MAX_LEN);
+				oa_memcpy(dev_now_params.monitor_platform_num, pValue, len);
 			}
 			else
 			{
@@ -1318,9 +1320,9 @@ if (UpdateMode == UpdateOnly){
 			//LbsCfgStruct.ResetTellen=len;
 			//Mem_Copy(LbsCfgStruct.ResetTel,pValue,len);
 			DEBUG("ResetTel");
-			if (len <= TEL_NUM_MAX_LEN){
-				oa_memset(&dev_now_params.reset_num, 0x0, 	sizeof(dev_now_params.reset_num));
-				oa_memcpy((u8 *)&dev_now_params.reset_num, pValue, len);
+			if (len < TEL_NUM_MAX_LEN){
+				oa_memset(dev_now_params.reset_num, 0x0, TEL_NUM_MAX_LEN);
+				oa_memcpy(dev_now_params.reset_num, pValue, len);
 			}
 			else{
 				DEBUG("param err ");
@@ -1330,11 +1332,9 @@ if (UpdateMode == UpdateOnly){
 			//LbsCfgStruct.FactySetTellen=len;
 			//Mem_Copy(LbsCfgStruct.FactySetTel,pValue,len);
 			DEBUG("FactryTel");
-			if (len <= TEL_NUM_MAX_LEN){
-				oa_memset(&dev_now_params.restore_factory_settings_num, 
-																	0x0, 
-						sizeof(dev_now_params.restore_factory_settings_num));
-				oa_memcpy((u8 *)&dev_now_params.restore_factory_settings_num, pValue, len);
+			if (len < TEL_NUM_MAX_LEN){
+				oa_memset(dev_now_params.restore_factory_settings_num, 0x0, TEL_NUM_MAX_LEN);
+				oa_memcpy(dev_now_params.restore_factory_settings_num, pValue, len);
 			}
 			else{
 				DEBUG("param err ");
@@ -1344,10 +1344,10 @@ if (UpdateMode == UpdateOnly){
 			//LbsCfgStruct.ServSMSTellen=len;
 			//Mem_Copy(LbsCfgStruct.ServSMSTel,pValue,len);
 			DEBUG("SMSTel");
-			if (len <= TEL_NUM_MAX_LEN)
+			if (len < TEL_NUM_MAX_LEN)
 			{
-				oa_memset(&dev_now_params.monitor_platform_sms_num, 0x0, sizeof(dev_now_params.monitor_platform_sms_num));
-				oa_memcpy((u8 *)&dev_now_params.monitor_platform_sms_num, pValue, len);
+				oa_memset(dev_now_params.monitor_platform_sms_num, 0x0, TEL_NUM_MAX_LEN);
+				oa_memcpy(dev_now_params.monitor_platform_sms_num, pValue, len);
 			}
 			else
 			{
@@ -1358,9 +1358,9 @@ if (UpdateMode == UpdateOnly){
 			//LbsCfgStruct.AlarmSMSTellen=len;
 			//Mem_Copy(LbsCfgStruct.AlarmSMSTel,pValue,len);
 			DEBUG("AlarmSMSTel");
-			if (len <= TEL_NUM_MAX_LEN){
-				oa_memset(&dev_now_params.terminal_sms_num, 0x0, 	sizeof(dev_now_params.terminal_sms_num));
-				oa_memcpy((u8 *)&dev_now_params.terminal_sms_num, pValue, len);
+			if (len < TEL_NUM_MAX_LEN){
+				oa_memset(dev_now_params.terminal_sms_num, 0x0, TEL_NUM_MAX_LEN);
+				oa_memcpy(dev_now_params.terminal_sms_num, pValue, len);
 			}
 			else{
 				DEBUG("param err ");
@@ -1538,9 +1538,9 @@ if (UpdateMode == UpdateOnly){
 			//LbsCfgStruct.CarIdlen=len;
 			//Mem_Copy(LbsCfgStruct.CarId,pValue,len);
 			DEBUG("Carid");
-			if (len <= VEHICLE_LICENCE_MAX_LEN){
-				oa_memset(&dev_now_params.vehicle_license, 0x0, 	sizeof(dev_now_params.vehicle_license));
-				oa_memcpy((u8 *)&dev_now_params.vehicle_license, pValue, len);
+			if (len < VEHICLE_LICENCE_MAX_LEN){
+				oa_memset(dev_now_params.vehicle_license, 0x0, 	VEHICLE_LICENCE_MAX_LEN);
+				oa_memcpy(dev_now_params.vehicle_license, pValue, len);
 			}
 			else{
 				DEBUG("param err ");
@@ -1654,8 +1654,11 @@ u8 ParaConvertandSet(Enum_CtrlCfgPara paramID,u8 *Srcval,u8 len,u16 *devAct)
 		case eAlarmSMSTel:
 		case eMonitTel:
 		case eSpeclSMSTel:
-			if(!ISStrTelValid(Srcval,len))
+			if(!ISStrTelValid(Srcval,len)){
+				DEBUG("number err!");
 				return 1;
+			}
+				
 			WriteLbsCfgPara(paramID,Srcval,len,UpdateOnly);
 		break;
 		case eCarid:   //peijl_130220 修改：车辆基本参数改变时，要先注销再重注册
@@ -1983,6 +1986,7 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 	switch(cmd)
 	{
 		case eOnlineUpgrad_Ctrl:{
+			DEBUG("wireless_updata");
 			control_type = wireless_update;
 			break;
 		}
@@ -2308,9 +2312,25 @@ static u8 set_round_area(u8 *pbuf, u16 buflen)
 		return 1;
 	}
 	//DEBUG(PrintDebug,"设置圆形区域\r\n");
-	DEBUG("设置圆形区域");
+	
 	option =  *pbuf++;
 	area_num = 	*pbuf++;
+
+	switch (option){
+		case 0:{
+			DEBUG("设置圆形区域:更新");
+		}break;
+		case 1:{
+			DEBUG("设置圆形区域:追加");
+		}break;
+		case 2:{
+			DEBUG("设置圆形区域:修改");
+		}break;
+		default:{
+			DEBUG("设置圆形区域:错误");
+		}break;
+	}
+	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
 	if (area_num > MAX_AREA_SUM){
 		DEBUG("area num is too large");
@@ -2353,9 +2373,24 @@ static u8 set_rect_area(u8 *pbuf, u16 buflen)
 		return 1;
 	}
 	//DEBUG(PrintDebug,"设置矩形区域\r\n");
-	DEBUG("设置矩形区域");
 	option =  *pbuf++;
 	area_num = 	*pbuf++;
+	
+	switch (option){
+		case 0:{
+			DEBUG("设置矩形区域:更新");
+		}break;
+		case 1:{
+			DEBUG("设置矩形区域:追加");
+		}break;
+		case 2:{
+			DEBUG("设置矩形区域:修改");
+		}break;
+		default:{
+			DEBUG("设置矩形区域:错误");
+		}break;
+	}
+	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
 	if (area_num > MAX_AREA_SUM){
 		DEBUG("area num is too large");
@@ -2399,9 +2434,24 @@ static u8 set_poly_area(u8 *pbuf, u16 buflen)
 		return 1;
 	}
 	//DEBUG(PrintDebug,"设置多边形区域\r\n");
-	DEBUG("设置多边形区域");
 	option =  *pbuf++;
 	area_num = 	*pbuf++;
+
+	switch (option){
+		case 0:{
+			DEBUG("设置多边形区域:更新");
+		}break;
+		case 1:{
+			DEBUG("设置多边形区域:追加");
+		}break;
+		case 2:{
+			DEBUG("设置多边形区域:修改");
+		}break;
+		default:{
+			DEBUG("设置多边形区域:错误");
+		}break;
+	}
+	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
 	if (area_num > MAX_AREA_SUM){
 		DEBUG("area num is too large");
@@ -2441,13 +2491,28 @@ static u8 del_area_message(u8 *pbuf, u16 buflen,u8 area_type)
 		DEBUG("check_car_ctl param error!");
 		return 1;
 	}
-	//DEBUG(PrintDebug,"删除区域信息\r\n");
-	DEBUG("删除区域信息");
+	
 	area_num = 	*pbuf++;
 	if (area_num > MAX_AREA_SUM){
 		DEBUG("area num is too large");
 		return 1;
 	}
+
+	switch (area_type){
+		case Circular_Area:{
+			DEBUG("删除圆形区域数目:%d", area_num);
+		}break;
+		case Rectangle_Area:{
+			DEBUG("删除矩形区域数目:%d", area_num);
+		}break;
+		case Poly_Area:{
+			DEBUG("删除多边形区域数目:%d", area_num);
+		}break;
+		default:{
+			DEBUG("删除区域出错");
+		}break;
+	}
+	
 	if(area_num)
 	{
 		for(i=0;i<area_num;i++)
@@ -5245,7 +5310,7 @@ u16 DevReq2ServPackag_build_blind(u16 ReqMsgId) //即时上传数据
 			//ret = write_blinddata(pbuf, U16Temp);
 			ret = write_blinddata_to_1file(pbuf, U16Temp);
 			if (OA_TRUE == ret){
-				print_rtc_time();
+				//print_rtc_time();
 				DEBUG("write one blinddata packet!total write num:%d", total_write);
 			}
 			return ret;

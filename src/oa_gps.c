@@ -110,8 +110,11 @@ void oa_app_gps(void)
 	static u8 upload_times;
 	static u32 driver_time;
 	static u32 relax_time;
-	static oa_bool vehicle_status;//OA_FALSE:park,OA_TRUE:driving
-	static oa_bool fatigue = OA_FALSE;//fatigue check 
+	static u32 park_times = 0;
+	static oa_bool fatigue = OA_FALSE;//fatigue check
+	static u8 time_last[6] = {0x0};
+	u8 time_cur[6] = {0x0};
+	static oa_uint8 day_drive = 0;
 	oa_uint16 build_ret;
 	oa_uint16 soc_ret;
 	u32 flag;
@@ -135,7 +138,7 @@ void oa_app_gps(void)
 			goto redo;
 		}
 	}
-	
+#if 0	
 	//gps antenna status detect 
 	//ISGpsAntOK();
 	ret = gps_ana_detect();
@@ -149,6 +152,7 @@ void oa_app_gps(void)
 		}
 		
 	}
+#endif
 	//gps data analysis:mileage statistics, speed alarm, driver fatigue,cog and so on.
 	result = GPS_DataAnaly();//update gps datas
 //	DEBUG("result:0x%X", __FILE__,  __func__, __LINE__, result);
@@ -192,8 +196,27 @@ void oa_app_gps(void)
 				if (OA_FALSE == rtc_status){
 					set_rtc_time(gps_info.Time); //when gps locate ok, set rtc time at once
 					rtc_status = OA_TRUE;
+					get_rtc_time(time_last);//get current time
 				}
 				
+			}
+			//-------------------------day overtime drive-----------------------------------
+			if (OA_TRUE == rtc_status){//rtc is ok
+				get_rtc_time(time_cur);
+				if (!oa_memcmp(time_last, time_cur, 3)){//in one day
+					if (gps_info.Speed > 0)	day_drive++;
+					else if (gps_info.Speed == 0) day_drive = 0;
+					if (day_drive * GPS_RUN_SECONDS >= dev_now_params.day_add_drive_time_threshold){
+						if (ReadAlarmPara(StaAlarm0, ALARM_DRIVE_OVERTIME) == RESET){
+							ret = handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
+							DEBUG("day overtime drive");
+						}
+					}
+				}
+				else{
+					oa_memcpy(time_last, time_cur, sizeof(time_last));
+					day_drive = 0;
+				}
 			}
 #if 0
 			//-------------------------bent point jugde-----------------------------
@@ -226,7 +249,7 @@ void oa_app_gps(void)
 			//gps_info.Speed = MAX_SPEED;//just for test
 			if (speed > MAX_SPEED || gps_info.Speed > MAX_SPEED){
 				gps_info.Speed = MAX_SPEED;
-				DEBUG(" speed max!");
+				DEBUG("speed max!");
 			}
 			
 			if (gps_info.Speed > speed){//handle this alarm & upload instantly
@@ -239,6 +262,23 @@ void oa_app_gps(void)
 				}
 			}
 			//--------------------------------------------------------------------
+			//--------------------------over time park------------------------------
+			if (0 == gps_info.Speed){
+				park_times++;
+				if (park_times * GPS_RUN_SECONDS >= dev_now_params.max_park_time){
+					if (ReadAlarmPara(StaAlarm0, ALARM_OVERTIME_PARKING) == RESET){
+						handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
+						DEBUG("overtime park");
+					}
+				}
+			}
+			else if (gps_info.Speed > 0){
+				if (park_times > 0)	park_times = 0;
+				if (ReadAlarmPara(StaAlarm0, ALARM_OVERTIME_PARKING) == SET){
+					ret = handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, RESET, OA_TRUE);
+					DEBUG("cancel overtime park");
+				}
+			}
 			//--------------------------mileage statistis-----------------------------
 			IntvlDistanc += GPS_IntvlDistanc(); //km
 			d_r_distance = IntvlDistanc;//just for distance report
@@ -254,8 +294,9 @@ void oa_app_gps(void)
 			//------------------------Periodically reported---------------------------
 			if (dev_now_params.report_strategy == 0){//Periodically reported
 				if (upload_times * GPS_RUN_SECONDS >= dev_now_params.default_reporttime){
-					DEBUG("send one location packet!maybe blind data");
+					DEBUG("@@@");
 					print_rtc_time();
+					DEBUG("send one location packet!maybe blind data");
 					ret = handle_alarm_status(OA_FALSE, OA_FALSE, SET, OA_FALSE);//just send
 					if (ret == OA_TRUE)	upload_times = 0;
 				}
@@ -321,14 +362,14 @@ void oa_app_gps(void)
 			//---------------------------------------------------------------------
 		}
 		else if (result & NMEA_RMC_UNFIXED){
-			DEBUG(" NMEA_RMC_UNFIXED!");
+			DEBUG("NMEA_RMC_UNFIXED!");
 			//设置未定位标志
 			if (ReadAlarmPara(StaSector1,STA_GPS_FIXED) == SET)
 				//WriteAlarmPara(RESET,StaSector1,STA_GPS_FIXED);
 				handle_alarm_status(StaSector1, STA_GPS_FIXED, RESET, OA_TRUE);
 		}
 		if (result &UBX_CFG_RST_OK){
-			DEBUG(" UBX_CFG_RST_OK!");
+			DEBUG("UBX_CFG_RST_OK!");
 		}
 		if (result &UBX_CFG_MSG_OK){
 			DEBUG("UBX_CFG_MSG_OK!");

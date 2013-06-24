@@ -41,10 +41,10 @@
 
 #define ACC_GPIO 19 //gpio19
 #define GPSANA_GPIO 3//gpio3
-#define KEY_GPIO 18
-#define IN0_GPIO 7
-#define IN1_GPIO 4
-#define OUT_GPIO 17
+#define KEY_GPIO 7
+#define IN0_GPIO 17
+#define IN1_GPIO 12
+#define OUT_GPIO 11
 
 #define GPIO_INPUT 0
 #define GPIO_OUTPUT 1
@@ -52,10 +52,10 @@
 
 #define ACC_ON 1
 #define ACC_OFF 0
-#define OA_ACC_RUN 10000
+#define OA_ACC_RUN 2000
 
 #if 0
-afficial hw definition
+official hw definition
 #define GPS_AADET 3//gpio3
 #define GPS_EN 18//gpio18
 #define KEY 7//gpio7

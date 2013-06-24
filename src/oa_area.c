@@ -905,6 +905,9 @@ oa_bool write_circle_area_data(u8 *buf, u16 *read_len, u8 option)
 			*read_len = 18;
 		}
 	}
+	DEBUG("区域ID:%d 中心点纬度:%f 中心点经度:%f 半径:%d", circle_area_var.area_id, (float)circle_area_var.center_point_lat/1000000, 
+						(float)circle_area_var.center_point_lon/1000000, 
+						circle_area_var.radius);
 	//-----------------------------------------------
 	circle_area_var.is_valid = valid;
 	ret = r_w_circle_area_data_file(&circle_area_var, file_write, 0/*has no effect*/, option);
@@ -992,6 +995,9 @@ oa_bool write_rect_area_data(u8 *buf, u16 *read_len, u8 option)
 			*read_len = 22;
 		}
 	}
+	DEBUG("区域ID:%d", rect_area_var.area_id);
+	DEBUG("左上点:纬度:%f 经度:%f", (float)rect_area_var.left_up_lat/1000000, (float)rect_area_var.left_up_lon/1000000);
+	DEBUG("右下点:纬度:%f 经度:%f", (float)rect_area_var.right_down_lat/1000000, (float)rect_area_var.right_down_lon/1000000);
 	//-----------------------------------------------
 	rect_area_var.is_valid = valid;
 	ret = r_w_rect_area_data_file(&rect_area_var, file_write, 0/*has no effect*/, option);
@@ -1120,6 +1126,10 @@ oa_bool write_poly_area_data(u8 *buf, u16 *read_len, u8 option)
 			}
 			*read_len = 8 + i * 8;
 		}
+	}
+	for(i=0; i<poly_area_var.total_point; i++){
+		DEBUG("第%d 个顶点:纬度:%f 经度:%f", i+1, (float)poly_area_var.vertax[i].vertax_lat/1000000, 
+															(float)poly_area_var.vertax[i].vertax_lon/1000000);
 	}
 	//-----------------------------------------------
 	poly_area_var.is_valid = valid;
@@ -1429,11 +1439,15 @@ area_status_enum circle_area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, 
 				if (1 == circle_area_var.area_para.depend_time){
 					//rtc is ok?
 					if (time[0] == 0x0 && time[1] == 0x0 && time[2] == 0x0) continue;
-					//if it isn't day cycle, discard it. In other words,only handle day cycle case!!!
-					if (circle_area_var.start_time[0] != 0x0 || circle_area_var.stop_time[0] != 0x0
-						|| circle_area_var.start_time[1] != 0x0 || circle_area_var.stop_time[1] != 0x0
-						|| circle_area_var.start_time[2] != 0x0 || circle_area_var.stop_time[2] != 0x0) continue;
-					res = CompareTime(circle_area_var.start_time, circle_area_var.stop_time, time, 3);
+					//if it is cycle
+					if (circle_area_var.start_time[0] == 0x0 && circle_area_var.stop_time[0] == 0x0){//circle time
+						if (circle_area_var.start_time[1] != 0x0 && circle_area_var.stop_time[1] != 0x0)
+							res = CompareTime(circle_area_var.start_time, circle_area_var.stop_time, time, 1);
+						else if (circle_area_var.start_time[2] != 0x0 && circle_area_var.stop_time[2] != 0x0)
+							res = CompareTime(circle_area_var.start_time, circle_area_var.stop_time, time, 2);
+						else res = CompareTime(circle_area_var.start_time, circle_area_var.stop_time, time, 3);
+					}
+					else continue;
 					if (0 == res) continue;
 					else if (1 == res){
 						i_o = Circular_Judge(lon, lat, &circle_area_desc);
@@ -1500,12 +1514,15 @@ area_status_enum rect_area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa
 				//compare	
 				if (1 == rect_area_var.area_para.depend_time){
 					//rtc is ok?
-					if (time[0] == 0x0 && time[1] == 0x0 && time[2] == 0x0) continue;
-					//if it isn't day cycle, discard it. In other words,only handle day cycle case!!!
-					if (rect_area_var.start_time[0] != 0x0 || rect_area_var.stop_time[0] != 0x0
-						|| rect_area_var.start_time[1] != 0x0 || rect_area_var.stop_time[1] != 0x0
-						|| rect_area_var.start_time[2] != 0x0 || rect_area_var.stop_time[2] != 0x0) continue;
-					res = CompareTime(rect_area_var.start_time, rect_area_var.stop_time, time, 3);
+					//if it is cycle
+					if (rect_area_var.start_time[0] == 0x0 && rect_area_var.stop_time[0] == 0x0){//circle time
+						if (rect_area_var.start_time[1] != 0x0 && rect_area_var.stop_time[1] != 0x0)
+							res = CompareTime(rect_area_var.start_time, rect_area_var.stop_time, time, 1);
+						else if (rect_area_var.start_time[2] != 0x0 && rect_area_var.stop_time[2] != 0x0)
+							res = CompareTime(rect_area_var.start_time, rect_area_var.stop_time, time, 2);
+						else res = CompareTime(rect_area_var.start_time, rect_area_var.stop_time, time, 3);
+					}
+					else continue;
 					if (0 == res) continue;
 					else if (1 == res){
 						i_o = poly_Judge(lon, lat, &rect_area_desc, 4);
@@ -1570,11 +1587,15 @@ area_status_enum poly_area_inout_judge(u32 lat, u32 lon, u8 *time, u16 speed, oa
 				if (1 == poly_area_var.area_para.depend_time){
 					//rtc is ok?
 					if (time[0] == 0x0 && time[1] == 0x0 && time[2] == 0x0) continue;
-					//if it isn't day cycle, discard it. In other words,only handle day cycle case!!!
-					if (poly_area_var.start_time[0] != 0x0 || poly_area_var.stop_time[0] != 0x0
-						|| poly_area_var.start_time[1] != 0x0 || poly_area_var.stop_time[1] != 0x0
-						|| poly_area_var.start_time[2] != 0x0 || poly_area_var.stop_time[2] != 0x0) continue;
-					res = CompareTime(poly_area_var.start_time, poly_area_var.stop_time, time, 3);
+					//if it is cycle
+					if (poly_area_var.start_time[0] == 0x0 && poly_area_var.stop_time[0] == 0x0){//circle time
+						if (poly_area_var.start_time[1] != 0x0 && poly_area_var.stop_time[1] != 0x0)
+							res = CompareTime(poly_area_var.start_time, poly_area_var.stop_time, time, 1);
+						else if (poly_area_var.start_time[2] != 0x0 && poly_area_var.stop_time[2] != 0x0)
+							res = CompareTime(poly_area_var.start_time, poly_area_var.stop_time, time, 2);
+						else res = CompareTime(poly_area_var.start_time, poly_area_var.stop_time, time, 3);
+					}
+					else continue;
 					if (0 == res) continue;
 					else if (1 == res){
 						i_o = poly_Judge(lon, lat, &poly_area_desc, poly_area_var.total_point);

@@ -666,13 +666,14 @@ oa_bool oa_app_blinddata(void)
 		if (ret == OA_FALSE){
 			goto redoit;
 		}
+		DEBUG("***");
 		//has blinddata
 		ret_len = escape_copy_to_send(blind_buf, data_len);
 		//DEBUG(" ret_len:%d!", ret_len);
 		if (ret_len > 0){
-			oa_soc_send_req();//check datas in buffer & send
 			print_rtc_time();
 			DEBUG("send one blinddata packet!total send num:%d", total_read);
+			oa_soc_send_req();//check datas in buffer & send
 		}
 		
 
