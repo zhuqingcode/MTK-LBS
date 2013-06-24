@@ -111,7 +111,10 @@ void oa_app_gps(void)
 	static u32 driver_time;
 	static u32 relax_time;
 	static u32 park_times = 0;
-	static oa_bool fatigue = OA_FALSE;//fatigue check 
+	static oa_bool fatigue = OA_FALSE;//fatigue check
+	static u8 time_last[6] = {0x0};
+	u8 time_cur[6] = {0x0};
+	static oa_uint8 day_drive = 0;
 	oa_uint16 build_ret;
 	oa_uint16 soc_ret;
 	u32 flag;
@@ -193,8 +196,27 @@ void oa_app_gps(void)
 				if (OA_FALSE == rtc_status){
 					set_rtc_time(gps_info.Time); //when gps locate ok, set rtc time at once
 					rtc_status = OA_TRUE;
+					get_rtc_time(time_last);//get current time
 				}
 				
+			}
+			//-------------------------day drive-----------------------------------
+			if (OA_TRUE == rtc_status){//rtc is ok
+				get_rtc_time(time_cur);
+				if (!oa_memcmp(time_last, time_cur, 3)){//in one day
+					if (gps_info.Speed > 0)	day_drive++;
+					else if (gps_info.Speed == 0) day_drive = 0;
+					if (day_drive * GPS_RUN_SECONDS >= dev_now_params.day_add_drive_time_threshold){
+						if (ReadAlarmPara(StaAlarm0, ALARM_DRIVE_OVERTIME) == RESET){
+							ret = handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
+							DEBUG("day overtime drive");
+						}
+					}
+				}
+				else{
+					oa_memcpy(time_last, time_cur, sizeof(time_last));
+					day_drive = 0;
+				}
 			}
 #if 0
 			//-------------------------bent point jugde-----------------------------
