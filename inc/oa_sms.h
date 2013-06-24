@@ -75,6 +75,7 @@
 #define swh_keyalarm "swh_keyalarm"
 #define overspeed "overspeed"
 #define overspeedtime "overspeedtime"
+#define daydrivetime "daydrivetime"
 #define tireddrivetime "tireddrivetime"
 #define min_resttime "min_resttime"
 #define max_parktime "max_parktime"
@@ -155,6 +156,7 @@ typedef enum
 	e_swh_keyalarm,
 	e_overspeed,
 	e_overspeedtime,
+	e_daydrivetime,
 	e_tireddrivetime,
 	e_min_resttime,
 	e_max_parktime,

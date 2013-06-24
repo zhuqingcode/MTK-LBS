@@ -200,7 +200,7 @@ void oa_app_gps(void)
 				}
 				
 			}
-			//-------------------------day drive-----------------------------------
+			//-------------------------day overtime drive-----------------------------------
 			if (OA_TRUE == rtc_status){//rtc is ok
 				get_rtc_time(time_cur);
 				if (!oa_memcmp(time_last, time_cur, 3)){//in one day

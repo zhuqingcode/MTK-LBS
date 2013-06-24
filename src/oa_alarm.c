@@ -118,6 +118,9 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 				case ALARM_GNSS_SHORT_CIRCUIT:{
 					oa_strcat(enquire_temp, "ALARM_GNSS_SHORT_CIRCUIT");
 				}break;
+				case ALARM_DRIVE_OVERTIME:{
+					oa_strcat(enquire_temp, "ALARM_DRIVE_OVERTIME");
+				}break;
 				case ALARM_OVERTIME_PARKING:{
 					oa_strcat(enquire_temp, "ALARM_OVERTIME_PARKING");
 				}break;

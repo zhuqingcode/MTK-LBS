@@ -632,6 +632,7 @@ void print_key_dev_params(void)
 	DEBUG_N("overspeed					:%d", dev_now_params.max_speed);
 	DEBUG_N("overspeedtime					:%d", dev_now_params.speed_duration);
 	DEBUG_N("tireddrivetime					:%d", dev_now_params.continuous_drive_time_threshold);
+	DEBUG_N("daydrivetime					:%d", dev_now_params.day_add_drive_time_threshold);
 	DEBUG_N("min_resttime					:%d", dev_now_params.min_rest_time);
 	DEBUG_N("max_parktime					:%d", dev_now_params.max_park_time);
 	DEBUG_N("provincID					:%d", dev_now_params.vehicle_province_id);
