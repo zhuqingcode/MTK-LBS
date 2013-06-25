@@ -2679,7 +2679,7 @@ void oa_app_sms(void)
 		prefix[i][oa_strlen(prefix[i])] = ';';
 		DEBUG("%s", prefix[i]);
 	}
-	
+#if 0	
 	if (sn == 1){
 		DEBUG("1 x sms");
 		//do not support multiple sms
@@ -2692,7 +2692,8 @@ void oa_app_sms(void)
 			oa_memset(&set, 0x0, sizeof(set));
 		}
 	}
-	else if (sn > 1 && sn <= MAX_SMS_NUM){
+#endif
+	if (sn <= MAX_SMS_NUM){
 		DEBUG("%d x sms", sn);
 		for (i = 0; i < sn; i++){
 			for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
