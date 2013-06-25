@@ -36,7 +36,7 @@
 #include "oa_lbs2mtk.h"
 #include "oa_jt808.h"
 #include "oa_debug.h"
-
+extern char *strtok(char s[], const char *delim);
 extern DEVICE_PARAMS dev_now_params;
 extern USE_LOCK now_use_lock;
 extern oa_uint8 acc_status;
@@ -1286,7 +1286,7 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 					continue;
 				}
 				
-				handle_keyword4ms(NULL, NULL, NULL, key_ret, &set, sms);
+				handle_keyword4ms(key_ret, &set);
 				handle_common4ms(key_ret, buf);
 				DEBUG("\nbuf:%s", buf);
 				oa_strcat(sendbuf, buf);

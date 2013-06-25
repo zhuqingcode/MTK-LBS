@@ -259,6 +259,7 @@ void gps_extract(oa_char *enquire_temp){
 		oa_strcat(enquire_temp, tmp);
 	}
 }
+#if 0
 /*********************************************************
 *Function:      need_ack_check()
 *Description:  search key word in message
@@ -292,6 +293,7 @@ ack_kind need_ack_check(oa_char *p)
 		//return noack;
 	}	
 }
+#endif
 /*********************************************************
 *Function:      need_ack_check()
 *Description:  search key word in message
@@ -530,6 +532,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 #endif
 	return OA_TRUE;
 }
+#if 0
 /*********************************************************
 *Function:      lookfor_keywords_loop()
 *Description:  search key word in message
@@ -602,6 +605,7 @@ e_keyword lookfor_keywords_loop(u8 *p_sms, u16 sms_len, keyword_context *p_set, 
 
 	return e_none;
 }
+#endif
 /*********************************************************
 *Function:      lookfor_keywords_loop()
 *Description:  search key word in message
@@ -693,6 +697,7 @@ void sms_send_feedback_func(os_sms_result send_ret)
 		oa_memset(&sms_fail, 0x0, sizeof(sms_fail));
 	}
 }
+#if 0
 /*********************************************************
 *Function:      handle_keyword()
 *Description:  handle the keyword
@@ -942,9 +947,9 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 	else if (scrn == which){
 		
 	}
-#endif	
-	
+#endif
 }
+#endif
 /*********************************************************
 *Function:      handle_keyword4ms()
 *Description:  handle the keyword for multiple sms
@@ -1248,6 +1253,7 @@ void dev_action_handle(keyword_context *p_set)
 
 	p_set->act_kind = no_act;
 }
+#if 0
 /*********************************************************
 *Function:      handle_keyword()
 *Description:  handle the keyword
@@ -1922,6 +1928,7 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 
 	
 }
+#endif
 /*********************************************************
 *Function:      handle_keyword4ms()
 *Description:  handle the keyword for mutiple sms
@@ -1953,8 +1960,8 @@ void sendsms4ms(u8 *buf){
 *Return:        void
 *Others:         
 *********************************************************/
-void handle_keyword4ms(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind, 
-										keyword_context *p_set, sms_or_uart which)
+void handle_keyword4ms(e_keyword key_kind, 
+										keyword_context *p_set)
 {
 	oa_bool ret;
 	char temp[16] = {0x0};
@@ -2702,7 +2709,7 @@ void oa_app_sms(void)
 					continue;
 				}
 				
-				handle_keyword4ms(NULL, NULL, NULL, key_ret, &set, sms);
+				handle_keyword4ms(key_ret, &set);
 				if (ms_ack == OA_TRUE){
 					handle_common4ms(key_ret, buf);
 					DEBUG("\nbuf:%s", buf);

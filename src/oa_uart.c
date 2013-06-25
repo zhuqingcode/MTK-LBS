@@ -213,6 +213,7 @@ oa_bool oa_uart_init(oa_uart_enum port)
 *********************************************************/
 void oa_app_uart(void)
 {
+#if 0
 	//analysis the uart data
 	//do about sms
 	e_keyword key_ret = e_none;
@@ -231,4 +232,5 @@ void oa_app_uart(void)
 		oa_memset(&set, 0x0, sizeof(set));
 	}
 	return;
+#endif
 }
