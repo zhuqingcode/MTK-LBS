@@ -299,26 +299,27 @@ ack_kind need_ack_check(oa_char *p)
 *Others:         
 *********************************************************/
 oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set, 
-										e_keyword e_kind, sms_or_uart which, u16 len)
+										e_keyword e_kind)
 {
 	char *p = NULL;
 	oa_char *p_SEMICOLON = NULL; 
 	oa_char temp[128] = {0x0};
-	oa_uint8 copy_len = 0;
+	
 	if (NULL == p_key || e_len == 0 || p_set == NULL){
 		DEBUG(" err!");
 		return OA_FALSE;
 	}
-	if (sms == which) copy_len = len;
-	else if (uart == which) copy_len = uart_contain.len;
-	else if (scrn == which)	 copy_len = len;
+
 	p = p_key+e_len;
 	if (*p == COLON){//means set
 		p_set->kind = set;
 		p++;
 		p_SEMICOLON = oa_strchr(p_key, SEMICOLON);
 		if (NULL != p_SEMICOLON)	oa_memcpy(temp, p, p_SEMICOLON-p);
-		else oa_memcpy(temp, p, copy_len - (e_len+1));
+		else {
+			DEBUG("format err!");
+			return OA_FALSE;
+		}//oa_memcpy(temp, p, copy_len - (e_len+1));
 		switch (e_kind){
 			case e_HB:
 			case e_RSP_TCP:
@@ -555,7 +556,9 @@ e_keyword lookfor_keywords_loop(u8 *p_sms, u16 sms_len, keyword_context *p_set, 
 			DEBUG(" p_set err!");
 			return e_none;
 		}
-		p_key = oa_strstr(message.data, p_keyword[e_i]);
+		//p_key = oa_strstr(message.data, p_keyword[e_i]);
+		oa_memcpy(temp, message.data, sms_len);
+		p_key = oa_strstr(temp, p_keyword[e_i]);
 	}
 	else if (uart == which){
 		if (NULL == p_set || e_i == e_none){
@@ -575,7 +578,7 @@ e_keyword lookfor_keywords_loop(u8 *p_sms, u16 sms_len, keyword_context *p_set, 
 	
 	if (NULL != p_key){
 		if (sms == which){
-			if (p_key != &message.data[0])		return e_none;
+			if (p_key != &temp[0])		return e_none;
 		}
 		else if (uart == which){
 			if (p_key != &uart_contain.buf[0])		return e_none;
@@ -591,7 +594,7 @@ e_keyword lookfor_keywords_loop(u8 *p_sms, u16 sms_len, keyword_context *p_set, 
 		else if (ack_ret == noack)  p_set->need_ack = OA_FALSE;
 		//set/enquiry check
 		e_len = oa_strlen(p_keyword[e_i]);
-		ret = set_enquiry_check(p_key, e_len, p_set, e_i, which, sms_len);
+		ret = set_enquiry_check(p_key, e_len, p_set, e_i);
 		if (OA_FALSE == ret) return e_none;
 		else return e_i;
 	}
@@ -605,7 +608,7 @@ e_keyword lookfor_keywords_loop(u8 *p_sms, u16 sms_len, keyword_context *p_set, 
 *Return:        void
 *Others:         
 *********************************************************/
-e_keyword look4keywords4ms(u8 *p_sms, u16 sms_len, keyword_context *p_set, oa_uint8 e_i, sms_or_uart which)
+e_keyword look4keywords4ms(oa_char *p_sms, u16 sms_len, keyword_context *p_set, oa_uint8 e_i, sms_or_uart which)
 {
 	oa_char *p_key = NULL;
 	oa_char temp[256] = {0x0};
@@ -646,7 +649,7 @@ e_keyword look4keywords4ms(u8 *p_sms, u16 sms_len, keyword_context *p_set, oa_ui
 	
 	if (NULL != p_key){
 		if (sms == which){
-			if (p_key != p_sms)		return e_none;
+			if (p_key != &temp[0])		return e_none;
 		}
 		else if (uart == which){
 			if (p_key != &uart_contain.buf[0])		return e_none;
@@ -657,7 +660,7 @@ e_keyword look4keywords4ms(u8 *p_sms, u16 sms_len, keyword_context *p_set, oa_ui
 		
 		//set/enquiry check
 		e_len = oa_strlen(p_keyword[e_i]);
-		ret = set_enquiry_check(p_key, e_len, p_set, e_i, which, sms_len);
+		ret = set_enquiry_check(p_key, e_len, p_set, e_i);
 		if (OA_FALSE == ret) return e_none;
 		else return e_i;
 	}
@@ -948,7 +951,7 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 *Return:        void
 *Others:         
 *********************************************************/
-void handle_common4ms(e_keyword key_kind, oa_uint8 *buf)
+void handle_common4ms(e_keyword key_kind, oa_char *buf)
 {
 	oa_bool ret;
 	char temp[16] = {0x0};
@@ -1137,7 +1140,7 @@ void handle_common4ms(e_keyword key_kind, oa_uint8 *buf)
 			oa_strcat(enquire_temp, "not support!");
 		}break;
 	}
-	oa_strcpy(buf, enquire_temp);
+	oa_memcpy(buf, enquire_temp, oa_strlen(enquire_temp));
 }
 
 /*********************************************************
@@ -2613,10 +2616,10 @@ void oa_app_sms(void)
 	oa_uint8 e_i, i = 0;
 	oa_uint8 sn = 0;
 	oa_char *p = NULL;
-	oa_uint8 prefix[MAX_SMS_NUM][64] = {{0x0}, {0x0}, {0x0}, {0x0}, {0x0}};
+	oa_char prefix[MAX_SMS_NUM][64] = {{0x0}, {0x0}, {0x0}, {0x0}, {0x0}};
 	oa_char data[256] = {0x0};
-	oa_uint8 sendbuf[256] = {0x0};
-	oa_uint8 buf[64] = {0x0};
+	oa_char sendbuf[256] = {0x0};
+	oa_char buf[64] = {0x0};
 	oa_uint8 len;
 	oa_bool ms_ack;
 #ifdef 0
@@ -2646,6 +2649,10 @@ void oa_app_sms(void)
 	len = message.len;
 	oa_memcpy(data, message.data, message.len);
 	p = strtok(data, ";");
+	if (NULL == p){
+		DEBUG("format err");
+		return;
+	}
 	while(NULL != p){
 		if (i <= MAX_SMS_NUM){
 			oa_strcpy(prefix[i], p);
@@ -2655,11 +2662,11 @@ void oa_app_sms(void)
 		else break;
 	}
 
-	if (prefix[i][0] == 'A' || prefix[i][0] == 'a' && prefix[i][1] == 0x0){
+	if (prefix[i-1][0] == 'A' || prefix[i-1][0] == 'a' && prefix[i-1][1] == 0x0){
 		sn = i -1;
 		ms_ack = OA_TRUE;
 	}
-	else if (prefix[i][0] == 'N' || prefix[i][0] == 'n' && prefix[i][1] == 0x0){
+	else if (prefix[i-1][0] == 'N' || prefix[i-1][0] == 'n' && prefix[i-1][1] == 0x0){
 		sn = i -1;
 		ms_ack = OA_FALSE;
 	}
@@ -2667,13 +2674,18 @@ void oa_app_sms(void)
 		sn = i;
 		ms_ack = OA_FALSE;
 	}
+	//add ";"
+	for (i = 0;i < sn; i++){
+		prefix[i][oa_strlen(prefix[i])] = ';';
+		DEBUG("%s", prefix[i]);
+	}
 	
 	if (sn == 1){
+		DEBUG("1 x sms");
 		//do not support multiple sms
 		for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
 			key_ret = lookfor_keywords_loop(NULL, len, &set, e_i, sms);
 			if (e_none == key_ret){
-				//DEBUG(" not support!");
 				continue;
 			}
 			handle_keyword(NULL, NULL, NULL, key_ret, &set, sms);
@@ -2681,22 +2693,26 @@ void oa_app_sms(void)
 		}
 	}
 	else if (sn > 1 && sn <= MAX_SMS_NUM){
+		DEBUG("%d x sms", sn);
 		for (i = 0; i < sn; i++){
 			for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
 				key_ret = look4keywords4ms(prefix[i], oa_strlen(prefix[i]), &set, e_i, sms);
 				if (e_none == key_ret){
 					continue;
 				}
+				
 				handle_keyword4ms(NULL, NULL, NULL, key_ret, &set, sms);
 				if (ms_ack == OA_TRUE){
 					handle_common4ms(key_ret, buf);
+					DEBUG("\nbuf:%s", buf);
 					oa_strcat(sendbuf, buf);
+					oa_memset(buf, 0x0, sizeof(buf));
 				}
 				dev_action_handle(&set);
 				oa_memset(&set, 0x0, sizeof(set));
 			}
 		}
-		sendsms4ms(sendbuf);
+		if (ms_ack == OA_TRUE) sendsms4ms(sendbuf);
 	}
 	else DEBUG("too many sms");
 	
