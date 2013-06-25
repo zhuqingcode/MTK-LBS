@@ -1228,11 +1228,41 @@ void handle_keyword_4trans(e_keyword key_kind, keyword_context *p_set, u16 *p_ac
 *********************************************************/
 u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_fbk_len)
 {
-	//do about sms
 	e_keyword key_ret = e_none;
 	keyword_context set = {0x0};
-	oa_uint8 e_i;
+	oa_uint8 e_i, i = 0;
+	oa_uint8 sn = 0;
+	oa_char *p = NULL;
+	oa_char prefix[MAX_SMS_NUM][64] = {{0x0}, {0x0}, {0x0}, {0x0}, {0x0}};
+	oa_char data[256] = {0x0};
+	oa_char sendbuf[256] = {0x0};
+	oa_char buf[64] = {0x0};
+	oa_uint8 len;
+	
 	DEBUG("sms:%s len:%d", p_sms, sms_len);
+	len = sms_len;
+	oa_memcpy(data, p_sms, len);
+	p = strtok(data, ";");
+	if (NULL == p){
+		DEBUG("format err");
+		return;
+	}
+	while(NULL != p){
+		if (i <= MAX_SMS_NUM){
+			oa_strcpy(prefix[i], p);
+			i++;
+			p = strtok(NULL, ";");
+		}
+		else break;
+	}
+
+	sn = i;
+	//add ";"
+	for (i = 0;i < sn; i++){
+		prefix[i][oa_strlen(prefix[i])] = ';';
+		DEBUG("%s", prefix[i]);
+	}
+#if 0
 	//do not support multiple sms
 	for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
 		
@@ -1246,6 +1276,34 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 		oa_memset(&set, 0x0, sizeof(set));
 		return ActionOK;
 	}
+#endif
+	if (sn <= MAX_SMS_NUM){
+		DEBUG("%d x sms", sn);
+		for (i = 0; i < sn; i++){
+			for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
+				key_ret = look4keywords4ms(prefix[i], oa_strlen(prefix[i]), &set, e_i, scrn);
+				if (e_none == key_ret){
+					continue;
+				}
+				
+				handle_keyword4ms(NULL, NULL, NULL, key_ret, &set, sms);
+				handle_common4ms(key_ret, buf);
+				DEBUG("\nbuf:%s", buf);
+				oa_strcat(sendbuf, buf);
+				oa_memset(buf, 0x0, sizeof(buf));
+				dev_action_handle(&set);
+				oa_memset(&set, 0x0, sizeof(set));
+			}
+		}
+		if (oa_strlen(sendbuf)){
+			*p_fbk_len = oa_strlen(sendbuf);
+			oa_memcpy(p_fbk, sendbuf, *p_fbk_len);
+			*p_act |= Sms_Ack_Enable;
+			return ActionOK;
+		}
+		
+	}
+	else DEBUG("too many sms");
 	
 	return UnDefinedSms;
 }
