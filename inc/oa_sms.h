@@ -109,7 +109,7 @@
 #define IP_SUFFIX_LEN 3
 #define IP_MAX_LEN 15
 #define PORT_MAX 65535
-#define PRINT_SAMEPARA	Trace("(%s:%s:%d): this parameter is same as the original, so I do nothing...", __FILE__, __func__, __LINE__)
+#define PRINT_SAMEPARA	DEBUG("this parameter is same as the original, so I do nothing...")
 #define ALARMBIT_MAX_LEN 32
 #define Rpt_strategy_max_num 3
 #define UNLOCK 0
