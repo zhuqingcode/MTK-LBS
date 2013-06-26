@@ -2907,6 +2907,7 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 			memcpy(rsp.SeqId, pbuf, 2);
 			pbuf+=2;
 			rsp.Rslt = *pbuf;
+			#if 0
 			//timeout
 			{
 				u16 temp_seq;
@@ -2918,6 +2919,7 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 					timeout_enable = OA_FALSE;
 				}
 			}
+			#endif
 			//debug info
 			DEBUG("register ack:0x%04x", REGISTERS_rsp);
 			DEBUG("rsp result:0x%x", rsp.Rslt);
@@ -5250,8 +5252,7 @@ u16 escape_copy_to_send(u8 *buf, u16 len, dev_plat_active kind)
 }
 void timeout_retrans_enable(u16 DevMsgId){
 	
-	if (DevMsgId == REGISTERS || DevMsgId == LOGIN || DevMsgId == UNREGISTERS 
-	|| DevMsgId == HEART_BEAT ||DevMsgId == REPORT_LOCATION){
+	if (DevMsgId == HEART_BEAT ||DevMsgId == REPORT_LOCATION){
 		Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//÷’∂À∑¢ÀÕœ˚œ¢ID by zhuqing @2013/6/26
 		timeout_enable = OA_TRUE;
 	}

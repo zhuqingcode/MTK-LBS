@@ -360,6 +360,7 @@ void oa_app_timeout(void *param)
 		if (offline_times * TIMEOUT_SECOND > RESTART_THRESHOLD){
 			do_reset();
 		}
+		goto redo;
 	}
 	else if (dev_running.plat_status == ONLINE) offline_times = 0;
 	
