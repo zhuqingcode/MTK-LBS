@@ -350,11 +350,19 @@ void oa_app_timeout(void *param)
 	static oa_bool first_valid = OA_FALSE;
 	static oa_uint32 Tn;
 	static oa_uint16 retrans_times = 0;
+	static oa_uint16 offline_times;
 	oa_uint32 time;
 	oa_uint16 real_len;
 	oa_uint16 soc_ret;
 
-	if (dev_running.plat_status == OFFLINE) goto redo;
+	if (dev_running.plat_status == OFFLINE){
+		offline_times++;
+		if (offline_times * TIMEOUT_SECOND > RESTART_THRESHOLD){
+			do_reset();
+		}
+	}
+	else if (dev_running.plat_status == ONLINE) offline_times = 0;
+	
 	if (timeout_enable == OA_FALSE){
 		timeout = 0;
 		goto redo;
