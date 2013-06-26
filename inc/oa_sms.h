@@ -35,6 +35,7 @@
 #define SMS_NUM_MAX_LEN 32
 #define SMS_DATA_MAX_LEN 160
 #define CONTEXT_MAX_LEN 128
+#define MAX_SMS_NUM 5
 //key words
 #define HB "Hearttime"
 #define RSP_TCP "RSP_TCP"

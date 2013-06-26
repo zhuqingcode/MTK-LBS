@@ -205,7 +205,6 @@ void oa_app_gps(void)
 				get_rtc_time(time_cur);
 				if (!oa_memcmp(time_last, time_cur, 3)){//in one day
 					if (gps_info.Speed > 0)	day_drive++;
-					else if (gps_info.Speed == 0) day_drive = 0;
 					if (day_drive * GPS_RUN_SECONDS >= dev_now_params.day_add_drive_time_threshold){
 						if (ReadAlarmPara(StaAlarm0, ALARM_DRIVE_OVERTIME) == RESET){
 							ret = handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);

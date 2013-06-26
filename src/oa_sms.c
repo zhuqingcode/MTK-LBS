@@ -40,6 +40,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+extern char *strtok(char s[], const char *delim);
 oa_sms_context message;
 oa_sms_context sms_fail;
 extern DEVICE_PARAMS dev_now_params;
@@ -258,6 +259,7 @@ void gps_extract(oa_char *enquire_temp){
 		oa_strcat(enquire_temp, tmp);
 	}
 }
+#if 0
 /*********************************************************
 *Function:      need_ack_check()
 *Description:  search key word in message
@@ -291,6 +293,7 @@ ack_kind need_ack_check(oa_char *p)
 		//return noack;
 	}	
 }
+#endif
 /*********************************************************
 *Function:      need_ack_check()
 *Description:  search key word in message
@@ -298,26 +301,27 @@ ack_kind need_ack_check(oa_char *p)
 *Others:         
 *********************************************************/
 oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set, 
-										e_keyword e_kind, sms_or_uart which, u16 len)
+										e_keyword e_kind)
 {
 	char *p = NULL;
 	oa_char *p_SEMICOLON = NULL; 
 	oa_char temp[128] = {0x0};
-	oa_uint8 copy_len = 0;
+	
 	if (NULL == p_key || e_len == 0 || p_set == NULL){
 		DEBUG(" err!");
 		return OA_FALSE;
 	}
-	if (sms == which) copy_len = message.len;
-	else if (uart == which) copy_len = uart_contain.len;
-	else if (scrn == which)	 copy_len = len;
+
 	p = p_key+e_len;
 	if (*p == COLON){//means set
 		p_set->kind = set;
 		p++;
 		p_SEMICOLON = oa_strchr(p_key, SEMICOLON);
 		if (NULL != p_SEMICOLON)	oa_memcpy(temp, p, p_SEMICOLON-p);
-		else oa_memcpy(temp, p, copy_len - (e_len+1));
+		else {
+			DEBUG("format err!");
+			return OA_FALSE;
+		}//oa_memcpy(temp, p, copy_len - (e_len+1));
 		switch (e_kind){
 			case e_HB:
 			case e_RSP_TCP:
@@ -528,6 +532,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 #endif
 	return OA_TRUE;
 }
+#if 0
 /*********************************************************
 *Function:      lookfor_keywords_loop()
 *Description:  search key word in message
@@ -554,7 +559,9 @@ e_keyword lookfor_keywords_loop(u8 *p_sms, u16 sms_len, keyword_context *p_set, 
 			DEBUG(" p_set err!");
 			return e_none;
 		}
-		p_key = oa_strstr(message.data, p_keyword[e_i]);
+		//p_key = oa_strstr(message.data, p_keyword[e_i]);
+		oa_memcpy(temp, message.data, sms_len);
+		p_key = oa_strstr(temp, p_keyword[e_i]);
 	}
 	else if (uart == which){
 		if (NULL == p_set || e_i == e_none){
@@ -574,7 +581,7 @@ e_keyword lookfor_keywords_loop(u8 *p_sms, u16 sms_len, keyword_context *p_set, 
 	
 	if (NULL != p_key){
 		if (sms == which){
-			if (p_key != &message.data[0])		return e_none;
+			if (p_key != &temp[0])		return e_none;
 		}
 		else if (uart == which){
 			if (p_key != &uart_contain.buf[0])		return e_none;
@@ -590,7 +597,74 @@ e_keyword lookfor_keywords_loop(u8 *p_sms, u16 sms_len, keyword_context *p_set, 
 		else if (ack_ret == noack)  p_set->need_ack = OA_FALSE;
 		//set/enquiry check
 		e_len = oa_strlen(p_keyword[e_i]);
-		ret = set_enquiry_check(p_key, e_len, p_set, e_i, which, sms_len);
+		ret = set_enquiry_check(p_key, e_len, p_set, e_i);
+		if (OA_FALSE == ret) return e_none;
+		else return e_i;
+	}
+
+
+	return e_none;
+}
+#endif
+/*********************************************************
+*Function:      lookfor_keywords_loop()
+*Description:  search key word in message
+*Return:        void
+*Others:         
+*********************************************************/
+e_keyword look4keywords4ms(oa_char *p_sms, u16 sms_len, keyword_context *p_set, oa_uint8 e_i, sms_or_uart which)
+{
+	oa_char *p_key = NULL;
+	oa_char temp[256] = {0x0};
+	oa_char ch;
+	ack_kind ack_ret;
+	oa_uint8 e_len;
+	oa_bool ret;
+//	oa_uint8 e_i;
+	
+	if (NULL == p_set || e_i == e_none){
+		DEBUG(" p_set err!");
+		return e_none;
+	}
+	
+	if (sms == which){
+		if (NULL == p_set || e_i == e_none){
+			DEBUG(" p_set err!");
+			return e_none;
+		}
+		oa_memcpy(temp, p_sms, sms_len);
+		p_key = oa_strstr(temp, p_keyword[e_i]);
+	}
+	else if (uart == which){
+		if (NULL == p_set || e_i == e_none){
+			DEBUG(" p_set err!");
+			return e_none;
+		}
+		p_key = oa_strstr(uart_contain.buf, p_keyword[e_i]);
+	}
+	else if (scrn == which){
+		if (NULL == p_set || NULL == p_sms || sms_len > 255){
+			DEBUG(" p_set err!");
+			return e_none;
+		}
+		oa_memcpy(temp, p_sms, sms_len);
+		p_key = oa_strstr(temp, p_keyword[e_i]);
+	}
+	
+	if (NULL != p_key){
+		if (sms == which){
+			if (p_key != &temp[0])		return e_none;
+		}
+		else if (uart == which){
+			if (p_key != &uart_contain.buf[0])		return e_none;
+		}
+		else if (scrn == which){
+			if (p_key != &temp[0])		return e_none;
+		}
+		
+		//set/enquiry check
+		e_len = oa_strlen(p_keyword[e_i]);
+		ret = set_enquiry_check(p_key, e_len, p_set, e_i);
 		if (OA_FALSE == ret) return e_none;
 		else return e_i;
 	}
@@ -623,6 +697,7 @@ void sms_send_feedback_func(os_sms_result send_ret)
 		oa_memset(&sms_fail, 0x0, sizeof(sms_fail));
 	}
 }
+#if 0
 /*********************************************************
 *Function:      handle_keyword()
 *Description:  handle the keyword
@@ -654,70 +729,77 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 	if (p_set->need_ack == OA_TRUE){
 		switch(key_kind){
 			case e_HB:{
-				sprintf(enquire_temp, "Hearttime:%d"/*very important here*/, dev_now_params.heartbeat_interval);
+				sprintf(enquire_temp, "Hearttime:%d;"/*very important here*/, dev_now_params.heartbeat_interval);
 			}break;
 			case e_RSP_TCP:{
-				sprintf(enquire_temp, "RSP_TCP:%d"/*very important here*/, dev_now_params.tcp_ack_timeout);
+				sprintf(enquire_temp, "RSP_TCP:%d;"/*very important here*/, dev_now_params.tcp_ack_timeout);
 			}break;
 			case e_RSP_UDP:{
-				sprintf(enquire_temp, "RSP_UDP:%d"/*very important here*/, dev_now_params.udp_ack_timeout);
+				sprintf(enquire_temp, "RSP_UDP:%d;"/*very important here*/, dev_now_params.udp_ack_timeout);
 			}break;
 			case e_RSP_SMS:{
-				sprintf(enquire_temp, "RSP_SMS:%d"/*very important here*/, dev_now_params.sms_ack_timeout);
+				sprintf(enquire_temp, "RSP_SMS:%d;"/*very important here*/, dev_now_params.sms_ack_timeout);
 			}break;
 			case e_Retry_TCP:{
-				sprintf(enquire_temp, "Retry_TCP:%d"/*very important here*/, dev_now_params.tcp_retrans_times);
+				sprintf(enquire_temp, "Retry_TCP:%d;"/*very important here*/, dev_now_params.tcp_retrans_times);
 			}break;
 			case e_Retry_UDP:{
-				sprintf(enquire_temp, "Retry_UDP:%d"/*very important here*/, dev_now_params.udp_retrans_times);
+				sprintf(enquire_temp, "Retry_UDP:%d;"/*very important here*/, dev_now_params.udp_retrans_times);
 			}break;
 			case e_Retry_SMS:{
-				sprintf(enquire_temp, "Retry_SMS:%d"/*very important here*/, dev_now_params.sms_retrans_times);
+				sprintf(enquire_temp, "Retry_SMS:%d;"/*very important here*/, dev_now_params.sms_retrans_times);
 			}break;
 			case e_IP:{
 				oa_strcat(enquire_temp, "IP:");
 				oa_strcat(enquire_temp, dev_now_params.m_server_ip);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_TCPPORT:{
-				sprintf(enquire_temp, "TCPPORT:%d"/*very important here*/, dev_now_params.server_tcp_port);
+				sprintf(enquire_temp, "TCPPORT:%d;"/*very important here*/, dev_now_params.server_tcp_port);
 			}break;
 			case e_UDPPORT:{
-				sprintf(enquire_temp, "UDPPORT:%d"/*very important here*/, dev_now_params.server_udp_port);
+				sprintf(enquire_temp, "UDPPORT:%d;"/*very important here*/, dev_now_params.server_udp_port);
 			}break;
 			case e_TEL:{
 				oa_strcat(enquire_temp, "TEL:");
 				oa_strcat(enquire_temp, dev_now_params.term_tel_num);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_Rpt_strategy:{
-				sprintf(enquire_temp, "Rpt_strategy:%d", dev_now_params.report_strategy);
+				sprintf(enquire_temp, "Rpt_strategy:%d;", dev_now_params.report_strategy);
 			}break;
 			case e_Rpttime_sleep:{
-				sprintf(enquire_temp, "Rpttime_sleep:%d", dev_now_params.sleep_reporttime);
+				sprintf(enquire_temp, "Rpttime_sleep:%d;", dev_now_params.sleep_reporttime);
 			}break;
 			case e_Rpttime_def:{
-				sprintf(enquire_temp, "Rpttime_def:%d", dev_now_params.default_reporttime);
+				sprintf(enquire_temp, "Rpttime_def:%d;", dev_now_params.default_reporttime);
 			}break;
 			case e_servertel:{
 				oa_strcat(enquire_temp, "servertel:");
 				oa_strcat(enquire_temp, dev_now_params.monitor_platform_num);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_resettel:{
 				oa_strcat(enquire_temp, "resettel:");
 				oa_strcat(enquire_temp, dev_now_params.reset_num);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_factorysettel:{
 				oa_strcat(enquire_temp, "factorysettel:");
 				oa_strcat(enquire_temp, dev_now_params.restore_factory_settings_num);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_alarmsmstel:{
 				oa_strcat(enquire_temp, "alarmsmstel:");
 				oa_strcat(enquire_temp, dev_now_params.terminal_sms_num);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_swh_alarmmask:{
 				oa_char tmp[33] = {0x0};
 				oa_itoa(dev_now_params.alarm_mask, tmp, BI);
 				oa_strcat(enquire_temp, "swh_alarmmask:");
 				oa_strcat(enquire_temp, tmp);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_swh_alarmsms:{
 				oa_char tmp[33] = {0x0};
@@ -725,68 +807,76 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 				//DEBUG(" temp:%s!", tmp);
 				oa_strcat(enquire_temp, "swh_alarmsms:");
 				oa_strcat(enquire_temp, tmp);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_overspeed:{
-				sprintf(enquire_temp, "overspeed:%d", dev_now_params.max_speed);
+				sprintf(enquire_temp, "overspeed:%d;", dev_now_params.max_speed);
 			}break;
 			case e_overspeedtime:{
-				sprintf(enquire_temp, "overspeedtime:%d", dev_now_params.speed_duration);
+				sprintf(enquire_temp, "overspeedtime:%d;", dev_now_params.speed_duration);
 			}break;
 			case e_min_resttime:{
-				sprintf(enquire_temp, "min_resttime:%d", dev_now_params.min_rest_time);
+				sprintf(enquire_temp, "min_resttime:%d;", dev_now_params.min_rest_time);
 			}break;
 			case e_max_parktime:{
-				sprintf(enquire_temp, "max_parktime:%d", dev_now_params.max_park_time);
+				sprintf(enquire_temp, "max_parktime:%d;", dev_now_params.max_park_time);
 			}break;
 			case e_daydrivetime:{
-				sprintf(enquire_temp, "daydrivetime:%d", dev_now_params.day_add_drive_time_threshold);
+				sprintf(enquire_temp, "daydrivetime:%d;", dev_now_params.day_add_drive_time_threshold);
 			}break;
 			case e_tireddrivetime:{
-				sprintf(enquire_temp, "tireddrivetime:%d", dev_now_params.continuous_drive_time_threshold);
+				sprintf(enquire_temp, "tireddrivetime:%d;", dev_now_params.continuous_drive_time_threshold);
 			}break;
 			case e_provincID:{
-				sprintf(enquire_temp, "provincID:%d", dev_now_params.vehicle_province_id);
+				sprintf(enquire_temp, "provincID:%d;", dev_now_params.vehicle_province_id);
 			}break;
 			case e_cityID:{
-				sprintf(enquire_temp, "cityID:%d", dev_now_params.vehicle_city_id);
+				sprintf(enquire_temp, "cityID:%d;", dev_now_params.vehicle_city_id);
 			}break;
 			case e_carID:{
 				oa_strcat(enquire_temp, "carID:");
 				oa_strcat(enquire_temp, dev_now_params.vehicle_license);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_carcolor:{
-				sprintf(enquire_temp, "carcolor:%d", dev_now_params.plate_color);
+				sprintf(enquire_temp, "carcolor:%d;", dev_now_params.plate_color);
 			}break;
 			case e_UPIP:{
 				oa_strcat(enquire_temp, "UPIP:");
 				oa_strcat(enquire_temp, dev_now_params.update_server_ip);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_UPPORT:{
-				sprintf(enquire_temp, "UPPORT:%d", dev_now_params.update_server_port);
+				sprintf(enquire_temp, "UPPORT:%d;", dev_now_params.update_server_port);
 			}break;
 			case e_UPFTPUSR:{
 				oa_strcat(enquire_temp, "UPFTPUSR:");
 				oa_strcat(enquire_temp, dev_now_params.ftpusr);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_UPFTPPWD:{
 				oa_strcat(enquire_temp, "UPFTPPWD:");
 				oa_strcat(enquire_temp, dev_now_params.ftppwd);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_UPPROG_NAME:{
 				oa_strcat(enquire_temp, "UPPROG_NAME:");
 				oa_strcat(enquire_temp, dev_now_params.ftp_prog_name);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_STATUS:{
 				status_extract(enquire_temp);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_GPS:{
 				gps_extract(enquire_temp);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_dev_lock:{
-				sprintf(enquire_temp, "dev_lock:%d", now_use_lock.lock);
+				sprintf(enquire_temp, "dev_lock:%d;", now_use_lock.lock);
 			}break;
 			case e_UPDATE:{
-				oa_strcat(enquire_temp, "doing update......");
+				oa_strcat(enquire_temp, "doing update;");
 			}break;
 			case e_VERSA:{
 				oa_strcat(temp, "HW,");
@@ -795,22 +885,26 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 				oa_strcat(enquire_temp, temp);
 				oa_strcat(enquire_temp, "SW,");
 				oa_strcat(enquire_temp, OA_SW_VERSION_NO);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_CLRLOG:{
 				oa_strcat(enquire_temp, "CLRLOG");
+				oa_strcat(enquire_temp, ";");
 			}break;
 			case e_AUTHEN:{
 				oa_uint8 code[AUTHEN_CODE_MAX_LEN] = 0x0;
 				oa_uint8 len;
 				if (read_authen_code(code, &len)){
 					oa_strcat(enquire_temp, code);
+					oa_strcat(enquire_temp, ";");
 				}
 			}break;	
 			case e_RESTART:{
-				oa_strcat(enquire_temp, "RESTART OK");
+				oa_strcat(enquire_temp, "RESTART OK;");
 			}break;
 			case e_DEVID:{
 				oa_strcat(enquire_temp, dev_now_params.term_id);
+				oa_strcat(enquire_temp, ";");
 			}break;
 			default:{
 				oa_strcat(enquire_temp, "not support!");
@@ -853,9 +947,207 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 	else if (scrn == which){
 		
 	}
-#endif	
-	
+#endif
 }
+#endif
+/*********************************************************
+*Function:      handle_keyword4ms()
+*Description:  handle the keyword for multiple sms
+*Return:        void
+*Others:         
+*********************************************************/
+void handle_common4ms(e_keyword key_kind, oa_char *buf)
+{
+	oa_bool ret;
+	char temp[16] = {0x0};
+	char enquire_temp[128] = {0x0};
+	
+	switch(key_kind){
+		case e_HB:{
+			sprintf(enquire_temp, "Hearttime:%d;"/*very important here*/, dev_now_params.heartbeat_interval);
+		}break;
+		case e_RSP_TCP:{
+			sprintf(enquire_temp, "RSP_TCP:%d;"/*very important here*/, dev_now_params.tcp_ack_timeout);
+		}break;
+		case e_RSP_UDP:{
+			sprintf(enquire_temp, "RSP_UDP:%d;"/*very important here*/, dev_now_params.udp_ack_timeout);
+		}break;
+		case e_RSP_SMS:{
+			sprintf(enquire_temp, "RSP_SMS:%d;"/*very important here*/, dev_now_params.sms_ack_timeout);
+		}break;
+		case e_Retry_TCP:{
+			sprintf(enquire_temp, "Retry_TCP:%d;"/*very important here*/, dev_now_params.tcp_retrans_times);
+		}break;
+		case e_Retry_UDP:{
+			sprintf(enquire_temp, "Retry_UDP:%d;"/*very important here*/, dev_now_params.udp_retrans_times);
+		}break;
+		case e_Retry_SMS:{
+			sprintf(enquire_temp, "Retry_SMS:%d;"/*very important here*/, dev_now_params.sms_retrans_times);
+		}break;
+		case e_IP:{
+			oa_strcat(enquire_temp, "IP:");
+			oa_strcat(enquire_temp, dev_now_params.m_server_ip);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_TCPPORT:{
+			sprintf(enquire_temp, "TCPPORT:%d;"/*very important here*/, dev_now_params.server_tcp_port);
+		}break;
+		case e_UDPPORT:{
+			sprintf(enquire_temp, "UDPPORT:%d;"/*very important here*/, dev_now_params.server_udp_port);
+		}break;
+		case e_TEL:{
+			oa_strcat(enquire_temp, "TEL:");
+			oa_strcat(enquire_temp, dev_now_params.term_tel_num);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_Rpt_strategy:{
+			sprintf(enquire_temp, "Rpt_strategy:%d;", dev_now_params.report_strategy);
+		}break;
+		case e_Rpttime_sleep:{
+			sprintf(enquire_temp, "Rpttime_sleep:%d;", dev_now_params.sleep_reporttime);
+		}break;
+		case e_Rpttime_def:{
+			sprintf(enquire_temp, "Rpttime_def:%d;", dev_now_params.default_reporttime);
+		}break;
+		case e_servertel:{
+			oa_strcat(enquire_temp, "servertel:");
+			oa_strcat(enquire_temp, dev_now_params.monitor_platform_num);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_resettel:{
+			oa_strcat(enquire_temp, "resettel:");
+			oa_strcat(enquire_temp, dev_now_params.reset_num);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_factorysettel:{
+			oa_strcat(enquire_temp, "factorysettel:");
+			oa_strcat(enquire_temp, dev_now_params.restore_factory_settings_num);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_alarmsmstel:{
+			oa_strcat(enquire_temp, "alarmsmstel:");
+			oa_strcat(enquire_temp, dev_now_params.terminal_sms_num);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_swh_alarmmask:{
+			oa_char tmp[33] = {0x0};
+			oa_itoa(dev_now_params.alarm_mask, tmp, BI);
+			oa_strcat(enquire_temp, "swh_alarmmask:");
+			oa_strcat(enquire_temp, tmp);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_swh_alarmsms:{
+			oa_char tmp[33] = {0x0};
+			oa_itoa(dev_now_params.alarm_send_sms_mask, tmp, BI);
+			//DEBUG(" temp:%s!", tmp);
+			oa_strcat(enquire_temp, "swh_alarmsms:");
+			oa_strcat(enquire_temp, tmp);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_overspeed:{
+			sprintf(enquire_temp, "overspeed:%d;", dev_now_params.max_speed);
+		}break;
+		case e_overspeedtime:{
+			sprintf(enquire_temp, "overspeedtime:%d;", dev_now_params.speed_duration);
+		}break;
+		case e_min_resttime:{
+			sprintf(enquire_temp, "min_resttime:%d;", dev_now_params.min_rest_time);
+		}break;
+		case e_max_parktime:{
+			sprintf(enquire_temp, "max_parktime:%d;", dev_now_params.max_park_time);
+		}break;
+		case e_daydrivetime:{
+			sprintf(enquire_temp, "daydrivetime:%d;", dev_now_params.day_add_drive_time_threshold);
+		}break;
+		case e_tireddrivetime:{
+			sprintf(enquire_temp, "tireddrivetime:%d;", dev_now_params.continuous_drive_time_threshold);
+		}break;
+		case e_provincID:{
+			sprintf(enquire_temp, "provincID:%d;", dev_now_params.vehicle_province_id);
+		}break;
+		case e_cityID:{
+			sprintf(enquire_temp, "cityID:%d;", dev_now_params.vehicle_city_id);
+		}break;
+		case e_carID:{
+			oa_strcat(enquire_temp, "carID:");
+			oa_strcat(enquire_temp, dev_now_params.vehicle_license);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_carcolor:{
+			sprintf(enquire_temp, "carcolor:%d;", dev_now_params.plate_color);
+		}break;
+		case e_UPIP:{
+			oa_strcat(enquire_temp, "UPIP:");
+			oa_strcat(enquire_temp, dev_now_params.update_server_ip);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_UPPORT:{
+			sprintf(enquire_temp, "UPPORT:%d;", dev_now_params.update_server_port);
+		}break;
+		case e_UPFTPUSR:{
+			oa_strcat(enquire_temp, "UPFTPUSR:");
+			oa_strcat(enquire_temp, dev_now_params.ftpusr);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_UPFTPPWD:{
+			oa_strcat(enquire_temp, "UPFTPPWD:");
+			oa_strcat(enquire_temp, dev_now_params.ftppwd);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_UPPROG_NAME:{
+			oa_strcat(enquire_temp, "UPPROG_NAME:");
+			oa_strcat(enquire_temp, dev_now_params.ftp_prog_name);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_STATUS:{
+			status_extract(enquire_temp);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_GPS:{
+			gps_extract(enquire_temp);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_dev_lock:{
+			sprintf(enquire_temp, "dev_lock:%d;", now_use_lock.lock);
+		}break;
+		case e_UPDATE:{
+			oa_strcat(enquire_temp, "doing update;");
+		}break;
+		case e_VERSA:{
+			oa_strcat(temp, "HW,");
+			oa_strcat(temp, OA_HW_VERSION_NO);
+			oa_strcat(temp, ";");
+			oa_strcat(enquire_temp, temp);
+			oa_strcat(enquire_temp, "SW,");
+			oa_strcat(enquire_temp, OA_SW_VERSION_NO);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_CLRLOG:{
+			oa_strcat(enquire_temp, "CLRLOG");
+			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_AUTHEN:{
+			oa_uint8 code[AUTHEN_CODE_MAX_LEN] = 0x0;
+			oa_uint8 len;
+			if (read_authen_code(code, &len)){
+				oa_strcat(enquire_temp, code);
+				oa_strcat(enquire_temp, ";");
+			}
+		}break;	
+		case e_RESTART:{
+			oa_strcat(enquire_temp, "RESTART OK;");
+		}break;
+		case e_DEVID:{
+			oa_strcat(enquire_temp, dev_now_params.term_id);
+			oa_strcat(enquire_temp, ";");
+		}break;
+		default:{
+			oa_strcat(enquire_temp, "not support!");
+		}break;
+	}
+	oa_memcpy(buf, enquire_temp, oa_strlen(enquire_temp));
+}
+
 /*********************************************************
 *Function:      dev_action_handle()
 *Description:  maybe device need do something
@@ -961,6 +1253,7 @@ void dev_action_handle(keyword_context *p_set)
 
 	p_set->act_kind = no_act;
 }
+#if 0
 /*********************************************************
 *Function:      handle_keyword()
 *Description:  handle the keyword
@@ -1635,6 +1928,687 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 
 	
 }
+#endif
+/*********************************************************
+*Function:      handle_keyword4ms()
+*Description:  handle the keyword for mutiple sms
+*Return:        void
+*Others:         
+*********************************************************/
+void sendsms4ms(u8 *buf){
+	oa_char nb_tmp[4] = {0x0};
+	nb_kind nb = err_nb;
+	
+	oa_strncpy(nb_tmp, &message.deliver_num[3], 3);
+	nb = telecom_num_check(nb_tmp);
+	if (tele_nb == nb){
+		//DEBUG("enquire_temp:%s nb:%s", enquire_temp, message.deliver_num);
+		oa_sms_test_dfalp(buf, message.deliver_num);
+	}
+	else if (err_nb != nb){
+		oa_sms_send_req(sms_send_feedback_func, message.deliver_num, buf, oa_strlen(buf), message.dcs);
+		oa_memcpy(sms_fail.data, buf, oa_strlen(buf));
+		sms_fail.len = oa_strlen(buf);
+		oa_memcpy(sms_fail.deliver_num, message.deliver_num, oa_strlen(message.deliver_num));
+		sms_fail.dcs = message.dcs;
+	}
+
+}
+/*********************************************************
+*Function:      handle_keyword4ms()
+*Description:  handle the keyword for mutiple sms
+*Return:        void
+*Others:         
+*********************************************************/
+void handle_keyword4ms(e_keyword key_kind, 
+										keyword_context *p_set)
+{
+	oa_bool ret;
+	char temp[16] = {0x0};
+	char enquire_temp[64] = {0x0};
+	switch (key_kind){
+		case e_HB:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.heartbeat_interval == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+
+				}
+				else{
+					dev_now_params.heartbeat_interval = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_RSP_TCP:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.tcp_ack_timeout == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+
+				}
+				else{
+					dev_now_params.tcp_ack_timeout = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_RSP_UDP:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.udp_ack_timeout == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+
+				}
+				else{
+					dev_now_params.udp_ack_timeout = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_RSP_SMS:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.sms_ack_timeout == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+
+				}
+				else{
+					dev_now_params.sms_ack_timeout = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_Retry_TCP:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.tcp_retrans_times == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+
+				}
+				else{
+					dev_now_params.tcp_retrans_times = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_Retry_UDP:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.udp_retrans_times == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+
+				}
+				else{
+					dev_now_params.udp_retrans_times = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_Retry_SMS:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.sms_retrans_times == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+
+				}
+				else{
+					dev_now_params.sms_retrans_times = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_IP:{
+			if (p_set->kind == set){
+				u8 ip_len;
+				if (oa_strlen(dev_now_params.m_server_ip) == oa_strlen(p_set->context.con_ch)){//length is equal
+					ip_len = oa_strlen(dev_now_params.m_server_ip);
+					if (!oa_strncmp(dev_now_params.m_server_ip, p_set->context.con_ch, ip_len)){
+						PRINT_SAMEPARA;
+						p_set->act_kind = no_act;
+						break;
+					}
+					else{//not equal
+						oa_memset(dev_now_params.m_server_ip, 0x0, sizeof(dev_now_params.m_server_ip));
+						oa_memcpy(dev_now_params.m_server_ip, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+						p_set->act_kind = reconn;
+					}
+				}
+				else{//not equal
+					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
+					oa_memset(dev_now_params.m_server_ip, 0x0, sizeof(dev_now_params.m_server_ip));
+					oa_memcpy(dev_now_params.m_server_ip, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
+					p_set->act_kind = reconn;
+				}
+			}		
+		}break;
+		case e_TCPPORT:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.server_tcp_port == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+
+				}
+				else{
+					dev_now_params.server_tcp_port = p_set->context.con_int;
+					p_set->act_kind = reconn;
+				}
+			}	
+		}break;
+		case e_UDPPORT:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.server_udp_port == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+
+				}
+				else{
+					dev_now_params.server_udp_port = p_set->context.con_int;
+					p_set->act_kind = reconn;
+				}
+			}	
+		}break;
+		case e_TEL:{
+			if (p_set->kind == set){
+				if (oa_strlen(dev_now_params.term_tel_num) == oa_strlen(p_set->context.con_ch)){
+					if (!oa_strncmp(dev_now_params.term_tel_num, p_set->context.con_ch, oa_strlen(dev_now_params.term_tel_num))){
+						PRINT_SAMEPARA;
+						p_set->act_kind = no_act;
+						break;
+					}
+					else{//not equal
+						oa_memset(dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
+						oa_memcpy(dev_now_params.term_tel_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+						p_set->act_kind = para_save;
+					}
+				}
+				else{
+					oa_memset(dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
+					oa_memcpy(dev_now_params.term_tel_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_Rpt_strategy:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.report_strategy == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.report_strategy = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+				
+			}
+		}break;
+		case e_Rpttime_sleep:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.sleep_reporttime == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.sleep_reporttime = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_Rpttime_def:{
+			if (p_set->kind == set){
+				if (dev_now_params.default_reporttime == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.default_reporttime = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_servertel:{
+			if (p_set->kind == set){
+				if (oa_strlen(dev_now_params.monitor_platform_num) == oa_strlen(p_set->context.con_ch)){
+					if (!oa_strncmp(dev_now_params.monitor_platform_num, p_set->context.con_ch, oa_strlen(dev_now_params.monitor_platform_num))){
+						PRINT_SAMEPARA;
+						p_set->act_kind = no_act;
+						break;
+					}
+					else{//not equal
+						oa_memset(dev_now_params.monitor_platform_num, 0x0, sizeof(dev_now_params.monitor_platform_num));
+						oa_memcpy(dev_now_params.monitor_platform_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+						p_set->act_kind = para_save;
+					}
+				}
+				else{//not equal
+					oa_memset(dev_now_params.monitor_platform_num, 0x0, sizeof(dev_now_params.monitor_platform_num));
+					oa_memcpy(dev_now_params.monitor_platform_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+					p_set->act_kind = para_save;
+					
+				}
+			}
+		}break;
+		case e_resettel:{
+			if (p_set->kind == set){
+				if (oa_strlen(dev_now_params.reset_num) == oa_strlen(p_set->context.con_ch)){
+					if (!oa_strncmp(dev_now_params.reset_num, p_set->context.con_ch, oa_strlen(dev_now_params.reset_num))){
+						PRINT_SAMEPARA;
+						p_set->act_kind = no_act;
+						break;
+
+					}
+					else{//not equal
+						oa_memset(dev_now_params.reset_num, 0x0, sizeof(dev_now_params.reset_num));
+						oa_memcpy(dev_now_params.reset_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+						p_set->act_kind = para_save;
+					}
+				}
+				else{//not equal
+					oa_memset(dev_now_params.reset_num, 0x0, sizeof(dev_now_params.reset_num));
+					oa_memcpy(dev_now_params.reset_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+					p_set->act_kind = para_save;
+					
+				}
+			}
+		}break;
+		case e_factorysettel:{
+			if (p_set->kind == set){
+				if (oa_strlen(dev_now_params.restore_factory_settings_num) == oa_strlen(p_set->context.con_ch)){
+					if (!oa_strncmp(dev_now_params.restore_factory_settings_num, p_set->context.con_ch, oa_strlen(dev_now_params.restore_factory_settings_num))){
+						PRINT_SAMEPARA;
+						p_set->act_kind = no_act;
+						break;
+
+					}
+					else{//not equal
+						oa_memset(dev_now_params.restore_factory_settings_num, 0x0, sizeof(dev_now_params.restore_factory_settings_num));
+						oa_memcpy(dev_now_params.restore_factory_settings_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+						p_set->act_kind = para_save;
+					}
+				}
+				else{//not equal
+					oa_memset(dev_now_params.restore_factory_settings_num, 0x0, sizeof(dev_now_params.restore_factory_settings_num));
+					oa_memcpy(dev_now_params.restore_factory_settings_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+					p_set->act_kind = para_save;
+
+				}
+			}
+			
+		}break;
+		case e_alarmsmstel:{
+			if (p_set->kind == set){
+				if (oa_strlen(dev_now_params.terminal_sms_num) == oa_strlen(p_set->context.con_ch)){
+					if (!oa_strncmp(dev_now_params.terminal_sms_num, p_set->context.con_ch, oa_strlen(dev_now_params.terminal_sms_num))){
+						PRINT_SAMEPARA;
+						p_set->act_kind = no_act;
+						break;
+
+					}
+					else{//not equal
+						oa_memset(dev_now_params.terminal_sms_num, 0x0, sizeof(dev_now_params.terminal_sms_num));
+						oa_memcpy(dev_now_params.terminal_sms_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+						p_set->act_kind = para_save;
+					}
+				}
+				else{//not equal
+					oa_memset(dev_now_params.terminal_sms_num, 0x0, sizeof(dev_now_params.terminal_sms_num));
+					oa_memcpy(dev_now_params.terminal_sms_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+					p_set->act_kind = para_save;
+					
+				}
+			}
+		}break;
+		case e_swh_alarmmask:{
+			if (p_set->kind == set){
+				if (dev_now_params.alarm_mask == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{//not equal
+					dev_now_params.alarm_mask = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_swh_alarmsms:{
+			if (p_set->kind == set){
+				if (dev_now_params.alarm_send_sms_mask == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{//not equal
+					dev_now_params.alarm_send_sms_mask = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_overspeed:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.max_speed == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.max_speed = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_overspeedtime:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.speed_duration == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.speed_duration = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_daydrivetime:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.day_add_drive_time_threshold == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.day_add_drive_time_threshold = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_tireddrivetime:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.continuous_drive_time_threshold == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.continuous_drive_time_threshold = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_min_resttime:{
+			if (p_set->kind == set){
+				if (dev_now_params.min_rest_time == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.min_rest_time = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_max_parktime:{
+			if (p_set->kind == set){
+				if (dev_now_params.max_park_time == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.max_park_time = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_provincID:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.vehicle_province_id == (u16)p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.vehicle_province_id = (u16)p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_cityID:{
+			if (p_set->kind == set){
+				if (dev_now_params.vehicle_city_id == (u16)p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.vehicle_city_id = (u16)p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_carID:{
+			if (p_set->kind == set){
+				if (oa_strlen(dev_now_params.vehicle_license) == oa_strlen(p_set->context.con_ch)){
+					if (!oa_strncmp(dev_now_params.vehicle_license, p_set->context.con_ch, oa_strlen(dev_now_params.vehicle_license))){
+						PRINT_SAMEPARA;
+						p_set->act_kind = no_act;
+						break;
+
+					}
+					else{//not equal
+						oa_memset(dev_now_params.vehicle_license, 0x0, sizeof(dev_now_params.vehicle_license));
+						oa_memcpy(dev_now_params.vehicle_license, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+						p_set->act_kind = para_save;
+					}
+				}
+				else{//not equal
+						oa_memset(dev_now_params.vehicle_license, 0x0, sizeof(dev_now_params.vehicle_license));
+						oa_memcpy(dev_now_params.vehicle_license, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+						p_set->act_kind = para_save;
+				}
+				
+			}
+		}break;
+		case e_carcolor:{
+			if (p_set->kind == set){
+				if (dev_now_params.plate_color == (u8)p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.plate_color = (u8)p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_UPIP:{
+			if (p_set->kind == set){
+				u8 ip_len;
+				if (oa_strlen(dev_now_params.update_server_ip) == oa_strlen(p_set->context.con_ch)){//length is equal
+					ip_len = oa_strlen(dev_now_params.update_server_ip);
+					if (!oa_strncmp(dev_now_params.update_server_ip, p_set->context.con_ch, ip_len)){
+						PRINT_SAMEPARA;
+						p_set->act_kind = no_act;
+						break;
+					}
+					else{//not equal
+						oa_memset(dev_now_params.update_server_ip, 0x0, sizeof(dev_now_params.update_server_ip));
+						oa_memcpy(dev_now_params.update_server_ip, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+						p_set->act_kind = para_save;
+					}
+				}
+				else{//not equal
+					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
+					oa_memset(dev_now_params.update_server_ip, 0x0, sizeof(dev_now_params.update_server_ip));
+					oa_memcpy(dev_now_params.update_server_ip, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
+					p_set->act_kind = para_save;
+				}
+			}	
+		}break;
+		case e_UPPORT:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.update_server_port == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+
+				}
+				else{
+					dev_now_params.update_server_port = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_UPFTPUSR:{
+			if (p_set->kind == set){
+				u8 ip_len;
+				if (oa_strlen(dev_now_params.ftpusr) == oa_strlen(p_set->context.con_ch)){//length is equal
+					ip_len = oa_strlen(dev_now_params.ftpusr);
+					if (!oa_strncmp(dev_now_params.ftpusr, p_set->context.con_ch, ip_len)){
+						PRINT_SAMEPARA;
+						p_set->act_kind = no_act;
+						break;
+					}
+					else{//not equal
+						oa_memset(dev_now_params.ftpusr, 0x0, sizeof(dev_now_params.ftpusr));
+						oa_memcpy(dev_now_params.ftpusr, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+						p_set->act_kind = para_save;
+					}
+				}
+				else{//not equal
+					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
+					oa_memset(dev_now_params.ftpusr, 0x0, sizeof(dev_now_params.ftpusr));
+					oa_memcpy(dev_now_params.ftpusr, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_UPFTPPWD:{
+			if (p_set->kind == set){
+				u8 ip_len;
+				if (oa_strlen(dev_now_params.ftppwd) == oa_strlen(p_set->context.con_ch)){//length is equal
+					ip_len = oa_strlen(dev_now_params.ftppwd);
+					if (!oa_strncmp(dev_now_params.ftppwd, p_set->context.con_ch, ip_len)){
+						PRINT_SAMEPARA;
+						p_set->act_kind = no_act;
+						break;
+					}
+					else{//not equal
+						oa_memset(dev_now_params.ftppwd, 0x0, sizeof(dev_now_params.ftpusr));
+						oa_memcpy(dev_now_params.ftppwd, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+						p_set->act_kind = para_save;
+					}
+				}
+				else{//not equal
+					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
+					oa_memset(dev_now_params.ftppwd, 0x0, sizeof(dev_now_params.ftppwd));
+					oa_memcpy(dev_now_params.ftppwd, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_UPPROG_NAME:{
+			if (p_set->kind == set){
+				u8 ip_len;
+				if (oa_strlen(dev_now_params.ftp_prog_name) == oa_strlen(p_set->context.con_ch)){//length is equal
+					ip_len = oa_strlen(dev_now_params.ftp_prog_name);
+					if (!oa_strncmp(dev_now_params.ftp_prog_name, p_set->context.con_ch, ip_len)){
+						PRINT_SAMEPARA;
+						p_set->act_kind = no_act;
+						break;
+					}
+					else{//not equal
+						oa_memset(dev_now_params.ftp_prog_name, 0x0, sizeof(dev_now_params.ftp_prog_name));
+						oa_memcpy(dev_now_params.ftp_prog_name, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+						p_set->act_kind = para_save;
+					}
+				}
+				else{//not equal
+					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
+					oa_memset(dev_now_params.ftp_prog_name, 0x0, sizeof(dev_now_params.ftp_prog_name));
+					oa_memcpy(dev_now_params.ftp_prog_name, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
+					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_STATUS:{
+			
+		}break;
+		case e_GPS:{
+
+		}break;
+		case e_CLRLOG:{
+			p_set->act_kind = clr_log;
+		}break;
+		case e_AUTHEN:{
+			if (p_set->kind == set){
+				if (p_set->context.con_ch[0] == 0xff)	p_set->act_kind = clr_authcode;
+				else if (oa_strlen(p_set->context.con_ch) > 0){
+					p_set->act_kind = update_authcode;
+				}
+			}			
+		}break;
+		case e_UPDATE:{
+			p_set->act_kind = update;
+		}break;
+		case e_VERSA:{
+
+		}break;
+		case e_RESTART:{
+			p_set->act_kind = reset;
+		}break;
+		case e_dev_lock:{
+			if (p_set->kind == set){
+				if (p_set->context.con_int == UNLOCK){
+					if (use_is_lock())	use_unlock();
+				}
+				
+			}
+		}break;
+		case e_DEVID:{
+			if (p_set->kind == set){
+				if (!oa_strncmp(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN)){
+						PRINT_SAMEPARA;
+						p_set->act_kind = no_act;
+						break;
+					}
+					else{//not equal
+						oa_memset(dev_now_params.term_id, 0x0, sizeof(dev_now_params.term_id));
+						oa_memcpy(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN);
+						p_set->act_kind = para_save;
+					}
+			}
+		}break;
+		case e_none:{
+			DEBUG(" not support!");
+		}break;
+		default:{
+			DEBUG(" not support!");
+			break;
+		}
+	}	
+}
+
 /*********************************************************
 *Function:      oa_app_sms()
 *Description:  handle the sms context
@@ -1646,8 +2620,15 @@ void oa_app_sms(void)
 	//do about sms
 	e_keyword key_ret = e_none;
 	keyword_context set = {0x0};
-	oa_uint8 e_i;
-	
+	oa_uint8 e_i, i = 0;
+	oa_uint8 sn = 0;
+	oa_char *p = NULL;
+	oa_char prefix[MAX_SMS_NUM][64] = {{0x0}, {0x0}, {0x0}, {0x0}, {0x0}};
+	oa_char data[256] = {0x0};
+	oa_char sendbuf[256] = {0x0};
+	oa_char buf[64] = {0x0};
+	oa_uint8 len;
+	oa_bool ms_ack;
 #ifdef 0
 	OA_DEBUG_USER("%s called", __FILE__, __func__);
 	if(message.dcs == OA_SMSAL_DEFAULT_DCS)
@@ -1672,25 +2653,76 @@ void oa_app_sms(void)
 	}
 	OA_DEBUG_USER("deliver_num: %s", message.deliver_num);
 #endif
-	//do not support multiple sms
-	for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
-		key_ret = lookfor_keywords_loop(NULL, 0, &set, e_i, sms);
-		if (e_none == key_ret){
-			//DEBUG(" not support!");
-			continue;
-		}
-		handle_keyword(NULL, NULL, NULL, key_ret, &set, sms);
-		oa_memset(&set, 0x0, sizeof(set));
-	}
-	#if 0
-	key_ret = lookfor_keywords_loop(&set);//lookfor_keywords(&set);
-	//DEBUG(" key_ret:%d!",key_ret);
-	if (e_none == key_ret){
-		DEBUG(" not support!");
+	len = message.len;
+	oa_memcpy(data, message.data, message.len);
+	p = strtok(data, ";");
+	if (NULL == p){
+		DEBUG("format err");
 		return;
 	}
-	handle_keyword(key_ret, &set);
-	#endif
+	while(NULL != p){
+		if (i <= MAX_SMS_NUM){
+			oa_strcpy(prefix[i], p);
+			i++;
+			p = strtok(NULL, ";");
+		}
+		else break;
+	}
+
+	if (prefix[i-1][0] == 'A' || prefix[i-1][0] == 'a' && prefix[i-1][1] == 0x0){
+		sn = i -1;
+		ms_ack = OA_TRUE;
+	}
+	else if (prefix[i-1][0] == 'N' || prefix[i-1][0] == 'n' && prefix[i-1][1] == 0x0){
+		sn = i -1;
+		ms_ack = OA_FALSE;
+	}
+	else{
+		sn = i;
+		ms_ack = OA_FALSE;
+	}
+	//add ";"
+	for (i = 0;i < sn; i++){
+		prefix[i][oa_strlen(prefix[i])] = ';';
+		DEBUG("%s", prefix[i]);
+	}
+#if 0	
+	if (sn == 1){
+		DEBUG("1 x sms");
+		//do not support multiple sms
+		for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
+			key_ret = lookfor_keywords_loop(NULL, len, &set, e_i, sms);
+			if (e_none == key_ret){
+				continue;
+			}
+			handle_keyword(NULL, NULL, NULL, key_ret, &set, sms);
+			oa_memset(&set, 0x0, sizeof(set));
+		}
+	}
+#endif
+	if (sn <= MAX_SMS_NUM){
+		DEBUG("%d x sms", sn);
+		for (i = 0; i < sn; i++){
+			for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
+				key_ret = look4keywords4ms(prefix[i], oa_strlen(prefix[i]), &set, e_i, sms);
+				if (e_none == key_ret){
+					continue;
+				}
+				
+				handle_keyword4ms(key_ret, &set);
+				if (ms_ack == OA_TRUE){
+					handle_common4ms(key_ret, buf);
+					DEBUG("\nbuf:%s", buf);
+					oa_strcat(sendbuf, buf);
+					oa_memset(buf, 0x0, sizeof(buf));
+				}
+				dev_action_handle(&set);
+				oa_memset(&set, 0x0, sizeof(set));
+			}
+		}
+		if (ms_ack == OA_TRUE) sendsms4ms(sendbuf);
+	}
+	else DEBUG("too many sms");
 	
 	return;
 }
