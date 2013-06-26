@@ -942,6 +942,7 @@ StuData;
 typedef struct _Protocol_Handle_s
 {
 	u8 DevSeqId[2];					//终端发送消息流水号 ，0开始，可循环
+	u8 DevMsgId[2];					//终端发送消息ID by zhuqing @2013/6/26
 	u8 ServSeqId[2];				//平台请求消息流水号
 	u8 ServMsgId[2];				//平台请求消息的ID
 	u8  Rsp2Serv;					//平台请求应答结果
@@ -1083,6 +1084,7 @@ typedef struct _Protocol_Handle_s
 typedef enum _PROTOCOL_HANDLE_e
 {
 	eDevSeqid,				//终端发送消息流水号
+	eDevMsgid,				//终端发送消息ID by zhuqing @2013/6/26
 	eServSeqid,				//平台请求消息流水
 	eServMsgid,				//平台请求消息ID
 	eRsp2ServSeq,			//平台请求应答结果
@@ -1172,5 +1174,11 @@ typedef enum
 	turnoff_allwireless,
 	none = 0xf,
 }dev_control_type;
+
+typedef enum
+{
+	dev_active,//设备主动发起
+	plat_active,//平台主动发起
+}dev_plat_active;
 
  #endif

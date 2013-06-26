@@ -41,6 +41,7 @@
 #define PORT_MAX 65535
 extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
+extern oa_bool timeout_enable;
 oa_bool need_reconn = OA_FALSE;
 dev_control_type control_type = none;
 
@@ -58,7 +59,7 @@ u8 ServUpdatabuf[UPDATA_BUFNUM][UPDATA_BUFLEN_MAX];
 extern DEV_PLAT_PARAS dev_running;
 ProtocolHandle sProtclHandl = {0};
 
-u16 escape_copy_to_send(u8 *buf, u16 len);
+u16 escape_copy_to_send(u8 *buf, u16 len, dev_plat_active kind);
 u16 DevReq2ServPackag_build(u16 ReqMsgId);
 u8 JT808Msg_Build(u16 DevMsgId,u16 totalPackt,u16 SubPackt,u8 *Sendbuf,u16 Sendbuflen,u16 *Senddatalen);
 #if 0
@@ -161,6 +162,7 @@ u8 Read_ProtclHandl(Protocol_Handle_e type, u8 *pbuf, u16 *pbuflen)
 		case eDevSeqid: //终端发送流水号
 			*pbuflen=sizeof(sProtclHandl.DevSeqId);
 			Mem_Copy(pbuf,sProtclHandl.DevSeqId,sizeof(sProtclHandl.DevSeqId));
+	#if 0
 			{
 				u16 id;
 				char_to_short(sProtclHandl.DevSeqId,&id);
@@ -170,7 +172,12 @@ u8 Read_ProtclHandl(Protocol_Handle_e type, u8 *pbuf, u16 *pbuflen)
 					id++;
 				short_to_char(sProtclHandl.DevSeqId,id);
 			}
+	#endif
 		break;
+		case eDevMsgid:{
+			*pbuflen=sizeof(sProtclHandl.DevMsgId);
+			Mem_Copy(pbuf,sProtclHandl.DevMsgId,sizeof(sProtclHandl.DevMsgId));
+		}break;
 		case eServSeqid: //流水号
 			*pbuflen=sizeof(sProtclHandl.ServSeqId);
 			Mem_Copy(pbuf,sProtclHandl.ServSeqId,sizeof(sProtclHandl.ServSeqId));
@@ -465,6 +472,9 @@ u8 Write_ProtclHandl(Protocol_Handle_e type, u8 *pbuf, u16 buflen)
 		case eDevSeqid: //终端发送流水号
 			Mem_Copy(sProtclHandl.DevSeqId,pbuf,sizeof(sProtclHandl.DevSeqId));
 		break;
+		case eDevMsgid:{
+			oa_memcpy(sProtclHandl.DevMsgId, pbuf, buflen);
+		}break;
 		case eServSeqid: //平台请求
 			Mem_Copy(sProtclHandl.ServSeqId,pbuf,buflen);
 		break;
@@ -1880,7 +1890,7 @@ u8 JT808MsgRsp_Send(u16 DevMsgId,u16 totalPackt,u16 SubPackt/*,u8 *Sendbuf,u16 S
 			return RspErrOther;
 		}
 
-		ret = escape_copy_to_send(pbuf, U16Temp);
+		ret = escape_copy_to_send(pbuf, U16Temp, plat_active);
 		if (ret > 0){
 			oa_soc_send_req();//check datas in buffer & send	
 		}
@@ -2897,6 +2907,17 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 			memcpy(rsp.SeqId, pbuf, 2);
 			pbuf+=2;
 			rsp.Rslt = *pbuf;
+			//timeout
+			{
+				u16 temp_seq;
+				u16 temp_seq2;
+				u16 temp_len;
+				char_to_short(&rsp.SeqId[0], &temp_seq2);
+				Read_ProtclHandl(eDevSeqid, (u8 *)&temp_seq, &temp_len);
+				if (timeout_enable == OA_TRUE && temp_seq == temp_seq2){
+					timeout_enable = OA_FALSE;
+				}
+			}
 			//debug info
 			DEBUG("register ack:0x%04x", REGISTERS_rsp);
 			DEBUG("rsp result:0x%x", rsp.Rslt);
@@ -2993,6 +3014,21 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 			u16 temp;
 			pbuf+=sizeof(MSG_HEAD);
 			memcpy(&rsp, pbuf, sizeof(LBS_PlatComRsp));
+			//timeout
+			{
+				u16 temp_msgid;
+				u16 temp_msgid2;
+				u16 temp_seq;
+				u16 temp_seq2;
+				u16 temp_len;
+				char_to_short(&rsp.SeqId[0], &temp_seq2);
+				char_to_short(&rsp.MsgId[0], &temp_msgid);
+				Read_ProtclHandl(eDevSeqid, (u8 *)&temp_seq, &temp_len);
+				Read_ProtclHandl(eDevMsgid, (u8 *)&temp_msgid2, &temp_len);
+				if (timeout_enable == OA_TRUE && temp_seq == temp_seq2 && temp_msgid == temp_msgid2){
+					timeout_enable = OA_FALSE;
+				}
+			}
 			//debug info
 			char_to_short(&rsp.MsgId[0], &temp);
 			DEBUG("platform common ack:DevReqmsgID:0x%04x, rsp result:0x%x", temp, rsp.Rslt);
@@ -3019,7 +3055,7 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 	*/	
 		default:{//以下N种为平台请求
 			Write_ProtclHandl(eServMsgid, pbuf, 2);
-			Write_ProtclHandl(eServSeqid, (pbuf+10), 2);
+			Write_ProtclHandl(eServSeqid, (pbuf+10), 2);//记录平台消息流水号
 			if(*(pbuf+2)&0x20) {//有分包项 peijl_20120912
 				pbuf+=(sizeof(MSG_HEAD)+sizeof(MSG_HEAD_sub));
 				U16Temp=Reallen-3-(sizeof(MSG_HEAD)+sizeof(MSG_HEAD_sub));
@@ -4557,6 +4593,7 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 	{
 		return 1;
 	}
+	
 	switch(DevMsgId)//终端消息
 	{
 #if 0
@@ -4586,6 +4623,11 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 			break;
 		}
 		case UNREGISTERS:
+		{
+			//空消息体
+			*msgbodylen=0;
+			break;
+		}
 		case HEART_BEAT:
 		{
 			//空消息体
@@ -5157,7 +5199,7 @@ u8 *getEmptybuf()
 *Return:        0:right others:wrong
 *Others:         
 *********************************************************/
-u16 escape_copy_to_send(u8 *buf, u16 len)
+u16 escape_copy_to_send(u8 *buf, u16 len, dev_plat_active kind)
 {
 	u16 real_len;
 	u8 SeqId[2];
@@ -5168,9 +5210,26 @@ u16 escape_copy_to_send(u8 *buf, u16 len)
 		OA_DEBUG_USER(" buf/len err");
 		return 0;
 	}
-	//给包加上流水号,流水号第加
-	Read_ProtclHandl(eDevSeqid, SeqId, &U16Temp);
-	oa_memcpy(buf+11, SeqId, 2);
+
+	if (kind == dev_active){
+		//给包加上流水号,流水号第加
+		Read_ProtclHandl(eDevSeqid, SeqId, &U16Temp);//after reading +1
+		oa_memcpy(buf+11, SeqId, 2);
+		{
+			u16 id;
+			char_to_short(sProtclHandl.DevSeqId,&id);
+			if(id==0xffff)
+				id=0;
+			else
+				id++;
+			short_to_char(sProtclHandl.DevSeqId,id);
+		}
+	}
+	else if (kind == plat_active){
+		//给包加上流水号,流水号第加
+		//Read_ProtclHandl(eServSeqid, SeqId, &U16Temp);
+		//oa_memcpy(buf+11, SeqId, 2);
+	}
 
 	//校验，除标示头尾和校验本身
 	if (1 == XOR_Check(buf+1, len-3,(buf+len-2)))
@@ -5182,22 +5241,21 @@ u16 escape_copy_to_send(u8 *buf, u16 len)
 	//对标示头和尾之外的包数据进行转义
 	JT808_dataChg(1, buf+1, len-2, &U16Temp);
 	len = U16Temp+2; //total data length
-	//debug info
-	{
-		u16 i;
-		DEBUG("sendlen:%d data:", len);
-		for (i=0; i<len; i++){
-			OA_DEBUG_USER("%02x ", buf[i]);
-		}
-		DEBUG();
-		
-	}
 	real_len = oa_write_buffer_force_noinit(g_soc_context.gprs_tx, buf, len);
 	if (real_len < len)
 	{
 		OA_DEBUG_USER(" write err");
 	}
 	return real_len;
+}
+void timeout_retrans_enable(u16 DevMsgId){
+	
+	if (DevMsgId == REGISTERS || DevMsgId == LOGIN || DevMsgId == UNREGISTERS 
+	|| DevMsgId == HEART_BEAT ||DevMsgId == REPORT_LOCATION){
+		Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
+		timeout_enable = OA_TRUE;
+	}
+	else timeout_enable = OA_FALSE;
 }
 /*********************************************************
 *Function:      DevReq2ServPackag_build()
@@ -5218,20 +5276,24 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 		//if (0 == JT808Msg_Build(ReqMsgId,1,0,pbuf+2,sizeof(ServUpdatabuf[0])-2,&U16Temp))
 		if (0 == JT808Msg_Build(ReqMsgId, 1, 0, pbuf, DATA_MAX_LEN, &U16Temp))
 		{
+			
 			if (U16Temp > DATA_MAX_LEN)
 			{
 				OA_DEBUG_USER(" data is too long!");
 				return 0;
 			}
+			
 			#if 0
 			//put data length into pbuf[0..1]
 			*pbuf = U16Temp>>8;
 			*(pbuf+1) = U16Temp&0xff;
 			OSQPost(QServUpdata,pbuf);
 			#endif
-			ret = escape_copy_to_send(pbuf, U16Temp);
-			if (ret > 0)
-			{
+			
+			
+			ret = escape_copy_to_send(pbuf, U16Temp, dev_active);
+			if (ret > 0){
+				timeout_retrans_enable(ReqMsgId);
 				return ret;
 			}
 			else

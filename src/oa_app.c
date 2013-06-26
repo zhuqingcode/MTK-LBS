@@ -44,7 +44,7 @@
 #include "oa_lbs2mtk.h"
 #include "oa_area.h"
 #include "oa_debug.h"
-
+#include "oa_app.h"
 DEV_PLAT_PARAS dev_running =
 {
 	PLAT_SOC_INIT,
@@ -54,9 +54,12 @@ DEV_PLAT_PARAS dev_running =
 	0,
 	OA_TRUE,
 };
-oa_bool acc_short_conning = OA_FALSE;//just used for send a location data when acc is off
+
+oa_uint16 timeout;
+oa_bool timeout_enable = OA_FALSE;//OA_FALSE:disable;OA_TRUE:enable
+soc_bak_context back_con = {0x0};
 extern DEVICE_PARAMS dev_now_params;
-extern oa_uint8 acc_status;
+extern oa_soc_context g_soc_context;
 extern void App_TaskSScrnSendManage(void *Para);
 extern void oa_app_area(void *para);
 /*--------END: Customer code----------*/
@@ -336,7 +339,56 @@ void oa_app_plat_data(void *param)
 	oa_timer_start(OA_TIMER_ID_4, oa_app_plat_data, NULL, OA_APP_PLAT_DATA);
 	return;
 }
+/*********************************************************
+*Function:     oa_app_timeout()
+*Description:  timeout strategy 
+*Return:		void
+*Others:         
+*********************************************************/
+void oa_app_timeout(void *param)
+{
+	static oa_bool first_valid = OA_FALSE;
+	static oa_uint32 Tn;
+	static oa_uint16 retrans_times = 0;
+	oa_uint32 time;
+	oa_uint16 real_len;
+	oa_uint16 soc_ret;
 
+	if (dev_running.plat_status == OFFLINE) goto redo;
+	if (timeout_enable == OA_FALSE){
+		timeout = 0;
+		goto redo;
+	}
+
+	if (first_valid == OA_FALSE){
+		Tn = dev_now_params.tcp_ack_timeout;
+		first_valid = OA_TRUE;
+	}
+	timeout++;
+	time = timeout * TIMEOUT_SECOND;
+	if (time > Tn){
+		//do a retransmission
+		real_len = oa_write_buffer_force_noinit(g_soc_context.gprs_tx, back_con.data, back_con.len);
+		if (real_len == back_con.len){
+			soc_ret = oa_soc_send_req();
+			if (soc_ret == real_len){
+				retrans_times++;
+				Tn = Tn * (retrans_times + 1);
+				DEBUG("%d x timeout retransmission ok", retrans_times);
+				if (retrans_times > dev_now_params.tcp_retrans_times){
+					DEBUG("do reconnect because tcp timeout");
+					Tn = dev_now_params.tcp_ack_timeout;
+					retrans_times = 0;
+					timeout = 0;
+					just_reconn();
+				}
+			}
+		}
+		else DEBUG("write err");
+	}
+redo:
+	oa_timer_start(OA_TIMER_ID_11, oa_app_timeout, NULL, OA_APP_TIMEOUT);
+}
 
 
 /****************************************************************
@@ -478,6 +530,8 @@ void oa_app_main(void)
 		oa_timer_start(OA_TIMER_ID_8, App_TaskSScrnSendManage, NULL, SCHD_SCRN_1TIME);
 		//area judge task
 		oa_timer_start(OA_TIMER_ID_9, oa_app_area, NULL, OA_AREA_DETECT_1TIME);
+		//timeout timer
+		oa_timer_start(OA_TIMER_ID_11, oa_app_timeout, NULL, OA_APP_TIMEOUT);
 	}
 	else if (OA_TRUE == dev_is_locked)  //device is lock
 	{
