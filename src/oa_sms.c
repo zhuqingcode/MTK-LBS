@@ -43,6 +43,7 @@
 extern char *strtok(char s[], const char *delim);
 oa_sms_context message;
 oa_sms_context sms_fail;
+oa_bool sms_enable = OA_TRUE;//
 extern DEVICE_PARAMS dev_now_params;
 extern uart_struct uart_contain;
 extern USE_LOCK now_use_lock;

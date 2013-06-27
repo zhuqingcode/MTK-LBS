@@ -32,7 +32,8 @@
 #include "oa_at-p.h"
 /*--------BEG: Customer code----------*/
 extern oa_sms_context message;
- extern oa_uint8 at_fedbak_buf[AT_FEDBAK_MAX_LEN];
+extern oa_uint8 at_fedbak_buf[AT_FEDBAK_MAX_LEN];
+extern oa_bool sms_enable;
 /*--------END: Customer code----------*/
 /*****************************************************************/
 /*-----------------End for customer define--------------------------*/
@@ -190,7 +191,8 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 	oa_at_cmd_demo_submit();
 	//oa_at_cmd_demo("at+cpms?\r\n");
 	//oa_at_cmd_demo_submit();
-	
+	//sms enable check
+	if (sms_enable == OA_FALSE) return;
 	oa_memset(&message, 0x0, sizeof(message));//reset message
 	if(dcs == OA_SMSAL_DEFAULT_DCS){
 		/*handle ascii sms text.*/

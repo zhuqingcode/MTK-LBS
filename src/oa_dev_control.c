@@ -33,6 +33,7 @@
 
 extern DEV_PLAT_PARAS dev_running;
 extern DEVICE_PARAMS dev_now_params;
+extern oa_bool sms_enable;
 #define POWEROFF_TIME 2000
 /*********************************************************
 *Function:      do_reset()
@@ -125,6 +126,7 @@ void do_turnoff_allwireless(void)
 			dev_running.plat_status = OFFLINE;
 		}
 	}
+	sms_enable = OA_FALSE;
 	oa_sleep(POWEROFF_TIME);
 	//maybe need do something about sms & call here
 }

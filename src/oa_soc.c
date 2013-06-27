@@ -291,6 +291,7 @@ oa_int16 oa_soc_send_req(void)
 			DEBUG("---send ok len=%d",ret);
 			//timeout
 			if (timeout_enable == OA_TRUE){
+				DEBUG("enable timeout");
 				timeout = 0;//start timeout
 				oa_memset(&back_con, 0x0, sizeof(soc_bak_context));
 				oa_memcpy(back_con.data, g_soc_context.gprs_tx_pending_data, len);//backup data

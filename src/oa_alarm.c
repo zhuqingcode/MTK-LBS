@@ -35,6 +35,7 @@ extern DEVICE_PARAMS dev_now_params;
 extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 acc_status;
 extern oa_sms_context sms_fail;
+extern oa_bool sms_enable;
 extern void sms_send_feedback_func(os_sms_result send_ret);
 /*********************************************************
 *Function:     handle_alarm_status()
@@ -94,7 +95,7 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 		}
 		//sms alarm
 		alarm_flag = dev_now_params.alarm_send_sms_mask;
-		if (alarm_flag & alarm_bit){
+		if ((alarm_flag & alarm_bit) && sms_enable == OA_TRUE){
 			char enquire_temp[32] = {0x0};
 			oa_char nb_tmp[4] = {0x0};
 			nb_kind nb = err_nb;
