@@ -42,7 +42,6 @@
 #include <stdlib.h>
 extern char *strtok(char s[], const char *delim);
 oa_sms_context message;
-oa_sms_context sms_fail;
 oa_bool sms_enable = OA_TRUE;//
 extern DEVICE_PARAMS dev_now_params;
 extern uart_struct uart_contain;
@@ -673,7 +672,7 @@ e_keyword look4keywords4ms(oa_char *p_sms, u16 sms_len, keyword_context *p_set, 
 
 	return e_none;
 }
-
+#if 0
 /*********************************************************
 *Function:      handle_keyword()
 *Description:  handle the keyword
@@ -698,6 +697,7 @@ void sms_send_feedback_func(os_sms_result send_ret)
 		oa_memset(&sms_fail, 0x0, sizeof(sms_fail));
 	}
 }
+#endif
 #if 0
 /*********************************************************
 *Function:      handle_keyword()
@@ -1937,22 +1937,9 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 *Others:         
 *********************************************************/
 void sendsms4ms(u8 *buf, u16 len, sms_kind s_k){
-	oa_char nb_tmp[4] = {0x0};
-	nb_kind nb = err_nb;
-	
-	oa_strncpy(nb_tmp, &message.deliver_num[3], 3);
-	nb = telecom_num_check(nb_tmp);
-	if (tele_nb == nb){
-		if (s_k == sms_normal)	oa_sms_test_dfalp(buf, message.deliver_num);
-		else if(s_k == sms_special) oa_sms_test_ucs2(buf, message.deliver_num, len);
-	}
-	else if (err_nb != nb){
-		oa_sms_send_req(sms_send_feedback_func, message.deliver_num, buf, len, message.dcs);
-		oa_memcpy(sms_fail.data, buf, oa_strlen(buf));
-		sms_fail.len = len;
-		oa_memcpy(sms_fail.deliver_num, message.deliver_num, oa_strlen(message.deliver_num));
-		sms_fail.dcs = message.dcs;
-	}
+	DEBUG("send sms");
+	if (s_k == sms_normal)	oa_sms_test_dfalp(buf, message.deliver_num);
+	else if(s_k == sms_special) oa_sms_test_ucs2(buf, message.deliver_num, len);
 }
 /*********************************************************
 *Function:      handle_keyword4ms()
