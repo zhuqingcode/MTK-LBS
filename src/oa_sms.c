@@ -249,13 +249,6 @@ void status_extract(oa_char *enquire_temp, u8 *p_len){
 	}
 	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
 	oa_memcpy(enquire_temp, tmp, pos);
-	//debug
-	{
-		oa_uint8 i;
-		for (i = 0;i < pos; i++){
-			OA_DEBUG_USER("%02X ", enquire_temp[i]);
-		}
-	}
 	*p_len = pos; 
 }
 /*********************************************************
@@ -2781,7 +2774,6 @@ void oa_app_sms(void)
 	}
 #endif
 	if (sn <= MAX_SMS_NUM){
-		u8 pos = 0;
 		DEBUG("%d x sms", sn);
 		for (i = 0; i < sn; i++){
 			for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
@@ -2792,18 +2784,10 @@ void oa_app_sms(void)
 				
 				handle_keyword4ms(key_ret, &set);
 				if (ms_ack == OA_TRUE){
-					oa_uint8 i2;
 					handle_common4ms(key_ret, buf, &len);
 					DEBUG("\nbuf:%s len:%d", buf, len);
 					if (set.s_k == sms_special) oa_memcpy(sendbuf, buf, len);
 					else if (set.s_k == sms_normal) oa_strcat(sendbuf, buf);
-					//oa_strcat(sendbuf, buf);
-					//oa_memcpy(&sendbuf[pos], buf, len);
-					//debug
-					for (i2 = 0;i2 < len;i2++){
-						OA_DEBUG_USER("%02X ", sendbuf[i2]);
-					}
-					pos += len;
 					oa_memset(buf, 0x0, sizeof(buf));
 				}
 				dev_action_handle(&set);
