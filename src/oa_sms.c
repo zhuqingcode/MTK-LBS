@@ -117,6 +117,7 @@ oa_char *p_keyword[] = {
  DEVID,
 };
 oa_uint8 KEYWORDS_SIZE = sizeof(p_keyword)/4;
+#if 0
 /*********************************************************
 *Function:      status_extract()
 *Description:  search key word in message
@@ -147,14 +148,36 @@ nb_kind telecom_num_check(oa_char *nb)
 		|| (!oa_strncmp(nb, "180", 3)) || (!oa_strncmp(nb, "189", 3)) )	return tele_nb;
 	else return mobe_nb;
 }
+#endif
+oa_uint8 termID[] = {0x7e,0xc8,0x7a,0xef,0x7f,0x16,0x53,0xf7,0x0,':'};//"终端编号:"
+oa_uint8 CardNum[] = {0x53,0x61,0x53,0xF7,0x0,':'};//"卡号:"
+oa_uint8 wcm[] = {0x0,'W',0x0,'C',0x0,'M',0x72,0xB6,0x60,0x01,0x0,':'};//"WCM状态:"
+oa_uint8 zc[] = {0x6B,0x63,0x5E,0x38};//"正常"
+oa_uint8 bzc[] = {0x4E,0x0D,0x6B,0x63,0x5E,0x38};//"不正常"
+oa_uint8 xhqd[] = {0x4F,0xE1,0x53,0xF7,0x5F,0x3A,0x5E,0xA6,0x0,':'};//"信号强度:"
+oa_uint8 acc[] = {0x0,'A',0x0,'C',0x0,'C',0x72,0xB6,0x60,0x01,0x0,':'};//"ACC状态:"
+oa_uint8 dk[] = {0x62,0x53,0x5F,0x00};//"打开"
+oa_uint8 gb[] = {0x51,0x73,0x95,0xED};//"关闭"
+oa_uint8 gps[] = {0x0,'G',0x0,'P',0x0,'S',0x72,0xB6,0x60,0x01,0x0,':'};//"GPS状态:"
+oa_uint8 du[] = {0x65,0xAD,0x8D,0xEF};//"断路"
+oa_uint8 du2[] = {0x77,0xED,0x8D,0xEF};//"短路"
+oa_uint8 pt[] = {0x5E,0x73,0x53,0xF0,0x72,0xB6,0x60,0x01,0x0,':'};//"平台状态:"
+oa_uint8 lj[] = {0x8F,0xDE,0x63,0xA5};//"连接"
+oa_uint8 wlj[] = {0x67,0x2A,0x8F,0xDE,0x63,0xA5};//"未连接"
+oa_uint8 fh[] = {0x0,';'};//";"
 /*********************************************************
 *Function:      status_extract()
 *Description:  search key word in message
 *Return:        void
 *Others:         
 *********************************************************/
-void status_extract(oa_char *enquire_temp){
-	oa_char tmp[64] = {0x0};
+void status_extract(oa_char *enquire_temp, u8 *p_len){
+	oa_char tmp[256] = {0x0};
+	oa_char tmp2[128] = {0x0};
+	oa_char tmp3[8] = {0x0};
+	oa_uint8 pos = 0;
+	oa_uint32 len = 0;
+#if 0	
 	oa_uint8 mod_status;
 	oa_strcat(tmp, "termID:");
 	oa_strcat(tmp, dev_now_params.term_id);
@@ -170,7 +193,70 @@ void status_extract(oa_char *enquire_temp){
 													acc_status,
 													mod_status,
 													dev_running.plat_status);
-	oa_strcat(enquire_temp, tmp);
+#endif
+	//终端编号
+	oa_memcpy(tmp, termID, sizeof(termID));pos += sizeof(termID);
+	len = asc2uc(tmp2, dev_now_params.term_id, oa_strlen(dev_now_params.term_id));
+	oa_memcpy(&tmp[pos], tmp2, len);pos += len;
+	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+	//卡号
+	oa_memset(tmp2, 0x0, sizeof(tmp2));
+	oa_memcpy(&tmp[pos], CardNum, sizeof(CardNum));pos += sizeof(CardNum);
+	len = asc2uc(tmp2, dev_now_params.term_tel_num, oa_strlen(dev_now_params.term_tel_num));
+	oa_memcpy(&tmp[pos], tmp2, len);pos += len;
+	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+	//WCM状态
+	oa_memcpy(&tmp[pos], wcm, sizeof(wcm));pos += sizeof(wcm);
+	if (oa_sim_network_is_valid()){
+		oa_memcpy(&tmp[pos], zc, 4);pos += 4;
+	}
+	else{
+		oa_memcpy(&tmp[pos], bzc, 6);pos += 6;
+	}
+	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+	//信号强度
+	oa_memset(tmp2, 0x0, sizeof(tmp2));
+	oa_memcpy(&tmp[pos], xhqd, sizeof(xhqd));pos += sizeof(xhqd);
+	sprintf(tmp3, "%d", oa_network_get_signal_level());
+	len = asc2uc(tmp2, tmp3, oa_strlen(tmp3));
+	oa_memcpy(&tmp[pos], tmp2, len);pos += len;
+	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+	//ACC状态
+	oa_memcpy(&tmp[pos], acc, sizeof(acc));pos += sizeof(acc);
+	if (acc_status == ACC_ON){
+		oa_memcpy(&tmp[pos], dk, 4);pos += 4;
+	}
+	else{
+		oa_memcpy(&tmp[pos], gb, 4);pos += 4;
+	}
+	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+	//GPS状态
+	oa_memcpy(&tmp[pos], gps, sizeof(gps));pos += sizeof(gps);
+	if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){
+		oa_memcpy(&tmp[pos], bzc, 6);pos += 6;
+	}
+	else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == RESET){
+		oa_memcpy(&tmp[pos], zc, 4);pos += 4;
+	}
+	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+	//平台状态
+	oa_memcpy(&tmp[pos], pt, sizeof(pt));pos += sizeof(pt);
+	if (dev_running.plat_status == ONLINE){
+		oa_memcpy(&tmp[pos], lj, 4);pos += 4;
+	}
+	else{
+		oa_memcpy(&tmp[pos], wlj, 6);pos += 6;
+	}
+	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+	oa_memcpy(enquire_temp, tmp, pos);
+	//debug
+	{
+		oa_uint8 i;
+		for (i = 0;i < pos; i++){
+			OA_DEBUG_USER("%02X ", enquire_temp[i]);
+		}
+	}
+	*p_len = pos; 
 }
 /*********************************************************
 *Function:      gps_extract()
@@ -957,11 +1043,11 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 *Return:        void
 *Others:         
 *********************************************************/
-void handle_common4ms(e_keyword key_kind, oa_char *buf)
+void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len)
 {
-	oa_bool ret;
+	u8 ret_len;
 	char temp[16] = {0x0};
-	char enquire_temp[128] = {0x0};
+	char enquire_temp[256] = {0x0};
 	
 	switch(key_kind){
 		case e_HB:{
@@ -1101,8 +1187,8 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf)
 			oa_strcat(enquire_temp, ";");
 		}break;
 		case e_STATUS:{
-			status_extract(enquire_temp);
-			oa_strcat(enquire_temp, ";");
+			status_extract(enquire_temp, &ret_len);
+			//oa_strcat(enquire_temp, ";");
 		}break;
 		case e_GPS:{
 			gps_extract(enquire_temp);
@@ -1146,7 +1232,14 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf)
 			oa_strcat(enquire_temp, "not support!");
 		}break;
 	}
-	oa_memcpy(buf, enquire_temp, oa_strlen(enquire_temp));
+	if (key_kind == e_STATUS){
+		oa_memcpy(buf, enquire_temp, ret_len);
+		*len = ret_len;
+	}
+	else{
+		*len = oa_strlen(enquire_temp);
+		oa_memcpy(buf, enquire_temp, *len);
+	}
 }
 
 /*********************************************************
@@ -2539,7 +2632,7 @@ void handle_keyword4ms(e_keyword key_kind,
 			}
 		}break;
 		case e_STATUS:{
-			
+			p_set->s_k = sms_special;
 		}break;
 		case e_GPS:{
 
@@ -2613,7 +2706,7 @@ void oa_app_sms(void)
 	oa_char prefix[MAX_SMS_NUM][64] = {{0x0}, {0x0}, {0x0}, {0x0}, {0x0}};
 	oa_char data[256] = {0x0};
 	oa_char sendbuf[256] = {0x0};
-	oa_char buf[64] = {0x0};
+	oa_char buf[256] = {0x0};
 	oa_uint8 len;
 	oa_bool ms_ack;
 #ifdef 0
@@ -2640,7 +2733,7 @@ void oa_app_sms(void)
 	}
 	OA_DEBUG_USER("deliver_num: %s", message.deliver_num);
 #endif
-	len = message.len;
+	//len = message.len;
 	oa_memcpy(data, message.data, message.len);
 	p = strtok(data, ";");
 	if (NULL == p){
@@ -2688,6 +2781,7 @@ void oa_app_sms(void)
 	}
 #endif
 	if (sn <= MAX_SMS_NUM){
+		u8 pos = 0;
 		DEBUG("%d x sms", sn);
 		for (i = 0; i < sn; i++){
 			for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
@@ -2698,9 +2792,18 @@ void oa_app_sms(void)
 				
 				handle_keyword4ms(key_ret, &set);
 				if (ms_ack == OA_TRUE){
-					handle_common4ms(key_ret, buf);
-					DEBUG("\nbuf:%s", buf);
-					oa_strcat(sendbuf, buf);
+					oa_uint8 i2;
+					handle_common4ms(key_ret, buf, &len);
+					DEBUG("\nbuf:%s len:%d", buf, len);
+					if (set.s_k == sms_special) oa_memcpy(sendbuf, buf, len);
+					else if (set.s_k == sms_normal) oa_strcat(sendbuf, buf);
+					//oa_strcat(sendbuf, buf);
+					//oa_memcpy(&sendbuf[pos], buf, len);
+					//debug
+					for (i2 = 0;i2 < len;i2++){
+						OA_DEBUG_USER("%02X ", sendbuf[i2]);
+					}
+					pos += len;
 					oa_memset(buf, 0x0, sizeof(buf));
 				}
 				dev_action_handle(&set);
@@ -2710,7 +2813,7 @@ void oa_app_sms(void)
 		if (ms_ack == OA_TRUE){
 			oa_uint8 n;
 			oa_char temp[256] = {0x0};
-			n = oa_strlen(sendbuf)/140;
+			n = len/140;
 			if (n > 1){
 				DEBUG("sms content is too long");
 				return;
@@ -2719,8 +2822,8 @@ void oa_app_sms(void)
 				oa_memcpy(temp, sendbuf, 140);
 				sendsms4ms(temp, 140, sms_special);
 				oa_memset(temp, 0x0, 256);
-				oa_memcpy(temp, &sendbuf[140], oa_strlen(sendbuf)-140);
-				sendsms4ms(temp, oa_strlen(temp), sms_special);
+				oa_memcpy(temp, &sendbuf[140], len -140);
+				sendsms4ms(temp, len -140, sms_special);
 			}
 			else if(n == 0) sendsms4ms(sendbuf, oa_strlen(sendbuf), sms_normal);
 		}
