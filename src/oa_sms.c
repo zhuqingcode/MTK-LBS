@@ -1936,24 +1936,23 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 *Return:        void
 *Others:         
 *********************************************************/
-void sendsms4ms(u8 *buf){
+void sendsms4ms(u8 *buf, u16 len, sms_kind s_k){
 	oa_char nb_tmp[4] = {0x0};
 	nb_kind nb = err_nb;
 	
 	oa_strncpy(nb_tmp, &message.deliver_num[3], 3);
 	nb = telecom_num_check(nb_tmp);
 	if (tele_nb == nb){
-		//DEBUG("enquire_temp:%s nb:%s", enquire_temp, message.deliver_num);
-		oa_sms_test_dfalp(buf, message.deliver_num);
+		if (s_k == sms_normal)	oa_sms_test_dfalp(buf, message.deliver_num);
+		else if(s_k == sms_special) oa_sms_test_ucs2(buf, message.deliver_num, len);
 	}
 	else if (err_nb != nb){
-		oa_sms_send_req(sms_send_feedback_func, message.deliver_num, buf, oa_strlen(buf), message.dcs);
+		oa_sms_send_req(sms_send_feedback_func, message.deliver_num, buf, len, message.dcs);
 		oa_memcpy(sms_fail.data, buf, oa_strlen(buf));
-		sms_fail.len = oa_strlen(buf);
+		sms_fail.len = len;
 		oa_memcpy(sms_fail.deliver_num, message.deliver_num, oa_strlen(message.deliver_num));
 		sms_fail.dcs = message.dcs;
 	}
-
 }
 /*********************************************************
 *Function:      handle_keyword4ms()
@@ -2721,7 +2720,23 @@ void oa_app_sms(void)
 				oa_memset(&set, 0x0, sizeof(set));
 			}
 		}
-		if (ms_ack == OA_TRUE) sendsms4ms(sendbuf);
+		if (ms_ack == OA_TRUE){
+			oa_uint8 n;
+			oa_char temp[256] = {0x0};
+			n = oa_strlen(sendbuf)/140;
+			if (n > 1){
+				DEBUG("sms content is too long");
+				return;
+			}
+			else if (n == 1){//only for 'STATUS;'
+				oa_memcpy(temp, sendbuf, 140);
+				sendsms4ms(temp, 140, sms_special);
+				oa_memset(temp, 0x0, 256);
+				oa_memcpy(temp, &sendbuf[140], oa_strlen(sendbuf)-140);
+				sendsms4ms(temp, oa_strlen(temp), sms_special);
+			}
+			else if(n == 0) sendsms4ms(sendbuf, oa_strlen(sendbuf), sms_normal);
+		}
 	}
 	else DEBUG("too many sms");
 	
