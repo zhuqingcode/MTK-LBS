@@ -180,3 +180,22 @@ oa_uint32 atobi(const char *src, oa_uint8 len)
 	}
 	return bi_tmp;
 }
+/*********************************************************
+*Function:     asc2uc()
+*Description: acs 2 uc
+*Return:		void
+*Others:         
+*********************************************************/
+oa_uint16 asc2uc(char *dst, char *src, oa_uint8 len)
+{
+	oa_uint8 i;
+	if (src == NULL || dst == NULL || len == 0){
+		return 0;
+	}
+	
+	for(i = 0;i < len; i++){
+		dst[2*i] = 0x0;
+		dst[2*i+1] = src[i];
+	}
+	return len * 2;
+}

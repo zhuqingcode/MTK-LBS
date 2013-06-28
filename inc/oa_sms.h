@@ -238,12 +238,19 @@ typedef union
 	oa_uint32 con_int;
 }ch_int_con;
 
+typedef enum
+{
+	sms_normal = 0x0,
+	sms_special,
+}sms_kind;
+
 typedef struct
 {
 	command_kind kind;
 	ch_int_con context;
 	oa_bool need_ack;
 	action_kind act_kind;
+	sms_kind s_k;
 }keyword_context;
 
 typedef enum

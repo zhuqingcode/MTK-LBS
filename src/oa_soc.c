@@ -32,9 +32,13 @@
 #include "oa_jt808.h"
 #include "oa_platform.h"
 #include "oa_debug.h"
+#include "oa_app.h"
 extern ProtocolHandle sProtclHandl;
 extern oa_bool need_reconn;
 extern dev_control_type control_type;
+extern oa_uint16 timeout;
+extern oa_bool timeout_enable;
+extern soc_bak_context back_con;
 //-------------------------------------
 /*debug*/
 #define GPRS_DEBUG OA_DEBUG_USER
@@ -274,7 +278,26 @@ oa_int16 oa_soc_send_req(void)
 		if (ret >= OA_SOC_SUCCESS)
 		{
 			//DEBUG("%s:sock_id=%d send ok len=%d",__func__,g_soc_context.socket_id,ret);
+			//debug info
+			{
+				u16 i;
+				DEBUG("sendlen:%d data:", len);
+				for (i=0; i<len; i++){
+					OA_DEBUG_USER("%02x ", g_soc_context.gprs_tx_pending_data[i]);
+				}
+				DEBUG();
+				
+			}
 			DEBUG("---send ok len=%d",ret);
+			//timeout
+			if (timeout_enable == OA_TRUE){
+				DEBUG("enable timeout");
+				timeout = 0;//start timeout
+				oa_memset(&back_con, 0x0, sizeof(soc_bak_context));
+				oa_memcpy(back_con.data, g_soc_context.gprs_tx_pending_data, len);//backup data
+				back_con.len = len;
+			}
+			
 			//if send success,dummy read to delete
 			len = oa_read_buffer_noinit(g_soc_context.gprs_tx, 
 			    							g_soc_context.gprs_tx_pending_data,

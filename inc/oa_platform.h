@@ -38,6 +38,9 @@
 #define PLAT_DATA_SECOND (OA_APP_PLAT_DATA / 1000)
 #define AUTHEN_CODE_MAX_LEN 127
 #define AUTHEN_ERR_MAX_TIMES 10
+#define OA_APP_TIMEOUT 2000
+#define TIMEOUT_SECOND (OA_APP_TIMEOUT/1000)
+#define RESTART_THRESHOLD (25 * 60)
 typedef struct
 {
 	oa_uint8 authen_code_len;
