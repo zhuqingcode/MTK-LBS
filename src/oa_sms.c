@@ -165,6 +165,17 @@ oa_uint8 pt[] = {0x5E,0x73,0x53,0xF0,0x72,0xB6,0x60,0x01,0x0,':'};//"平台状态:"
 oa_uint8 lj[] = {0x8F,0xDE,0x63,0xA5};//"连接"
 oa_uint8 wlj[] = {0x67,0x2A,0x8F,0xDE,0x63,0xA5};//"未连接"
 oa_uint8 fh[] = {0x0,';'};//";"
+
+oa_uint8 ydw[] = {0x5D,0xF2,0x5B,0x9A,0x4F,0x4D};//"已定位"
+oa_uint8 wdw[] = {0x67,0x2A,0x5B,0x9A,0x4F,0x4D};//"未定位"
+oa_uint8 sj[] = {0x65,0xF6,0x95,0xF4,0x0,':'};//"时间:"
+oa_uint8 wd[] = {0x7E,0xAC,0x5E,0xA6,0x0,':'};//"纬度:"
+oa_uint8 jd[] = {0x7E,0xCF,0x5E,0xA6,0x0,':'};//"经度:"
+oa_uint8 sd[] = {0x90,0x1F,0x5E,0xA6,0x0,':'};//"速度:"
+oa_uint8 kmh[] = "(km/h)";//{0x0,'(',0x0,'k',0x0,'m',0x0,'/',0x0,'h',0x0,')'};//"(km/h)"
+oa_uint8 fx[] = {0x65,0xB9,0x54,0x11,0x0,':'};//"方向:"
+oa_uint8 mk[] = {0x6A,0x21,0x57,0x57,0x0,':'};//"模块:"
+oa_uint8 tx[] = {0x59,0x29,0x7E,0xBF,0x0,':'};//"天线:"
 /*********************************************************
 *Function:      status_extract()
 *Description:  search key word in message
@@ -257,11 +268,89 @@ void status_extract(oa_char *enquire_temp, u8 *p_len){
 *Return:        void
 *Others:         
 *********************************************************/
-void gps_extract(oa_char *enquire_temp){
-	oa_char tmp[64] = {0x0};
+void gps_extract(oa_char *enquire_temp, u8 *p_len){
+	oa_char tmp[256] = {0x0};
+	oa_char tmp2[128] = {0x0};
+	oa_char tmp3[128] = {0x0};
+	oa_uint8 pos = 0;
+	oa_uint32 len = 0;
 	oa_time_struct t = {0};
 	oa_uint8 i;
+
+	//gps状态
+	oa_memcpy(tmp, gps, sizeof(gps));pos += sizeof(gps);
+	oa_memcpy(&tmp[pos], ydw, 6);pos += 6;
+	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+	
 	if (GPS_FIXED == Pos_Inf.Fix_Status){
+		//时间
+		oa_memcpy(&tmp[pos], sj, sizeof(sj));pos += sizeof(sj);
+		t.nYear = ((Pos_Inf.Time[0]>>4)&0x0F)*10+ (Pos_Inf.Time[0]&0x0F);
+		t.nMonth = ((Pos_Inf.Time[1]>>4)&0x0F)*10+ (Pos_Inf.Time[1]&0x0F);//-1
+		t.nDay = ((Pos_Inf.Time[2]>>4)&0x0F)*10+ (Pos_Inf.Time[2]&0x0F);
+		t.nHour = ((Pos_Inf.Time[3]>>4)&0x0F)*10+ (Pos_Inf.Time[3]&0x0F);
+		t.nMin = ((Pos_Inf.Time[4]>>4)&0x0F)*10+ (Pos_Inf.Time[4]&0x0F);
+		t.nSec = ((Pos_Inf.Time[5]>>4)&0x0F)*10+ (Pos_Inf.Time[5]&0x0F);
+		sprintf(tmp3, "%d %d %d %d %d %d", t.nYear, t.nMonth, t.nDay, t.nHour, t.nMin, t.nSec);
+		len = asc2uc(tmp2, tmp3, oa_strlen(tmp3));
+		oa_memcpy(&tmp[pos], tmp2, len);pos += len;
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		//纬度
+		oa_memcpy(&tmp[pos], wd, sizeof(wd));pos += sizeof(wd);
+		oa_memset(tmp3, 0x0, sizeof(tmp3));
+		oa_strcat(tmp3, "N");
+		tmp3[1] = Pos_Inf.Latitude[0];
+		tmp3[2] = Pos_Inf.Latitude[1];
+		tmp3[3] = '.';
+		tmp3[4] = Pos_Inf.Latitude[2];
+		tmp3[5] = Pos_Inf.Latitude[3];
+		tmp3[6] = Pos_Inf.Latitude[4];
+		tmp3[7] = Pos_Inf.Latitude[5];
+		tmp3[8] = Pos_Inf.Latitude[6];
+		tmp3[9] = Pos_Inf.Latitude[7];
+		oa_memset(tmp2, 0x0, sizeof(tmp2));
+		len = asc2uc(tmp2, tmp3, oa_strlen(tmp3));
+		oa_memcpy(&tmp[pos], tmp2, len);pos += len;
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		//经度
+		oa_memcpy(&tmp[pos], jd, sizeof(jd));pos += sizeof(jd);
+		oa_memset(tmp3, 0x0, sizeof(tmp3));
+		oa_strcat(tmp3, "E");
+		tmp3[1] = Pos_Inf.Longitude[0];
+		tmp3[2] = Pos_Inf.Longitude[1];
+		tmp3[3] = Pos_Inf.Longitude[2];
+		tmp3[4] = '.';
+		tmp3[5] = Pos_Inf.Longitude[3];
+		tmp3[6] = Pos_Inf.Longitude[4];
+		tmp3[7] = Pos_Inf.Longitude[5];
+		tmp3[8] = Pos_Inf.Longitude[6];
+		tmp3[9] = Pos_Inf.Longitude[7];
+		tmp3[10] = Pos_Inf.Longitude[8];
+		oa_memset(tmp2, 0x0, sizeof(tmp2));
+		len = asc2uc(tmp2, tmp3, oa_strlen(tmp3));
+		oa_memcpy(&tmp[pos], tmp2, len);pos += len;
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		//速度
+		oa_memcpy(&tmp[pos], sd, sizeof(sd));pos += sizeof(sd);
+		oa_memset(tmp3, 0x0, sizeof(tmp3));
+		sprintf(tmp3, "%03d", Pos_Inf.Speed);
+		oa_strcat(tmp3, kmh);
+		oa_memset(tmp2, 0x0, sizeof(tmp2));
+		len = asc2uc(tmp2, tmp3, oa_strlen(tmp3));
+		oa_memcpy(&tmp[pos], tmp2, len);pos += len;
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		//方向
+		oa_memcpy(&tmp[pos], fx, sizeof(fx));pos += sizeof(fx);
+		oa_memset(tmp3, 0x0, sizeof(tmp3));
+		sprintf(tmp3, "%03d", Pos_Inf.COG);
+		oa_memset(tmp2, 0x0, sizeof(tmp2));
+		len = asc2uc(tmp2, tmp3, oa_strlen(tmp3));
+		oa_memcpy(&tmp[pos], tmp2, len);pos += len;
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		oa_memcpy(enquire_temp, tmp, pos);
+		*p_len = pos; 
+#if 0
+		//---------
 		sprintf(tmp, "GPS Status:%d;", GPS_FIXED);
 		oa_strcat(enquire_temp, tmp);
 		oa_memset(tmp, 0x0, sizeof(tmp));
@@ -316,8 +405,31 @@ void gps_extract(oa_char *enquire_temp){
 		sprintf(tmp, "Cog:%d;", Pos_Inf.COG);
 		oa_strcat(enquire_temp, tmp);
 		oa_memset(tmp, 0x0, sizeof(tmp));
+#endif
 	}
 	else if (GPS_UNFIXED == Pos_Inf.Fix_Status){
+		//未定位
+		oa_memcpy(&tmp[pos], wdw, sizeof(wdw));pos += sizeof(wdw);
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		//模块
+		if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){
+			oa_memcpy(&tmp[pos], bzc, sizeof(bzc));pos += sizeof(bzc);
+		}
+		else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == RESET){
+			oa_memcpy(&tmp[pos], zc, sizeof(zc));pos += sizeof(zc);
+		}
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ANTENNA) == SET){
+			oa_memcpy(&tmp[pos], dk, sizeof(dk));pos += sizeof(dk);
+		}
+		else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ANTENNA) == RESET){
+			oa_memcpy(&tmp[pos], zc, sizeof(zc));pos += sizeof(zc);
+		}
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		oa_memcpy(enquire_temp, tmp, pos);
+		*p_len = pos; 
+#if 0
+		//------
 		sprintf(tmp, "GPS Status:%d;", GPS_UNFIXED);
 		oa_strcat(enquire_temp, tmp);
 		oa_memset(tmp, 0x0, sizeof(tmp));
@@ -336,7 +448,9 @@ void gps_extract(oa_char *enquire_temp){
 			sprintf(tmp, "Antenna:%d;", 1);
 		}
 		oa_strcat(enquire_temp, tmp);
+#endif
 	}
+
 }
 #if 0
 /*********************************************************
@@ -1184,8 +1298,8 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len)
 			//oa_strcat(enquire_temp, ";");
 		}break;
 		case e_GPS:{
-			gps_extract(enquire_temp);
-			oa_strcat(enquire_temp, ";");
+			gps_extract(enquire_temp, &ret_len);
+			//oa_strcat(enquire_temp, ";");
 		}break;
 		case e_dev_lock:{
 			sprintf(enquire_temp, "dev_lock:%d;", now_use_lock.lock);
@@ -1225,7 +1339,7 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len)
 			oa_strcat(enquire_temp, "not support!");
 		}break;
 	}
-	if (key_kind == e_STATUS){
+	if (key_kind == e_STATUS || key_kind == e_GPS){
 		oa_memcpy(buf, enquire_temp, ret_len);
 		*len = ret_len;
 	}
@@ -2628,7 +2742,7 @@ void handle_keyword4ms(e_keyword key_kind,
 			p_set->s_k = sms_special;
 		}break;
 		case e_GPS:{
-
+			p_set->s_k = sms_special;
 		}break;
 		case e_CLRLOG:{
 			p_set->act_kind = clr_log;
@@ -2702,6 +2816,7 @@ void oa_app_sms(void)
 	oa_char buf[256] = {0x0};
 	oa_uint8 len;
 	oa_bool ms_ack;
+	sms_kind t_s = sms_normal;
 #ifdef 0
 	OA_DEBUG_USER("%s called", __FILE__, __func__);
 	if(message.dcs == OA_SMSAL_DEFAULT_DCS)
@@ -2786,8 +2901,14 @@ void oa_app_sms(void)
 				if (ms_ack == OA_TRUE){
 					handle_common4ms(key_ret, buf, &len);
 					DEBUG("\nbuf:%s len:%d", buf, len);
-					if (set.s_k == sms_special) oa_memcpy(sendbuf, buf, len);
-					else if (set.s_k == sms_normal) oa_strcat(sendbuf, buf);
+					if (set.s_k == sms_special){
+						t_s = sms_special;
+						oa_memcpy(sendbuf, buf, len);
+					}
+					else if (set.s_k == sms_normal){
+						t_s = sms_normal;
+						oa_strcat(sendbuf, buf);
+					}
 					oa_memset(buf, 0x0, sizeof(buf));
 				}
 				dev_action_handle(&set);
@@ -2797,19 +2918,25 @@ void oa_app_sms(void)
 		if (ms_ack == OA_TRUE){
 			oa_uint8 n;
 			oa_char temp[256] = {0x0};
-			n = len/140;
-			if (n > 1){
-				DEBUG("sms content is too long");
-				return;
+			if (sms_special == t_s){
+				n = len/140;
+				if (n > 1){
+					DEBUG("sms content is too long");
+					return;
+				}
+				else if (n == 1){//only for 'STATUS;' & 'GPS'
+					oa_memcpy(temp, sendbuf, 140);
+					sendsms4ms(temp, 140, sms_special);
+					oa_memset(temp, 0x0, 256);
+					oa_memcpy(temp, &sendbuf[140], len -140);
+					sendsms4ms(temp, len -140, sms_special);
+				}
+				else if (n == 0){
+					oa_memcpy(temp, sendbuf, len);
+					sendsms4ms(temp, len, sms_special);
+				}
 			}
-			else if (n == 1){//only for 'STATUS;'
-				oa_memcpy(temp, sendbuf, 140);
-				sendsms4ms(temp, 140, sms_special);
-				oa_memset(temp, 0x0, 256);
-				oa_memcpy(temp, &sendbuf[140], len -140);
-				sendsms4ms(temp, len -140, sms_special);
-			}
-			else if(n == 0) sendsms4ms(sendbuf, oa_strlen(sendbuf), sms_normal);
+			else if(sms_normal == t_s) sendsms4ms(sendbuf, oa_strlen(sendbuf), sms_normal);
 		}
 	}
 	else DEBUG("too many sms");
