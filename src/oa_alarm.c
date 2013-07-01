@@ -31,11 +31,12 @@
 #include "oa_hw.h"
 #include "oa_debug.h"
 #include "oa_sms.h"
+#include "oa_app.h"
 extern DEVICE_PARAMS dev_now_params;
 extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 acc_status;
 extern oa_bool sms_enable;
-extern void sms_send_feedback_func(os_sms_result send_ret);
+extern timeout_struct timeout_var;
 /*********************************************************
 *Function:     handle_alarm_status()
 *Description:  handle alarm status
@@ -69,7 +70,7 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 			}
 			
 			
-			if (dev_running.plat_status == OFFLINE){
+			if (dev_running.plat_status == OFFLINE || timeout_var.do_timeout == OA_TRUE){
 				ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
 				if (ret)	return OA_TRUE;
 				else return OA_FALSE;
@@ -137,7 +138,7 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 	}
 	else{//just send
 
-		if (dev_running.plat_status == OFFLINE){
+		if (dev_running.plat_status == OFFLINE || timeout_var.do_timeout == OA_TRUE){
 			ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
 			if (ret)	return OA_TRUE;
 			else return OA_FALSE;
