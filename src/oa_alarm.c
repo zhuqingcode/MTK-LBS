@@ -35,7 +35,7 @@ extern DEVICE_PARAMS dev_now_params;
 extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 acc_status;
 extern oa_bool sms_enable;
-extern oa_bool soc_en;
+extern void sms_send_feedback_func(os_sms_result send_ret);
 /*********************************************************
 *Function:     handle_alarm_status()
 *Description:  handle alarm status
@@ -69,7 +69,7 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 			}
 			
 			
-			if (dev_running.plat_status == OFFLINE || soc_en == OA_FALSE){
+			if (dev_running.plat_status == OFFLINE){
 				ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
 				if (ret)	return OA_TRUE;
 				else return OA_FALSE;
@@ -137,7 +137,7 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 	}
 	else{//just send
 
-		if (dev_running.plat_status == OFFLINE || soc_en == OA_FALSE){
+		if (dev_running.plat_status == OFFLINE){
 			ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
 			if (ret)	return OA_TRUE;
 			else return OA_FALSE;

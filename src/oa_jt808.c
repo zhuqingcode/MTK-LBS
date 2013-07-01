@@ -42,10 +42,10 @@
 extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
 extern oa_bool timeout_en;
-extern oa_bool soc_en;
 oa_bool need_reconn = OA_FALSE;
 dev_control_type control_type = none;
 
+oa_uint16 serial_num = 0;//发送流水号
 static u32 AlarmFlag[StatusNum]={0};
 
 //#define UPDATA_BUFNUM		12 //上传数据队列的缓存区个数
@@ -3030,10 +3030,6 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 				if (timeout_en == OA_TRUE && temp_seq == temp_seq2 && temp_msgid == temp_msgid2){
 					timeout_en = OA_FALSE;
 				}
-
-				if (soc_en == OA_FALSE && temp_seq == temp_seq2 && temp_msgid == temp_msgid2){
-					soc_en == OA_TRUE;
-				}
 			}
 			//debug info
 			char_to_short(&rsp.MsgId[0], &temp);
@@ -4638,7 +4634,6 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 		{
 			Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
 			timeout_en = OA_TRUE;
-			soc_en = OA_FALSE;
 			//空消息体
 			*msgbodylen=0;
 			break;
@@ -4652,7 +4647,6 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 		{
 			Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
 			timeout_en = OA_TRUE;
-			soc_en = OA_FALSE;
 			status = report_location_buildbody(msgbody, msgbodylen);
 			break;
 		}
