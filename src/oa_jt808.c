@@ -4632,6 +4632,8 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 		}
 		case HEART_BEAT:
 		{
+			Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
+			timeout_enable = OA_TRUE;
 			//空消息体
 			*msgbodylen=0;
 			break;
@@ -4643,6 +4645,8 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 		}
 		case REPORT_LOCATION:
 		{
+			Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
+			timeout_enable = OA_TRUE;
 			status = report_location_buildbody(msgbody, msgbodylen);
 			break;
 		}
@@ -5242,14 +5246,6 @@ u16 escape_copy_to_send(u8 *buf, u16 len)
 	}
 	return real_len;
 }
-void timeout_retrans_enable(u16 DevMsgId){
-	
-	if (DevMsgId == HEART_BEAT ||DevMsgId == REPORT_LOCATION){
-		Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
-		timeout_enable = OA_TRUE;
-	}
-	else timeout_enable = OA_FALSE;
-}
 /*********************************************************
 *Function:      DevReq2ServPackag_build()
 *Description:  build kinds of packets
@@ -5286,7 +5282,6 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 			
 			ret = escape_copy_to_send(pbuf, U16Temp);
 			if (ret > 0){
-				timeout_retrans_enable(ReqMsgId);
 				return ret;
 			}
 			else

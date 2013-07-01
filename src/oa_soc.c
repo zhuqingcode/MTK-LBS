@@ -36,7 +36,6 @@
 extern ProtocolHandle sProtclHandl;
 extern oa_bool need_reconn;
 extern dev_control_type control_type;
-extern oa_uint16 timeout;
 extern oa_bool timeout_enable;
 extern soc_bak_context back_con;
 //-------------------------------------
@@ -292,7 +291,6 @@ oa_int16 oa_soc_send_req(void)
 			//timeout
 			if (timeout_enable == OA_TRUE){
 				DEBUG("enable timeout");
-				timeout = 0;//start timeout
 				oa_memset(&back_con, 0x0, sizeof(soc_bak_context));
 				oa_memcpy(back_con.data, g_soc_context.gprs_tx_pending_data, len);//backup data
 				back_con.len = len;
