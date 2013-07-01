@@ -59,7 +59,7 @@ u8 ServUpdatabuf[UPDATA_BUFNUM][UPDATA_BUFLEN_MAX];
 extern DEV_PLAT_PARAS dev_running;
 ProtocolHandle sProtclHandl = {0};
 
-u16 escape_copy_to_send(u8 *buf, u16 len, dev_plat_active kind);
+u16 escape_copy_to_send(u8 *buf, u16 len);
 u16 DevReq2ServPackag_build(u16 ReqMsgId);
 u8 JT808Msg_Build(u16 DevMsgId,u16 totalPackt,u16 SubPackt,u8 *Sendbuf,u16 Sendbuflen,u16 *Senddatalen);
 #if 0
@@ -1890,7 +1890,7 @@ u8 JT808MsgRsp_Send(u16 DevMsgId,u16 totalPackt,u16 SubPackt/*,u8 *Sendbuf,u16 S
 			return RspErrOther;
 		}
 
-		ret = escape_copy_to_send(pbuf, U16Temp, plat_active);
+		ret = escape_copy_to_send(pbuf, U16Temp);
 		if (ret > 0){
 			oa_soc_send_req();//check datas in buffer & send	
 		}
@@ -5201,7 +5201,7 @@ u8 *getEmptybuf()
 *Return:        0:right others:wrong
 *Others:         
 *********************************************************/
-u16 escape_copy_to_send(u8 *buf, u16 len, dev_plat_active kind)
+u16 escape_copy_to_send(u8 *buf, u16 len)
 {
 	u16 real_len;
 	u8 SeqId[2];
@@ -5213,26 +5213,18 @@ u16 escape_copy_to_send(u8 *buf, u16 len, dev_plat_active kind)
 		return 0;
 	}
 
-	if (kind == dev_active){
-		//给包加上流水号,流水号第加
-		Read_ProtclHandl(eDevSeqid, SeqId, &U16Temp);//after reading +1
-		oa_memcpy(buf+11, SeqId, 2);
-		{
-			u16 id;
-			char_to_short(sProtclHandl.DevSeqId,&id);
-			if(id==0xffff)
-				id=0;
-			else
-				id++;
-			short_to_char(sProtclHandl.DevSeqId,id);
-		}
+	//给包加上流水号,流水号第加
+	Read_ProtclHandl(eDevSeqid, SeqId, &U16Temp);//after reading +1
+	oa_memcpy(buf+11, SeqId, 2);
+	{
+		u16 id;
+		char_to_short(sProtclHandl.DevSeqId,&id);
+		if(id==0xffff)
+			id=0;
+		else
+			id++;
+		short_to_char(sProtclHandl.DevSeqId,id);
 	}
-	else if (kind == plat_active){
-		//给包加上流水号,流水号第加
-		//Read_ProtclHandl(eServSeqid, SeqId, &U16Temp);
-		//oa_memcpy(buf+11, SeqId, 2);
-	}
-
 	//校验，除标示头尾和校验本身
 	if (1 == XOR_Check(buf+1, len-3,(buf+len-2)))
 	{
@@ -5292,7 +5284,7 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 			#endif
 			
 			
-			ret = escape_copy_to_send(pbuf, U16Temp, dev_active);
+			ret = escape_copy_to_send(pbuf, U16Temp);
 			if (ret > 0){
 				timeout_retrans_enable(ReqMsgId);
 				return ret;

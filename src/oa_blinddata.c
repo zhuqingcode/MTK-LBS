@@ -669,7 +669,7 @@ oa_bool oa_app_blinddata(void)
 		}
 		DEBUG("^^^");
 		//has blinddata
-		ret_len = escape_copy_to_send(blind_buf, data_len, dev_active);
+		ret_len = escape_copy_to_send(blind_buf, data_len);
 		//DEBUG(" ret_len:%d!", ret_len);
 		if (ret_len > 0){
 			print_rtc_time();
