@@ -54,9 +54,7 @@ DEV_PLAT_PARAS dev_running =
 	0,
 	OA_TRUE,
 };
-
-oa_bool timeout_en = OA_FALSE;//OA_FALSE:disable;OA_TRUE:enable
-oa_bool soc_en = OA_TRUE;//
+timeout_struct timeout_var = {OA_FALSE, OA_FALSE, 0};
 soc_bak_context back_con = {0x0};
 extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
@@ -347,9 +345,8 @@ void oa_app_plat_data(void *param)
 *********************************************************/
 void oa_app_timeout(void *param)
 {
-	static oa_bool first_valid = OA_FALSE;
+	static oa_bool first_run = OA_TRUE;
 	static oa_uint32 Tn;
-	static oa_uint16 timeout_times = 0;
 	static oa_uint16 retrans_times = 0;
 	static oa_uint16 offline_times;
 	oa_uint32 time;
@@ -365,31 +362,33 @@ void oa_app_timeout(void *param)
 	}
 	else if (dev_running.plat_status == ONLINE) offline_times = 0;
 	
-	if (timeout_en == OA_FALSE){
-		timeout_times = 0;
+	if (timeout_var.timeout_en == OA_FALSE){
+		timeout_var.timeout_times = 0;
 		goto redo;
 	}
 
-	if (first_valid == OA_FALSE){
+	if (first_run == OA_TRUE){
 		Tn = dev_now_params.tcp_ack_timeout;
-		first_valid = OA_TRUE;
+		first_run = OA_FALSE;
 	}
-	timeout_times++;
-	time = timeout_times * TIMEOUT_SECOND;
+	
+	timeout_var.timeout_times++;
+	time = timeout_var.timeout_times * TIMEOUT_SECOND;
 	if (time > Tn){
 		//do a retransmission
 		real_len = oa_write_buffer_force_noinit(g_soc_context.gprs_tx, back_con.data, back_con.len);
 		if (real_len == back_con.len){
+			timeout_var.do_timeout = OA_TRUE;
 			soc_ret = oa_soc_send_req();//exist duplicate copy???
 			if (soc_ret == real_len){//retrans ok
 				DEBUG("%d x timeout retransmission ok", retrans_times);
 				retrans_times = 0;
 				Tn = dev_now_params.tcp_ack_timeout;
-				timeout_times = 0;
+				timeout_var.timeout_times = 0;
 			}
 			else{//retrans err
 				retrans_times++;
-				timeout_times = 0;
+				timeout_var.timeout_times = 0;
 				DEBUG("%d x timeout retransmission err", retrans_times);
 				if (retrans_times > dev_now_params.tcp_retrans_times){
 					DEBUG("do reconnect because tcp timeout");
@@ -401,7 +400,7 @@ void oa_app_timeout(void *param)
 			}
 		}
 		else{
-			timeout_times = 0;DEBUG("write err");
+			timeout_var.timeout_times = 0;DEBUG("write err");
 		} 
 	}
 redo:

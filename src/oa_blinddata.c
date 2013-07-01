@@ -28,10 +28,11 @@
 #include "oa_platform.h"
 #include "oa_debug.h"
 #include "oa_jt808.h"
+#include "oa_app.h"
 #include <stdio.h>
 #include <stdlib.h>
 extern DEV_PLAT_PARAS dev_running;
-extern oa_bool timeout_en;
+extern timeout_struct timeout_var;
 u16 total_write;
 u16 total_read;
 oa_bool has_blinddata_dir(void);
@@ -673,12 +674,11 @@ oa_bool oa_app_blinddata(void)
 		//DEBUG(" ret_len:%d!", ret_len);
 		if (ret_len > 0){
 			print_rtc_time();
-			timeout_en = OA_TRUE;
+			timeout_var.timeout_en = OA_TRUE;
+			timeout_var.do_timeout = OA_FALSE;
 			DEBUG("send one blinddata packet!total send num:%d", total_read);
 			oa_soc_send_req();//check datas in buffer & send
 		}
-		
-
 	}
 	
 	

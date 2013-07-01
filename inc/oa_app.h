@@ -35,6 +35,7 @@ typedef struct{
 
 typedef struct{
 	oa_bool timeout_en;
-	oa_bool timeout_soc_enable;
+	oa_bool do_timeout;
+	oa_uint16 timeout_times;
 }timeout_struct;
 #endif

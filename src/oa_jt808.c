@@ -37,11 +37,12 @@
 #include "SchedulScrn.h"
 #include "Area_Judge.h"
 #include "oa_debug.h"
+#include "oa_app.h"
 #define PRINT_SAMEPARA	DEBUG(" this parameter is same as the original, so I do nothing...")
 #define PORT_MAX 65535
 extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
-extern oa_bool timeout_en;
+extern timeout_struct timeout_var;
 oa_bool need_reconn = OA_FALSE;
 dev_control_type control_type = none;
 
@@ -3027,8 +3028,8 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 				char_to_short(&rsp.MsgId[0], &temp_msgid);
 				Read_ProtclHandl(eDevSeqid, (u8 *)&temp_seq, &temp_len);
 				Read_ProtclHandl(eDevMsgid, (u8 *)&temp_msgid2, &temp_len);
-				if (timeout_en == OA_TRUE && temp_seq == temp_seq2 && temp_msgid == temp_msgid2){
-					timeout_en = OA_FALSE;
+				if (timeout_var.timeout_en == OA_TRUE && temp_seq == temp_seq2 && temp_msgid == temp_msgid2){
+					timeout_var.timeout_en = OA_FALSE;
 				}
 			}
 			//debug info
@@ -4633,7 +4634,8 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 		case HEART_BEAT:
 		{
 			Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
-			timeout_en = OA_TRUE;
+			timeout_var.timeout_en = OA_TRUE;
+			timeout_var.do_timeout = OA_FALSE;
 			//空消息体
 			*msgbodylen=0;
 			break;
@@ -4646,7 +4648,8 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 		case REPORT_LOCATION:
 		{
 			Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
-			timeout_en = OA_TRUE;
+			timeout_var.timeout_en = OA_TRUE;
+			timeout_var.do_timeout = OA_FALSE;
 			status = report_location_buildbody(msgbody, msgbodylen);
 			break;
 		}
