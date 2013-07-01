@@ -28,10 +28,11 @@
 #include "oa_platform.h"
 #include "oa_debug.h"
 #include "oa_jt808.h"
+#include "oa_app.h"
 #include <stdio.h>
 #include <stdlib.h>
 extern DEV_PLAT_PARAS dev_running;
-extern oa_bool timeout_enable;
+extern timeout_struct timeout_var;
 u16 total_write;
 u16 total_read;
 oa_bool has_blinddata_dir(void);
@@ -649,6 +650,7 @@ oa_bool oa_app_blinddata(void)
 	u8 blind_buf[DATA_MAX_LEN] = {0};
 	u16 data_len;
 	u16 ret_len;
+	u16 send_len;
 	static oa_bool task_runed = OA_TRUE;
 	
 	if (OA_TRUE == task_runed){
@@ -661,7 +663,7 @@ oa_bool oa_app_blinddata(void)
 		goto redoit;
 	}
 
-	if (dev_running.plat_status == ONLINE){
+	if (dev_running.plat_status == ONLINE && timeout_var.do_timeout == OA_FALSE){
 		//ret = read_blinddata(blind_buf, &data_len);
 		ret = read_blinddata_from_1file(blind_buf, &data_len);
 		if (ret == OA_FALSE){
@@ -669,16 +671,18 @@ oa_bool oa_app_blinddata(void)
 		}
 		DEBUG("^^^");
 		//has blinddata
-		ret_len = escape_copy_to_send(blind_buf, data_len, dev_active);
+		ret_len = escape_copy_to_send(blind_buf, data_len);
 		//DEBUG(" ret_len:%d!", ret_len);
 		if (ret_len > 0){
 			print_rtc_time();
-			timeout_enable = OA_TRUE;
-			DEBUG("send one blinddata packet!total send num:%d", total_read);
-			oa_soc_send_req();//check datas in buffer & send
+			timeout_var.timeout_en = OA_TRUE;
+			timeout_var.do_timeout = OA_FALSE;
+			send_len = oa_soc_send_req();//check datas in buffer & send
+			if (send_len == ret_len){
+				DEBUG("send one blinddata packet!total send num:%d", total_read);
+			}
+			else DEBUG("^^^send err");
 		}
-		
-
 	}
 	
 	

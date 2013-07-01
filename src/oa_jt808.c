@@ -37,11 +37,12 @@
 #include "SchedulScrn.h"
 #include "Area_Judge.h"
 #include "oa_debug.h"
+#include "oa_app.h"
 #define PRINT_SAMEPARA	DEBUG(" this parameter is same as the original, so I do nothing...")
 #define PORT_MAX 65535
 extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
-extern oa_bool timeout_enable;
+extern timeout_struct timeout_var;
 oa_bool need_reconn = OA_FALSE;
 dev_control_type control_type = none;
 
@@ -59,7 +60,7 @@ u8 ServUpdatabuf[UPDATA_BUFNUM][UPDATA_BUFLEN_MAX];
 extern DEV_PLAT_PARAS dev_running;
 ProtocolHandle sProtclHandl = {0};
 
-u16 escape_copy_to_send(u8 *buf, u16 len, dev_plat_active kind);
+u16 escape_copy_to_send(u8 *buf, u16 len);
 u16 DevReq2ServPackag_build(u16 ReqMsgId);
 u8 JT808Msg_Build(u16 DevMsgId,u16 totalPackt,u16 SubPackt,u8 *Sendbuf,u16 Sendbuflen,u16 *Senddatalen);
 #if 0
@@ -1890,7 +1891,7 @@ u8 JT808MsgRsp_Send(u16 DevMsgId,u16 totalPackt,u16 SubPackt/*,u8 *Sendbuf,u16 S
 			return RspErrOther;
 		}
 
-		ret = escape_copy_to_send(pbuf, U16Temp, plat_active);
+		ret = escape_copy_to_send(pbuf, U16Temp);
 		if (ret > 0){
 			oa_soc_send_req();//check datas in buffer & send	
 		}
@@ -2915,8 +2916,8 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 				u16 temp_len;
 				char_to_short(&rsp.SeqId[0], &temp_seq2);
 				Read_ProtclHandl(eDevSeqid, (u8 *)&temp_seq, &temp_len);
-				if (timeout_enable == OA_TRUE && temp_seq == temp_seq2){
-					timeout_enable = OA_FALSE;
+				if (timeout_en == OA_TRUE && temp_seq == temp_seq2){
+					timeout_en = OA_FALSE;
 				}
 			}
 			#endif
@@ -3027,8 +3028,8 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 				char_to_short(&rsp.MsgId[0], &temp_msgid);
 				Read_ProtclHandl(eDevSeqid, (u8 *)&temp_seq, &temp_len);
 				Read_ProtclHandl(eDevMsgid, (u8 *)&temp_msgid2, &temp_len);
-				if (timeout_enable == OA_TRUE && temp_seq == temp_seq2 && temp_msgid == temp_msgid2){
-					timeout_enable = OA_FALSE;
+				if (timeout_var.timeout_en == OA_TRUE && temp_seq == temp_seq2 && temp_msgid == temp_msgid2){
+					timeout_var.timeout_en = OA_FALSE;
 				}
 			}
 			//debug info
@@ -4632,6 +4633,9 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 		}
 		case HEART_BEAT:
 		{
+			Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
+			timeout_var.timeout_en = OA_TRUE;
+			timeout_var.do_timeout = OA_FALSE;
 			//空消息体
 			*msgbodylen=0;
 			break;
@@ -4643,6 +4647,9 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 		}
 		case REPORT_LOCATION:
 		{
+			Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
+			timeout_var.timeout_en = OA_TRUE;
+			timeout_var.do_timeout = OA_FALSE;
 			status = report_location_buildbody(msgbody, msgbodylen);
 			break;
 		}
@@ -5201,7 +5208,7 @@ u8 *getEmptybuf()
 *Return:        0:right others:wrong
 *Others:         
 *********************************************************/
-u16 escape_copy_to_send(u8 *buf, u16 len, dev_plat_active kind)
+u16 escape_copy_to_send(u8 *buf, u16 len)
 {
 	u16 real_len;
 	u8 SeqId[2];
@@ -5213,26 +5220,18 @@ u16 escape_copy_to_send(u8 *buf, u16 len, dev_plat_active kind)
 		return 0;
 	}
 
-	if (kind == dev_active){
-		//给包加上流水号,流水号第加
-		Read_ProtclHandl(eDevSeqid, SeqId, &U16Temp);//after reading +1
-		oa_memcpy(buf+11, SeqId, 2);
-		{
-			u16 id;
-			char_to_short(sProtclHandl.DevSeqId,&id);
-			if(id==0xffff)
-				id=0;
-			else
-				id++;
-			short_to_char(sProtclHandl.DevSeqId,id);
-		}
+	//给包加上流水号,流水号第加
+	Read_ProtclHandl(eDevSeqid, SeqId, &U16Temp);//after reading +1
+	oa_memcpy(buf+11, SeqId, 2);
+	{
+		u16 id;
+		char_to_short(sProtclHandl.DevSeqId,&id);
+		if(id==0xffff)
+			id=0;
+		else
+			id++;
+		short_to_char(sProtclHandl.DevSeqId,id);
 	}
-	else if (kind == plat_active){
-		//给包加上流水号,流水号第加
-		//Read_ProtclHandl(eServSeqid, SeqId, &U16Temp);
-		//oa_memcpy(buf+11, SeqId, 2);
-	}
-
 	//校验，除标示头尾和校验本身
 	if (1 == XOR_Check(buf+1, len-3,(buf+len-2)))
 	{
@@ -5249,14 +5248,6 @@ u16 escape_copy_to_send(u8 *buf, u16 len, dev_plat_active kind)
 		OA_DEBUG_USER(" write err");
 	}
 	return real_len;
-}
-void timeout_retrans_enable(u16 DevMsgId){
-	
-	if (DevMsgId == HEART_BEAT ||DevMsgId == REPORT_LOCATION){
-		Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
-		timeout_enable = OA_TRUE;
-	}
-	else timeout_enable = OA_FALSE;
 }
 /*********************************************************
 *Function:      DevReq2ServPackag_build()
@@ -5292,9 +5283,8 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 			#endif
 			
 			
-			ret = escape_copy_to_send(pbuf, U16Temp, dev_active);
+			ret = escape_copy_to_send(pbuf, U16Temp);
 			if (ret > 0){
-				timeout_retrans_enable(ReqMsgId);
 				return ret;
 			}
 			else
