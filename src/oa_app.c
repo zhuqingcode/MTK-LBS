@@ -380,17 +380,23 @@ void oa_app_timeout(void *param)
 		real_len = oa_write_buffer_force_noinit(g_soc_context.gprs_tx, back_con.data, back_con.len);
 		if (real_len == back_con.len){
 			soc_ret = oa_soc_send_req();
-			if (soc_ret == real_len){
-				retrans_times++;
-				Tn = Tn * (retrans_times + 1);
+			if (soc_ret == real_len){//retrans ok
 				DEBUG("%d x timeout retransmission ok", retrans_times);
+				retrans_times = 0;
+				Tn = dev_now_params.tcp_ack_timeout;
+				timeout = 0;
+			}
+			else{//retrans err
+				retrans_times++;
+				timeout = 0;
+				DEBUG("%d x timeout retransmission err", retrans_times);
 				if (retrans_times > dev_now_params.tcp_retrans_times){
 					DEBUG("do reconnect because tcp timeout");
 					Tn = dev_now_params.tcp_ack_timeout;
 					retrans_times = 0;
-					timeout = 0;
 					just_reconn();
 				}
+				else Tn = Tn * (retrans_times + 1);
 			}
 		}
 		else DEBUG("write err");
