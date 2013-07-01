@@ -650,6 +650,7 @@ oa_bool oa_app_blinddata(void)
 	u8 blind_buf[DATA_MAX_LEN] = {0};
 	u16 data_len;
 	u16 ret_len;
+	u16 send_len;
 	static oa_bool task_runed = OA_TRUE;
 	
 	if (OA_TRUE == task_runed){
@@ -676,8 +677,11 @@ oa_bool oa_app_blinddata(void)
 			print_rtc_time();
 			timeout_var.timeout_en = OA_TRUE;
 			timeout_var.do_timeout = OA_FALSE;
-			DEBUG("send one blinddata packet!total send num:%d", total_read);
-			oa_soc_send_req();//check datas in buffer & send
+			send_len = oa_soc_send_req();//check datas in buffer & send
+			if (send_len == ret_len){
+				DEBUG("send one blinddata packet!total send num:%d", total_read);
+			}
+			else DEBUG("^^^send err");
 		}
 	}
 	
