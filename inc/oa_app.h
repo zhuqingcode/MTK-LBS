@@ -34,7 +34,7 @@ typedef struct{
 }soc_bak_context;
 
 typedef struct{
-	oa_bool timeout_enable;
+	oa_bool timeout_en;
 	oa_bool timeout_soc_enable;
 }timeout_struct;
 #endif

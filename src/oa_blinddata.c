@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 extern DEV_PLAT_PARAS dev_running;
-extern oa_bool timeout_enable;
+extern oa_bool timeout_en;
 u16 total_write;
 u16 total_read;
 oa_bool has_blinddata_dir(void);
@@ -673,7 +673,7 @@ oa_bool oa_app_blinddata(void)
 		//DEBUG(" ret_len:%d!", ret_len);
 		if (ret_len > 0){
 			print_rtc_time();
-			timeout_enable = OA_TRUE;
+			timeout_en = OA_TRUE;
 			DEBUG("send one blinddata packet!total send num:%d", total_read);
 			oa_soc_send_req();//check datas in buffer & send
 		}
