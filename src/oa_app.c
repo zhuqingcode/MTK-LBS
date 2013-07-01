@@ -323,6 +323,7 @@ void oa_app_plat_data(void *param)
 					soc_ret = oa_soc_send_req();
 					if (build_ret == soc_ret){
 						hbeat_counter = 0;
+						DEBUG("$$$");
 						print_rtc_time();
 						DEBUG("send one heartbeat packet");
 					}
