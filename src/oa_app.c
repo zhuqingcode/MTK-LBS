@@ -533,7 +533,7 @@ void oa_app_main(void)
 		//watchdog task
 //		oa_timer_start(OA_TIMER_ID_1, oa_app_wdt, NULL, OA_WDT_SCHEDULER_PERIOD);
 		//acc status detect
-		oa_timer_start(OA_TIMER_ID_6, acc_status_detect, NULL, OA_ACC_RUN);
+		oa_timer_start(OA_TIMER_ID_6, acc_status_detect, NULL, OA_ACC_RUN_1ST);
 		//platform link task
 		oa_timer_start(OA_APP_SCHEDULER_ID, oa_app_plat_link, NULL, OA_APP_PLAT_LINK_1ST);
 		//platform data task
