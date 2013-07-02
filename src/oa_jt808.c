@@ -4633,9 +4633,9 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 		}
 		case HEART_BEAT:
 		{
-			Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
-			timeout_var.timeout_en = OA_TRUE;
-			timeout_var.do_timeout = OA_FALSE;
+			//Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
+			//timeout_var.timeout_en = OA_TRUE;
+			//timeout_var.do_timeout = OA_FALSE;
 			//空消息体
 			*msgbodylen=0;
 			break;
@@ -5210,19 +5210,21 @@ u8 *getEmptybuf()
 *********************************************************/
 u16 escape_copy_to_send(u8 *buf, u16 len)
 {
+	u8 data_buf[DATA_MAX_LEN] = {0};
 	u16 real_len;
 	u8 SeqId[2];
 	u16 U16Temp;
 	
-	if (NULL == buf || len == 0)
+	if (NULL == buf || len == 0 || len > DATA_MAX_LEN)
 	{
 		OA_DEBUG_USER(" buf/len err");
 		return 0;
 	}
-
+	
+	oa_memcpy(data_buf, buf, len);
 	//给包加上流水号,流水号第加
 	Read_ProtclHandl(eDevSeqid, SeqId, &U16Temp);//after reading +1
-	oa_memcpy(buf+11, SeqId, 2);
+	oa_memcpy(data_buf+11, SeqId, 2);
 	{
 		u16 id;
 		char_to_short(sProtclHandl.DevSeqId,&id);
@@ -5233,16 +5235,16 @@ u16 escape_copy_to_send(u8 *buf, u16 len)
 		short_to_char(sProtclHandl.DevSeqId,id);
 	}
 	//校验，除标示头尾和校验本身
-	if (1 == XOR_Check(buf+1, len-3,(buf+len-2)))
+	if (1 == XOR_Check(data_buf+1, len-3,(data_buf+len-2)))
 	{
 		OA_DEBUG_USER(" XOR err");
 		return 0;
 	}
 
 	//对标示头和尾之外的包数据进行转义
-	JT808_dataChg(1, buf+1, len-2, &U16Temp);
+	JT808_dataChg(1, data_buf+1, len-2, &U16Temp);
 	len = U16Temp+2; //total data length
-	real_len = oa_write_buffer_force_noinit(g_soc_context.gprs_tx, buf, len);
+	real_len = oa_write_buffer_force_noinit(g_soc_context.gprs_tx, data_buf, len);
 	if (real_len < len)
 	{
 		OA_DEBUG_USER(" write err");
