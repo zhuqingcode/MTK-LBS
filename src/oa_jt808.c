@@ -4633,9 +4633,9 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 		}
 		case HEART_BEAT:
 		{
-			Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
-			timeout_var.timeout_en = OA_TRUE;
-			timeout_var.do_timeout = OA_FALSE;
+			//Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
+			//timeout_var.timeout_en = OA_TRUE;
+			//timeout_var.do_timeout = OA_FALSE;
 			//空消息体
 			*msgbodylen=0;
 			break;

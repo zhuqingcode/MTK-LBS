@@ -313,7 +313,7 @@ void oa_app_plat_data(void *param)
 		//do something when acc is on
 		hbeat_counter++;
 		
-		if (dev_running.plat_status == ONLINE && timeout_var.do_timeout == OA_FALSE){
+		if (dev_running.plat_status == ONLINE){
 			if (hbeat_counter * PLAT_DATA_SECOND >= dev_now_params.heartbeat_interval){
 				build_ret = DevReq2ServPackag_build(HEART_BEAT);//build heartbeats packets & fill buffer with it
 				if (!build_ret){
