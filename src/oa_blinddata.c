@@ -681,7 +681,10 @@ oa_bool oa_app_blinddata(void)
 			if (send_len == ret_len){
 				DEBUG("^^^send one blinddata packet!total send num:%d", total_read);
 			}
-			else DEBUG("^^^send err");
+			else{
+				DEBUG("^^^send err, write back!");
+				write_blinddata_to_1file(blind_buf, data_len);
+			} 
 		}
 	}
 	
