@@ -45,7 +45,8 @@ extern oa_soc_context g_soc_context;
 extern timeout_struct timeout_var;
 oa_bool need_reconn = OA_FALSE;
 dev_control_type control_type = none;
-
+oa_uint8 upgrade_ip[16] = {0x0};
+oa_uint32 s_port = 0;
 oa_uint16 serial_num = 0;//·¢ËÍÁ÷Ë®ºÅ
 static u32 AlarmFlag[StatusNum]={0};
 
@@ -1998,7 +1999,19 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 	{
 		case eOnlineUpgrad_Ctrl:{
 			DEBUG("wireless_updata");
-			control_type = wireless_update;
+			//extract paras
+			DEBUG("param:%s", pmsgbody);
+			p = oa_strstr(pmsgbody, ";");
+			if (p){
+				Paralen = p - pmsgbody;
+				if (Paralen){
+					oa_memset(upgrade_ip, 0x0, sizeof(upgrade_ip));
+					oa_memcpy(upgrade_ip, pmsgbody, Paralen);
+					if(ISAscIPValid(upgrade_ip, oa_strlen(upgrade_ip))) control_type = wireless_update;
+					else DEBUG("ip err");
+				}
+				else DEBUG("paras err");
+			}
 			break;
 		}
 		
@@ -2085,6 +2098,36 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 		break;
 #endif	
 		case eSpclServ_Ctrl:{
+			oa_uint8 *p0 = NULL;
+			oa_uint8 *p1 = NULL;
+			oa_uint8 *p_p = NULL;
+			DEBUG("conn_to_specified_server");
+			//extract paras
+			DEBUG("param:%s", pmsgbody);
+			p_p = pmsgbody;
+			for(i = 0;i < 7;i++){
+				p = oa_strstr(p_p, ";");
+				if (p){
+					if (i == 4) p0 = p;
+					else if (i == 5) p1 = p;
+					p_p = p+1;
+					continue;
+				}
+				else DEBUG("paras err");
+			}
+			if (p1 - (p0+1) > 0){
+				oa_memset(upgrade_ip, 0x0, sizeof(upgrade_ip));
+				oa_memcpy(upgrade_ip, p0+1, p1 - (p0+1));
+				if(!ISAscIPValid(upgrade_ip, oa_strlen(upgrade_ip))){
+					DEBUG("ip err");
+					break;
+				}
+			}else{
+				DEBUG("paras err");
+				break;
+			}
+
+			char_to_short(p1+1, &s_port);
 			control_type = conn_to_specified_server;
 			break;
 		}

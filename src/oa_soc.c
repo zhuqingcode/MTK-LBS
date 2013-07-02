@@ -36,6 +36,8 @@
 extern ProtocolHandle sProtclHandl;
 extern oa_bool need_reconn;
 extern dev_control_type control_type;
+extern oa_uint8 upgrade_ip[16];
+extern oa_uint32 s_port;
 extern timeout_struct timeout_var;
 extern soc_bak_context back_con;
 //-------------------------------------
@@ -129,7 +131,12 @@ void oa_soc_fill_addr_struct(void)
 	}
 }
 
-
+void fill_soc(u8 *ip, u32 port)
+{
+	g_soc_param.port = port;
+	oa_memset(g_soc_param.serve_ipaddr, 0x0, sizeof(g_soc_param.serve_ipaddr));
+	oa_memcpy(g_soc_param.serve_ipaddr, ip, oa_strlen(ip));
+}
 
 void oa_soc_set_apn_cb(oa_bool result)
 {
@@ -482,11 +489,11 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 			if (none != control_type){
 				switch (control_type){
 					case wireless_update:{
-						ftp_update();
+						ftp_update(upgrade_ip);
 					}
 					break;
 					case conn_to_specified_server:{
-						DEBUG("doesn't support!");
+						conn2specific_server(upgrade_ip, s_port);
 					}
 					break;
 					case term_powerdown:{

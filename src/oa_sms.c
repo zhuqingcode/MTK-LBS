@@ -1374,7 +1374,7 @@ void dev_action_handle(keyword_context *p_set)
 			do_soc_reconn();
 		}break;
 		case update:{
-			ftp_update();
+			ftp_update(NULL);
 		}break;
 		case reset:{
 			do_reset();
