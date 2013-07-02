@@ -549,7 +549,7 @@ void oa_app_main(void)
 		//area judge task
 		oa_timer_start(OA_TIMER_ID_9, oa_app_area, NULL, OA_AREA_DETECT_1TIME);
 		//timeout timer
-		oa_timer_start(OA_TIMER_ID_11, oa_app_timeout, NULL, OA_APP_TIMEOUT);
+		oa_timer_start(OA_TIMER_ID_11, oa_app_timeout, NULL, OA_APP_TIMEOUT_1ST);
 	}
 	else if (OA_TRUE == dev_is_locked)  //device is lock
 	{
