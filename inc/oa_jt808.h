@@ -27,7 +27,7 @@
 #ifndef __OA_JT808_H__
 #define __OA_JT808_H__
 #include "oa_type.h"
-
+#include "oa_dev_params.h"
 
 #define JT808_FLAG 0x7E
 #define TELMAXLEN  32
@@ -1183,10 +1183,10 @@ typedef enum
 
 typedef struct
 {
-	oa_uint8 ip[16];
+	oa_uint8 ip[SERVER_IP_MAX_LEN];
 	oa_uint16 port;
-	oa_uint8 usr[16];
-	oa_uint8 pw[16];
-	oa_uint8 fw[16];
+	oa_uint8 usr[SERVER_IP_MAX_LEN];
+	oa_uint8 pw[SERVER_IP_MAX_LEN];
+	oa_uint8 fw[SERVER_IP_MAX_LEN];
 }upgrade_paras;
  #endif

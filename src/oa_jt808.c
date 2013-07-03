@@ -2003,6 +2003,7 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 			oa_uint8 *p4 = NULL;
 			oa_uint8 *p5 = NULL;
 			oa_uint8 *p_p = NULL;
+			oa_uint8 len;
 			DEBUG("wireless_updata");
 			//extract paras
 			DEBUG("param:%s", pmsgbody);
@@ -2022,23 +2023,23 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 				}
 				else DEBUG("paras err");
 			}
-			
-			if (p1 - (p0+1) > 0){
-				oa_memcpy(up_paras.usr, p0+1, p1 - (p0+1));
+			len = p1 - (p0+1);
+			if (len > 0 && len < SERVER_IP_MAX_LEN){
+				oa_memcpy(up_paras.usr, p0+1, len);
 			}else{
 				DEBUG("paras err");
 				break;
 			}
-
-			if (p2 - (p1+1) > 0){
-				oa_memcpy(up_paras.pw, p1+1, p2 - (p1+1));
+			len = p2 - (p1+1);
+			if (len > 0 && len < SERVER_IP_MAX_LEN){
+				oa_memcpy(up_paras.pw, p1+1, len);
 			}else{
 				DEBUG("paras err");
 				break;
 			}
-
-			if (p3 - (p2+1) > 0){
-				oa_memcpy(up_paras.ip, p2+1, p3 - (p2+1));
+			len = p3 - (p2+1);
+			if (len > 0 && len < SERVER_IP_MAX_LEN){
+				oa_memcpy(up_paras.ip, p2+1, len);
 				if(!ISAscIPValid(up_paras.ip, oa_strlen(up_paras.ip))){
 					DEBUG("ip err");
 					break;
@@ -2049,9 +2050,9 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 			}
 			
 			char_to_short(p3+1, &up_paras.port);
-
-			if (p5 - (p4+1) > 0){
-				oa_memcpy(up_paras.fw, p4+1, p5 - (p4+1));
+			len = p5 - (p4+1);
+			if (len > 0){
+				oa_memcpy(up_paras.fw, p4+1, len);
 			}else{
 				DEBUG("paras err");
 				break;
@@ -2147,6 +2148,7 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 			oa_uint8 *p0 = NULL;
 			oa_uint8 *p1 = NULL;
 			oa_uint8 *p_p = NULL;
+			oa_uint8 len;
 			DEBUG("conn_to_specified_server");
 			//extract paras
 			DEBUG("param:%s", pmsgbody);
@@ -2162,8 +2164,9 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 				}
 				else DEBUG("paras err");
 			}
-			if (p1 - (p0+1) > 0){
-				oa_memcpy(up_paras.ip, p0+1, p1 - (p0+1));
+			len = p1 - (p0+1);
+			if (len > 0 && len < SERVER_IP_MAX_LEN){
+				oa_memcpy(up_paras.ip, p0+1, len);
 				if(!ISAscIPValid(up_paras.ip, oa_strlen(up_paras.ip))){
 					DEBUG("ip err");
 					break;
