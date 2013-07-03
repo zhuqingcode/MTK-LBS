@@ -45,8 +45,7 @@ extern oa_soc_context g_soc_context;
 extern timeout_struct timeout_var;
 oa_bool need_reconn = OA_FALSE;
 dev_control_type control_type = none;
-
-oa_uint16 serial_num = 0;//发送流水号
+upgrade_paras up_paras;
 static u32 AlarmFlag[StatusNum]={0};
 
 //#define UPDATA_BUFNUM		12 //上传数据队列的缓存区个数
@@ -1997,7 +1996,68 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 	switch(cmd)
 	{
 		case eOnlineUpgrad_Ctrl:{
+			oa_uint8 *p0 = NULL;
+			oa_uint8 *p1 = NULL;
+			oa_uint8 *p2 = NULL;
+			oa_uint8 *p3 = NULL;
+			oa_uint8 *p4 = NULL;
+			oa_uint8 *p5 = NULL;
+			oa_uint8 *p_p = NULL;
+			oa_uint8 len;
 			DEBUG("wireless_updata");
+			//extract paras
+			DEBUG("param:%s", pmsgbody);
+			oa_memset(&up_paras, 0x0, sizeof(up_paras));
+			p_p = pmsgbody;
+			for(i = 0;i < 11;i++){
+				p = oa_strstr(p_p, ";");
+				if (p){
+					if (i == 1) p0 = p;//user name
+					else if (i == 2) p1 = p;//password
+					else if (i == 3) p2 = p;//ip
+					else if (i == 4) p3 = p;//tcp port
+					else if (i == 8) p4 = p;//firmware
+					else if (i == 9) p5 = p;
+					p_p = p+1;
+					continue;
+				}
+				else DEBUG("paras err");
+			}
+			len = p1 - (p0+1);
+			if (len > 0 && len < SERVER_IP_MAX_LEN){
+				oa_memcpy(up_paras.usr, p0+1, len);
+			}else{
+				DEBUG("paras err");
+				break;
+			}
+			len = p2 - (p1+1);
+			if (len > 0 && len < SERVER_IP_MAX_LEN){
+				oa_memcpy(up_paras.pw, p1+1, len);
+			}else{
+				DEBUG("paras err");
+				break;
+			}
+			len = p3 - (p2+1);
+			if (len > 0 && len < SERVER_IP_MAX_LEN){
+				oa_memcpy(up_paras.ip, p2+1, len);
+				if(!ISAscIPValid(up_paras.ip, oa_strlen(up_paras.ip))){
+					DEBUG("ip err");
+					break;
+				}
+			}else{
+				DEBUG("paras err");
+				break;
+			}
+			
+			char_to_short(p3+1, &up_paras.port);
+			len = p5 - (p4+1);
+			if (len > 0){
+				oa_memcpy(up_paras.fw, p4+1, len);
+			}else{
+				DEBUG("paras err");
+				break;
+			}
+
 			control_type = wireless_update;
 			break;
 		}
@@ -2085,6 +2145,38 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 		break;
 #endif	
 		case eSpclServ_Ctrl:{
+			oa_uint8 *p0 = NULL;
+			oa_uint8 *p1 = NULL;
+			oa_uint8 *p_p = NULL;
+			oa_uint8 len;
+			DEBUG("conn_to_specified_server");
+			//extract paras
+			DEBUG("param:%s", pmsgbody);
+			oa_memset(&up_paras, 0x0, sizeof(up_paras));
+			p_p = pmsgbody;
+			for(i = 0;i < 7;i++){
+				p = oa_strstr(p_p, ";");
+				if (p){
+					if (i == 4) p0 = p;
+					else if (i == 5) p1 = p;
+					p_p = p+1;
+					continue;
+				}
+				else DEBUG("paras err");
+			}
+			len = p1 - (p0+1);
+			if (len > 0 && len < SERVER_IP_MAX_LEN){
+				oa_memcpy(up_paras.ip, p0+1, len);
+				if(!ISAscIPValid(up_paras.ip, oa_strlen(up_paras.ip))){
+					DEBUG("ip err");
+					break;
+				}
+			}else{
+				DEBUG("paras err");
+				break;
+			}
+
+			char_to_short(p1+1, &up_paras.port);
 			control_type = conn_to_specified_server;
 			break;
 		}
@@ -4633,9 +4725,9 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 		}
 		case HEART_BEAT:
 		{
-			Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
-			timeout_var.timeout_en = OA_TRUE;
-			timeout_var.do_timeout = OA_FALSE;
+			//Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
+			//timeout_var.timeout_en = OA_TRUE;
+			//timeout_var.do_timeout = OA_FALSE;
 			//空消息体
 			*msgbodylen=0;
 			break;
@@ -5210,19 +5302,21 @@ u8 *getEmptybuf()
 *********************************************************/
 u16 escape_copy_to_send(u8 *buf, u16 len)
 {
+	u8 data_buf[DATA_MAX_LEN] = {0};
 	u16 real_len;
 	u8 SeqId[2];
 	u16 U16Temp;
 	
-	if (NULL == buf || len == 0)
+	if (NULL == buf || len == 0 || len > DATA_MAX_LEN)
 	{
 		OA_DEBUG_USER(" buf/len err");
 		return 0;
 	}
-
+	
+	oa_memcpy(data_buf, buf, len);
 	//给包加上流水号,流水号第加
 	Read_ProtclHandl(eDevSeqid, SeqId, &U16Temp);//after reading +1
-	oa_memcpy(buf+11, SeqId, 2);
+	oa_memcpy(data_buf+11, SeqId, 2);
 	{
 		u16 id;
 		char_to_short(sProtclHandl.DevSeqId,&id);
@@ -5233,16 +5327,16 @@ u16 escape_copy_to_send(u8 *buf, u16 len)
 		short_to_char(sProtclHandl.DevSeqId,id);
 	}
 	//校验，除标示头尾和校验本身
-	if (1 == XOR_Check(buf+1, len-3,(buf+len-2)))
+	if (1 == XOR_Check(data_buf+1, len-3,(data_buf+len-2)))
 	{
 		OA_DEBUG_USER(" XOR err");
 		return 0;
 	}
 
 	//对标示头和尾之外的包数据进行转义
-	JT808_dataChg(1, buf+1, len-2, &U16Temp);
+	JT808_dataChg(1, data_buf+1, len-2, &U16Temp);
 	len = U16Temp+2; //total data length
-	real_len = oa_write_buffer_force_noinit(g_soc_context.gprs_tx, buf, len);
+	real_len = oa_write_buffer_force_noinit(g_soc_context.gprs_tx, data_buf, len);
 	if (real_len < len)
 	{
 		OA_DEBUG_USER(" write err");

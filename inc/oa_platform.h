@@ -29,16 +29,17 @@
 #include "oa_type.h"
 #include "oa_api.h"
 #include "oa_setting.h"
-#define OA_APP_PLAT_LINK_1ST 10000
+#define OA_APP_PLAT_LINK_1ST 5000
 #define AUTHEN_FILE L"authen_file.ini"
 
 #define OA_APP_PLAT_LINK 1000// 1s
 #define OA_APP_PLAT_DATA 3000//30s
-#define OA_APP_PLAT_DATA_1TIME  10000
+#define OA_APP_PLAT_DATA_1TIME  20000
 #define PLAT_DATA_SECOND (OA_APP_PLAT_DATA / 1000)
 #define AUTHEN_CODE_MAX_LEN 127
 #define AUTHEN_ERR_MAX_TIMES 10
 #define OA_APP_TIMEOUT 2000
+#define OA_APP_TIMEOUT_1ST 20000
 #define TIMEOUT_SECOND (OA_APP_TIMEOUT/1000)
 #define RESTART_THRESHOLD (25 * 60)
 typedef struct

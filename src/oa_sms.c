@@ -1374,7 +1374,7 @@ void dev_action_handle(keyword_context *p_set)
 			do_soc_reconn();
 		}break;
 		case update:{
-			ftp_update();
+			ftp_update(NULL);
 		}break;
 		case reset:{
 			do_reset();
@@ -2928,8 +2928,10 @@ void oa_app_sms(void)
 					oa_memcpy(temp, sendbuf, 140);
 					sendsms4ms(temp, 140, sms_special);
 					oa_memset(temp, 0x0, 256);
-					oa_memcpy(temp, &sendbuf[140], len -140);
-					sendsms4ms(temp, len -140, sms_special);
+					if (len - 140 > 0){
+						oa_memcpy(temp, &sendbuf[140], len -140);
+						sendsms4ms(temp, len -140, sms_special);
+					}
 				}
 				else if (n == 0){
 					oa_memcpy(temp, sendbuf, len);

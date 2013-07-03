@@ -679,9 +679,12 @@ oa_bool oa_app_blinddata(void)
 			timeout_var.do_timeout = OA_FALSE;
 			send_len = oa_soc_send_req();//check datas in buffer & send
 			if (send_len == ret_len){
-				DEBUG("send one blinddata packet!total send num:%d", total_read);
+				DEBUG("^^^send one blinddata packet!total send num:%d", total_read);
 			}
-			else DEBUG("^^^send err");
+			else{
+				DEBUG("^^^send err, write back!");
+				write_blinddata_to_1file(blind_buf, data_len);
+			} 
 		}
 	}
 	
