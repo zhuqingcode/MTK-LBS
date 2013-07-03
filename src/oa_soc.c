@@ -36,8 +36,7 @@
 extern ProtocolHandle sProtclHandl;
 extern oa_bool need_reconn;
 extern dev_control_type control_type;
-extern oa_uint8 upgrade_ip[16];
-extern oa_uint32 s_port;
+extern upgrade_paras up_paras;
 extern timeout_struct timeout_var;
 extern soc_bak_context back_con;
 //-------------------------------------
@@ -489,11 +488,11 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 			if (none != control_type){
 				switch (control_type){
 					case wireless_update:{
-						ftp_update(upgrade_ip);
+						ftp_update(&up_paras);
 					}
 					break;
 					case conn_to_specified_server:{
-						conn2specific_server(upgrade_ip, s_port);
+						conn2specific_server(&up_paras);
 					}
 					break;
 					case term_powerdown:{

@@ -30,7 +30,7 @@
 #include "oa_platform.h"
 #include "oa_dev_params.h"
 #include "oa_debug.h"
-
+#include "oa_jt808.h"
 extern DEV_PLAT_PARAS dev_running;
 extern DEVICE_PARAMS dev_now_params;
 extern oa_bool sms_enable;
@@ -201,11 +201,11 @@ void just_reconn(void)
 *Return:		
 *Others:         
 *********************************************************/
-void conn2specific_server(u8 *ip, u32 port)
+void conn2specific_server(upgrade_paras *p)
 {
-	DEBUG("server info: ip:%s port:%d", ip, port);
-	if (!oa_memcmp(ip, dev_now_params.m_server_ip, 16)) return;
-	fill_soc(ip, port);
+	DEBUG("server info: ip:%s port:%d", p->ip, p->port);
+	if (!oa_memcmp(p->ip, dev_now_params.m_server_ip, 16)) return;
+	fill_soc(p->ip, p->port);
 	del_authcode();
 	just_reconn();
 }
@@ -238,21 +238,26 @@ void just_close_soc(void)
 *Return:		
 *Others:         
 *********************************************************/
-void ftp_update(oa_uint8 *p)
+void ftp_update(upgrade_paras *p)
 {
 	oa_char para[64] = {0x0};
 	oa_char tmp[16] = {0x0};
+	
 	oa_strcat(para, "ftp:");
 	if (p == NULL) oa_strcat(para, dev_now_params.update_server_ip);
-	else oa_strcat(para, p);
+	else oa_strcat(para, p->ip);
 	oa_strcat(para, ",");
-	sprintf(tmp , "%d,", dev_now_params.update_server_port);
+	if (p == NULL) sprintf(tmp , "%d,", dev_now_params.update_server_port);
+	else sprintf(tmp , "%d,", p->port);
 	oa_strcat(para, tmp);
-	oa_strcat(para, dev_now_params.ftpusr);
+	if (p == NULL) oa_strcat(para, dev_now_params.ftpusr);
+	else oa_strcat(para, p->usr);
 	oa_strcat(para, ",");
-	oa_strcat(para, dev_now_params.ftppwd);
+	if (p == NULL) oa_strcat(para, dev_now_params.ftppwd);
+	else oa_strcat(para, p->pw);
 	oa_strcat(para, ",");
-	oa_strcat(para, dev_now_params.ftp_prog_name);
+	if (p == NULL) oa_strcat(para, dev_now_params.ftp_prog_name);
+	else oa_strcat(para, p->fw);
 	oa_strcat(para, ",0");//8:print download bar & restart after finish
 	//oa_strcat(para, ",openatdll.dll,0");
 	DEBUG("update param:%s", para);
