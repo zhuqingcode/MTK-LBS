@@ -3111,16 +3111,18 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 			memcpy(&rsp, pbuf, sizeof(LBS_PlatComRsp));
 			//timeout
 			{
-				u16 temp_msgid;
-				u16 temp_msgid2;
-				u16 temp_seq;
-				u16 temp_seq2;
+				u16 temp_msgid = 0;
+				u16 temp_msgid2 = 0;
+				u16 temp_seq = 0;
+				u16 temp_seq2 = 0;
 				u16 temp_len;
-				char_to_short(&rsp.SeqId[0], &temp_seq2);
+				char_to_short(&rsp.SeqId[0], &temp_seq);
 				char_to_short(&rsp.MsgId[0], &temp_msgid);
-				Read_ProtclHandl(eDevSeqid, (u8 *)&temp_seq, &temp_len);
+				char_to_short(&sProtclHandl.DevSeqId[0], &temp_seq2);
 				Read_ProtclHandl(eDevMsgid, (u8 *)&temp_msgid2, &temp_len);
-				if (timeout_var.timeout_en == OA_TRUE && temp_seq == temp_seq2 && temp_msgid == temp_msgid2){
+				DEBUG("seq:%02x msgid:%04x seq2:%02x msgid2:%04x", temp_seq, temp_msgid, temp_seq2, temp_msgid2);
+				if (timeout_var.timeout_en == OA_TRUE && temp_seq == temp_seq2-1 && temp_msgid == temp_msgid2){
+					DEBUG("disable timeout");
 					timeout_var.do_timeout = OA_FALSE;
 					timeout_var.timeout_en = OA_FALSE;
 				}
