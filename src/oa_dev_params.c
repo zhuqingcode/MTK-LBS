@@ -82,11 +82,11 @@ DEVICE_PARAMS dev_def_params =
 	10,							//urgent_reportdistance
 	15,							//corner_reportangle
 	10,
-	{"13814120415"},				//moniter platform num
-	{"13814120415"},				//reset_num
-	{"13814120415"},				//restore_factory_settings_num
-	{"13814120415"},
-	{"13814120415"},				//terminal_sms_num
+	{"13888888888"},				//moniter platform num
+	{"13888888888"},				//reset_num
+	{"13888888888"},				//restore_factory_settings_num
+	{"13888888888"},
+	{"13888888888"},				//terminal_sms_num
 	//......
 	0x00000000,					//alarm_mask
 	0,							//alarm_send_sms_mask
@@ -106,12 +106,12 @@ DEVICE_PARAMS dev_def_params =
 	{"70555"},					//man id
 	{"T100G"},					//term model
 	{"3000015"},					//term id
-	{"13814120415"},				//LclTEL
+	{"13888888888"},				//LclTEL
 	{"114.221.34.95"},				//ftp ip
 	21,							//port
 	{"talent"},					//user name
 	{"talent"},					//pwd
-	{"mtk-lbs-beta v1.0.0"},				//program name
+	{"mtk-lbs v1.0.0"},				//program name
 };
 
 DEVICE_PARAMS dev_now_params;

@@ -155,21 +155,22 @@ void oa_app_gps(void)
 #endif
 	//gps data analysis:mileage statistics, speed alarm, driver fatigue,cog and so on.
 	result = GPS_DataAnaly();//update gps datas
-//	DEBUG("result:0x%X", __FILE__,  __func__, __LINE__, result);
+	//DEBUG("result:0x%X", result);
 	if (result & GPS_NO_DATA){//analysis gps data failed for 30s, module status must be changed to broken 
 		if (ModelCnt * GPS_RUN_SECONDS < CHECK_GPS_ERR){
 			ModelCnt++;							
 		}	
 		else{//handle this alarm
+			DEBUG("gps model err");
 			ret = handle_alarm_status(StaAlarm0, ALARM_GNSS_ERR, SET,OA_TRUE);
-			if (OA_TRUE == ret)	ModelCnt = 0;
+			//if (OA_TRUE == ret)	ModelCnt = 0;
 		}
 	}
 	else{//if gps module's is good, change it to good because gps data is normal
 		if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){//cancel this alarm, upload instantly
 			//WriteAlarmPara(RESET, StaAlarm0, ALARM_GNSS_ERR);
 			handle_alarm_status(StaAlarm0, ALARM_GNSS_ERR, RESET, OA_TRUE);
-			DEBUG("Gps model is OK.");
+			DEBUG("gps model is OK.");
 		}
 		//clear it
 		if (ModelCnt > 0) ModelCnt = 0;
@@ -206,10 +207,8 @@ void oa_app_gps(void)
 				if (!oa_memcmp(time_last, time_cur, 3)){//in one day
 					if (gps_info.Speed > 0)	day_drive++;
 					if (day_drive * GPS_RUN_SECONDS >= dev_now_params.day_add_drive_time_threshold){
-						if (ReadAlarmPara(StaAlarm0, ALARM_DRIVE_OVERTIME) == RESET){
 							ret = handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
 							DEBUG("day overtime drive");
-						}
 					}
 				}
 				else{
@@ -265,10 +264,8 @@ void oa_app_gps(void)
 			if (0 == gps_info.Speed){
 				park_times++;
 				if (park_times * GPS_RUN_SECONDS >= dev_now_params.max_park_time){
-					if (ReadAlarmPara(StaAlarm0, ALARM_OVERTIME_PARKING) == RESET){
 						handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
 						DEBUG("overtime park");
-					}
 				}
 			}
 			else if (gps_info.Speed > 0){
@@ -291,7 +288,7 @@ void oa_app_gps(void)
 			}
 			//--------------------------------------------------------------------
 			//------------------------Periodically reported---------------------------
-			if (dev_now_params.report_strategy == 0){//Periodically reported
+			if (dev_now_params.report_strategy >= 0 && dev_now_params.report_strategy <= 2){//Periodically reported
 				if (upload_times * GPS_RUN_SECONDS >= dev_now_params.default_reporttime){
 					DEBUG("@@@");
 					print_rtc_time();
@@ -300,6 +297,7 @@ void oa_app_gps(void)
 					if (ret == OA_TRUE)	upload_times = 0;
 				}
 			}
+#if 0
 			else if (dev_now_params.report_strategy == 1){//distance reported
 				if ((u32)(1000 * d_r_distance) >= dev_now_params.default_reportdistance){
 					DEBUG("send one location packet!");
@@ -321,6 +319,7 @@ void oa_app_gps(void)
 				}
 
 			}
+#endif
 			//--------------------------------------------------------------------
 			//-------------------------fatigue driving-------------------------------
 			if (gps_info.Speed > 0){

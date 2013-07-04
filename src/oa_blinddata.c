@@ -652,7 +652,7 @@ oa_bool oa_app_blinddata(void)
 	u16 ret_len;
 	u16 send_len;
 	static oa_bool task_runed = OA_TRUE;
-	
+	//static u16 ReqMsgId = REPORT_LOCATION;
 	if (OA_TRUE == task_runed){
 		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		task_runed = OA_FALSE;
@@ -669,14 +669,13 @@ oa_bool oa_app_blinddata(void)
 		if (ret == OA_FALSE){
 			goto redoit;
 		}
-		DEBUG("^^^");
 		//has blinddata
 		ret_len = escape_copy_to_send(blind_buf, data_len);
 		//DEBUG(" ret_len:%d!", ret_len);
 		if (ret_len > 0){
 			print_rtc_time();
-			timeout_var.timeout_en = OA_TRUE;
-			timeout_var.do_timeout = OA_FALSE;
+			//Write_ProtclHandl(eDevMsgid, (u8 *)&ReqMsgId, 2);
+			//timeout_var.timeout_en = OA_TRUE;
 			send_len = oa_soc_send_req();//check datas in buffer & send
 			if (send_len == ret_len){
 				DEBUG("^^^send one blinddata packet!total send num:%d", total_read);

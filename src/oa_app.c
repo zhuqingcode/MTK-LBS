@@ -365,6 +365,8 @@ void oa_app_timeout(void *param)
 	
 	if (timeout_var.timeout_en == OA_FALSE){
 		timeout_var.timeout_times = 0;
+		timeout_var.do_timeout = OA_FALSE;
+		Tn = dev_now_params.tcp_ack_timeout;
 		goto redo;
 	}
 
@@ -383,25 +385,22 @@ void oa_app_timeout(void *param)
 			soc_ret = oa_soc_send_req();//exist duplicate copy???
 			if (soc_ret == real_len){//retrans ok
 				DEBUG("%d x timeout retransmission ok", retrans_times);
-				retrans_times = 0;
-				Tn = dev_now_params.tcp_ack_timeout;
-				timeout_var.timeout_times = 0;
-			}
-			else{//retrans err
 				retrans_times++;
-				timeout_var.timeout_times = 0;
-				DEBUG("%d x timeout retransmission err", retrans_times);
 				if (retrans_times > dev_now_params.tcp_retrans_times){
 					DEBUG("do reconnect because tcp timeout");
+					timeout_var.do_timeout = OA_FALSE;
+					timeout_var.timeout_en = OA_FALSE;
 					Tn = dev_now_params.tcp_ack_timeout;
 					retrans_times = 0;
 					just_reconn();
+					goto redo;
 				}
-				else Tn = Tn * (retrans_times + 1);
+				Tn = Tn * (retrans_times + 1);
+				timeout_var.timeout_times = 0;
 			}
 		}
 		else{
-			timeout_var.timeout_times = 0;DEBUG("write err");
+			DEBUG("write err");
 		} 
 	}
 redo:
