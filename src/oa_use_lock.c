@@ -31,8 +31,8 @@
 
 USE_LOCK def_use_lock = 
 {
-	OA_TRUE,// lock
-	//OA_FALSE,// unlock
+	//OA_TRUE,// lock
+	OA_FALSE,// unlock
 };
 USE_LOCK now_use_lock;
 

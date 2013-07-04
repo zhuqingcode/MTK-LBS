@@ -3121,6 +3121,7 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 				Read_ProtclHandl(eDevSeqid, (u8 *)&temp_seq, &temp_len);
 				Read_ProtclHandl(eDevMsgid, (u8 *)&temp_msgid2, &temp_len);
 				if (timeout_var.timeout_en == OA_TRUE && temp_seq == temp_seq2 && temp_msgid == temp_msgid2){
+					timeout_var.do_timeout = OA_FALSE;
 					timeout_var.timeout_en = OA_FALSE;
 				}
 			}
@@ -4739,9 +4740,7 @@ static u8 BuildMsgbody(u16 DevMsgId, u8 *msgbody, u16 *msgbodylen, u16 totalPack
 		}
 		case REPORT_LOCATION:
 		{
-			Write_ProtclHandl(eDevMsgid, (u8 *)&DevMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
-			timeout_var.timeout_en = OA_TRUE;
-			timeout_var.do_timeout = OA_FALSE;
+			
 			status = report_location_buildbody(msgbody, msgbodylen);
 			break;
 		}
@@ -5379,6 +5378,11 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 			
 			ret = escape_copy_to_send(pbuf, U16Temp);
 			if (ret > 0){
+				if (ReqMsgId == REPORT_LOCATION){
+					Write_ProtclHandl(eDevMsgid, (u8 *)&ReqMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
+					timeout_var.timeout_en = OA_TRUE;
+					timeout_var.do_timeout = OA_FALSE;
+				}
 				return ret;
 			}
 			else

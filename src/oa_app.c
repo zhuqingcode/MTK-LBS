@@ -365,6 +365,8 @@ void oa_app_timeout(void *param)
 	
 	if (timeout_var.timeout_en == OA_FALSE){
 		timeout_var.timeout_times = 0;
+		timeout_var.do_timeout = OA_FALSE;
+		Tn = dev_now_params.tcp_ack_timeout;
 		goto redo;
 	}
 
@@ -393,6 +395,7 @@ void oa_app_timeout(void *param)
 				DEBUG("%d x timeout retransmission err", retrans_times);
 				if (retrans_times > dev_now_params.tcp_retrans_times){
 					DEBUG("do reconnect because tcp timeout");
+					timeout_var.do_timeout = OA_FALSE;
 					Tn = dev_now_params.tcp_ack_timeout;
 					retrans_times = 0;
 					just_reconn();
