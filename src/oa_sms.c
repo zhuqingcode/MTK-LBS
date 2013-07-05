@@ -593,6 +593,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 			}break;
 			case e_Rpttime_sleep:
 			case e_Rpttime_def:
+			case e_Rptcog:
 			case e_overspeed:
 			case e_min_resttime:
 			case e_daydrivetime:
@@ -600,6 +601,12 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 			case e_max_parktime:{
 				if (oa_is_digit_str(temp, oa_strlen(temp))){
 					p_set->context.con_int = oa_atoi(temp);
+					if (e_kind == e_Rptcog){
+						if (p_set->context.con_int >= 180){
+							DEBUG(" paras err!");
+							return OA_FALSE;
+						}
+					}
 				}
 				else{
 					DEBUG(" paras err!");
@@ -1202,6 +1209,9 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len)
 		}break;
 		case e_Rpttime_def:{
 			sprintf(enquire_temp, "Rpttime_def:%d;", dev_now_params.default_reporttime);
+		}break;
+		case e_Rptcog:{
+			sprintf(enquire_temp, "Rptcog:%d;", dev_now_params.corner_reportangle);
 		}break;
 		case e_servertel:{
 			oa_strcat(enquire_temp, "servertel:");
@@ -2362,6 +2372,19 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.default_reporttime = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_Rptcog:{
+			if (p_set->kind == set){
+				if (dev_now_params.corner_reportangle == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.corner_reportangle = p_set->context.con_int;
 					p_set->act_kind = para_save;
 				}
 			}
