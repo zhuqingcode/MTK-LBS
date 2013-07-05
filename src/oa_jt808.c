@@ -3026,25 +3026,25 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 						return PLAT_TREMREG_ACK;	
 					}
 					else{
-						DEBUG(" no authentication code");
+						DEBUG("no authentication code");
 						return RspPackgerr;
 					}
 				}
 				break;
 				case RspError:
 				case RspUnsurport:{
-					DEBUG(" has already registered:%d", rsp.Rslt);
+					DEBUG("has already registered:%d", rsp.Rslt);
 					return PLAT_TREMREG_ACK;
 				}
 				break;
 				case RspMsgerr:
 				case RspAlarmCheck:{
-					DEBUG(" database has no info:%d", rsp.Rslt);
-					return RspPackgerr;
+					DEBUG("database has no info:%d", rsp.Rslt);
+					return PLAT_TREMREG_ACK;
 				}
 				break;
 				default:{
-					DEBUG(" Rsp packet err!");
+					DEBUG("Rsp packet err!");
 					return RspPackgerr;
 				}break;
 			}

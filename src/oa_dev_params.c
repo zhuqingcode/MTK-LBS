@@ -47,7 +47,7 @@ extern oa_soc_set_parameter soc_cs;
 DEVICE_PARAMS dev_def_params =
 {
 	60,							//heartbeat_interval
-	10,							//tcp_ack_timeout
+	30,							//tcp_ack_timeout
 	3,							//tcp_retrans_times
 	30,							//udp_ack_timeout
 	3,							//udp_retrans_times

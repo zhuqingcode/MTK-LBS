@@ -417,7 +417,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 				case RspMsgerr:
 				case RspUnsurport:
 				case RspAlarmCheck:{
-					if (!try_unlock){
+					if (!use_is_lock()){//unlocked
 						if (dev_running.plat_status == OFFLINE){
 							dev_running.plat_switch = OA_TRUE;
 							dev_running.next_step = PLAT_DEV_REG;
@@ -425,11 +425,15 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 					}
 					else{
 						try_unlock = OA_FALSE;
+						dev_running.plat_switch = OA_TRUE;
 					}
+				}break;
+				case RspPackgerr:{
+					dev_running.plat_switch = OA_TRUE;
+					dev_running.next_step = PLAT_DEV_REG;
 				}break;
 				default:break;
 			}
-			
 		}
 		break;
 		case PLAT_COMMON_ACK:{
@@ -444,6 +448,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 						//unlock
 						if (use_is_lock()){
 							use_unlock();
+							try_unlock = OA_FALSE;
 							DEBUG("Congratulations to you,device is unlocked!");
 						}
 					}
@@ -469,7 +474,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 					DEBUG("plat common ack fail : %d", ret);
 					if (dev_running.doing_what == authen && dev_running.plat_status == OFFLINE){
 						dev_running.plat_switch = OA_TRUE;//if authen err, do it again
-						if (try_unlock){
+						if (use_is_lock()){//locked
 							try_unlock = OA_FALSE;
 						}
 						dev_running.authen_err_time++;
