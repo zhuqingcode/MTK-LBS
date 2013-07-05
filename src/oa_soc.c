@@ -39,6 +39,7 @@ extern dev_control_type control_type;
 extern upgrade_paras up_paras;
 extern timeout_struct timeout_var;
 extern soc_bak_context back_con;
+extern oa_bool try_unlock;
 //-------------------------------------
 /*debug*/
 #define GPRS_DEBUG OA_DEBUG_USER
@@ -405,13 +406,32 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 	ret = JT808_recv_analysis(data, len);
 	switch (ret){
 		case PLAT_TREMREG_ACK:{
-			if (dev_running.plat_status == OFFLINE){
-				dev_running.plat_switch = OA_TRUE;
-				dev_running.next_step = PLAT_DEV_LOGIN;
+			switch (sProtclHandl.PlatComrsp.Rslt){
+				case RspOK:{
+					if (dev_running.plat_status == OFFLINE){
+						dev_running.plat_switch = OA_TRUE;
+						dev_running.next_step = PLAT_DEV_LOGIN;
+					}
+				}break;
+				case RspError:
+				case RspMsgerr:
+				case RspUnsurport:
+				case RspAlarmCheck:{
+					if (!try_unlock){
+						if (dev_running.plat_status == OFFLINE){
+							dev_running.plat_switch = OA_TRUE;
+							dev_running.next_step = PLAT_DEV_REG;
+						}
+					}
+					else{
+						try_unlock = OA_FALSE;
+					}
+				}break;
+				default:break;
 			}
+			
 		}
 		break;
-		
 		case PLAT_COMMON_ACK:{
 			switch (sProtclHandl.PlatComrsp.Rslt){
 				case RspOK:{
@@ -421,6 +441,11 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 						dev_running.plat_status = ONLINE;//鉴权后表示与平台连接上
 						dev_running.doing_what = do_none;//means authen ok
 						dev_running.authen_err_time = 0;
+						//unlock
+						if (use_is_lock()){
+							use_unlock();
+							DEBUG("Congratulations to you,device is unlocked!");
+						}
 					}
 					//case unreg
 					else if (dev_running.doing_what == unreg && dev_running.plat_status == ONLINE){
@@ -444,6 +469,9 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 					DEBUG("plat common ack fail : %d", ret);
 					if (dev_running.doing_what == authen && dev_running.plat_status == OFFLINE){
 						dev_running.plat_switch = OA_TRUE;//if authen err, do it again
+						if (try_unlock){
+							try_unlock = OA_FALSE;
+						}
 						dev_running.authen_err_time++;
 						if (dev_running.authen_err_time >= AUTHEN_ERR_MAX_TIMES){
 							oa_bool tmp;

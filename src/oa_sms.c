@@ -49,6 +49,7 @@ extern USE_LOCK now_use_lock;
 extern oa_uint8 acc_status;
 extern STRUCT_RMC Pos_Inf;
 extern DEV_PLAT_PARAS dev_running;
+extern oa_bool try_unlock;
 oa_char *p_keyword[] = {
  HB,
  RSP_TCP,
@@ -108,7 +109,6 @@ oa_char *p_keyword[] = {
  STATUS,
  STATICS,
  GPS,
- DEV_LOCK,
  UPDATE,
  VERSA,
  CLRLOG,
@@ -689,16 +689,6 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 					oa_memcpy(p_set->context.con_ch, temp, oa_strlen(temp));
 				}
 				else if (0 == oa_strlen(temp))	p_set->context.con_ch[0] = 0xff;
-			}break;
-			case e_dev_lock:{
-				if (oa_is_digit_str(temp, oa_strlen(temp))){
-					p_set->context.con_int = oa_atoi(temp);
-					DEBUG(" dev unlock!");
-					if (p_set->context.con_int != UNLOCK){//only for unlock 
-						DEBUG(" paras err!");
-						return OA_FALSE;
-					}
-				}
 			}break;
 			case e_DEVID:{
 				if (oa_strlen(temp) == DEVID_LEN){
@@ -1311,9 +1301,6 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len)
 			gps_extract(enquire_temp, &ret_len);
 			//oa_strcat(enquire_temp, ";");
 		}break;
-		case e_dev_lock:{
-			sprintf(enquire_temp, "dev_lock:%d;", now_use_lock.lock);
-		}break;
 		case e_UPDATE:{
 			oa_strcat(enquire_temp, "doing update;");
 		}break;
@@ -1342,6 +1329,7 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len)
 			oa_strcat(enquire_temp, "RESTART OK;");
 		}break;
 		case e_DEVID:{
+			oa_strcat(enquire_temp, "DEVID:");
 			oa_strcat(enquire_temp, dev_now_params.term_id);
 			oa_strcat(enquire_temp, ";");
 		}break;
@@ -2787,14 +2775,6 @@ void handle_keyword4ms(e_keyword key_kind,
 		case e_RESTART:{
 			p_set->act_kind = reset;
 		}break;
-		case e_dev_lock:{
-			if (p_set->kind == set){
-				if (p_set->context.con_int == UNLOCK){
-					if (use_is_lock())	use_unlock();
-				}
-				
-			}
-		}break;
 		case e_DEVID:{
 			if (p_set->kind == set){
 				if (!oa_strncmp(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN)){
@@ -2839,6 +2819,7 @@ void oa_app_sms(void)
 	oa_char buf[256] = {0x0};
 	oa_uint8 len;
 	oa_bool ms_ack;
+	oa_bool try_unlock_inside = OA_FALSE;
 	sms_kind t_s = sms_normal;
 #ifdef 0
 	OA_DEBUG_USER("%s called", __FILE__, __func__);
@@ -2935,6 +2916,7 @@ void oa_app_sms(void)
 					oa_memset(buf, 0x0, sizeof(buf));
 				}
 				dev_action_handle(&set);
+				if (set.kind == 0x1 && use_is_lock()) try_unlock_inside = OA_TRUE;
 				oa_memset(&set, 0x0, sizeof(set));
 			}
 		}
@@ -2962,6 +2944,11 @@ void oa_app_sms(void)
 				}
 			}
 			else if(sms_normal == t_s) sendsms4ms(sendbuf, oa_strlen(sendbuf), sms_normal);
+		}
+
+		if (try_unlock_inside == OA_TRUE){
+			DEBUG("try unlock");
+			try_unlock = OA_TRUE;
 		}
 	}
 	else DEBUG("too many sms");

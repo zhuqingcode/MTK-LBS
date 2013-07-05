@@ -4922,7 +4922,7 @@ u8 JT808Msg_Build(u16 DevMsgId,u16 totalPackt,u16 SubPackt,u8 *Sendbuf,u16 Sendb
 	//创建消息体!!!
 	status = BuildMsgbody(DevMsgId,pbuf, &U16Temp,totalPackt, SubPackt);
 	if (status){
-		DEBUG(" BuildMsgbody error, status=%d!", status);
+		DEBUG("BuildMsgbody error, status=%d!", status);
 		return 1;
 	}
 	//赋值消息体属性的长度
@@ -5366,7 +5366,7 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 			
 			if (U16Temp > DATA_MAX_LEN)
 			{
-				OA_DEBUG_USER(" data is too long!");
+				DEBUG("data is too long!");
 				return 0;
 			}
 			
@@ -5395,7 +5395,7 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 		}
 		else
 		{	
-			DEBUG(" build package error.");
+			DEBUG("build package error...");
 			return 0;
 		}
 	}
@@ -5470,12 +5470,12 @@ u16 DevReq2ServPackag_build_blind(u16 ReqMsgId) //即时上传数据
 			
 		}
 		else{	
-			DEBUG(" build package error.");
+			DEBUG("build package error.");
 			return OA_FALSE;
 		}
 	}
 	else{
-		OA_DEBUG_USER(" no empty buffer!");
+		DEBUG("no empty buffer!");
 		return OA_FALSE;
 	}
 

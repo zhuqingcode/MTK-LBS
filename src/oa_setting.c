@@ -60,18 +60,18 @@ void oa_soc_setting_init(void)
 		/* hope never return here. */
 		if (handle < 0)
 		{
-			OA_DEBUG_USER("Create soc setting file failed!");
+			DEBUG("Create soc setting file failed!");
 			return;
 		}
 
 	      ret = oa_fwrite(handle, &soc_cs, sizeof(soc_cs), &dummy_write);//soc_cs has been changed in 'params_to_soc_set'
 		if((ret < 0) || (dummy_write != sizeof(soc_cs)))
 		{
-			OA_DEBUG_USER("Init soc setting file failed!");
+			DEBUG("Init soc setting file failed!");
 			return;
 		}
 
-		OA_DEBUG_USER("Create soc setting file ok!");    
+		DEBUG("Create soc setting file ok!");    
 
 		ret = oa_fseek(handle, 0, OA_FILE_BEGIN);
 	}

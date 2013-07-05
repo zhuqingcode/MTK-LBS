@@ -95,7 +95,6 @@
 #define STATUS "STATUS"
 #define STATICS "STATICS"
 #define GPS "GPS"
-#define DEV_LOCK "dev_lock" //dev_lock:0 unlock device
 #define UPDATE "UPDATE"
 #define VERSA "VERSA"
 #define CLRLOG "CLRLOG"
@@ -176,7 +175,6 @@ typedef enum
 	e_STATUS,
 	e_STATICS,
 	e_GPS,
-	e_dev_lock,
 	e_UPDATE,
 	e_VERSA,
 	e_CLRLOG,
