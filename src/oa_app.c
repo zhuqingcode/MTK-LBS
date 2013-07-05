@@ -56,6 +56,7 @@ DEV_PLAT_PARAS dev_running =
 };
 timeout_struct timeout_var = {OA_FALSE, OA_FALSE, 0};
 soc_bak_context back_con = {0x0};
+oa_bool try_unlock = OA_FALSE;
 extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
 extern void App_TaskSScrnSendManage(void *Para);
@@ -94,6 +95,8 @@ void oa_app_plat_link(void *para)
 		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		task_runed = OA_FALSE;
 	}
+
+	if (use_is_lock() && try_unlock == OA_FALSE) goto again;
 	//避免重复进行某一步操作
 	if (OA_TRUE == dev_running.plat_switch){
 		switch (dev_running.next_step){
@@ -104,6 +107,7 @@ void oa_app_plat_link(void *para)
 					oa_soc_init();//soc paras & callback register
 					oa_soc_state_check();//check & connect
 					dev_running.plat_switch = OA_FALSE;
+					
 				}
 				else{
 					DEBUG("sim network is invalue!");
@@ -193,6 +197,7 @@ void oa_app_plat_link(void *para)
 		}
 	}
 
+again:
 	oa_timer_start(OA_APP_SCHEDULER_ID, oa_app_plat_link, NULL, OA_APP_PLAT_LINK);
 	return;
 	
@@ -518,23 +523,25 @@ void oa_app_main(void)
 		callback_func_reg();
 		//run sms backgrade
 		oa_timer_start(OA_TIMER_ID_10, oa_sms_demo, NULL, 1000);
+		//application initial, mainly about socket
+		oa_app_init();
+		//platform link task
+		oa_timer_start(OA_APP_SCHEDULER_ID, oa_app_plat_link, NULL, OA_APP_PLAT_LINK_1ST);
 		first_run = OA_FALSE;
 	}
 	
 	//Determines whether the device is locked?
 	use_lock();
 	dev_is_locked = use_is_lock();
+	
 	if (OA_FALSE == dev_is_locked) //device is unlock
 	{
-		//application initial, mainly about socket
-		oa_app_init();
-
 		//watchdog task
 //		oa_timer_start(OA_TIMER_ID_1, oa_app_wdt, NULL, OA_WDT_SCHEDULER_PERIOD);
 		//acc status detect
 		oa_timer_start(OA_TIMER_ID_6, acc_status_detect, NULL, OA_ACC_RUN_1ST);
 		//platform link task
-		oa_timer_start(OA_APP_SCHEDULER_ID, oa_app_plat_link, NULL, OA_APP_PLAT_LINK_1ST);
+//		oa_timer_start(OA_APP_SCHEDULER_ID, oa_app_plat_link, NULL, OA_APP_PLAT_LINK_1ST);
 		//platform data task
 		oa_timer_start(OA_TIMER_ID_4, oa_app_plat_data, NULL, OA_APP_PLAT_DATA_1TIME);
 		//gps initial task:this task maybe is useless because the gps module desn't need initial
@@ -552,7 +559,7 @@ void oa_app_main(void)
 	}
 	else if (OA_TRUE == dev_is_locked)  //device is lock
 	{
-		DEBUG("device is locked!Please activate it.");
+		if (!try_unlock) DEBUG("device is locked!Please activate it.");
 		//app main restart
 		oa_timer_start(OA_TIMER_ID_3, oa_app_main, NULL, OA_MAIN_SCHEDULER_PERIOD);
 	}

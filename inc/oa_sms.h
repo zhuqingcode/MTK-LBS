@@ -59,8 +59,8 @@
 #define Rpttime_alarm "Rpttime_alarm"
 #define Rpttime_def "Rpttime_def"
 #define Rptdis_unlog "Rptdis_unlog"
-#define Rptdis_sleep "Rptdis sleep"
-#define Rptdis_alarm "Rptdis alarm"
+#define Rptdis_sleep "Rptdis_sleep"
+#define Rptdis_alarm "Rptdis_alarm"
 #define Rptdis_def "Rptdis_def"
 #define Rptcog "Rptcog"
 #define servertel "servertel"
@@ -95,7 +95,6 @@
 #define STATUS "STATUS"
 #define STATICS "STATICS"
 #define GPS "GPS"
-#define DEV_LOCK "dev_lock" //dev_lock:0 unlock device
 #define UPDATE "UPDATE"
 #define VERSA "VERSA"
 #define CLRLOG "CLRLOG"
@@ -176,7 +175,6 @@ typedef enum
 	e_STATUS,
 	e_STATICS,
 	e_GPS,
-	e_dev_lock,
 	e_UPDATE,
 	e_VERSA,
 	e_CLRLOG,
