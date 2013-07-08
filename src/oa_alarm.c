@@ -56,7 +56,8 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 		return OA_FALSE;
 	}
 	if (flag == OA_TRUE){
-		alarm_flag = dev_now_params.alarm_mask;
+		if (part == StaAlarm0) alarm_flag = dev_now_params.alarm_mask;
+		else if (part == StaSector1) alarm_flag = 0;
 		if (alarm_flag & alarm_bit){//alarm is masked
 			DEBUG("this alarm is masked!");
 			return OA_TRUE;

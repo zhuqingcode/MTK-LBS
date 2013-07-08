@@ -193,6 +193,7 @@ void oa_app_gps(void)
 			if ((ReadAlarmPara(StaSector1, STA_GPS_FIXED) == RESET) && (GPS_FIXED == gps_info.Fix_Status)){
 				//WriteAlarmPara(SET, StaSector1, STA_GPS_FIXED);
 				handle_alarm_status(StaSector1, STA_GPS_FIXED, SET, OA_TRUE);
+				DEBUG("GPS locate done");
 				Oldcog = gps_info.COG;//
 				if (OA_FALSE == rtc_status){
 					set_rtc_time(gps_info.Time); //when gps locate ok, set rtc time at once
@@ -251,11 +252,13 @@ void oa_app_gps(void)
 			}
 			
 			if (gps_info.Speed > speed){//handle this alarm & upload instantly
+				DEBUG("over speed");
 				ret = handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 			}
 			else if (gps_info.Speed <= speed){
 				if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET){
 					//WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
+					DEBUG("cancel over speed");
 					handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, RESET, OA_TRUE);
 				}
 			}
