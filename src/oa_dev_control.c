@@ -145,7 +145,18 @@ void do_something_before_reconn(void)
 	//fill 'g_soc_context' with current paras
 	oa_soc_fill_addr_struct();
 }
-
+/*********************************************************
+*Function:     do_socset_b4_unlock()
+*Description:  do_socset_b4_unlock
+*Return:		
+*Others:         
+*********************************************************/
+void do_socset_b4_unlock(){
+	params_to_soc_set();
+	oa_soc_setting_save();
+	/*Setting parameters*/
+	oa_soc_setting_init();
+}
 /*********************************************************
 *Function:     do_soc_reconn()
 *Description:  do_soc_reconn

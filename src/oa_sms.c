@@ -1369,7 +1369,7 @@ void dev_action_handle(keyword_context *p_set)
 		case reconn:{
 			ret = dev_params_save();
 			if (ret == OA_TRUE)	print_key_dev_params();
-			do_soc_reconn();
+			if (!use_is_lock()) do_soc_reconn();
 		}break;
 		case update:{
 			ftp_update(NULL);

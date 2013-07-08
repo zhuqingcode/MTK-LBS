@@ -103,6 +103,7 @@ void oa_app_plat_link(void *para)
 			case PLAT_SOC_INIT:{
 				if (oa_sim_network_is_valid()){
 					DEBUG("GSM network init finished!");
+					if (use_is_lock()) do_socset_b4_unlock();
 					/*soc init*/
 					oa_soc_init();//soc paras & callback register
 					oa_soc_state_check();//check & connect

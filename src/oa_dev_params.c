@@ -64,7 +64,7 @@ DEVICE_PARAMS dev_def_params =
 	{"root"},						//b_apn_password
 	{"112.4.133.86"},				//b_server_ip
 	{"talentvideo.com.cn"},			//b_server_dn
-	11119,						//server_tcp_port
+	10000,						//server_tcp_port
 	9994,						//server_udp_port
 	//9992,						//hx:just for test
 	//......
@@ -642,6 +642,8 @@ void print_key_dev_params(void)
 	DEBUG_N("UPIP						:%s", dev_now_params.update_server_ip);
 	DEBUG_N("UPPORT						:%d", dev_now_params.update_server_port);
 	DEBUG_N("ftp_prog_name					:%s", dev_now_params.ftp_prog_name);
+	DEBUG_N("ftpusr						:%s", dev_now_params.ftpusr);
+	DEBUG_N("ftppwd						:%s", dev_now_params.ftppwd);
 	
 	
 	DEBUG_N("man id						:%s", dev_now_params.manufacturers_id);
