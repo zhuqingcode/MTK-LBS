@@ -673,9 +673,10 @@ oa_bool oa_app_blinddata(void)
 		ret_len = escape_copy_to_send(blind_buf, data_len);
 		//DEBUG(" ret_len:%d!", ret_len);
 		if (ret_len > 0){
+			DEBUG("^^^");
 			print_rtc_time();
 			//Write_ProtclHandl(eDevMsgid, (u8 *)&ReqMsgId, 2);
-			//timeout_var.timeout_en = OA_TRUE;
+			timeout_var.timeout_en = OA_FALSE;
 			send_len = oa_soc_send_req();//check datas in buffer & send
 			if (send_len == ret_len){
 				DEBUG("^^^send one blinddata packet!total send num:%d", total_read);
