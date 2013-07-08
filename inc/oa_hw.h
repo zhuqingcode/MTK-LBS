@@ -39,7 +39,8 @@
 #define LEVEL_SENSITIVE OA_FALSE
 #define OA_CUR_TEST_EINT_NO 0/**/
 
-#define ACC_GPIO 19 //gpio19
+//#define ACC_GPIO 19 //gpio19
+#define ACC_GPIO 4 //gpio4
 #define GPSANA_GPIO 3//gpio3
 #define KEY_GPIO 7
 #define IN0_GPIO 17

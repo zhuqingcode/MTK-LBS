@@ -145,7 +145,7 @@ void acc_status_detect(void *param)
 			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == RESET){
 				WriteAlarmPara(SET, StaSector1, STA_ACC_ON);
 			}
-			acc_status = ACC_ON;
+			acc_status = ACC_OFF;
 		}	
 	}
 	else{//acc is off
@@ -156,7 +156,7 @@ void acc_status_detect(void *param)
 			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == SET){
 				WriteAlarmPara(RESET, StaSector1, STA_ACC_ON);
 			}
-			acc_status = ACC_OFF;
+			acc_status = ACC_ON;
 		}
 	}
 	//ugent alarm detect
