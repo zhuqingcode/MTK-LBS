@@ -2905,6 +2905,7 @@ void oa_app_sms(void)
 				if (ms_ack == OA_TRUE){
 					handle_common4ms(key_ret, buf, &len);
 					DEBUG("\nbuf:%s len:%d", buf, len);
+					if (len == 0) return;//do not ack
 					if (set.s_k == sms_special){
 						t_s = sms_special;
 						oa_memcpy(sendbuf, buf, len);
