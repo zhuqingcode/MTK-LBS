@@ -173,6 +173,7 @@ void acc_status_detect(void *param)
 			if (ugent_last == OA_TRUE){
 				if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == RESET){
 					handle_alarm_status(StaAlarm0, ALARM_EMERGENCY_k, SET, OA_TRUE);
+					handle_alarm_sms(ALARM_EMERGENCY_k);
 					DEBUG("key alarm");
 				}
 			}

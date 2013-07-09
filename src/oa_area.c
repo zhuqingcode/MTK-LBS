@@ -1713,6 +1713,7 @@ void oa_app_area(void *para)
 		//do alarm
 		DEBUG("进出区域");
 		handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
+		handle_alarm_sms(ALARM_ENTER_AREA);
 		flag = OA_TRUE;
 	}
 	
@@ -1723,6 +1724,7 @@ void oa_app_area(void *para)
 			if (o_s_alarm_period * OA_AREA_RUN_SECOND >= o_s_t){
 				DEBUG("区域内超速");
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
+				handle_alarm_sms(ALARM_OVER_SPEED);
 				o_s_flag = OA_TRUE;
 
 				o_s_alarm_period = 0;
