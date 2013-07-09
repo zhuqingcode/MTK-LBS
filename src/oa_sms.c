@@ -533,7 +533,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 			case e_IP:
 			case e_Sub_IP:
 			case e_UPIP:{
-				if (ISAscIPValid(temp, oa_strlen(temp))){
+				if (ip_is_valued(temp, oa_strlen(temp))){
 					oa_memcpy(p_set->context.con_ch, temp, oa_strlen(temp));
 				}
 				else{
@@ -619,7 +619,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 					if (oa_strlen(temp) <= ALARMBIT_MAX_LEN){
 						//DEBUG(" temp:%s!", temp);
 						p_set->context.con_int = atobi(temp, oa_strlen(temp));
-						//DEBUG(" p_set->context.con_int:%u!", p_set->context.con_int);
+						DEBUG(" p_set->context.con_int:%u!", p_set->context.con_int);
 					}	
 					else{
 						DEBUG(" paras err!");
@@ -1225,14 +1225,14 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len)
 		}break;
 		case e_swh_alarmmask:{
 			oa_char tmp[33] = {0x0};
-			oa_itoa(dev_now_params.alarm_mask, tmp, BI);
+			oa_myitoa(dev_now_params.alarm_mask, tmp);
 			oa_strcat(enquire_temp, "swh_alarmmask:");
 			oa_strcat(enquire_temp, tmp);
 			oa_strcat(enquire_temp, ";");
 		}break;
 		case e_swh_alarmsms:{
 			oa_char tmp[33] = {0x0};
-			oa_itoa(dev_now_params.alarm_send_sms_mask, tmp, BI);
+			oa_myitoa(dev_now_params.alarm_send_sms_mask, tmp);
 			//DEBUG(" temp:%s!", tmp);
 			oa_strcat(enquire_temp, "swh_alarmsms:");
 			oa_strcat(enquire_temp, tmp);
@@ -1371,11 +1371,16 @@ void dev_action_handle(keyword_context *p_set)
 			if (ret == OA_TRUE)	print_key_dev_params();
 			if (!use_is_lock()) do_soc_reconn();
 		}break;
+		case rereg:{
+			ret = dev_params_save();
+			if (ret == OA_TRUE)	print_key_dev_params();
+			if (!use_is_lock()) do_rereg();
+		}break;
 		case update:{
 			ftp_update(NULL);
 		}break;
 		case reset:{
-			do_reset();
+			//do_reset();
 		}break;
 		case clr_log:{
 			clear_miles();
@@ -2314,13 +2319,13 @@ void handle_keyword4ms(e_keyword key_kind,
 					else{//not equal
 						oa_memset(dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
 						oa_memcpy(dev_now_params.term_tel_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
+						p_set->act_kind = rereg;
 					}
 				}
 				else{
 					oa_memset(dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
 					oa_memcpy(dev_now_params.term_tel_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					p_set->act_kind = para_save;
+					p_set->act_kind = rereg;
 				}
 			}
 		}break;
@@ -2582,7 +2587,7 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.vehicle_province_id = (u16)p_set->context.con_int;
-					p_set->act_kind = para_save;
+					p_set->act_kind = rereg;
 				}
 			}
 		}break;
@@ -2595,7 +2600,7 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.vehicle_city_id = (u16)p_set->context.con_int;
-					p_set->act_kind = para_save;
+					p_set->act_kind = rereg;
 				}
 			}
 		}break;
@@ -2611,13 +2616,13 @@ void handle_keyword4ms(e_keyword key_kind,
 					else{//not equal
 						oa_memset(dev_now_params.vehicle_license, 0x0, sizeof(dev_now_params.vehicle_license));
 						oa_memcpy(dev_now_params.vehicle_license, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
+						p_set->act_kind = rereg;
 					}
 				}
 				else{//not equal
 						oa_memset(dev_now_params.vehicle_license, 0x0, sizeof(dev_now_params.vehicle_license));
 						oa_memcpy(dev_now_params.vehicle_license, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
+						p_set->act_kind = rereg;
 				}
 				
 			}
@@ -2631,7 +2636,7 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.plate_color = (u8)p_set->context.con_int;
-					p_set->act_kind = para_save;
+					p_set->act_kind = rereg;
 				}
 			}
 		}break;
@@ -2785,7 +2790,7 @@ void handle_keyword4ms(e_keyword key_kind,
 					else{//not equal
 						oa_memset(dev_now_params.term_id, 0x0, sizeof(dev_now_params.term_id));
 						oa_memcpy(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN);
-						p_set->act_kind = para_save;
+						p_set->act_kind = rereg;
 					}
 			}
 		}break;
@@ -2944,8 +2949,14 @@ void oa_app_sms(void)
 				}
 			}
 			else if(sms_normal == t_s) sendsms4ms(sendbuf, oa_strlen(sendbuf), sms_normal);
+			
+			if (key_ret == e_RESTART){
+				oa_sleep(5000);
+				do_reset();
+			}
 		}
 
+		
 		if (try_unlock_inside == OA_TRUE){
 			DEBUG("try unlock");
 			try_unlock = OA_TRUE;

@@ -625,9 +625,9 @@ void print_key_dev_params(void)
 	DEBUG_N("factorysettel					:%s", dev_now_params.restore_factory_settings_num);
 	DEBUG_N("smstel						:%s", dev_now_params.monitor_platform_sms_num);
 	DEBUG_N("alarmsmstel					:%s", dev_now_params.terminal_sms_num);
-	oa_itoa(dev_now_params.alarm_mask, tmp, BI);
+	oa_myitoa(dev_now_params.alarm_mask, tmp);
 	DEBUG_N("swh_alarmmask					:%s", tmp);
-	oa_itoa(dev_now_params.alarm_send_sms_mask, tmp, BI);
+	oa_myitoa(dev_now_params.alarm_send_sms_mask, tmp);
 	DEBUG_N("swh_alarmsms					:%s", tmp);
 	DEBUG_N("overspeed					:%d", dev_now_params.max_speed);
 	DEBUG_N("overspeedtime					:%d", dev_now_params.speed_duration);

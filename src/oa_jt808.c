@@ -38,14 +38,15 @@
 #include "Area_Judge.h"
 #include "oa_debug.h"
 #include "oa_app.h"
+#include "oa_sms.h"
 #define PRINT_SAMEPARA	DEBUG(" this parameter is same as the original, so I do nothing...")
 #define PORT_MAX 65535
 extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
 extern timeout_struct timeout_var;
-oa_bool need_reconn = OA_FALSE;
 dev_control_type control_type = none;
 upgrade_paras up_paras;
+action_kind plat_paraset = 0x0;
 static u32 AlarmFlag[StatusNum]={0};
 
 //#define UPDATA_BUFNUM		12 //ÉÏ´«Êý¾Ý¶ÓÁÐµÄ»º´æÇø¸öÊý
@@ -62,89 +63,6 @@ ProtocolHandle sProtclHandl = {0};
 u16 escape_copy_to_send(u8 *buf, u16 len);
 u16 DevReq2ServPackag_build(u16 ReqMsgId);
 u8 JT808Msg_Build(u16 DevMsgId,u16 totalPackt,u16 SubPackt,u8 *Sendbuf,u16 Sendbuflen,u16 *Senddatalen);
-#if 0
-/*********************************************************
-*Function:      term_reg_enpacket()
-*Description:  enpacket the terminal register message
-*Return:        oa_bool
-*Others:         
-*********************************************************/
-oa_bool term_reg_enpacket(oa_uint8 *buf, oa_uint16 *p_len)
-{
-	if (NULL == buf || NULL == p_len)
-	{
-		OA_DEBUG_USER("err:", __FILE__, __func__,__LINE__);
-		return OA_FALSE;
-	}
-	*p_len = 0;
-	//province id
-	short_to_2char(buf, dev_now_params.vehicle_province_id);
-	buf += sizeof(dev_now_params.vehicle_province_id);
-	*p_len += 2;
-	//city id
-	short_to_2char(buf, dev_now_params.vehicle_city_id);
-	buf += sizeof(dev_now_params.vehicle_city_id);
-	*p_len += 2;
-	//manufacturers id
-	oa_memcpy(buf, dev_now_params.manufacturers_id, MAN_ID_MAX_LEN);
-	buf += MAN_ID_MAX_LEN;
-	*p_len += MAN_ID_MAX_LEN;
-	//terminal model
-	oa_memcpy(buf, dev_now_params.term_model, TERM_MODEL_MAX_LEN);
-	buf += TERM_MODEL_MAX_LEN;
-	*p_len += TERM_MODEL_MAX_LEN;
-	//terminal id
-	oa_memcpy(buf, dev_now_params.term_id, TERM_ID_MAX_LEN);
-	buf += TERM_ID_MAX_LEN;
-	*p_len += TERM_ID_MAX_LEN;
-	//plate colar
-	oa_memcpy(buf, &dev_now_params.plate_color, sizeof(dev_now_params.plate_color));
-	buf += sizeof(dev_now_params.plate_color);
-	*p_len += sizeof(dev_now_params.plate_color);
-	//vehicle lisence
-	oa_memcpy(buf, dev_now_params.vehicle_license, oa_strlen(dev_now_params.vehicle_license));
-	buf += oa_strlen(dev_now_params.vehicle_license);
-	*p_len += oa_strlen(dev_now_params.vehicle_license);
-	return OA_TRUE;
-}
-/*********************************************************
-*Function:      fill_reg_packet()
-*Description:  enpacket the terminal register message
-*Return:        oa_bool
-*Others:         
-*********************************************************/
-oa_bool msg_head_enpacket(oa_uint8 *buf, oa_uint16 body_len)
-{
-	if (NULL == buf)
-	{
-		return OA_FALSE;
-	}
-	//---------------ÏûÏ¢Í·----------------
-	//±êÊ¾Î»
-	buf[0] = JT808_FLAG;
-	//ÏûÏ¢id
-	buf[1] = TERM_REG;
-	//ÏûÏ¢ÌåÊôÐÔ
-	short_to_2char(&buf[2], body_len & 0x03ff);
-	//ÖÕ¶ËÊÖ»úºÅ
-	oa_memcpy(&buf[4], dev_now_params.term_tel_num, sizeof(dev_now_params.term_tel_num));
-	//ÏûÏ¢Á÷Ë®ºÅ
-	short_to_2char(&buf[10], serial_num);
-	//-----------------------------------------	
-	
-}
-/*********************************************************
-*Function:      fill_reg_packet()
-*Description:  enpacket the terminal register message
-*Return:        oa_bool
-*Others:         
-*********************************************************/
-oa_bool send_buffer_enpacket(void)
-{
-	
-	
-}
-#endif
 //=====================================´ÓLBSÉÏÒÆÖ²======================================
 u8 Read_ProtclHandl(Protocol_Handle_e type, u8 *pbuf, u16 *pbuflen)
 {
@@ -752,20 +670,10 @@ u8 JT808_dataChg(u8 flag, u8 *pstr, u16 strlen, u16 *Destlen)
 
 	return status;
 }
-/*--------------------------------------------------------------------------------------
-*Function:       WriteLbsCfgPara()
-*Description:	¶ÁÈ«¾Ö±äÁ¿LbsCfgStruct
-*				UpdateOnlyÖ»¸üÐÂramµÄLbsCfgStruct
-*				UpdateFlash ¸üÐÂramÍ¬Ê±Ð´Èëflash
-*				Ð´flash£º¿ÉÒÔÔÚ²ÎÊýÉèÖÃµÄÍ¬Ê±Ð´flash£¬Ò²¿ÉÒÔÔÚCfgParaÎªeCfaParaMaxÊ±Ö±½ÓÐ´flash
-*input:			CfgPara ²ÎÊý¶ÔÓ¦µÄJTT808Ð­ÒéID
-*				pValueÒªÐ´ÈëµÄÖµ£¬lenÐ´Èë³¤¶È
-*				UpdateMode UpdateOnlyÖ»¸üÐÂramÈ«¾Ö±äÁ¿£¬UpdateFlashÍ¬Ê±Ð´flash				
-*Return:		ActionOK±í³É¹¦£¬ParaError²ÎÊý´íÎó
-*Others:		
----------------------------------------------------------------------------------------*/
-//ÅÐ¶Ïlen³¤¶È×Ö·û´®ÊÇ·ñÎªIP IP¸ñÊ½xxx.xxx.xxx.xxx peijl_20120828 ÐÞ¸Ä
-u8 ISAscIPValid(u8 *IP,u8 len){
+#if 0
+//ÅÐ¶Ïlen³¤¶È×Ö·û´®ÊÇ·ñÎªIP IP¸ñÊ½xxx.xxx.xxx.xxx peijl_20120828 ÐÞ¸
+oa_bool ISAscIPValid (u8 *IP, u8 len)
+{
 	u8 i;
 	u8 pot=0;
 	u16 potdata=0;
@@ -792,6 +700,43 @@ u8 ISAscIPValid(u8 *IP,u8 len){
 		}
 		else if(IP[i]>='0'&&IP[i]<='9')
 			potdata=potdata*10+IP[i]-'0';
+		else
+			return OA_FALSE;
+	}
+	if((pot!=3)||(potdata>255))
+		return OA_FALSE;
+
+	return OA_TRUE;
+}
+#endif
+oa_bool ip_is_valued (u8 *ip, u8 len)
+{
+	u8 i;
+	u8 pot=0;
+	u16 potdata=0;
+	if(ip==NULL)
+		return OA_FALSE;
+	if(len<7 ||len>15)
+		return OA_FALSE;
+	if(ip[0]=='.'||ip[len-1]=='.')
+		return OA_FALSE;
+	for(i=0;i<len-1;i++)
+	{
+		if(ip[i]=='.'&&ip[i+1]=='.')
+		return OA_FALSE;
+	}
+
+	for(i=0;i<len;i++)
+	{
+		if(ip[i]=='.')
+		{
+			if(potdata>255)
+				return OA_FALSE;
+			potdata=0;
+			pot++;
+		}
+		else if(ip[i]>='0'&&ip[i]<='9')
+			potdata=potdata*10+ip[i]-'0';
 		else
 			return OA_FALSE;
 	}
@@ -880,8 +825,8 @@ u8 WriteLbsCfgPara(Enum_CtrlCfgPara CfgPara, u8 *pValue,u8 len,UpdateModeEnum Up
 		break;
 		case eIP:
 		case eIP_sub:
-			if(!ISAscIPValid(pValue,len)){
-				DEBUG("here");
+			//if(!ISAscIPValid(pValue,len)){
+			if (!ip_is_valued(pValue,len)){
 				return 1;
 			}
 				
@@ -909,23 +854,21 @@ u8 WriteLbsCfgPara(Enum_CtrlCfgPara CfgPara, u8 *pValue,u8 len,UpdateModeEnum Up
 			if(len!=4)
 				return 1;
 		break;
-//		case eRptStrategy:
-//			if((len!=1)||
-//			(*pValue!=0&&*pValue!=1&&*pValue!=2))
-//				return 1;
-//		break;
-//		case eRptType:
-//			if((len!=1)||
-//			(*pValue!=0&&*pValue!=1))
-//				return 1;
-//		break;
-//		case eRptCog:
-//			if((len!=4)
-//			||(*pValue>180)||(*(pValue+1)!=0)||(*(pValue+2)!=0)||(*(pValue+3)!=0)) //>108
-//				return 1;
-//		break;
-
-/*	
+		case eRptStrategy:
+			if((len!=1)||
+				(*pValue!=0&&*pValue!=1&&*pValue!=2))
+				return 1;
+		break;
+		case eRptType:
+			if((len!=1)||
+			(*pValue!=0&&*pValue!=1))
+				return 1;
+		break;
+		case eRptCog:
+			if((len!=4)
+			||(*pValue>180)||(*(pValue+1)!=0)||(*(pValue+2)!=0)||(*(pValue+3)!=0)) //>108
+				return 1;
+		break;	
 		case eAnswerType:
 		break;
 		case eMaxCalltime:
@@ -968,7 +911,6 @@ u8 WriteLbsCfgPara(Enum_CtrlCfgPara CfgPara, u8 *pValue,u8 len,UpdateModeEnum Up
 		break;
 		case eCarclor:
 		break;
-*/
 		case ePrivic:
 		case eCity:
 			if(len!=2)
@@ -1006,7 +948,8 @@ if (UpdateMode == UpdateOnly){
 					}
 					else{
 						dev_now_params.server_udp_port = tmp;
-						need_reconn = OA_TRUE;
+						//need_reconn = OA_TRUE;
+						plat_paraset = reconn;
 					}
 				}
 				else{
@@ -1034,7 +977,8 @@ if (UpdateMode == UpdateOnly){
 					}
 					else{
 						dev_now_params.server_tcp_port = tmp;
-						need_reconn = OA_TRUE;
+						//need_reconn = OA_TRUE;
+						plat_paraset = reconn;
 					}
 				}
 				else{
@@ -1071,14 +1015,15 @@ if (UpdateMode == UpdateOnly){
 					else{//not equal
 						oa_memset(dev_now_params.m_server_ip, 0x0, sizeof(dev_now_params.m_server_ip));
 						oa_memcpy(dev_now_params.m_server_ip, ip_tmp, len);
-						need_reconn = OA_TRUE;
+						//need_reconn = OA_TRUE;
+						plat_paraset = reconn;
 					}
 				}
 				else{//not equal
 					oa_memset(dev_now_params.m_server_ip, 0x0, sizeof(dev_now_params.m_server_ip));
 					oa_memcpy(dev_now_params.m_server_ip, ip_tmp, len);
-					need_reconn = OA_TRUE;
-
+					//need_reconn = OA_TRUE;
+					plat_paraset = reconn;
 				}
 				#if 0
 				oa_memset(&dev_now_params.m_server_ip, 0x0, sizeof(dev_now_params.m_server_ip));
@@ -1125,10 +1070,13 @@ if (UpdateMode == UpdateOnly){
 			u8 tel_tmp[TERM_TEL_NUM_MAX_LEN] = {0x0};
 			//LbsCfgStruct.LclTELlen=len;
 			//Mem_Copy(LbsCfgStruct.LclTEL,pValue,len);
+			oa_memcpy(tel_tmp, pValue, len);
 			DEBUG("set LclTEL");
 			if (len <= TERM_TEL_NUM_MAX_LEN){
+				if (!oa_memcmp((u8 *)&dev_now_params.term_tel_num[0], tel_tmp, 11)) break;
 				oa_memset(&dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
 				oa_memcpy((u8 *)&dev_now_params.term_tel_num, pValue, len);
+				plat_paraset = rereg;
 			}
 			else{
 				DEBUG("param err ");
@@ -1521,45 +1469,61 @@ if (UpdateMode == UpdateOnly){
 				DEBUG("param err ");
 			}
 		break;
-		case ePrivic:
-			#if 0
-			//char_to_short(pValue,&U16Temp);
-			Mem_Copy((u8 *)&LbsCfgStruct.ProvinceId,pValue,len);	
-			#endif
+		case ePrivic:{
+			u16 U16Temp = 0;
+			char_to_short(pValue,&U16Temp);
+			//Mem_Copy((u8 *)&LbsCfgStruct.ProvinceId,pValue,len);	
 			DEBUG("Privic");
 			if (len == 2){
+				if (dev_now_params.vehicle_province_id == U16Temp) break;
 				oa_memcpy((u8 *)&dev_now_params.vehicle_province_id, pValue, len);
+				plat_paraset = rereg;
 			}
 			else {
 				DEBUG("param err ");
 			}
+
+		}
 		break;
-		case eCity:
+		case eCity:{
+			u16 U16Temp = 0;
+			char_to_short(pValue,&U16Temp);
 			//Mem_Copy((u8 *)&LbsCfgStruct.CityId,pValue,len);
 			DEBUG("City");
 			if (len == 2){
+				if (dev_now_params.vehicle_province_id == U16Temp) break;
 				oa_memcpy((u8 *)&dev_now_params.vehicle_city_id, pValue, len);
+				plat_paraset = rereg;
 			}
 			else {
 				DEBUG("param err ");
 			}
+		}
 		break;
-		case eCarid:
+		case eCarid:{
 			//LbsCfgStruct.CarIdlen=len;
 			//Mem_Copy(LbsCfgStruct.CarId,pValue,len);
+			u8 temp[VEHICLE_LICENCE_MAX_LEN] = {0x0};
+			oa_memcpy(temp, pValue, len);
 			DEBUG("Carid");
 			if (len < VEHICLE_LICENCE_MAX_LEN){
+				if (!oa_memcmp(dev_now_params.vehicle_license, temp, VEHICLE_LICENCE_MAX_LEN)) break;
 				oa_memset(dev_now_params.vehicle_license, 0x0, 	VEHICLE_LICENCE_MAX_LEN);
 				oa_memcpy(dev_now_params.vehicle_license, pValue, len);
+				plat_paraset = rereg;
 			}
 			else{
 				DEBUG("param err ");
 			}
+		}
 		break;
-		case eCarclor:
+		case eCarclor:{
 			DEBUG("Carclor");
 			//LbsCfgStruct.CarIdColor=*pValue;
+			if (dev_now_params.plate_color == *pValue) break;
 			dev_now_params.plate_color = *pValue;
+			plat_paraset = rereg;
+		}
 		break;
 		default:{DEBUG("not support!");}
 		break;
@@ -1604,7 +1568,8 @@ u8 ParaConvertandSet(Enum_CtrlCfgPara paramID,u8 *Srcval,u8 len,u16 *devAct)
 		case eIP:
 		case eIP_sub:{
 			u8 t[16];
-			if(!ISAscIPValid(Srcval,len))
+			//if(!ISAscIPValid(Srcval,len))
+			if (!ip_is_valued(Srcval,len))
 				return 1;
 			WriteLbsCfgPara(paramID, Srcval,len,UpdateOnly);
 			#if 0
@@ -2040,7 +2005,7 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 			len = p3 - (p2+1);
 			if (len > 0 && len < SERVER_IP_MAX_LEN){
 				oa_memcpy(up_paras.ip, p2+1, len);
-				if(!ISAscIPValid(up_paras.ip, oa_strlen(up_paras.ip))){
+				if(!ip_is_valued(up_paras.ip, oa_strlen(up_paras.ip))){
 					DEBUG("ip err");
 					break;
 				}
@@ -2167,7 +2132,7 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 			len = p1 - (p0+1);
 			if (len > 0 && len < SERVER_IP_MAX_LEN){
 				oa_memcpy(up_paras.ip, p0+1, len);
-				if(!ISAscIPValid(up_paras.ip, oa_strlen(up_paras.ip))){
+				if(!ip_is_valued(up_paras.ip, oa_strlen(up_paras.ip))){
 					DEBUG("ip err");
 					break;
 				}

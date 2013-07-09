@@ -213,6 +213,7 @@ typedef enum
 	clr_authcode,
 	update_authcode,
 	reset,
+	rereg,
 	no_act = 0xf,
 }action_kind;
 

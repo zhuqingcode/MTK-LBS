@@ -51,7 +51,7 @@ void do_reset(void)
 		}
 	}
 	DEBUG("someone let me reset myself , so..., goodbye......");
-	oa_sleep(POWEROFF_TIME);
+	oa_sleep(2000);
 	oa_module_restart(NULL);
 }
 /*********************************************************
@@ -181,6 +181,29 @@ void do_soc_reconn(void)
 	dev_running.plat_switch = OA_TRUE;
 	dev_running.next_step = PLAT_RECONN;
 	DEBUG("do reconnect!");
+}
+/*********************************************************
+*Function:     do_rereg()
+*Description:  do_rereg
+*Return:		
+*Others:         
+*********************************************************/
+void do_rereg(void)
+{	
+	oa_bool ret;
+	ret = del_authcode();
+	if (OA_TRUE == ret){
+		DEBUG("delete authen ok");
+		if (OFFLINE == dev_running.plat_status){
+			dev_running.next_step = PLAT_DEV_REG;
+			dev_running.plat_switch = OA_TRUE;
+		}		
+		else if (ONLINE == dev_running.plat_status){//if you delete authcode, you must unregsiter & reg again
+			dev_running.next_step = PLAT_DEV_UNREG;
+			dev_running.plat_switch = OA_TRUE;
+		}
+	}
+	DEBUG("do rereg!");
 }
 /*********************************************************
 *Function:     just_reconn()
