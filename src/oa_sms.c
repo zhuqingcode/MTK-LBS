@@ -2951,7 +2951,7 @@ void oa_app_sms(void)
 			else if(sms_normal == t_s) sendsms4ms(sendbuf, oa_strlen(sendbuf), sms_normal);
 			
 			if (key_ret == e_RESTART){
-				oa_sleep(5000);
+				//oa_sleep(5000);
 				do_reset();
 			}
 		}

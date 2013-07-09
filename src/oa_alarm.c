@@ -64,10 +64,10 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 		}
 		else{//alarm is unmasked
 			if (SET == status){
-				if (ReadAlarmPara(part, alarm_bit) == RESET)	WriteAlarmPara(SET, part, alarm_bit);
+				WriteAlarmPara(SET, part, alarm_bit);
 			}
 			else if (RESET == status){
-				if (ReadAlarmPara(part, alarm_bit) == SET)	WriteAlarmPara(RESET, part, alarm_bit);
+				WriteAlarmPara(RESET, part, alarm_bit);
 			}
 			
 			

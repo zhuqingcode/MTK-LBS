@@ -267,8 +267,8 @@ void oa_app_gps(void)
 			if (0 == gps_info.Speed){
 				park_times++;
 				if (park_times * GPS_RUN_SECONDS >= dev_now_params.max_park_time){
-						handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
-						DEBUG("overtime park");
+					handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
+					DEBUG("overtime park");
 				}
 			}
 			else if (gps_info.Speed > 0){

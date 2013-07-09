@@ -1076,7 +1076,7 @@ if (UpdateMode == UpdateOnly){
 				if (!oa_memcmp((u8 *)&dev_now_params.term_tel_num[0], tel_tmp, 11)) break;
 				oa_memset(&dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
 				oa_memcpy((u8 *)&dev_now_params.term_tel_num, pValue, len);
-				plat_paraset = rereg;
+				//plat_paraset = rereg;
 			}
 			else{
 				DEBUG("param err ");
@@ -2402,7 +2402,7 @@ static u8 set_round_area(u8 *pbuf, u16 buflen)
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
 	if (area_num > MAX_AREA_SUM){
 		DEBUG("area num is too large");
-		return 1;
+		area_num = 24;
 	}
 	
 	for(i=0;i<area_num;i++)
@@ -2462,7 +2462,7 @@ static u8 set_rect_area(u8 *pbuf, u16 buflen)
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
 	if (area_num > MAX_AREA_SUM){
 		DEBUG("area num is too large");
-		return 1;
+		area_num = 24;
 	}
 	
 	for(i=0;i<area_num;i++)
@@ -2523,7 +2523,7 @@ static u8 set_poly_area(u8 *pbuf, u16 buflen)
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
 	if (area_num > MAX_AREA_SUM){
 		DEBUG("area num is too large");
-		return 1;
+		area_num = 24;
 	}
 	
 	for(i=0;i<area_num;i++)
