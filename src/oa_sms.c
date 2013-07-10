@@ -1346,7 +1346,17 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len)
 		oa_memcpy(buf, enquire_temp, *len);
 	}
 }
-
+/*********************************************************
+*Function:      handle_keyword4ms()
+*Description:  handle the keyword for mutiple sms
+*Return:        void
+*Others:         
+*********************************************************/
+void sendsms4ms(u8 *buf, u16 len, sms_kind s_k){
+	DEBUG("send sms");
+	if (s_k == sms_normal)	oa_sms_test_dfalp(buf, message.deliver_num);
+	else if(s_k == sms_special) oa_sms_test_ucs2(buf, message.deliver_num, len);
+}
 /*********************************************************
 *Function:      dev_action_handle()
 *Description:  maybe device need do something
@@ -1380,7 +1390,8 @@ void dev_action_handle(keyword_context *p_set)
 			ftp_update(NULL);
 		}break;
 		case reset:{
-			//do_reset();
+			set_reset_flag();
+			do_reset();
 		}break;
 		case clr_log:{
 			clear_miles();
@@ -2133,17 +2144,6 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 	
 }
 #endif
-/*********************************************************
-*Function:      handle_keyword4ms()
-*Description:  handle the keyword for mutiple sms
-*Return:        void
-*Others:         
-*********************************************************/
-void sendsms4ms(u8 *buf, u16 len, sms_kind s_k){
-	DEBUG("send sms");
-	if (s_k == sms_normal)	oa_sms_test_dfalp(buf, message.deliver_num);
-	else if(s_k == sms_special) oa_sms_test_ucs2(buf, message.deliver_num, len);
-}
 /*********************************************************
 *Function:      handle_keyword4ms()
 *Description:  handle the keyword for mutiple sms
@@ -2949,11 +2949,6 @@ void oa_app_sms(void)
 				}
 			}
 			else if(sms_normal == t_s) sendsms4ms(sendbuf, oa_strlen(sendbuf), sms_normal);
-			
-			if (key_ret == e_RESTART){
-				//oa_sleep(5000);
-				do_reset();
-			}
 		}
 
 		

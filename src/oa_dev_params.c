@@ -441,6 +441,16 @@ oa_bool del_some_files(void)
 		}
 	}
 
+	handle = oa_fopen(RESTART_FILE);
+	if (handle >= 0){
+		oa_fclose(handle);
+		//delete files about restart flag
+		ret = oa_fdelete(RESTART_FILE);
+		if (ret < 0){
+			DEBUG("delete file:RESTART_FILE err!");
+			return OA_FALSE;
+		}
+	}
 	
 	
 	return OA_TRUE;

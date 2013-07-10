@@ -28,7 +28,7 @@
 #define __OA_SMS_H__
 #include "oa_type.h"
 #include "oa_api.h"
-
+#include "oa_dev_params.h"
 //#define SMS_CALLBACK
 #define DBG_SMS
 #define SMS_HANDLE_DELAY 1000//ms
@@ -36,6 +36,7 @@
 #define SMS_DATA_MAX_LEN 160
 #define CONTEXT_MAX_LEN 128
 #define MAX_SMS_NUM 5
+#define RESTART_FILE L"RESTART.ini"
 //key words
 #define HB "Hearttime"
 #define RSP_TCP "RSP_TCP"
@@ -259,6 +260,12 @@ typedef enum
 	mobe_nb,
 	uni_nb,
 }nb_kind;
+
+typedef struct
+{
+	oa_bool flag;//OA_TRUE:need to send restart sms.
+	oa_uint8 sms_nb[TEL_NUM_MAX_LEN];
+}reset_struct;
 extern void oa_app_sms(void);
 #endif
 

@@ -132,6 +132,11 @@ void handle_alarm_sms(u32 alarm_bit)
 	u32 alarm_flag;
 
 	//sms alarm
+	alarm_flag = dev_now_params.alarm_mask;
+	if (alarm_flag & alarm_bit){//alarm is masked
+		DEBUG("this alarm is masked!");
+		return;
+	}
 	alarm_flag = dev_now_params.alarm_send_sms_mask;
 	if ((alarm_flag & alarm_bit) && sms_enable == OA_TRUE){
 		char enquire_temp[32] = {0x0};
