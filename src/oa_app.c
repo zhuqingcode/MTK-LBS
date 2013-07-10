@@ -512,6 +512,7 @@ void oa_app_main(void)
 	
 	if (OA_TRUE == first_run)
 	{
+		
 		//DEBUG(OA_SW_VERSION_NO);
 		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		//device params initial
@@ -528,6 +529,8 @@ void oa_app_main(void)
 		oa_app_init();
 		//platform link task
 		oa_timer_start(OA_APP_SCHEDULER_ID, oa_app_plat_link, NULL, OA_APP_PLAT_LINK_1ST);
+		//need to send restart sms?
+		need_send_sms_after_reset();
 		first_run = OA_FALSE;
 	}
 	

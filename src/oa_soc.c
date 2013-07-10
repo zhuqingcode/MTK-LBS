@@ -33,8 +33,9 @@
 #include "oa_platform.h"
 #include "oa_debug.h"
 #include "oa_app.h"
+#include "oa_sms.h"
 extern ProtocolHandle sProtclHandl;
-extern oa_bool need_reconn;
+extern action_kind plat_paraset;
 extern dev_control_type control_type;
 extern upgrade_paras up_paras;
 extern timeout_struct timeout_var;
@@ -514,9 +515,13 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 		case PLAT_REQ:{
 			//do something here
 			//DEBUG("plat request!");
-			if (need_reconn == OA_TRUE){
-				need_reconn = OA_FALSE;
+			if (plat_paraset == reconn){
+				plat_paraset = 0;
 				do_soc_reconn();
+			}
+			else if (plat_paraset == rereg){
+				plat_paraset = 0;
+				do_rereg();
 			}
 
 			if (none != control_type){

@@ -163,6 +163,7 @@ void oa_app_gps(void)
 		else{//handle this alarm
 			DEBUG("gps model err");
 			ret = handle_alarm_status(StaAlarm0, ALARM_GNSS_ERR, SET,OA_TRUE);
+			handle_alarm_sms(ALARM_GNSS_ERR);
 			//if (OA_TRUE == ret)	ModelCnt = 0;
 		}
 	}
@@ -209,6 +210,7 @@ void oa_app_gps(void)
 					if (gps_info.Speed > 0)	day_drive++;
 					if (day_drive * GPS_RUN_SECONDS >= dev_now_params.day_add_drive_time_threshold){
 							ret = handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
+							handle_alarm_sms(ALARM_OVERTIME_PARKING);
 							DEBUG("day overtime drive");
 					}
 				}
@@ -254,6 +256,7 @@ void oa_app_gps(void)
 			if (gps_info.Speed > speed){//handle this alarm & upload instantly
 				DEBUG("over speed");
 				ret = handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
+				handle_alarm_sms(ALARM_OVER_SPEED);
 			}
 			else if (gps_info.Speed <= speed){
 				if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET){
@@ -267,8 +270,9 @@ void oa_app_gps(void)
 			if (0 == gps_info.Speed){
 				park_times++;
 				if (park_times * GPS_RUN_SECONDS >= dev_now_params.max_park_time){
-						handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
-						DEBUG("overtime park");
+					handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
+					handle_alarm_sms(ALARM_OVERTIME_PARKING);
+					DEBUG("overtime park");
 				}
 			}
 			else if (gps_info.Speed > 0){
@@ -334,6 +338,7 @@ void oa_app_gps(void)
 				if (driver_time * GPS_RUN_SECONDS > dev_now_params.continuous_drive_time_threshold){
 					DEBUG("fatigue driving!");
 					ret = handle_alarm_status(StaAlarm0, ALARM_DRIVE_TIRED, SET, OA_TRUE);
+					handle_alarm_sms(ALARM_DRIVE_TIRED);
 					if (ret == OA_TRUE)	driver_time = 0;
 					
 				}

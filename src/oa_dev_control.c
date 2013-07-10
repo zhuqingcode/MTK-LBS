@@ -31,10 +31,13 @@
 #include "oa_dev_params.h"
 #include "oa_debug.h"
 #include "oa_jt808.h"
+#include "oa_sms.h"
 extern DEV_PLAT_PARAS dev_running;
 extern DEVICE_PARAMS dev_now_params;
 extern oa_bool sms_enable;
+extern oa_sms_context message;
 #define POWEROFF_TIME 2000
+
 /*********************************************************
 *Function:      do_reset()
 *Description:  reset device  
@@ -51,8 +54,85 @@ void do_reset(void)
 		}
 	}
 	DEBUG("someone let me reset myself , so..., goodbye......");
-	oa_sleep(POWEROFF_TIME);
+	oa_sleep(2000);
 	oa_module_restart(NULL);
+}
+/*********************************************************
+*Function:      set_reset_flag()
+*Description:  reset device  
+*Return:        void
+*Others:         
+*********************************************************/
+void set_reset_flag(void)
+{
+	oa_int32 handle, ret;
+	oa_uint32 dummy_write;
+	reset_struct r_s;
+	
+	handle = oa_fopen(RESTART_FILE);
+	if (handle < 0)
+	{
+		/* create new file for setting. */
+		handle = oa_fcreate(RESTART_FILE);
+		/* hope never return here. */
+		if (handle < 0)
+		{
+			DEBUG("Create restart file failed!");
+			return;
+		}
+
+		oa_memset(&r_s, 0x0, sizeof(r_s));
+		ret = oa_fwrite(handle, &r_s, sizeof(r_s), &dummy_write);
+		if((ret < 0) || (dummy_write != sizeof(r_s)))
+		{
+			DEBUG("Init restart file failed!");
+			return;
+		}
+	}
+
+	oa_fseek(handle, 0, OA_FILE_BEGIN);
+	r_s.flag = OA_TRUE;
+	oa_strcat(r_s.sms_nb, message.deliver_num);
+	ret = oa_fwrite(handle, &r_s, sizeof(r_s), &dummy_write);
+	if ((ret < 0) || (dummy_write != sizeof(r_s)))
+	{
+		DEBUG("write err!");
+		return;
+	}
+
+	oa_fclose(handle);
+}
+/*********************************************************
+*Function:      set_reset_flag()
+*Description:  reset device  
+*Return:        void
+*Others:         
+*********************************************************/
+oa_bool need_send_sms_after_reset(void)
+{
+	oa_int32 handle, ret;
+	oa_uint32 dummy_read;
+	reset_struct r_s;
+	
+	handle = oa_fopen(RESTART_FILE);
+	if (handle < 0) return OA_FALSE;
+
+	ret = oa_fread(handle, &r_s, sizeof(r_s), &dummy_read);
+	if ((ret < 0) || (dummy_read != sizeof(r_s))) goto fail;
+	
+	if (r_s.flag == OA_TRUE){
+		DEBUG("send restart sms");
+		oa_sms_test_dfalp("RESTART OK;", r_s.sms_nb);
+	}
+
+	oa_fclose(handle);
+	oa_fdelete(RESTART_FILE);
+	return OA_TRUE;
+fail:
+	//need delete the file and reset here..
+	oa_fclose(handle);
+	oa_fdelete(RESTART_FILE);
+	return OA_FALSE;
 }
 /*********************************************************
 *Function:      do_factory_set()
@@ -181,6 +261,29 @@ void do_soc_reconn(void)
 	dev_running.plat_switch = OA_TRUE;
 	dev_running.next_step = PLAT_RECONN;
 	DEBUG("do reconnect!");
+}
+/*********************************************************
+*Function:     do_rereg()
+*Description:  do_rereg
+*Return:		
+*Others:         
+*********************************************************/
+void do_rereg(void)
+{	
+	oa_bool ret;
+	ret = del_authcode();
+	if (OA_TRUE == ret){
+		DEBUG("delete authen ok");
+		if (OFFLINE == dev_running.plat_status){
+			dev_running.next_step = PLAT_DEV_REG;
+			dev_running.plat_switch = OA_TRUE;
+		}		
+		else if (ONLINE == dev_running.plat_status){//if you delete authcode, you must unregsiter & reg again
+			dev_running.next_step = PLAT_DEV_UNREG;
+			dev_running.plat_switch = OA_TRUE;
+		}
+	}
+	DEBUG("do rereg!");
 }
 /*********************************************************
 *Function:     just_reconn()
