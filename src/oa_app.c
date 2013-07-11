@@ -507,27 +507,7 @@ void oa_sms_demo(void *param){
 	
 	oa_timer_start(OA_TIMER_ID_10, oa_sms_demo, NULL, 1000);
 }
-/*********************************************************
-*Function:     oa_sms_demo()
-*Description:  application entry     
-*Return:		void
-*Others:         
-*********************************************************/
-void oa_screen_demo(void *param)
-{
-	u8 time[6] = {0};
-	static u8 s_t = 0;
-	if (scrn_send == OA_TRUE){
-		if (s_s.Action & CHINESE_SMS_ENABLE){
-			SScrn_SMS_Send(TELSMS_PDU_CMD,"0",1, time, s_s.sendbuf, s_s.buflen);
-		}
-		else{
-			DEBUG("send sms 2 screen");
-			SScrn_CenterSMS_Send(s_s.sendbuf, s_s.buflen);
-		}
-	}
 
-}
 /*********************************************************
 *Function:     oa_app_main()
 *Description:  application entry     
