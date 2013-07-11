@@ -55,7 +55,8 @@ scrn_struct s_s;
 void oa_screen_demo(void *param)
 {
 	DEBUG("send sms 2 screen");
-	SScrn_CenterSMS_Send(s_s.sendbuf, s_s.buflen);
+	if (s_s.buflen > 0)	SScrn_CenterSMS_Send(s_s.sendbuf, s_s.buflen);
+	else DEBUG("len err!");
 }
 /*********************************************************
 *Function:      sched_scrn_ana_4trans()
