@@ -42,4 +42,11 @@
 //#define TL_LclUpdate_Enable	(u16)(1<<6)
 #define CHINESE_SMS_ENABLE	(u16)(1<<7)
 #define Sms_Ack_Force_DISABLE	(u16)(1<<8)
+
+typedef struct
+{
+	u16 Action;
+	u8 sendbuf[256];
+	u16 buflen;
+}scrn_struct;
  #endif

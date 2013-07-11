@@ -47,7 +47,7 @@ extern oa_soc_set_parameter soc_cs;
 DEVICE_PARAMS dev_def_params =
 {
 	60,							//heartbeat_interval
-	10,							//tcp_ack_timeout
+	30,							//tcp_ack_timeout
 	3,							//tcp_retrans_times
 	30,							//udp_ack_timeout
 	3,							//udp_retrans_times
@@ -64,7 +64,7 @@ DEVICE_PARAMS dev_def_params =
 	{"root"},						//b_apn_password
 	{"112.4.133.86"},				//b_server_ip
 	{"talentvideo.com.cn"},			//b_server_dn
-	11119,						//server_tcp_port
+	10000,						//server_tcp_port
 	9994,						//server_udp_port
 	//9992,						//hx:just for test
 	//......
@@ -441,6 +441,16 @@ oa_bool del_some_files(void)
 		}
 	}
 
+	handle = oa_fopen(RESTART_FILE);
+	if (handle >= 0){
+		oa_fclose(handle);
+		//delete files about restart flag
+		ret = oa_fdelete(RESTART_FILE);
+		if (ret < 0){
+			DEBUG("delete file:RESTART_FILE err!");
+			return OA_FALSE;
+		}
+	}
 	
 	
 	return OA_TRUE;
@@ -625,9 +635,9 @@ void print_key_dev_params(void)
 	DEBUG_N("factorysettel					:%s", dev_now_params.restore_factory_settings_num);
 	DEBUG_N("smstel						:%s", dev_now_params.monitor_platform_sms_num);
 	DEBUG_N("alarmsmstel					:%s", dev_now_params.terminal_sms_num);
-	oa_itoa(dev_now_params.alarm_mask, tmp, BI);
+	oa_myitoa(dev_now_params.alarm_mask, tmp);
 	DEBUG_N("swh_alarmmask					:%s", tmp);
-	oa_itoa(dev_now_params.alarm_send_sms_mask, tmp, BI);
+	oa_myitoa(dev_now_params.alarm_send_sms_mask, tmp);
 	DEBUG_N("swh_alarmsms					:%s", tmp);
 	DEBUG_N("overspeed					:%d", dev_now_params.max_speed);
 	DEBUG_N("overspeedtime					:%d", dev_now_params.speed_duration);
@@ -642,6 +652,8 @@ void print_key_dev_params(void)
 	DEBUG_N("UPIP						:%s", dev_now_params.update_server_ip);
 	DEBUG_N("UPPORT						:%d", dev_now_params.update_server_port);
 	DEBUG_N("ftp_prog_name					:%s", dev_now_params.ftp_prog_name);
+	DEBUG_N("ftpusr						:%s", dev_now_params.ftpusr);
+	DEBUG_N("ftppwd						:%s", dev_now_params.ftppwd);
 	
 	
 	DEBUG_N("man id						:%s", dev_now_params.manufacturers_id);

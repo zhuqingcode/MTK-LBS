@@ -45,6 +45,7 @@
 #include "oa_area.h"
 #include "oa_debug.h"
 #include "oa_app.h"
+#include "SchedulScrn.h"
 DEV_PLAT_PARAS dev_running =
 {
 	PLAT_SOC_INIT,
@@ -59,6 +60,8 @@ soc_bak_context back_con = {0x0};
 oa_bool try_unlock = OA_FALSE;
 extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
+extern oa_bool scrn_send;
+extern scrn_struct s_s;
 extern void App_TaskSScrnSendManage(void *Para);
 extern void oa_app_area(void *para);
 /*--------END: Customer code----------*/
@@ -103,6 +106,7 @@ void oa_app_plat_link(void *para)
 			case PLAT_SOC_INIT:{
 				if (oa_sim_network_is_valid()){
 					DEBUG("GSM network init finished!");
+					if (use_is_lock()) do_socset_b4_unlock();
 					/*soc init*/
 					oa_soc_init();//soc paras & callback register
 					oa_soc_state_check();//check & connect
@@ -477,6 +481,12 @@ void oa_app_init(void)
 	DEBUG(OA_HW_VERSION_NO);
 	return;
 }
+/*********************************************************
+*Function:     oa_sms_demo()
+*Description:  application entry     
+*Return:		void
+*Others:         
+*********************************************************/
 void oa_sms_demo(void *param){
 	
 	static oa_bool first_valid = OA_FALSE;
@@ -497,7 +507,27 @@ void oa_sms_demo(void *param){
 	
 	oa_timer_start(OA_TIMER_ID_10, oa_sms_demo, NULL, 1000);
 }
+/*********************************************************
+*Function:     oa_sms_demo()
+*Description:  application entry     
+*Return:		void
+*Others:         
+*********************************************************/
+void oa_screen_demo(void *param)
+{
+	u8 time[6] = {0};
+	static u8 s_t = 0;
+	if (scrn_send == OA_TRUE){
+		if (s_s.Action & CHINESE_SMS_ENABLE){
+			SScrn_SMS_Send(TELSMS_PDU_CMD,"0",1, time, s_s.sendbuf, s_s.buflen);
+		}
+		else{
+			DEBUG("send sms 2 screen");
+			SScrn_CenterSMS_Send(s_s.sendbuf, s_s.buflen);
+		}
+	}
 
+}
 /*********************************************************
 *Function:     oa_app_main()
 *Description:  application entry     
@@ -511,6 +541,7 @@ void oa_app_main(void)
 	
 	if (OA_TRUE == first_run)
 	{
+		
 		//DEBUG(OA_SW_VERSION_NO);
 		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		//device params initial
@@ -523,10 +554,14 @@ void oa_app_main(void)
 		callback_func_reg();
 		//run sms backgrade
 		oa_timer_start(OA_TIMER_ID_10, oa_sms_demo, NULL, 1000);
+		//screen send sms feedback 
+		//oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
 		//application initial, mainly about socket
 		oa_app_init();
 		//platform link task
 		oa_timer_start(OA_APP_SCHEDULER_ID, oa_app_plat_link, NULL, OA_APP_PLAT_LINK_1ST);
+		//need to send restart sms?
+		need_send_sms_after_reset();
 		first_run = OA_FALSE;
 	}
 	

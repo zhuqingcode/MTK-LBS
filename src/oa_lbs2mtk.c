@@ -44,6 +44,7 @@ extern STRUCT_RMC Pos_Inf;
 extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 KEYWORDS_SIZE;
 extern oa_char *p_keyword[];
+extern oa_bool try_unlock;
 #if 0
 /*********************************************************
 *Function:      need_ack_check()
@@ -1238,6 +1239,9 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 	oa_char sendbuf[256] = {0x0};
 	oa_char buf[64] = {0x0};
 	oa_uint8 len;
+	oa_bool ms_ack;
+	oa_bool try_unlock_inside = OA_FALSE;
+	sms_kind t_s = sms_normal;
 	
 	DEBUG("sms:%s len:%d", p_sms, sms_len);
 	len = sms_len;
@@ -1256,7 +1260,16 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 		else break;
 	}
 
-	sn = i;
+	if (prefix[i-1][0] == 'A' || prefix[i-1][0] == 'a' && prefix[i-1][1] == 0x0){
+		sn = i -1;
+	}
+	else if (prefix[i-1][0] == 'N' || prefix[i-1][0] == 'n' && prefix[i-1][1] == 0x0){
+		sn = i -1;
+	}
+	else{
+		sn = i;
+	}
+	ms_ack = OA_TRUE;
 	//add ";"
 	for (i = 0;i < sn; i++){
 		prefix[i][oa_strlen(prefix[i])] = ';';
@@ -1277,8 +1290,8 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 		return ActionOK;
 	}
 #endif
+	
 	if (sn <= MAX_SMS_NUM){
-		u8 pos = 0;
 		DEBUG("%d x sms", sn);
 		for (i = 0; i < sn; i++){
 			for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
@@ -1288,25 +1301,50 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 				}
 				
 				handle_keyword4ms(key_ret, &set);
-				handle_common4ms(key_ret, buf, &len);
-				DEBUG("\nbuf:%s", buf);
-				//oa_strcat(sendbuf, buf);
-				oa_memcpy(&sendbuf[pos], buf, len);
-				oa_memset(buf, 0x0, sizeof(buf));
-				dev_action_handle(&set);
+				if (ms_ack == OA_TRUE){
+					handle_common4ms(key_ret, buf, &len);
+					DEBUG("\nbuf:%s len:%d", buf, len);
+					if (len == 0) return UnDefinedSms;
+					if (set.s_k == sms_special){
+						t_s = sms_special;
+						oa_memcpy(sendbuf, buf, len);
+					}
+					else if (set.s_k == sms_normal){
+						t_s = sms_normal;
+						oa_strcat(sendbuf, buf);
+					}
+					oa_memset(buf, 0x0, sizeof(buf));
+				}
+				dev_action_handle(&set, scrn);
+				if (set.kind == 0x1 && use_is_lock()) try_unlock_inside = OA_TRUE;
 				oa_memset(&set, 0x0, sizeof(set));
 			}
 		}
-		if (oa_strlen(sendbuf)){
-			*p_fbk_len = oa_strlen(sendbuf);
-			oa_memcpy(p_fbk, sendbuf, *p_fbk_len);
+
+		if (try_unlock_inside == OA_TRUE){
+			DEBUG("try unlock");
+			try_unlock = OA_TRUE;
+		}
+		
+		if (ms_ack == OA_TRUE){
+			if (sms_special == t_s){
+				*p_fbk_len = len;
+				oa_memcpy(p_fbk, sendbuf, *p_fbk_len);
+				*p_act |= CHINESE_SMS_ENABLE;
+			}
+			else if(sms_normal == t_s){
+				*p_fbk_len = oa_strlen(sendbuf);
+				oa_memcpy(p_fbk, sendbuf, *p_fbk_len);
+			}
+
 			*p_act |= Sms_Ack_Enable;
 			return ActionOK;
 		}
+
+		
 		
 	}
 	else DEBUG("too many sms");
-	
 	return UnDefinedSms;
 }
 

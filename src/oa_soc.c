@@ -33,8 +33,9 @@
 #include "oa_platform.h"
 #include "oa_debug.h"
 #include "oa_app.h"
+#include "oa_sms.h"
 extern ProtocolHandle sProtclHandl;
-extern oa_bool need_reconn;
+extern action_kind plat_paraset;
 extern dev_control_type control_type;
 extern upgrade_paras up_paras;
 extern timeout_struct timeout_var;
@@ -69,7 +70,7 @@ extern DEV_PLAT_PARAS dev_running;
 //for NOINIT buffer
 #define OA_GPRS_BUFFER_NOINIT_SIZE (oa_sram_noinit_get_size() - (1024*50))//500k-50k?
 
-
+void oa_soc_notify_ind_user_callback(void *inMsg);
 void oa_soc_init_fast(void)
 {
 	//init socket context
@@ -96,10 +97,11 @@ void oa_soc_init_fast(void)
 
 	//fill socket connect server address 
 	oa_soc_fill_addr_struct();
-
+	//register socket network notify event callback function 
+	oa_soc_notify_ind_register(oa_soc_notify_ind_user_callback);
 }
 
-void oa_soc_notify_ind_user_callback(void *inMsg);
+
 void oa_soc_init(void)
 {
 	//register network APN, only set APN success,can connect network
@@ -107,7 +109,7 @@ void oa_soc_init(void)
 	oa_gprs_apn_init(&g_soc_context.apn_info);
 
 	//register socket network notify event callback function 
-	oa_soc_notify_ind_register(oa_soc_notify_ind_user_callback);
+	//oa_soc_notify_ind_register(oa_soc_notify_ind_user_callback);//zhuqing mv it to func 'oa_soc_init_fast'
 }
 
 extern oa_soc_set_parameter g_soc_param;
@@ -417,7 +419,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 				case RspMsgerr:
 				case RspUnsurport:
 				case RspAlarmCheck:{
-					if (!try_unlock){
+					if (!use_is_lock()){//unlocked
 						if (dev_running.plat_status == OFFLINE){
 							dev_running.plat_switch = OA_TRUE;
 							dev_running.next_step = PLAT_DEV_REG;
@@ -425,11 +427,15 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 					}
 					else{
 						try_unlock = OA_FALSE;
+						dev_running.plat_switch = OA_TRUE;
 					}
+				}break;
+				case RspPackgerr:{
+					dev_running.plat_switch = OA_TRUE;
+					dev_running.next_step = PLAT_DEV_REG;
 				}break;
 				default:break;
 			}
-			
 		}
 		break;
 		case PLAT_COMMON_ACK:{
@@ -444,6 +450,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 						//unlock
 						if (use_is_lock()){
 							use_unlock();
+							try_unlock = OA_FALSE;
 							DEBUG("Congratulations to you,device is unlocked!");
 						}
 					}
@@ -469,7 +476,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 					DEBUG("plat common ack fail : %d", ret);
 					if (dev_running.doing_what == authen && dev_running.plat_status == OFFLINE){
 						dev_running.plat_switch = OA_TRUE;//if authen err, do it again
-						if (try_unlock){
+						if (use_is_lock()){//locked
 							try_unlock = OA_FALSE;
 						}
 						dev_running.authen_err_time++;
@@ -508,9 +515,13 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 		case PLAT_REQ:{
 			//do something here
 			//DEBUG("plat request!");
-			if (need_reconn == OA_TRUE){
-				need_reconn = OA_FALSE;
+			if (plat_paraset == reconn){
+				plat_paraset = 0;
 				do_soc_reconn();
+			}
+			else if (plat_paraset == rereg){
+				plat_paraset = 0;
+				do_rereg();
 			}
 
 			if (none != control_type){
@@ -623,15 +634,22 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 				g_soc_context.state = OA_SOC_STATE_ONLINE;
 				//oa_soc_send_req( );
 				if (OFFLINE == dev_running.plat_status){//判断当前有没有和平台连接上
-					ret = has_reg();//判断有没有注册过，如果已经注册就鉴权；没有注册才去注册
-					if (OA_FALSE == ret){
+					if (!use_is_lock()){//unlocked
+						ret = has_reg();//判断有没有注册过，如果已经注册就鉴权；没有注册才去注册
+						if (OA_FALSE == ret){
+							dev_running.plat_switch = OA_TRUE;
+							dev_running.next_step = PLAT_DEV_REG;
+						}
+						else{
+							dev_running.plat_switch = OA_TRUE;
+							dev_running.next_step = PLAT_DEV_LOGIN;
+						}
+					}
+					else{//locked means has not reged
 						dev_running.plat_switch = OA_TRUE;
 						dev_running.next_step = PLAT_DEV_REG;
 					}
-					else{
-						dev_running.plat_switch = OA_TRUE;
-						dev_running.next_step = PLAT_DEV_LOGIN;
-					}
+					
 				}
 			}
 			else{
@@ -647,12 +665,18 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 			//also callded by powerdown!
 			DEBUG("sock_id=%d close causeid=%d", soc_notify->socket_id,soc_notify->error_cause);
 			if (oa_soc_close_req()){
-				if (dev_running.plat_status == ONLINE){
-					dev_running.plat_status = OFFLINE;
-				}
+				if (!use_is_lock()){
+					if (dev_running.plat_status == ONLINE){
+						dev_running.plat_status = OFFLINE;
+					}
 
-				dev_running.plat_switch = OA_TRUE;
-				dev_running.next_step = PLAT_SOC_INIT;
+					dev_running.plat_switch = OA_TRUE;
+					dev_running.next_step = PLAT_SOC_INIT;
+				}
+				else{
+					try_unlock = OA_FALSE;
+				}
+				
 			}
 			else{
 				DEBUG(" soc close err!");

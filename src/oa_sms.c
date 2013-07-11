@@ -533,7 +533,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 			case e_IP:
 			case e_Sub_IP:
 			case e_UPIP:{
-				if (ISAscIPValid(temp, oa_strlen(temp))){
+				if (ip_is_valued(temp, oa_strlen(temp))){
 					oa_memcpy(p_set->context.con_ch, temp, oa_strlen(temp));
 				}
 				else{
@@ -619,7 +619,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 					if (oa_strlen(temp) <= ALARMBIT_MAX_LEN){
 						//DEBUG(" temp:%s!", temp);
 						p_set->context.con_int = atobi(temp, oa_strlen(temp));
-						//DEBUG(" p_set->context.con_int:%u!", p_set->context.con_int);
+						DEBUG(" p_set->context.con_int:%u!", p_set->context.con_int);
 					}	
 					else{
 						DEBUG(" paras err!");
@@ -1225,14 +1225,14 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len)
 		}break;
 		case e_swh_alarmmask:{
 			oa_char tmp[33] = {0x0};
-			oa_itoa(dev_now_params.alarm_mask, tmp, BI);
+			oa_myitoa(dev_now_params.alarm_mask, tmp);
 			oa_strcat(enquire_temp, "swh_alarmmask:");
 			oa_strcat(enquire_temp, tmp);
 			oa_strcat(enquire_temp, ";");
 		}break;
 		case e_swh_alarmsms:{
 			oa_char tmp[33] = {0x0};
-			oa_itoa(dev_now_params.alarm_send_sms_mask, tmp, BI);
+			oa_myitoa(dev_now_params.alarm_send_sms_mask, tmp);
 			//DEBUG(" temp:%s!", tmp);
 			oa_strcat(enquire_temp, "swh_alarmsms:");
 			oa_strcat(enquire_temp, tmp);
@@ -1346,14 +1346,24 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len)
 		oa_memcpy(buf, enquire_temp, *len);
 	}
 }
-
+/*********************************************************
+*Function:      handle_keyword4ms()
+*Description:  handle the keyword for mutiple sms
+*Return:        void
+*Others:         
+*********************************************************/
+void sendsms4ms(u8 *buf, u16 len, sms_kind s_k){
+	DEBUG("send sms");
+	if (s_k == sms_normal)	oa_sms_test_dfalp(buf, message.deliver_num);
+	else if(s_k == sms_special) oa_sms_test_ucs2(buf, message.deliver_num, len);
+}
 /*********************************************************
 *Function:      dev_action_handle()
 *Description:  maybe device need do something
 *Return:        void
 *Others:         
 *********************************************************/
-void dev_action_handle(keyword_context *p_set)
+void dev_action_handle(keyword_context *p_set, sms_or_uart which)
 {
 	oa_bool ret;
 	if (NULL == p_set){
@@ -1369,12 +1379,18 @@ void dev_action_handle(keyword_context *p_set)
 		case reconn:{
 			ret = dev_params_save();
 			if (ret == OA_TRUE)	print_key_dev_params();
-			do_soc_reconn();
+			if (!use_is_lock()) do_soc_reconn();
+		}break;
+		case rereg:{
+			ret = dev_params_save();
+			if (ret == OA_TRUE)	print_key_dev_params();
+			if (!use_is_lock()) do_rereg();
 		}break;
 		case update:{
 			ftp_update(NULL);
 		}break;
 		case reset:{
+			set_reset_flag(which);
 			do_reset();
 		}break;
 		case clr_log:{
@@ -2134,17 +2150,6 @@ void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind,
 *Return:        void
 *Others:         
 *********************************************************/
-void sendsms4ms(u8 *buf, u16 len, sms_kind s_k){
-	DEBUG("send sms");
-	if (s_k == sms_normal)	oa_sms_test_dfalp(buf, message.deliver_num);
-	else if(s_k == sms_special) oa_sms_test_ucs2(buf, message.deliver_num, len);
-}
-/*********************************************************
-*Function:      handle_keyword4ms()
-*Description:  handle the keyword for mutiple sms
-*Return:        void
-*Others:         
-*********************************************************/
 void handle_keyword4ms(e_keyword key_kind, 
 										keyword_context *p_set)
 {
@@ -2314,13 +2319,13 @@ void handle_keyword4ms(e_keyword key_kind,
 					else{//not equal
 						oa_memset(dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
 						oa_memcpy(dev_now_params.term_tel_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
+						p_set->act_kind = rereg;
 					}
 				}
 				else{
 					oa_memset(dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
 					oa_memcpy(dev_now_params.term_tel_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					p_set->act_kind = para_save;
+					p_set->act_kind = rereg;
 				}
 			}
 		}break;
@@ -2582,7 +2587,7 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.vehicle_province_id = (u16)p_set->context.con_int;
-					p_set->act_kind = para_save;
+					p_set->act_kind = rereg;
 				}
 			}
 		}break;
@@ -2595,7 +2600,7 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.vehicle_city_id = (u16)p_set->context.con_int;
-					p_set->act_kind = para_save;
+					p_set->act_kind = rereg;
 				}
 			}
 		}break;
@@ -2611,13 +2616,13 @@ void handle_keyword4ms(e_keyword key_kind,
 					else{//not equal
 						oa_memset(dev_now_params.vehicle_license, 0x0, sizeof(dev_now_params.vehicle_license));
 						oa_memcpy(dev_now_params.vehicle_license, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
+						p_set->act_kind = rereg;
 					}
 				}
 				else{//not equal
 						oa_memset(dev_now_params.vehicle_license, 0x0, sizeof(dev_now_params.vehicle_license));
 						oa_memcpy(dev_now_params.vehicle_license, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
+						p_set->act_kind = rereg;
 				}
 				
 			}
@@ -2631,7 +2636,7 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.plate_color = (u8)p_set->context.con_int;
-					p_set->act_kind = para_save;
+					p_set->act_kind = rereg;
 				}
 			}
 		}break;
@@ -2785,7 +2790,7 @@ void handle_keyword4ms(e_keyword key_kind,
 					else{//not equal
 						oa_memset(dev_now_params.term_id, 0x0, sizeof(dev_now_params.term_id));
 						oa_memcpy(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN);
-						p_set->act_kind = para_save;
+						p_set->act_kind = rereg;
 					}
 			}
 		}break;
@@ -2821,30 +2826,7 @@ void oa_app_sms(void)
 	oa_bool ms_ack;
 	oa_bool try_unlock_inside = OA_FALSE;
 	sms_kind t_s = sms_normal;
-#ifdef 0
-	OA_DEBUG_USER("%s called", __FILE__, __func__);
-	if(message.dcs == OA_SMSAL_DEFAULT_DCS)
-	{
-		/*handle ascii sms text.*/
-		OA_DEBUG_USER("data:%s", message.data);
-	}
-	else if(message.dcs == OA_SMSAL_UCS2_DCS)
-	{
-		/*handle unicode sms text.*/
-		/*chinese sms*/
-		oa_uint16 i;
-		for(i=0; i<message.len; i++)
-		{
-			OA_DEBUG_USER("data: %2X", message.data[i]);
-		}
-	}
-	else
-	{
-		/*handle 8-bit sms text.*/
-		OA_DEBUG_USER("8-bit sms text!!!");
-	}
-	OA_DEBUG_USER("deliver_num: %s", message.deliver_num);
-#endif
+
 	//len = message.len;
 	oa_memcpy(data, message.data, message.len);
 	p = strtok(data, ";");
@@ -2905,6 +2887,7 @@ void oa_app_sms(void)
 				if (ms_ack == OA_TRUE){
 					handle_common4ms(key_ret, buf, &len);
 					DEBUG("\nbuf:%s len:%d", buf, len);
+					if (len == 0) return;//do not ack
 					if (set.s_k == sms_special){
 						t_s = sms_special;
 						oa_memcpy(sendbuf, buf, len);
@@ -2915,7 +2898,7 @@ void oa_app_sms(void)
 					}
 					oa_memset(buf, 0x0, sizeof(buf));
 				}
-				dev_action_handle(&set);
+				dev_action_handle(&set, sms);
 				if (set.kind == 0x1 && use_is_lock()) try_unlock_inside = OA_TRUE;
 				oa_memset(&set, 0x0, sizeof(set));
 			}
@@ -2946,6 +2929,7 @@ void oa_app_sms(void)
 			else if(sms_normal == t_s) sendsms4ms(sendbuf, oa_strlen(sendbuf), sms_normal);
 		}
 
+		
 		if (try_unlock_inside == OA_TRUE){
 			DEBUG("try unlock");
 			try_unlock = OA_TRUE;

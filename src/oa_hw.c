@@ -137,26 +137,30 @@ void acc_status_detect(void *param)
 	static oa_bool ugent_last = OA_FALSE;
 	
 	ret = oa_gpio_read(ACC_GPIO);
-	if (ret){//acc is on
+	if (ret){//acc is off
 		//key shake
 		oa_sleep(10);
 		ret = oa_gpio_read(ACC_GPIO);
 		if (ret){
-			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == RESET){
-				WriteAlarmPara(SET, StaSector1, STA_ACC_ON);
+			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == SET){
+				WriteAlarmPara(RESET, StaSector1, STA_ACC_ON);
+				handle_alarm_status(StaSector1, STA_ACC_ON, RESET, OA_TRUE);
+				DEBUG("ACC status changed:off");
 			}
-			acc_status = ACC_ON;
+			acc_status = ACC_OFF;
 		}	
 	}
-	else{//acc is off
+	else{//acc is on
 		//key shake
 		oa_sleep(10);
 		ret = oa_gpio_read(ACC_GPIO);
 		if (!ret){
-			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == SET){
-				WriteAlarmPara(RESET, StaSector1, STA_ACC_ON);
+			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == RESET){
+				WriteAlarmPara(SET, StaSector1, STA_ACC_ON);
+				handle_alarm_status(StaSector1, STA_ACC_ON, SET, OA_TRUE);
+				DEBUG("ACC status changed:on");
 			}
-			acc_status = ACC_OFF;
+			acc_status = ACC_ON;
 		}
 	}
 	//ugent alarm detect
@@ -169,6 +173,8 @@ void acc_status_detect(void *param)
 			if (ugent_last == OA_TRUE){
 				if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == RESET){
 					handle_alarm_status(StaAlarm0, ALARM_EMERGENCY_k, SET, OA_TRUE);
+					handle_alarm_sms(ALARM_EMERGENCY_k);
+					DEBUG("key alarm");
 				}
 			}
 			ugent_last = OA_TRUE;
@@ -179,9 +185,10 @@ void acc_status_detect(void *param)
 		oa_sleep(10);
 		ret = oa_gpio_read(KEY_GPIO);
 		if (!ret){
-			if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == SET){
-				handle_alarm_status(StaAlarm0, ALARM_EMERGENCY_k, RESET, OA_TRUE);
-			}
+			//if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == SET){
+			//	handle_alarm_status(StaAlarm0, ALARM_EMERGENCY_k, RESET, OA_TRUE);
+			//	DEBUG("cancel key alarm");
+			//}
 			ugent_last = OA_FALSE;
 		}
 	}
