@@ -92,7 +92,7 @@ void set_reset_flag(sms_or_uart which)
 
 	oa_fseek(handle, 0, OA_FILE_BEGIN);
 	r_s.flag = OA_TRUE;
-	oa_strcat(r_s.sms_nb, message.deliver_num);
+	if (which == sms)	oa_strcat(r_s.sms_nb, message.deliver_num);
 	r_s.s_u = which;
 	ret = oa_fwrite(handle, &r_s, sizeof(r_s), &dummy_write);
 	if ((ret < 0) || (dummy_write != sizeof(r_s)))

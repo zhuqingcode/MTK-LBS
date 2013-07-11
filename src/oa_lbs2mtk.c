@@ -1315,7 +1315,7 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 					}
 					oa_memset(buf, 0x0, sizeof(buf));
 				}
-				dev_action_handle(&set);
+				dev_action_handle(&set, scrn);
 				if (set.kind == 0x1 && use_is_lock()) try_unlock_inside = OA_TRUE;
 				oa_memset(&set, 0x0, sizeof(set));
 			}

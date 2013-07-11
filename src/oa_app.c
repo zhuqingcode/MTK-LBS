@@ -525,15 +525,8 @@ void oa_screen_demo(void *param)
 			DEBUG("send sms 2 screen");
 			SScrn_CenterSMS_Send(s_s.sendbuf, s_s.buflen);
 		}
-		s_t++;
-		if (s_t == 2){
-			s_t = 0;
-			scrn_send = OA_FALSE;
-		}
-		
 	}
 
-	oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
 }
 /*********************************************************
 *Function:     oa_app_main()
@@ -562,7 +555,7 @@ void oa_app_main(void)
 		//run sms backgrade
 		oa_timer_start(OA_TIMER_ID_10, oa_sms_demo, NULL, 1000);
 		//screen send sms feedback 
-		oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
+		//oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
 		//application initial, mainly about socket
 		oa_app_init();
 		//platform link task

@@ -9,13 +9,14 @@
 #include "SchedulScrn.h"
 #include "oa_lbs2mtk.h"
 #include "oa_debug.h"
-
+#include "oa_dev_params.h"
 extern STRUCT_RMC Pos_Inf;
-extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 acc_status;
+extern DEVICE_PARAMS dev_now_params;
 extern STRUCT_SScrn_Result SScrn_Result;
 oa_bool scrn_send = OA_FALSE;
 scrn_struct s_s;
+extern void oa_screen_demo(void *param);
 #if 0
 #ifdef EVDO_USE
 extern u32 SYS_CHANNEL;  //EVDO分配给监控平台的socket号
@@ -474,6 +475,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 				oa_memcpy(s_s.sendbuf, pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3);
 				s_s.buflen = pSchedulScrnHandle->len3;
 				scrn_send = OA_TRUE;
+				oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
 			}
 			else if(pSchedulScrnHandle->Status == ActionOK)//正确解析
 			{
@@ -493,6 +495,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 					oa_memcpy(s_s.sendbuf, pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3);
 					s_s.buflen = pSchedulScrnHandle->len3;
 					scrn_send = OA_TRUE;
+					oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
 					//app_CentersmsAckAction(pSchedulScrnHandle->DevAct,pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->len3);
 				}
 			}
@@ -1505,9 +1508,10 @@ static void app_SScrnSendtaskExecut(Stk_SchedulSend_Handle *pSScrnSendHandle)
 			else
 				pSScrnSendHandle->DataBuf[0]=0;
 			#endif
-			if (dev_running.plat_status == ONLINE) 	pSScrnSendHandle->DataBuf[0]=0x25;
-			else 	pSScrnSendHandle->DataBuf[0]=0;
-			ReadLbsCfgPara(eOverspeed,&pSScrnSendHandle->DataBuf[1],&pSScrnSendHandle->U8len);
+			if (oa_sim_network_is_valid()) 	pSScrnSendHandle->DataBuf[0] = 0x13/*0x25*/;
+			else 	pSScrnSendHandle->DataBuf[0] = 0x02;
+			//ReadLbsCfgPara(eOverspeed,&pSScrnSendHandle->DataBuf[1],&pSScrnSendHandle->U8len);
+			pSScrnSendHandle->DataBuf[1] = dev_now_params.max_speed;
 			//GetCSQ(&pSScrnSendHandle->DataBuf[2]);
 			pSScrnSendHandle->DataBuf[2] = oa_network_get_signal_level();
 			#if 0
@@ -1516,8 +1520,8 @@ static void app_SScrnSendtaskExecut(Stk_SchedulSend_Handle *pSScrnSendHandle)
 			else
 				pSScrnSendHandle->DataBuf[3]=1;
 			#endif
-			if (acc_status == ACC_ON)		pSScrnSendHandle->DataBuf[3] = 0;
-			else if (acc_status == ACC_OFF)	pSScrnSendHandle->DataBuf[3] = 1;	
+			if (acc_status == ACC_ON)		pSScrnSendHandle->DataBuf[3] = 1;
+			else if (acc_status == ACC_OFF)	pSScrnSendHandle->DataBuf[3] = 0;	
 			pSScrnSendHandle->DataBuf[4]=0;//未设看车
 			#if 0
 			ReadLbsCfgPara(eNET, &pSScrnSendHandle->U8Temp, &pSScrnSendHandle->U8len);

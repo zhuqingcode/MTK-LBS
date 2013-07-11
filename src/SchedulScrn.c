@@ -1465,7 +1465,7 @@ static u8 SScrn_UpResult(u8 *Str,u8 Cmd)
 			Mem_Copy(SScrn_Result.result.SMS_Data.SMSDat,pStr,datalen);  //将中心短信信息保存
 			SScrn_Result.result.SMS_Data.SMSLen=datalen;
 			SScrn_Result.result.SMS_Data.SMSDat[datalen]='\0';
-			SSCRN_Print("中心短信内容:%s",SScrn_Result.result.SMS_Data.SMSDat);
+			//SSCRN_Print("中心短信内容:%s",SScrn_Result.result.SMS_Data.SMSDat);
 			SScrn_Result.CMD_TYPE=CENTER_SMS_CMD;
 		break;
 		case UNICODE_SMS_CMD:
@@ -1962,7 +1962,7 @@ u8 SScrn_SMS_Send(u8 cmd,u8 *Tel,u8 Tellen,u8 *Time,u8 *SMS,u8 smslen)
 static u8 SScrn_Ack_Send()
 {
 	u8 buf[5];
-	SSCRN_Print("向调度屏发送应答");
+	//SSCRN_Print("向调度屏发送应答");
 	return(Ack_Package(buf,Normal_Ack,ACK_CMD,0));
 }
 /*********************************************************
@@ -2027,7 +2027,7 @@ u8 SScrn_SMSResult_Send(u8 result)
 		SSCRN_Print("返回调度屏短信发送结果,错误输入\r\n");
 		return 1;
 	}
-	SSCRN_Print("返回调度屏短信发送结果");
+	//SSCRN_Print("返回调度屏短信发送结果");
 	if(result)
 	{
 		return(Ack_Package(buf,Operate_Ack,SMS_SEND_FAILD_CMD,0));
@@ -2398,7 +2398,7 @@ static u8 Ack_Package(u8 *Str,u8 mode,u8 Cmd,u8 Result)
 		ret = SchedulScrn_SendStr(Str,datalen);
 		//if((Cmd==ACK_CMD))//如果发送的是应答命令字,则不等待
 		if (OA_TRUE == ret){
-			SSCRN_Print("向调度屏发送成功");
+			//SSCRN_Print("向调度屏发送成功");
 			flag=0;
 			break;
 		}
