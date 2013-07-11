@@ -32,11 +32,14 @@
 #include "oa_debug.h"
 #include "oa_sms.h"
 #include "oa_app.h"
+#include "oa_lbs2mtk.h"
 extern DEVICE_PARAMS dev_now_params;
 extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 acc_status;
 extern oa_bool sms_enable;
 extern timeout_struct timeout_var;
+extern scrn_struct s_s;
+extern void oa_screen_demo(void *param);
 /*********************************************************
 *Function:     handle_alarm_status()
 *Description:  handle alarm status
@@ -130,7 +133,7 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 void handle_alarm_sms(u32 alarm_bit)
 {
 	u32 alarm_flag;
-
+	char enquire_temp[32] = {0x0};
 	//sms alarm
 	alarm_flag = dev_now_params.alarm_mask;
 	if (alarm_flag & alarm_bit){//alarm is masked
@@ -138,40 +141,45 @@ void handle_alarm_sms(u32 alarm_bit)
 		return;
 	}
 	alarm_flag = dev_now_params.alarm_send_sms_mask;
-	if ((alarm_flag & alarm_bit) && sms_enable == OA_TRUE){
-		char enquire_temp[32] = {0x0};
-		switch (alarm_bit){
-			case ALARM_EMERGENCY_k:{
-				oa_strcat(enquire_temp, "ALARM_EMERGENCY_k");
-			}break;
-			case ALARM_OVER_SPEED:{
-				oa_strcat(enquire_temp, "ALARM_OVER_SPEED");
-			}break;
-			case ALARM_DRIVE_TIRED:{
-				oa_strcat(enquire_temp, "ALARM_DRIVE_TIRED");
-			}break;
-			case ALARM_GNSS_ERR:{
-				oa_strcat(enquire_temp, "ALARM_GNSS_ERR");
-			}break;
-			case ALARM_GNSS_ANTENNA:{
-				oa_strcat(enquire_temp, "ALARM_GNSS_ANTENNA");
-			}break;
-			case ALARM_GNSS_SHORT_CIRCUIT:{
-				oa_strcat(enquire_temp, "ALARM_GNSS_SHORT_CIRCUIT");
-			}break;
-			case ALARM_DRIVE_OVERTIME:{
-				oa_strcat(enquire_temp, "ALARM_DRIVE_OVERTIME");
-			}break;
-			case ALARM_OVERTIME_PARKING:{
-				oa_strcat(enquire_temp, "ALARM_OVERTIME_PARKING");
-			}break;
-			case ALARM_ENTER_AREA:{
-				oa_strcat(enquire_temp, "ALARM_ENTER_AREA");
-			}break;
-			default:return;
-		}
+	
+	switch (alarm_bit){
+		case ALARM_EMERGENCY_k:{
+			oa_strcat(enquire_temp, "ALARM_EMERGENCY_k");
+		}break;
+		case ALARM_OVER_SPEED:{
+			oa_strcat(enquire_temp, "ALARM_OVER_SPEED");
+		}break;
+		case ALARM_DRIVE_TIRED:{
+			oa_strcat(enquire_temp, "ALARM_DRIVE_TIRED");
+		}break;
+		case ALARM_GNSS_ERR:{
+			oa_strcat(enquire_temp, "ALARM_GNSS_ERR");
+		}break;
+		case ALARM_GNSS_ANTENNA:{
+			oa_strcat(enquire_temp, "ALARM_GNSS_ANTENNA");
+		}break;
+		case ALARM_GNSS_SHORT_CIRCUIT:{
+			oa_strcat(enquire_temp, "ALARM_GNSS_SHORT_CIRCUIT");
+		}break;
+		case ALARM_DRIVE_OVERTIME:{
+			oa_strcat(enquire_temp, "ALARM_DRIVE_OVERTIME");
+		}break;
+		case ALARM_OVERTIME_PARKING:{
+			oa_strcat(enquire_temp, "ALARM_OVERTIME_PARKING");
+		}break;
+		case ALARM_ENTER_AREA:{
+			oa_strcat(enquire_temp, "ALARM_ENTER_AREA");
+		}break;
+		default:return;
+	}
 
+	if ((alarm_flag & alarm_bit) && sms_enable == OA_TRUE){
 		DEBUG("send sms");
 		oa_sms_test_dfalp(enquire_temp, dev_now_params.terminal_sms_num);
 	}
+	
+	oa_memset(&s_s, 0x0, sizeof(s_s));
+	s_s.buflen = oa_strlen(enquire_temp);
+	oa_memcpy(s_s.sendbuf, enquire_temp, s_s.buflen);
+	oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
 }

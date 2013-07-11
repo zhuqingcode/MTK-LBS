@@ -14,8 +14,7 @@ extern STRUCT_RMC Pos_Inf;
 extern oa_uint8 acc_status;
 extern DEVICE_PARAMS dev_now_params;
 extern STRUCT_SScrn_Result SScrn_Result;
-oa_bool scrn_send = OA_FALSE;
-scrn_struct s_s;
+extern scrn_struct s_s;
 extern void oa_screen_demo(void *param);
 #if 0
 #ifdef EVDO_USE
@@ -474,7 +473,6 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 				oa_memset(&s_s, 0x0, sizeof(s_s));
 				oa_memcpy(s_s.sendbuf, pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3);
 				s_s.buflen = pSchedulScrnHandle->len3;
-				scrn_send = OA_TRUE;
 				oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
 			}
 			else if(pSchedulScrnHandle->Status == ActionOK)//ÕýÈ·½âÎö
@@ -492,9 +490,17 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 				{
 					DEBUG("scrn data:%s len:%d", pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3);
 					oa_memset(&s_s, 0x0, sizeof(s_s));
-					oa_memcpy(s_s.sendbuf, pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3);
-					s_s.buflen = pSchedulScrnHandle->len3;
-					scrn_send = OA_TRUE;
+					if (pSchedulScrnHandle->DevAct & CHINESE_SMS_ENABLE){
+						u8 temp[256] = {0x0};
+						u8 len = 0;
+						SMS_EnglishUniToGBK(pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3, temp, &len);
+						oa_memcpy(s_s.sendbuf, temp, len);
+						s_s.buflen = len;
+					}
+					else{
+						oa_memcpy(s_s.sendbuf, pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3);
+						s_s.buflen = pSchedulScrnHandle->len3;
+					}
 					oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
 					//app_CentersmsAckAction(pSchedulScrnHandle->DevAct,pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->len3);
 				}
