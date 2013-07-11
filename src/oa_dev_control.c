@@ -63,7 +63,7 @@ void do_reset(void)
 *Return:        void
 *Others:         
 *********************************************************/
-void set_reset_flag(void)
+void set_reset_flag(sms_or_uart which)
 {
 	oa_int32 handle, ret;
 	oa_uint32 dummy_write;
@@ -93,6 +93,7 @@ void set_reset_flag(void)
 	oa_fseek(handle, 0, OA_FILE_BEGIN);
 	r_s.flag = OA_TRUE;
 	oa_strcat(r_s.sms_nb, message.deliver_num);
+	r_s.s_u = which;
 	ret = oa_fwrite(handle, &r_s, sizeof(r_s), &dummy_write);
 	if ((ret < 0) || (dummy_write != sizeof(r_s)))
 	{
@@ -122,7 +123,8 @@ oa_bool need_send_sms_after_reset(void)
 	
 	if (r_s.flag == OA_TRUE){
 		DEBUG("send restart sms");
-		oa_sms_test_dfalp("RESTART OK;", r_s.sms_nb);
+		if (r_s.s_u == sms) oa_sms_test_dfalp("RESTART OK;", r_s.sms_nb);
+		else if (r_s.s_u == scrn) SScrn_CenterSMS_Send("RESTART OK;", oa_strlen("RESTART OK;"));
 	}
 
 	oa_fclose(handle);

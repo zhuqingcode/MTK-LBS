@@ -1106,7 +1106,7 @@ u8 SScrn_DataAnaly(void)
 #endif
 	oa_memcpy(RcvBuf, uart_contain.buf, uart_contain.len);
 	MsgLen = uart_contain.len;
-	SSCRN_Print("ÊÕµ½µ÷¶ÈÆÁÏûÏ¢,ÏûÏ¢³¤¶È:%d",MsgLen);
+	//DEBUG("ÊÕµ½µ÷¶ÈÆÁÏûÏ¢,ÏûÏ¢³¤¶È:%d",MsgLen);
 	pStr=RcvBuf;
 	if(*pStr++==0x24)
 	{
@@ -1160,10 +1160,13 @@ u8 SScrn_DataAnaly(void)
 				SSCRN_Print("´®¿Úµ¼ÈëÏßÂ·¿ªÊ¼......\r\n");
 				SScrn_Result.CMD_TYPE=STATION_DOWNLOAD_START_CMD;
 			break;
+			case ACK_CMD:
+				//DEBUG("ÊÕµ½µ÷¶ÈÆÁÓ¦´ð");
+				return 	SCCRN_UNEXP_CMD;
 			default:
 			//	SScrn_Result.CMD_TYPE=SCCRN_UNEXP_CMD;
-				SSCRN_Print("(%s %s %d):µ÷¶ÈÆÁÊÕµ½Î´¶¨ÒåÏûÏ¢:", __FILE__, __func__, __LINE__);
-				SSCRN_Print("(%s %s %d):Ö¸ÁîÂëÎª:%02x",__FILE__, __func__, __LINE__, Cmd);
+				//DEBUG("(%s %s %d):µ÷¶ÈÆÁÊÕµ½Î´¶¨ÒåÏûÏ¢", __FILE__, __func__, __LINE__);
+				//DEBUG("(%s %s %d):Ö¸ÁîÂëÎª:%02x",__FILE__, __func__, __LINE__, Cmd);
 				return 	SCCRN_UNEXP_CMD;
 //			break;
 		}
@@ -2057,7 +2060,7 @@ u8 SScrn_CenterSMS_Send(u8* Str,u16 len)	  //·¢ËÍÖÐÐÄ¶ÌÐÅ	//ÐÞ¸Ä,Ö§³Ö³¬³¤ÖÐÐÄµ÷¶
 		SSCRN_Print("Ïòµ÷¶ÈÆÁ·¢ËÍÖÐÐÄ¶ÌÐÅ³ö´í,ÊäÈë´íÎó");
 		return 1;
 	}
-	SSCRN_Print("(%s %s %d):Ïòµ÷¶ÈÆÁ·¢ËÍÖÐÐÄ¶ÌÐÅ", __FILE__, __func__, __LINE__);
+	//SSCRN_Print("(%s %s %d):Ïòµ÷¶ÈÆÁ·¢ËÍÖÐÐÄ¶ÌÐÅ", __FILE__, __func__, __LINE__);
 	while(strlen>MAX_MSG_LEN)
 	{
 		res=Host_Send_Packag(HOST_CenSMS_CMD,Pstr,MAX_MSG_LEN);
@@ -2544,13 +2547,10 @@ static u8 Protocol_Check_2para(const u8 *PStr1,const u16 PStr_Length1,const u8 *
 			SSCRN_Print("Ïòµ÷¶ÈÆÁ·¢ËÍÊ§°Ü,´ÎÊý:%d\r\n",3-cnt);
 		}
 		#endif
-//		else
-//		{
-			SSCRN_Print("(%s %s %d):Ïòµ÷¶ÈÆÁ·¢ËÍ³É¹¦", __FILE__, __func__, __LINE__);
-			result=0;
-			break;
-//		}
+		
+		//SSCRN_Print("(%s %s %d):Ïòµ÷¶ÈÆÁ·¢ËÍ³É¹¦", __FILE__, __func__, __LINE__);
 	}
+	result=0;
 //	OSSemPost(Schedul_UsartSendSem);
 	return result;
 }

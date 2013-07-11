@@ -29,6 +29,7 @@
 #include "oa_type.h"
 #include "oa_api.h"
 #include "oa_dev_params.h"
+#include "oa_uart.h"
 //#define SMS_CALLBACK
 #define DBG_SMS
 #define SMS_HANDLE_DELAY 1000//ms
@@ -265,6 +266,7 @@ typedef struct
 {
 	oa_bool flag;//OA_TRUE:need to send restart sms.
 	oa_uint8 sms_nb[TEL_NUM_MAX_LEN];
+	sms_or_uart s_u;
 }reset_struct;
 extern void oa_app_sms(void);
 #endif

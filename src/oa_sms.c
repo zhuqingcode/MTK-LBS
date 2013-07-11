@@ -1363,7 +1363,7 @@ void sendsms4ms(u8 *buf, u16 len, sms_kind s_k){
 *Return:        void
 *Others:         
 *********************************************************/
-void dev_action_handle(keyword_context *p_set)
+void dev_action_handle(keyword_context *p_set, sms_or_uart which)
 {
 	oa_bool ret;
 	if (NULL == p_set){
@@ -1390,7 +1390,7 @@ void dev_action_handle(keyword_context *p_set)
 			ftp_update(NULL);
 		}break;
 		case reset:{
-			set_reset_flag();
+			set_reset_flag(which);
 			do_reset();
 		}break;
 		case clr_log:{
@@ -2826,30 +2826,7 @@ void oa_app_sms(void)
 	oa_bool ms_ack;
 	oa_bool try_unlock_inside = OA_FALSE;
 	sms_kind t_s = sms_normal;
-#ifdef 0
-	OA_DEBUG_USER("%s called", __FILE__, __func__);
-	if(message.dcs == OA_SMSAL_DEFAULT_DCS)
-	{
-		/*handle ascii sms text.*/
-		OA_DEBUG_USER("data:%s", message.data);
-	}
-	else if(message.dcs == OA_SMSAL_UCS2_DCS)
-	{
-		/*handle unicode sms text.*/
-		/*chinese sms*/
-		oa_uint16 i;
-		for(i=0; i<message.len; i++)
-		{
-			OA_DEBUG_USER("data: %2X", message.data[i]);
-		}
-	}
-	else
-	{
-		/*handle 8-bit sms text.*/
-		OA_DEBUG_USER("8-bit sms text!!!");
-	}
-	OA_DEBUG_USER("deliver_num: %s", message.deliver_num);
-#endif
+
 	//len = message.len;
 	oa_memcpy(data, message.data, message.len);
 	p = strtok(data, ";");
@@ -2920,7 +2897,7 @@ void oa_app_sms(void)
 					}
 					oa_memset(buf, 0x0, sizeof(buf));
 				}
-				dev_action_handle(&set);
+				dev_action_handle(&set, sms);
 				if (set.kind == 0x1 && use_is_lock()) try_unlock_inside = OA_TRUE;
 				oa_memset(&set, 0x0, sizeof(set));
 			}
