@@ -39,7 +39,7 @@ typedef signed short int s16;
 #define Mem_Set oa_memset
 #define Str_Char oa_strchr
 #define Str_Cmp_N oa_strncpy
-#define SSCRN_Print OA_DEBUG_USER
+#define SSCRN_Print DEBUG
 #define Str_Cat oa_strcat
 typedef enum
 {

@@ -9,11 +9,14 @@
 #include "SchedulScrn.h"
 #include "oa_lbs2mtk.h"
 #include "oa_debug.h"
-
+#include "oa_dev_params.h"
 extern STRUCT_RMC Pos_Inf;
-extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 acc_status;
+extern DEVICE_PARAMS dev_now_params;
 extern STRUCT_SScrn_Result SScrn_Result;
+oa_bool scrn_send = OA_FALSE;
+scrn_struct s_s;
+extern void oa_screen_demo(void *param);
 #if 0
 #ifdef EVDO_USE
 extern u32 SYS_CHANNEL;  //EVDO分配给监控平台的socket号
@@ -94,7 +97,7 @@ void App_TaskSScrnRcvManage(void *Para)
 //		app_SScrnRcvtaskinit(pSchedulScrnHandle);
 //		scrn_init = OA_TRUE;
 //	}
-	Mem_Set(pSchedulScrnHandle, 0, sizeof( Stk_Schedul_Handle));
+	oa_memset(pSchedulScrnHandle, 0, sizeof( Stk_Schedul_Handle));
 	pSchedulScrnHandle->ScrnType = SchedulScrn;
 	oa_memset(&SScrn_Result, 0, sizeof(SScrn_Result));
 	
@@ -427,7 +430,8 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	if (pSchedulScrnHandle->Cmdtype != SCCRN_UNEXP_CMD 
 		&& pSchedulScrnHandle->Cmdtype != SCCRN_TIME_OUT
 		&& pSchedulScrnHandle->Cmdtype != SCCRN_ERROR_RETURN)
-		DEBUG("SchedulScrn_Task:sscreen protocal cmd: 0x%02x", pSchedulScrnHandle->Cmdtype);
+		//DEBUG("SchedulScrn_Task:sscreen protocal cmd: 0x%02x", pSchedulScrnHandle->Cmdtype);
+		;
 	else		return;
 	
 	if (pSchedulScrnHandle->ScrnType == SchedulScrn){
@@ -465,8 +469,13 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 				//OSTimeDly(30);
 				pSchedulScrnHandle->len3 = strlen("非辅助短信！");
 				Mem_Copy(pSchedulScrnHandle->DataBuf2, "非辅助短信！", pSchedulScrnHandle->len3);
-				if (ActionOK != SScrn_CenterSMS_Send(pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3))
-					DEBUG("SchedulScrn_Task:Send Ack-Sms failed");
+				//if (ActionOK != SScrn_CenterSMS_Send(pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3))
+				//	DEBUG("SchedulScrn_Task:Send Ack-Sms failed");
+				oa_memset(&s_s, 0x0, sizeof(s_s));
+				oa_memcpy(s_s.sendbuf, pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3);
+				s_s.buflen = pSchedulScrnHandle->len3;
+				scrn_send = OA_TRUE;
+				oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
 			}
 			else if(pSchedulScrnHandle->Status == ActionOK)//正确解析
 			{
@@ -479,10 +488,15 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 					pSchedulScrnHandle->len2=pSchedulScrnHandle->len;
 					}
 				}	  */
-				if(!(pSchedulScrnHandle->DevAct&Sms_Ack_Force_DISABLE))
+				if(pSchedulScrnHandle->DevAct&Sms_Ack_Enable)
 				{
-					//OSTimeDly(300);
-					app_CentersmsAckAction(pSchedulScrnHandle->DevAct,pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->len3);
+					DEBUG("scrn data:%s len:%d", pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3);
+					oa_memset(&s_s, 0x0, sizeof(s_s));
+					oa_memcpy(s_s.sendbuf, pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3);
+					s_s.buflen = pSchedulScrnHandle->len3;
+					scrn_send = OA_TRUE;
+					oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
+					//app_CentersmsAckAction(pSchedulScrnHandle->DevAct,pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->len3);
 				}
 			}
 		break;
@@ -1450,7 +1464,7 @@ static void app_SScrnSendtaskExecut(Stk_SchedulSend_Handle *pSScrnSendHandle)
 			}
 		}
 #endif
-	#if SCREEN_N990>0
+	#if 0
 		if(++pSScrnSendHandle->TxTim_Cnt>300)  //10s心跳
 		{
 			SchedulScrn_heartbeatSend();
@@ -1494,9 +1508,10 @@ static void app_SScrnSendtaskExecut(Stk_SchedulSend_Handle *pSScrnSendHandle)
 			else
 				pSScrnSendHandle->DataBuf[0]=0;
 			#endif
-			if (dev_running.plat_status == ONLINE) 	pSScrnSendHandle->DataBuf[0]=0x25;
-			else 	pSScrnSendHandle->DataBuf[0]=0;
-			ReadLbsCfgPara(eOverspeed,&pSScrnSendHandle->DataBuf[1],&pSScrnSendHandle->U8len);
+			if (oa_sim_network_is_valid()) 	pSScrnSendHandle->DataBuf[0] = 0x13/*0x25*/;
+			else 	pSScrnSendHandle->DataBuf[0] = 0x02;
+			//ReadLbsCfgPara(eOverspeed,&pSScrnSendHandle->DataBuf[1],&pSScrnSendHandle->U8len);
+			pSScrnSendHandle->DataBuf[1] = dev_now_params.max_speed;
 			//GetCSQ(&pSScrnSendHandle->DataBuf[2]);
 			pSScrnSendHandle->DataBuf[2] = oa_network_get_signal_level();
 			#if 0
@@ -1505,8 +1520,8 @@ static void app_SScrnSendtaskExecut(Stk_SchedulSend_Handle *pSScrnSendHandle)
 			else
 				pSScrnSendHandle->DataBuf[3]=1;
 			#endif
-			if (acc_status == ACC_ON)		pSScrnSendHandle->DataBuf[3] = 0;
-			else if (acc_status == ACC_OFF)	pSScrnSendHandle->DataBuf[3] = 1;	
+			if (acc_status == ACC_ON)		pSScrnSendHandle->DataBuf[3] = 1;
+			else if (acc_status == ACC_OFF)	pSScrnSendHandle->DataBuf[3] = 0;	
 			pSScrnSendHandle->DataBuf[4]=0;//未设看车
 			#if 0
 			ReadLbsCfgPara(eNET, &pSScrnSendHandle->U8Temp, &pSScrnSendHandle->U8len);
