@@ -1354,6 +1354,10 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len)
 *********************************************************/
 void sendsms4ms(u8 *buf, u16 len, sms_kind s_k){
 	DEBUG("send sms");
+	if (len == 0){
+		DEBUG("len err!");
+		return;
+	}
 	if (s_k == sms_normal)	oa_sms_test_dfalp(buf, message.deliver_num);
 	else if(s_k == sms_special) oa_sms_test_ucs2(buf, message.deliver_num, len);
 }
