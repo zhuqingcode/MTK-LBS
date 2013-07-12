@@ -139,7 +139,6 @@ void acc_status_detect(void *param)
 	ret = oa_gpio_read(ACC_GPIO);
 	if (ret){//acc is off
 		//key shake
-		oa_sleep(10);
 		ret = oa_gpio_read(ACC_GPIO);
 		if (ret){
 			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == SET){
@@ -152,7 +151,6 @@ void acc_status_detect(void *param)
 	}
 	else{//acc is on
 		//key shake
-		oa_sleep(10);
 		ret = oa_gpio_read(ACC_GPIO);
 		if (!ret){
 			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == RESET){
@@ -167,7 +165,6 @@ void acc_status_detect(void *param)
 	ret = oa_gpio_read(KEY_GPIO);
 	if (ret){
 		//key shake
-		oa_sleep(10);
 		ret = oa_gpio_read(KEY_GPIO);
 		if (ret){
 			if (ugent_last == OA_TRUE){
@@ -182,7 +179,6 @@ void acc_status_detect(void *param)
 	}
 	else{
 		//key shake
-		oa_sleep(10);
 		ret = oa_gpio_read(KEY_GPIO);
 		if (!ret){
 			if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == SET){

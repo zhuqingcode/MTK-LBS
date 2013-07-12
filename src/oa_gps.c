@@ -106,7 +106,7 @@ void oa_app_gps(void)
 	static FP32 IntvlDistanc = 0.0;
 	STRUCT_RMC gps_info;
 	u32 speed;
-	static u8 upload_times;
+	static u32 upload_times;
 	static u32 driver_time;
 	static u32 relax_time;
 	static u32 park_times = 0;
@@ -195,7 +195,6 @@ void oa_app_gps(void)
 				//WriteAlarmPara(SET, StaSector1, STA_GPS_FIXED);
 				handle_alarm_status(StaSector1, STA_GPS_FIXED, SET, OA_TRUE);
 				DEBUG("GPS locate done");
-				upload_times = 0;//第一次定位后清零
 				Oldcog = gps_info.COG;//
 				if (OA_FALSE == rtc_status){
 					set_rtc_time(gps_info.Time); //when gps locate ok, set rtc time at once
@@ -218,7 +217,9 @@ void oa_app_gps(void)
 					}
 				}
 				else{
-					WriteAlarmPara(RESET, StaAlarm0, ALARM_DRIVE_OVERTIME);
+					if (ReadAlarmPara(StaAlarm0, ALARM_DRIVE_OVERTIME) == SET){
+						WriteAlarmPara(RESET, StaAlarm0, ALARM_DRIVE_OVERTIME);
+					}
 					oa_memcpy(time_last, time_cur, sizeof(time_last));
 					day_drive = 0;
 				}
@@ -304,9 +305,8 @@ void oa_app_gps(void)
 			//------------------------Periodically reported---------------------------
 			if (dev_now_params.report_strategy >= 0 && dev_now_params.report_strategy <= 2){//Periodically reported
 				if (upload_times * GPS_RUN_SECONDS >= dev_now_params.default_reporttime){
-					DEBUG("@@@");
 					print_rtc_time();
-					DEBUG("send one location packet!maybe blind data");
+					DEBUG("@@@send one location packet!maybe blind data");
 					handle_alarm_status(0, 0, 0, OA_FALSE);//just send
 					upload_times = 0;
 				}

@@ -673,7 +673,6 @@ oa_bool oa_app_blinddata(void)
 		ret_len = escape_copy_to_send(blind_buf, data_len);
 		//DEBUG(" ret_len:%d!", ret_len);
 		if (ret_len > 0){
-			DEBUG("^^^");
 			print_rtc_time();
 			//Write_ProtclHandl(eDevMsgid, (u8 *)&ReqMsgId, 2);
 			timeout_var.timeout_en = OA_FALSE;

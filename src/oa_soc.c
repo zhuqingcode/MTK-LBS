@@ -473,7 +473,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 				case RspMsgerr:
 				case RspUnsurport:{
 					//case authen
-					DEBUG("plat common ack fail : %d", ret);
+					DEBUG("plat common ack fail : %d", sProtclHandl.PlatComrsp.Rslt);
 					if (dev_running.doing_what == authen && dev_running.plat_status == OFFLINE){
 						dev_running.plat_switch = OA_TRUE;//if authen err, do it again
 						if (use_is_lock()){//locked
