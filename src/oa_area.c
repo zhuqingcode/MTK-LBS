@@ -1733,6 +1733,7 @@ void oa_app_area(void *para)
 		else o_s_alarm_period = 0;
 	}
 	else if (area_outside == area_status && o_s_alarm_period > 0) o_s_alarm_period = 0;
+	#if 0
 	//if device is outside area,cancel related alarm
 	else if (area_outside == area_status && OA_TRUE == o_s_flag){
 		if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET){
@@ -1740,6 +1741,7 @@ void oa_app_area(void *para)
 			o_s_flag = OA_FALSE;
 		}
 	}
+	#endif
 #if 0	
 	//cancel this alarm:I think this kind of alarm is a periodic one, so it doesn't need to alarm all the time!
 	if (flag == OA_TRUE){

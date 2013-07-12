@@ -104,7 +104,6 @@ void oa_app_gps(void)
 	static u32 IntvlCog = 0;
 	static u8 infoprintCnt = 0;
 	static FP32 IntvlDistanc = 0.0;
-	static FP32 d_r_distance = 0.0;
 	STRUCT_RMC gps_info;
 	u32 speed;
 	static u8 upload_times;
@@ -162,15 +161,16 @@ void oa_app_gps(void)
 		}	
 		else{//handle this alarm
 			DEBUG("gps model err");
-			ret = handle_alarm_status(StaAlarm0, ALARM_GNSS_ERR, SET,OA_TRUE);
-			handle_alarm_sms(ALARM_GNSS_ERR);
+			if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == RESET){
+				handle_alarm_sms(ALARM_GNSS_ERR);
+				handle_alarm_status(StaAlarm0, ALARM_GNSS_ERR, SET,OA_TRUE);
+			}
 			//if (OA_TRUE == ret)	ModelCnt = 0;
 		}
 	}
 	else{//if gps module's is good, change it to good because gps data is normal
 		if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){//cancel this alarm, upload instantly
-			//WriteAlarmPara(RESET, StaAlarm0, ALARM_GNSS_ERR);
-			handle_alarm_status(StaAlarm0, ALARM_GNSS_ERR, RESET, OA_TRUE);
+			WriteAlarmPara(RESET, StaAlarm0, ALARM_GNSS_ERR);
 			DEBUG("gps model is OK.");
 		}
 		//clear it
@@ -195,6 +195,7 @@ void oa_app_gps(void)
 				//WriteAlarmPara(SET, StaSector1, STA_GPS_FIXED);
 				handle_alarm_status(StaSector1, STA_GPS_FIXED, SET, OA_TRUE);
 				DEBUG("GPS locate done");
+				upload_times = 0;//第一次定位后清零
 				Oldcog = gps_info.COG;//
 				if (OA_FALSE == rtc_status){
 					set_rtc_time(gps_info.Time); //when gps locate ok, set rtc time at once
@@ -209,12 +210,15 @@ void oa_app_gps(void)
 				if (!oa_memcmp(time_last, time_cur, 3)){//in one day
 					if (gps_info.Speed > 0)	day_drive++;
 					if (day_drive * GPS_RUN_SECONDS >= dev_now_params.day_add_drive_time_threshold){
-							ret = handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
-							handle_alarm_sms(ALARM_OVERTIME_PARKING);
-							DEBUG("day overtime drive");
+							if (ReadAlarmPara(StaAlarm0, ALARM_DRIVE_OVERTIME) == RESET){
+								handle_alarm_status(StaAlarm0, ALARM_DRIVE_OVERTIME, SET, OA_TRUE);
+								handle_alarm_sms(ALARM_DRIVE_OVERTIME);
+								DEBUG("day overtime drive");
+							}
 					}
 				}
 				else{
+					WriteAlarmPara(RESET, StaAlarm0, ALARM_DRIVE_OVERTIME);
 					oa_memcpy(time_last, time_cur, sizeof(time_last));
 					day_drive = 0;
 				}
@@ -255,14 +259,16 @@ void oa_app_gps(void)
 			
 			if (gps_info.Speed > speed){//handle this alarm & upload instantly
 				DEBUG("over speed");
-				ret = handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
-				handle_alarm_sms(ALARM_OVER_SPEED);
+				if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == RESET){
+					handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
+					handle_alarm_sms(ALARM_OVER_SPEED);
+				}
+				
 			}
 			else if (gps_info.Speed <= speed){
 				if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET){
-					//WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
+					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 					DEBUG("cancel over speed");
-					handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, RESET, OA_TRUE);
 				}
 			}
 			//--------------------------------------------------------------------
@@ -270,21 +276,22 @@ void oa_app_gps(void)
 			if (0 == gps_info.Speed){
 				park_times++;
 				if (park_times * GPS_RUN_SECONDS >= dev_now_params.max_park_time){
-					handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
-					handle_alarm_sms(ALARM_OVERTIME_PARKING);
-					DEBUG("overtime park");
+					if (ReadAlarmPara(StaAlarm0, ALARM_OVERTIME_PARKING) == RESET){
+						handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
+						handle_alarm_sms(ALARM_OVERTIME_PARKING);
+						DEBUG("overtime park");
+					}
 				}
 			}
 			else if (gps_info.Speed > 0){
 				if (park_times > 0)	park_times = 0;
 				if (ReadAlarmPara(StaAlarm0, ALARM_OVERTIME_PARKING) == SET){
-					ret = handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, RESET, OA_TRUE);
+					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVERTIME_PARKING);//cancel this alarm
 					DEBUG("cancel overtime park");
 				}
 			}
 			//--------------------------mileage statistis-----------------------------
-			IntvlDistanc += GPS_IntvlDistanc(); //km
-			d_r_distance = IntvlDistanc;//just for distance report
+			IntvlDistanc += GPS_IntvlDistanc(&gps_info); //km
 			if (IntvlDistanc - UPDATE_DISTANC >= EPSINON){
 				//GpsDistancCacul(&IntvlDistanc);//changed to statement below
 				ret = mile_stat_add(IntvlDistanc);
@@ -300,8 +307,8 @@ void oa_app_gps(void)
 					DEBUG("@@@");
 					print_rtc_time();
 					DEBUG("send one location packet!maybe blind data");
-					ret = handle_alarm_status(OA_FALSE, OA_FALSE, SET, OA_FALSE);//just send
-					if (ret == OA_TRUE)	upload_times = 0;
+					handle_alarm_status(0, 0, 0, OA_FALSE);//just send
+					upload_times = 0;
 				}
 			}
 #if 0
@@ -331,34 +338,29 @@ void oa_app_gps(void)
 			//-------------------------fatigue driving-------------------------------
 			if (gps_info.Speed > 0){
 				driver_time++;
-				if (driver_time * GPS_RUN_SECONDS > BASIC_DRIVETIME){//concern that driver has already drived for 30min firstly.
-					fatigue = OA_TRUE;							//then distinguish fatigue driving
-				}
-				
 				if (driver_time * GPS_RUN_SECONDS > dev_now_params.continuous_drive_time_threshold){
-					DEBUG("fatigue driving!");
-					ret = handle_alarm_status(StaAlarm0, ALARM_DRIVE_TIRED, SET, OA_TRUE);
-					handle_alarm_sms(ALARM_DRIVE_TIRED);
-					if (ret == OA_TRUE)	driver_time = 0;
-					
-				}
-
-				if (OA_TRUE == fatigue){
-					if (relax_time * GPS_RUN_SECONDS > 120 
-					&& relax_time * GPS_RUN_SECONDS < dev_now_params.min_rest_time){//60:just for concerning driver has have a relax before.
 					if (ReadAlarmPara(StaAlarm0, ALARM_DRIVE_TIRED) == RESET){
-						WriteAlarmPara(SET, StaAlarm0, ALARM_DRIVE_TIRED); //set this kind of alarm
+						DEBUG("fatigue driving!");
+						ret = handle_alarm_status(StaAlarm0, ALARM_DRIVE_TIRED, SET, OA_TRUE);
+						handle_alarm_sms(ALARM_DRIVE_TIRED);
+						if (ret == OA_TRUE)	driver_time = 0;
 					}
+				}
+				#if 0
+				if (driver_time * GPS_RUN_SECONDS > 600){
+					if (relax_time * GPS_RUN_SECONDS > 0
+						&& relax_time * GPS_RUN_SECONDS < dev_now_params.min_rest_time){//60:just for concerning driver has have a relax before.
+						if (ReadAlarmPara(StaAlarm0, ALARM_DRIVE_TIRED) == RESET){
+							WriteAlarmPara(SET, StaAlarm0, ALARM_DRIVE_TIRED); //set this kind of alarm
+						}
 					}
 					else if (relax_time * GPS_RUN_SECONDS > dev_now_params.min_rest_time){
 						if (ReadAlarmPara(StaAlarm0, ALARM_DRIVE_TIRED) == SET){
 							WriteAlarmPara(RESET, StaAlarm0, ALARM_DRIVE_TIRED); //cancel this kind of alarm
 						}
 					}
-					fatigue = OA_FALSE;
 				}
-				
-				
+				#endif
 				relax_time = 0;
 			}
 			else if (gps_info.Speed == 0){
@@ -368,7 +370,7 @@ void oa_app_gps(void)
 			//---------------------------------------------------------------------
 		}
 		else if (result & NMEA_RMC_UNFIXED){
-			DEBUG("NMEA_RMC_UNFIXED!");
+			DEBUG("GPS locate err");
 			//设置未定位标志
 			if (ReadAlarmPara(StaSector1,STA_GPS_FIXED) == SET)
 				//WriteAlarmPara(RESET,StaSector1,STA_GPS_FIXED);

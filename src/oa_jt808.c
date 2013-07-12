@@ -5405,11 +5405,11 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 *Others:         
 *********************************************************/
 extern u16 total_write;
-u16 DevReq2ServPackag_build_blind(u16 ReqMsgId) //即时上传数据
+oa_bool DevReq2ServPackag_build_blind(u16 ReqMsgId) //即时上传数据
 {
 	u8 pbuf[DATA_MAX_LEN] = 0;
 	u16 U16Temp = 0;
-	oa_bool ret = 0;
+	oa_bool ret;
 	//pbuf = getEmptybuf();
 	if (NULL != pbuf){
 		//pbuf[0..1]:data length after enpacketing
