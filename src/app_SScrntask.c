@@ -466,8 +466,8 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 																&pSchedulScrnHandle->len3);
 			if (pSchedulScrnHandle->Status == UnDefinedSms){//非辅助短信
 				//OSTimeDly(30);
-				pSchedulScrnHandle->len3 = strlen("非辅助短信！");
-				Mem_Copy(pSchedulScrnHandle->DataBuf2, "非辅助短信！", pSchedulScrnHandle->len3);
+				pSchedulScrnHandle->len3 = oa_strlen("sms err!");
+				Mem_Copy(pSchedulScrnHandle->DataBuf2, "sms err!", pSchedulScrnHandle->len3);
 				//if (ActionOK != SScrn_CenterSMS_Send(pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3))
 				//	DEBUG("SchedulScrn_Task:Send Ack-Sms failed");
 				oa_memset(&s_s, 0x0, sizeof(s_s));

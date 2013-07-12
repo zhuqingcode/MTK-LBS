@@ -26,6 +26,7 @@
  ****************************************************************************/
 #include "oa_type.h"
 #include "oa_api.h"
+#include "oa_soc.h"
 #include "oa_sms.h"
 #include "oa_uart.h"
 #include "oa_dev_params.h"
@@ -49,6 +50,7 @@ extern USE_LOCK now_use_lock;
 extern oa_uint8 acc_status;
 extern STRUCT_RMC Pos_Inf;
 extern DEV_PLAT_PARAS dev_running;
+extern oa_soc_context g_soc_context;
 extern oa_bool try_unlock;
 oa_char *p_keyword[] = {
  HB,
@@ -2294,7 +2296,8 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.server_tcp_port = p_set->context.con_int;
-					p_set->act_kind = reconn;
+					if (g_soc_context.soc_addr.sock_type == OA_SOCK_STREAM) p_set->act_kind = reconn;
+					else p_set->act_kind = para_save;
 				}
 			}	
 		}break;
@@ -2308,7 +2311,8 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.server_udp_port = p_set->context.con_int;
-					p_set->act_kind = reconn;
+					if (g_soc_context.soc_addr.sock_type == OA_SOCK_DGRAM) p_set->act_kind = reconn;
+					else p_set->act_kind = para_save;
 				}
 			}	
 		}break;

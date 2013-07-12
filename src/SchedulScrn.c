@@ -2516,7 +2516,7 @@ static u8 Protocol_Check_2para(const u8 *PStr1,const u16 PStr_Length1,const u8 *
 	u8 pbuf_head[3];		//3字节数组，存放  包头 指令码 长度
 	u8 pbuf_Tail[2];		//2字节数组，存放 校验值 结束符
 	u8 err;
-	u8 cnt=3;
+	u8 cnt=1;
 	u8 result=0;
 
 	pbuf_head[0]=0x24;	//包头
