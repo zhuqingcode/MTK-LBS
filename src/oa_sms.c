@@ -151,6 +151,7 @@ nb_kind telecom_num_check(oa_char *nb)
 	else return mobe_nb;
 }
 #endif
+//unicode
 oa_uint8 termID[] = {0x7e,0xc8,0x7a,0xef,0x7f,0x16,0x53,0xf7,0x0,':'};//"终端编号:"
 oa_uint8 CardNum[] = {0x53,0x61,0x53,0xF7,0x0,':'};//"卡号:"
 oa_uint8 wcm[] = {0x0,'W',0x0,'C',0x0,'M',0x72,0xB6,0x60,0x01,0x0,':'};//"WCM状态:"
@@ -178,91 +179,163 @@ oa_uint8 kmh[] = "(km/h)";//{0x0,'(',0x0,'k',0x0,'m',0x0,'/',0x0,'h',0x0,')'};//
 oa_uint8 fx[] = {0x65,0xB9,0x54,0x11,0x0,':'};//"方向:"
 oa_uint8 mk[] = {0x6A,0x21,0x57,0x57,0x0,':'};//"模块:"
 oa_uint8 tx[] = {0x59,0x29,0x7E,0xBF,0x0,':'};//"天线:"
+//gbk
+oa_uint8 termID_gbk[] = {0xD6,0xD5,0xB6,0xCB,0xB1,0xE0,0xBA,0xC5,':'};//"终端编号:"
+oa_uint8 CardNum_gbk[] = {0xbf,0xa8,0xba,0xc5,':'};//"卡号:"
+oa_uint8 wcm_gbk[] = {'W','C','M',0xd7,0xb4,0xcc,0xac,':'};//"WCM状态:"
+oa_uint8 zc_gbk[] = {0xd5,0xfd,0xb3,0xa3};//"正常"
+oa_uint8 bzc_gbk[] = {0xb2,0xbb,0xd5,0xfd,0xb3,0xa3};//"不正常"
+oa_uint8 xhqd_gbk[] = {0xd0,0xc5,0xba,0xc5,0xc7,0xbf,0xb6,0xc8,':'};//"信号强度:"
+oa_uint8 acc_gbk[] = {'A','C','C',0xd7,0xb4,0xcc,0xac,':'};//"ACC状态:"
+oa_uint8 dk_gbk[] = {0xb4,0xf2,0xbf,0xaa};//"打开"
+oa_uint8 gb_gbk[] = {0xb9,0xd8,0xb1,0xd5};//"关闭"
+oa_uint8 gps_gbk[] = {'G','P','S',0xd7,0xb4,0xcc,0xac,':'};//"GPS状态:"
+oa_uint8 du_gbk[] = {0xb6,0xcf,0xc2,0xb7};//"断路"
+oa_uint8 du2_gbk[] = {0xb6,0xcc,0xc2,0xb7};//"短路"
+oa_uint8 pt_gbk[] = {0xc6,0xbd,0xcc,0xa8,0xd7,0xb4,0xcc,0xac,':'};//"平台状态:"
+oa_uint8 lj_gbk[] = {0xc1,0xac,0xbd,0xd3};//"连接"
+oa_uint8 wlj_gbk[] = {0xce,0xb4,0xc1,0xac,0xbd,0xd3};//"未连接"
+oa_uint8 fh_gbk[] = {';'};//";"
+
+oa_uint8 ydw_gbk[] = {0xD2,0xd1,0xb6,0xa8,0xce,0xbb};//"已定位"
+oa_uint8 wdw_gbk[] = {0xc1,0xb4,0xb6,0xa8,0xce,0xbb};//"未定位"
+oa_uint8 sj_gbk[] = {0xca,0xb1,0xbc,0xe4,':'};//"时间:"
+oa_uint8 wd_gbk[] = {0xce,0xb3,0xb6,0xc8,':'};//"纬度:"
+oa_uint8 jd_gbk[] = {0xbe,0xad,0xb6,0xc8,':'};//"经度:"
+oa_uint8 sd_gbk[] = {0xcb,0xd9,0xb6,0xc8,':'};//"速度:"
+oa_uint8 kmh_gbk[] = "(km/h)";//{0x0,'(',0x0,'k',0x0,'m',0x0,'/',0x0,'h',0x0,')'};//"(km/h)"
+oa_uint8 fx_gbk[] = {0xb7,0xbd,0xcf,0xf2,':'};//"方向:"
+oa_uint8 mk_gbk[] = {0xc4,0xa3,0xbf,0xe9,':'};//"模块:"
+oa_uint8 tx_gbk[] = {0xcc,0xec,0xcf,0xdf,':'};//"天线:"
+
 /*********************************************************
 *Function:      status_extract()
 *Description:  search key word in message
 *Return:        void
 *Others:         
 *********************************************************/
-void status_extract(oa_char *enquire_temp, u8 *p_len){
+void status_extract(oa_char *enquire_temp, u8 *p_len, sms_or_uart which){
 	oa_char tmp[256] = {0x0};
 	oa_char tmp2[128] = {0x0};
 	oa_char tmp3[8] = {0x0};
 	oa_uint8 pos = 0;
 	oa_uint32 len = 0;
-#if 0	
-	oa_uint8 mod_status;
-	oa_strcat(tmp, "termID:");
-	oa_strcat(tmp, dev_now_params.term_id);
-	oa_strcat(tmp, ",CardNum:");
-	oa_strcat(tmp, dev_now_params.term_tel_num);
-	oa_strcat(tmp, ",");
-	oa_strcat(enquire_temp, tmp);
-	oa_memset(tmp, 0x0, sizeof(tmp));
-	if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET)	mod_status = 0;
-	else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == RESET)	mod_status = 1;
-	//1  normal 0 abnormal
-	sprintf(tmp, "Signal:%d,Acc:%d,Gps:%d,Platform:%d", oa_network_get_signal_level(),
-													acc_status,
-													mod_status,
-													dev_running.plat_status);
-#endif
-	//终端编号
-	oa_memcpy(tmp, termID, sizeof(termID));pos += sizeof(termID);
-	len = asc2uc(tmp2, dev_now_params.term_id, oa_strlen(dev_now_params.term_id));
-	oa_memcpy(&tmp[pos], tmp2, len);pos += len;
-	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
-	//卡号
-	oa_memset(tmp2, 0x0, sizeof(tmp2));
-	oa_memcpy(&tmp[pos], CardNum, sizeof(CardNum));pos += sizeof(CardNum);
-	len = asc2uc(tmp2, dev_now_params.term_tel_num, oa_strlen(dev_now_params.term_tel_num));
-	oa_memcpy(&tmp[pos], tmp2, len);pos += len;
-	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
-	//WCM状态
-	oa_memcpy(&tmp[pos], wcm, sizeof(wcm));pos += sizeof(wcm);
-	if (oa_sim_network_is_valid()){
-		oa_memcpy(&tmp[pos], zc, 4);pos += 4;
+	
+	if (which == sms){
+		//终端编号
+		oa_memcpy(tmp, termID, sizeof(termID));pos += sizeof(termID);
+		len = asc2uc(tmp2, dev_now_params.term_id, oa_strlen(dev_now_params.term_id));
+		oa_memcpy(&tmp[pos], tmp2, len);pos += len;
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		//卡号
+		oa_memset(tmp2, 0x0, sizeof(tmp2));
+		oa_memcpy(&tmp[pos], CardNum, sizeof(CardNum));pos += sizeof(CardNum);
+		len = asc2uc(tmp2, dev_now_params.term_tel_num, oa_strlen(dev_now_params.term_tel_num));
+		oa_memcpy(&tmp[pos], tmp2, len);pos += len;
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		//WCM状态
+		oa_memcpy(&tmp[pos], wcm, sizeof(wcm));pos += sizeof(wcm);
+		if (oa_sim_network_is_valid()){
+			oa_memcpy(&tmp[pos], zc, 4);pos += 4;
+		}
+		else{
+			oa_memcpy(&tmp[pos], bzc, 6);pos += 6;
+		}
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		//信号强度
+		oa_memset(tmp2, 0x0, sizeof(tmp2));
+		oa_memcpy(&tmp[pos], xhqd, sizeof(xhqd));pos += sizeof(xhqd);
+		sprintf(tmp3, "%d", oa_network_get_signal_level());
+		len = asc2uc(tmp2, tmp3, oa_strlen(tmp3));
+		oa_memcpy(&tmp[pos], tmp2, len);pos += len;
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		//ACC状态
+		oa_memcpy(&tmp[pos], acc, sizeof(acc));pos += sizeof(acc);
+		if (acc_status == ACC_ON){
+			oa_memcpy(&tmp[pos], dk, 4);pos += 4;
+		}
+		else{
+			oa_memcpy(&tmp[pos], gb, 4);pos += 4;
+		}
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		//GPS状态
+		oa_memcpy(&tmp[pos], gps, sizeof(gps));pos += sizeof(gps);
+		if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){
+			oa_memcpy(&tmp[pos], bzc, 6);pos += 6;
+		}
+		else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == RESET){
+			oa_memcpy(&tmp[pos], zc, 4);pos += 4;
+		}
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		//平台状态
+		oa_memcpy(&tmp[pos], pt, sizeof(pt));pos += sizeof(pt);
+		if (dev_running.plat_status == ONLINE){
+			oa_memcpy(&tmp[pos], lj, 4);pos += 4;
+		}
+		else{
+			oa_memcpy(&tmp[pos], wlj, 6);pos += 6;
+		}
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		oa_memcpy(enquire_temp, tmp, pos);
+		*p_len = pos; 
 	}
-	else{
-		oa_memcpy(&tmp[pos], bzc, 6);pos += 6;
+	else if (which == scrn){
+		//终端编号
+		oa_memcpy(tmp, termID_gbk, sizeof(termID_gbk));pos += sizeof(termID_gbk);
+		len = oa_strlen(dev_now_params.term_id);
+		oa_memcpy(&tmp[pos], dev_now_params.term_id, len);pos += len;
+		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+		//卡号
+		oa_memcpy(&tmp[pos], CardNum_gbk, sizeof(CardNum_gbk));pos += sizeof(CardNum_gbk);
+		len = oa_strlen(dev_now_params.term_tel_num);
+		oa_memcpy(&tmp[pos], dev_now_params.term_tel_num, len);pos += len;
+		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+		//WCM状态
+		oa_memcpy(&tmp[pos], wcm_gbk, sizeof(wcm_gbk));pos += sizeof(wcm_gbk);
+		if (oa_sim_network_is_valid()){
+			oa_memcpy(&tmp[pos], zc_gbk, sizeof(zc_gbk));pos += sizeof(zc_gbk);
+		}
+		else{
+			oa_memcpy(&tmp[pos], bzc_gbk, sizeof(bzc_gbk));pos += sizeof(bzc_gbk);
+		}
+		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+		//信号强度
+		oa_memset(tmp2, 0x0, sizeof(tmp2));
+		oa_memcpy(&tmp[pos], xhqd_gbk, sizeof(xhqd_gbk));pos += sizeof(xhqd_gbk);
+		sprintf(tmp2, "%d", oa_network_get_signal_level());
+		len = oa_strlen(tmp2);
+		oa_memcpy(&tmp[pos], tmp2, len);pos += len;
+		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+		//ACC状态
+		oa_memcpy(&tmp[pos], acc_gbk, sizeof(acc_gbk));pos += sizeof(acc_gbk);
+		if (acc_status == ACC_ON){
+			oa_memcpy(&tmp[pos], dk_gbk, sizeof(dk_gbk));pos += sizeof(dk_gbk);
+		}
+		else{
+			oa_memcpy(&tmp[pos], gb_gbk, sizeof(gb_gbk));pos += sizeof(gb_gbk);
+		}
+		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+		//GPS状态
+		oa_memcpy(&tmp[pos], gps_gbk, sizeof(gps_gbk));pos += sizeof(gps_gbk);
+		if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){
+			oa_memcpy(&tmp[pos], bzc_gbk, 6);pos += 6;
+		}
+		else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == RESET){
+			oa_memcpy(&tmp[pos], zc_gbk, 4);pos += 4;
+		}
+		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+		//平台状态
+		oa_memcpy(&tmp[pos], pt_gbk, sizeof(pt_gbk));pos += sizeof(pt_gbk);
+		if (dev_running.plat_status == ONLINE){
+			oa_memcpy(&tmp[pos], lj_gbk, 4);pos += 4;
+		}
+		else{
+			oa_memcpy(&tmp[pos], wlj_gbk, 6);pos += 6;
+		}
+		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+		oa_memcpy(enquire_temp, tmp, pos);
+		*p_len = pos; 
 	}
-	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
-	//信号强度
-	oa_memset(tmp2, 0x0, sizeof(tmp2));
-	oa_memcpy(&tmp[pos], xhqd, sizeof(xhqd));pos += sizeof(xhqd);
-	sprintf(tmp3, "%d", oa_network_get_signal_level());
-	len = asc2uc(tmp2, tmp3, oa_strlen(tmp3));
-	oa_memcpy(&tmp[pos], tmp2, len);pos += len;
-	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
-	//ACC状态
-	oa_memcpy(&tmp[pos], acc, sizeof(acc));pos += sizeof(acc);
-	if (acc_status == ACC_ON){
-		oa_memcpy(&tmp[pos], dk, 4);pos += 4;
-	}
-	else{
-		oa_memcpy(&tmp[pos], gb, 4);pos += 4;
-	}
-	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
-	//GPS状态
-	oa_memcpy(&tmp[pos], gps, sizeof(gps));pos += sizeof(gps);
-	if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){
-		oa_memcpy(&tmp[pos], bzc, 6);pos += 6;
-	}
-	else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == RESET){
-		oa_memcpy(&tmp[pos], zc, 4);pos += 4;
-	}
-	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
-	//平台状态
-	oa_memcpy(&tmp[pos], pt, sizeof(pt));pos += sizeof(pt);
-	if (dev_running.plat_status == ONLINE){
-		oa_memcpy(&tmp[pos], lj, 4);pos += 4;
-	}
-	else{
-		oa_memcpy(&tmp[pos], wlj, 6);pos += 6;
-	}
-	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
-	oa_memcpy(enquire_temp, tmp, pos);
-	*p_len = pos; 
 }
 /*********************************************************
 *Function:      gps_extract()
@@ -270,7 +343,7 @@ void status_extract(oa_char *enquire_temp, u8 *p_len){
 *Return:        void
 *Others:         
 *********************************************************/
-void gps_extract(oa_char *enquire_temp, u8 *p_len){
+void gps_extract(oa_char *enquire_temp, u8 *p_len, sms_or_uart which){
 	oa_char tmp[256] = {0x0};
 	oa_char tmp2[128] = {0x0};
 	oa_char tmp3[128] = {0x0};
@@ -278,13 +351,13 @@ void gps_extract(oa_char *enquire_temp, u8 *p_len){
 	oa_uint32 len = 0;
 	oa_time_struct t = {0};
 	oa_uint8 i;
+	if (sms == which){
+		//gps状态
+		oa_memcpy(tmp, gps, sizeof(gps));pos += sizeof(gps);
+		oa_memcpy(&tmp[pos], ydw, 6);pos += 6;
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
 
-	//gps状态
-	oa_memcpy(tmp, gps, sizeof(gps));pos += sizeof(gps);
-	oa_memcpy(&tmp[pos], ydw, 6);pos += 6;
-	oa_memcpy(&tmp[pos], fh, 2);pos += 2;
-	
-	if (GPS_FIXED == Pos_Inf.Fix_Status){
+		if (GPS_FIXED == Pos_Inf.Fix_Status){
 		//时间
 		oa_memcpy(&tmp[pos], sj, sizeof(sj));pos += sizeof(sj);
 		t.nYear = ((Pos_Inf.Time[0]>>4)&0x0F)*10+ (Pos_Inf.Time[0]&0x0F);
@@ -351,108 +424,123 @@ void gps_extract(oa_char *enquire_temp, u8 *p_len){
 		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
 		oa_memcpy(enquire_temp, tmp, pos);
 		*p_len = pos; 
-#if 0
-		//---------
-		sprintf(tmp, "GPS Status:%d;", GPS_FIXED);
-		oa_strcat(enquire_temp, tmp);
-		oa_memset(tmp, 0x0, sizeof(tmp));
-		//------time-------
+		}
+		else if (GPS_UNFIXED == Pos_Inf.Fix_Status){
+			//未定位
+			oa_memcpy(&tmp[pos], wdw, sizeof(wdw));pos += sizeof(wdw);
+			oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+			//模块
+			if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){
+				oa_memcpy(&tmp[pos], bzc, sizeof(bzc));pos += sizeof(bzc);
+			}
+			else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == RESET){
+				oa_memcpy(&tmp[pos], zc, sizeof(zc));pos += sizeof(zc);
+			}
+			oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+			if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ANTENNA) == SET){
+				oa_memcpy(&tmp[pos], dk, sizeof(dk));pos += sizeof(dk);
+			}
+			else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ANTENNA) == RESET){
+				oa_memcpy(&tmp[pos], zc, sizeof(zc));pos += sizeof(zc);
+			}
+			oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+			oa_memcpy(enquire_temp, tmp, pos);
+			*p_len = pos; 
+		}
+	}
+	else if (scrn == which){
+		//gps状态
+		oa_memcpy(tmp, gps_gbk, sizeof(gps_gbk));pos += sizeof(gps_gbk);
+		oa_memcpy(&tmp[pos], ydw_gbk, 6);pos += 6;
+		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+
+		if (GPS_FIXED == Pos_Inf.Fix_Status){
+		//时间
+		oa_memcpy(&tmp[pos], sj_gbk, sizeof(sj_gbk));pos += sizeof(sj_gbk);
 		t.nYear = ((Pos_Inf.Time[0]>>4)&0x0F)*10+ (Pos_Inf.Time[0]&0x0F);
 		t.nMonth = ((Pos_Inf.Time[1]>>4)&0x0F)*10+ (Pos_Inf.Time[1]&0x0F);//-1
 		t.nDay = ((Pos_Inf.Time[2]>>4)&0x0F)*10+ (Pos_Inf.Time[2]&0x0F);
 		t.nHour = ((Pos_Inf.Time[3]>>4)&0x0F)*10+ (Pos_Inf.Time[3]&0x0F);
 		t.nMin = ((Pos_Inf.Time[4]>>4)&0x0F)*10+ (Pos_Inf.Time[4]&0x0F);
 		t.nSec = ((Pos_Inf.Time[5]>>4)&0x0F)*10+ (Pos_Inf.Time[5]&0x0F);
-		sprintf(tmp, "Time:%d %d %d %d %d %d;", t.nYear, t.nMonth, t.nDay, t.nHour, t.nMin, t.nSec);
-		oa_strcat(enquire_temp, tmp);
-		oa_memset(tmp, 0x0, sizeof(tmp));
-		//------latitude-----
-		oa_strcat(tmp, "N:");
-		tmp[2] = Pos_Inf.Latitude[0];
-		tmp[3] = Pos_Inf.Latitude[1];
-		//tmp[4] = '\'';
-		tmp[4] = '$';
-		tmp[5] = Pos_Inf.Latitude[2];
-		tmp[6] = Pos_Inf.Latitude[3];
-		tmp[7] = Pos_Inf.Latitude[4];
-		tmp[8] = Pos_Inf.Latitude[5];
-		tmp[9] = Pos_Inf.Latitude[6];
-		tmp[10] = Pos_Inf.Latitude[7];
-		//tmp[11] = '\"';
-		tmp[11] = '\'';
-		tmp[12] = ';';
-		oa_strcat(enquire_temp, tmp);
-		oa_memset(tmp, 0x0, sizeof(tmp));
-		//------longtitude---
-		oa_strcat(tmp, "E:");
-		tmp[2] = Pos_Inf.Longitude[0];
-		tmp[3] = Pos_Inf.Longitude[1];
-		tmp[4] = Pos_Inf.Longitude[2];
-		tmp[5] = '$';
-		tmp[6] = Pos_Inf.Longitude[3];
-		tmp[7] = Pos_Inf.Longitude[4];
-		tmp[8] = Pos_Inf.Longitude[5];
-		tmp[9] = Pos_Inf.Longitude[6];
-		tmp[10] = Pos_Inf.Longitude[7];
-		tmp[11] = Pos_Inf.Longitude[8];
-		tmp[12] = '\'';
-		tmp[13] = ';';
-		oa_strcat(enquire_temp, tmp);
-		oa_memset(tmp, 0x0, sizeof(tmp));
-		//------speed-------
-		sprintf(tmp, "Speed:%d;", Pos_Inf.Speed);
-		oa_strcat(enquire_temp, tmp);
-		oa_memset(tmp, 0x0, sizeof(tmp));
-		//------cog--------
-		sprintf(tmp, "Cog:%d;", Pos_Inf.COG);
-		oa_strcat(enquire_temp, tmp);
-		oa_memset(tmp, 0x0, sizeof(tmp));
-#endif
-	}
-	else if (GPS_UNFIXED == Pos_Inf.Fix_Status){
-		//未定位
-		oa_memcpy(&tmp[pos], wdw, sizeof(wdw));pos += sizeof(wdw);
-		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
-		//模块
-		if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){
-			oa_memcpy(&tmp[pos], bzc, sizeof(bzc));pos += sizeof(bzc);
-		}
-		else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == RESET){
-			oa_memcpy(&tmp[pos], zc, sizeof(zc));pos += sizeof(zc);
-		}
-		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
-		if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ANTENNA) == SET){
-			oa_memcpy(&tmp[pos], dk, sizeof(dk));pos += sizeof(dk);
-		}
-		else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ANTENNA) == RESET){
-			oa_memcpy(&tmp[pos], zc, sizeof(zc));pos += sizeof(zc);
-		}
-		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		sprintf(tmp3, "%d %d %d %d %d %d", t.nYear, t.nMonth, t.nDay, t.nHour, t.nMin, t.nSec);
+		len = oa_strlen(tmp3);
+		oa_memcpy(&tmp[pos], tmp3, len);pos += len;
+		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+		//纬度
+		oa_memcpy(&tmp[pos], wd_gbk, sizeof(wd_gbk));pos += sizeof(wd_gbk);
+		oa_memset(tmp3, 0x0, sizeof(tmp3));
+		oa_strcat(tmp3, "N");
+		tmp3[1] = Pos_Inf.Latitude[0];
+		tmp3[2] = Pos_Inf.Latitude[1];
+		tmp3[3] = '.';
+		tmp3[4] = Pos_Inf.Latitude[2];
+		tmp3[5] = Pos_Inf.Latitude[3];
+		tmp3[6] = Pos_Inf.Latitude[4];
+		tmp3[7] = Pos_Inf.Latitude[5];
+		tmp3[8] = Pos_Inf.Latitude[6];
+		tmp3[9] = Pos_Inf.Latitude[7];
+		len = oa_strlen(tmp3);
+		oa_memcpy(&tmp[pos], tmp3, len);pos += len;
+		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+		//经度
+		oa_memcpy(&tmp[pos], jd_gbk, sizeof(jd_gbk));pos += sizeof(jd_gbk);
+		oa_memset(tmp3, 0x0, sizeof(tmp3));
+		oa_strcat(tmp3, "E");
+		tmp3[1] = Pos_Inf.Longitude[0];
+		tmp3[2] = Pos_Inf.Longitude[1];
+		tmp3[3] = Pos_Inf.Longitude[2];
+		tmp3[4] = '.';
+		tmp3[5] = Pos_Inf.Longitude[3];
+		tmp3[6] = Pos_Inf.Longitude[4];
+		tmp3[7] = Pos_Inf.Longitude[5];
+		tmp3[8] = Pos_Inf.Longitude[6];
+		tmp3[9] = Pos_Inf.Longitude[7];
+		tmp3[10] = Pos_Inf.Longitude[8];
+		len = oa_strlen(tmp3);
+		oa_memcpy(&tmp[pos], tmp3, len);pos += len;
+		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+		//速度
+		oa_memcpy(&tmp[pos], sd_gbk, sizeof(sd_gbk));pos += sizeof(sd_gbk);
+		oa_memset(tmp3, 0x0, sizeof(tmp3));
+		sprintf(tmp3, "%03d", Pos_Inf.Speed);
+		oa_strcat(tmp3, kmh);
+		len = oa_strlen(tmp3);
+		oa_memcpy(&tmp[pos], tmp3, len);pos += len;
+		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+		//方向
+		oa_memcpy(&tmp[pos], fx_gbk, sizeof(fx_gbk));pos += sizeof(fx_gbk);
+		oa_memset(tmp3, 0x0, sizeof(tmp3));
+		sprintf(tmp3, "%03d", Pos_Inf.COG);
+		len = oa_strlen(tmp3);
+		oa_memcpy(&tmp[pos], tmp3, len);pos += len;
+		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
 		oa_memcpy(enquire_temp, tmp, pos);
 		*p_len = pos; 
-#if 0
-		//------
-		sprintf(tmp, "GPS Status:%d;", GPS_UNFIXED);
-		oa_strcat(enquire_temp, tmp);
-		oa_memset(tmp, 0x0, sizeof(tmp));
-		if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){
-			sprintf(tmp, "Module:%d;", 0);
 		}
-		else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == RESET){
-			sprintf(tmp, "Module:%d;", 1);
+		else if (GPS_UNFIXED == Pos_Inf.Fix_Status){
+			//未定位
+			oa_memcpy(&tmp[pos], wdw_gbk, sizeof(wdw_gbk));pos += sizeof(wdw_gbk);
+			oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+			//模块
+			if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){
+				oa_memcpy(&tmp[pos], bzc_gbk, sizeof(bzc_gbk));pos += sizeof(bzc_gbk);
+			}
+			else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == RESET){
+				oa_memcpy(&tmp[pos], zc_gbk, sizeof(zc_gbk));pos += sizeof(zc_gbk);
+			}
+			oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+			if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ANTENNA) == SET){
+				oa_memcpy(&tmp[pos], dk_gbk, sizeof(dk_gbk));pos += sizeof(dk_gbk);
+			}
+			else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ANTENNA) == RESET){
+				oa_memcpy(&tmp[pos], zc_gbk, sizeof(zc_gbk));pos += sizeof(zc_gbk);
+			}
+			oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+			oa_memcpy(enquire_temp, tmp, pos);
+			*p_len = pos; 
 		}
-		oa_strcat(enquire_temp, tmp);
-		oa_memset(tmp, 0x0, sizeof(tmp));
-		if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ANTENNA) == SET){
-			sprintf(tmp, "Antenna:%d;", 0);
-		}
-		else if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ANTENNA) == RESET){
-			sprintf(tmp, "Antenna:%d;", 1);
-		}
-		oa_strcat(enquire_temp, tmp);
-#endif
 	}
-
 }
 #if 0
 /*********************************************************
@@ -1149,7 +1237,7 @@ void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which
 *Return:        void
 *Others:         
 *********************************************************/
-void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len)
+void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart which)
 {
 	u8 ret_len;
 	char temp[16] = {0x0};
@@ -1296,11 +1384,11 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len)
 			oa_strcat(enquire_temp, ";");
 		}break;
 		case e_STATUS:{
-			status_extract(enquire_temp, &ret_len);
+			status_extract(enquire_temp, &ret_len, which);
 			//oa_strcat(enquire_temp, ";");
 		}break;
 		case e_GPS:{
-			gps_extract(enquire_temp, &ret_len);
+			gps_extract(enquire_temp, &ret_len, which);
 			//oa_strcat(enquire_temp, ";");
 		}break;
 		case e_UPDATE:{
@@ -2893,7 +2981,7 @@ void oa_app_sms(void)
 				
 				handle_keyword4ms(key_ret, &set);
 				if (ms_ack == OA_TRUE){
-					handle_common4ms(key_ret, buf, &len);
+					handle_common4ms(key_ret, buf, &len, sms);
 					DEBUG("\nbuf:%s len:%d", buf, len);
 					if (len == 0) return;//do not ack
 					if (set.s_k == sms_special){

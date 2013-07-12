@@ -74,7 +74,7 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 	oa_char prefix[MAX_SMS_NUM][64] = {{0x0}, {0x0}, {0x0}, {0x0}, {0x0}};
 	oa_char data[256] = {0x0};
 	oa_char sendbuf[256] = {0x0};
-	oa_char buf[64] = {0x0};
+	oa_char buf[256] = {0x0};
 	oa_uint8 len;
 	oa_bool ms_ack;
 	oa_bool try_unlock_inside = OA_FALSE;
@@ -125,7 +125,7 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 				
 				handle_keyword4ms(key_ret, &set);
 				if (ms_ack == OA_TRUE){
-					handle_common4ms(key_ret, buf, &len);
+					handle_common4ms(key_ret, buf, &len, scrn);
 					DEBUG("\nbuf:%s len:%d", buf, len);
 					if (len == 0) return UnDefinedSms;
 					if (set.s_k == sms_special){
