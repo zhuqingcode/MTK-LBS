@@ -79,7 +79,7 @@ static void UTC_To_RTC(STRUCT_RMC *POS_Inf);
 void GPS_CFG_NAV_SET(void);
 static u8 HowManyDays(u8 year ,u8 month);
 static s32 Get_Space_Time(u8 *Now_Time,u8 *Pass_Time);
-static float GPS_Local_Change(STRUCT_RMC POS_Inf,u8 Mode);
+float GPS_Local_Change(u8 *Lon2Lat,u8 Mode);
 static int diff_day (unsigned char* date1,unsigned char *date2 ); /*天数计算*/
 static int count_day ( int year, int month, int day, int flag );  /*天数计算*/
 #define leap(year) ((year%4==0&&year%100!=0)||(year%400==0))  /*闰年判断*/
@@ -1655,109 +1655,101 @@ u8 GetPosinfASC(u8 *Str,u8 StrSize,u8 *Strlen,u8 Filed)
 *Others:        32位无符号整型值，单位km 
 *********************************************************/
 #if GPS_DISTANCE_EN
-FP32 GPS_IntvlDistanc(void)
+/*********************************************************
+*Function:       void GPS_IntvlDistanc()
+*Description:    对GPS进行天线检测和设定，启动GPS
+*Calls:          
+*Called By:      
+*Input:         无
+*Output:        TimeStr  写入时间的指针
+*Return:        0:获取时间成功. 1:获取失败，一般是因为未定位
+*Others:        32位无符号整型值，单位km 
+*********************************************************/
+FP32 GPS_IntvlDistanc(STRUCT_RMC *gps_info)
 {
-	u8 Time[6];
-	u8 err;
+	static FP32  Old_Lon = 0;	/*上一点纬度*/
+	static FP32  Old_Lat = 0;	/*上一点经度*/
+	FP32 IntvlDistanc=0;
+	static u16   Last_Speed;	/*前一次速度 计算一次距离*/
+	static u8 Pass_Time[6] = {0};			/*上次的时间*/
+	FP32  New_Lon;	/*新纬度*/
+	FP32  New_Lat;	/*新经度*/
+//	FP32  Now_Speed;	/*当前速度 计算一次距离*/
+//	u32   RtcNowCnt;  /*RTC数据*/
+	s32		Fixed_Cnt;		/*定位时间计数*/
+//	u8 Time[6];
+//	u8 err;
 	u8 flag=0;//正确标志
-/*	//DEBUG(PrintDebug,"Latitude:%c%c%c%c%c%c%c%c,Longitude:%c%c%c%c%c%c%c%c%c!\r\n",GPSHandle.GPS_INF.Latitude[0],
-	GPSHandle.GPS_INF.Latitude[1],GPSHandle.GPS_INF.Latitude[2],GPSHandle.GPS_INF.Latitude[3],GPSHandle.GPS_INF.Latitude[4],
-	GPSHandle.GPS_INF.Latitude[5],GPSHandle.GPS_INF.Latitude[6],GPSHandle.GPS_INF.Latitude[7],GPSHandle.GPS_INF.Longitude[0],GPSHandle.GPS_INF.Longitude[1],
-	GPSHandle.GPS_INF.Longitude[2],GPSHandle.GPS_INF.Longitude[3],GPSHandle.GPS_INF.Longitude[4],GPSHandle.GPS_INF.Longitude[5],GPSHandle.GPS_INF.Longitude[6],
-	GPSHandle.GPS_INF.Longitude[7],GPSHandle.GPS_INF.Longitude[8]);
-	//DEBUG(PrintDebug,"Time:%x %x %x %x %x %x!\r\n",GPSHandle.GPS_INF.Time[0],GPSHandle.GPS_INF.Time[1],GPSHandle.GPS_INF.Time[2],GPSHandle.GPS_INF.Time[3],GPSHandle.GPS_INF.Time[4],GPSHandle.GPS_INF.Time[5]);
-	//DEBUG(PrintDebug,"Height:%d\r\n",GPSHandle.GPS_INF.Height);
-*/
-	if(GPS_GetFixStatus() == 0)	   //如果在定位状态
+//	u8 status=0;
+//	app_GetPosinf(&status,GPSFixedStatus,0);
+	if(gps_info->Fix_Status == GPS_FIXED)	   //如果在定位状态
 	{
-		#if GPS_PRINT
-		//DEBUG(PrintDevDebug,"计算距离!\r\n");
-		#endif
-		if(GPSHandle.Old_Lon==0&&GPSHandle.Old_Lat==0)//首次定位
+	//	Trace(PrintDebug,"计算距离!\r\n");
+		if((Old_Lon==0)&&(Old_Lat==0))//首次定位
 		{
-			GPSHandle.Oldcog=GPSHandle.GPS_INF.COG;
-			#if GPS_PRINT
-			//DEBUG(PrintDevDebug,"First Locall Time:%lu!\r\n",GPSHandle.Unfixed_Cnt);
-			#endif
-			//OSSemPend(GPS_DataSem,0,&err);
-			GPSHandle.Old_Lon=GPS_Local_Change(GPSHandle.GPS_INF,1) ;
-			GPSHandle.Old_Lat=GPS_Local_Change(GPSHandle.GPS_INF,0) ;
-			//OSSemPost(GPS_DataSem);
-			GPSHandle.Unfixed_Cnt=0;
-			GPSHandle.Fixed_Cnt=0;
-			GPS_GetTime(Time);
-			oa_memcpy(GPSHandle.Pass_Time,Time,6);
+			Old_Lon=GPS_Local_Change(gps_info->Longitude,1) ;
+			Old_Lat=GPS_Local_Change(gps_info->Latitude,0) ;
+			Fixed_Cnt=0;
+			memcpy(Pass_Time,gps_info->Time,6);
 			return 0;	
 		}
 		else
 		{
-			GPSHandle.Unfixed_Cnt=0;
-			GPS_GetTime(Time);
-	
-			GPSHandle.Fixed_Cnt=Get_Space_Time(Time,GPSHandle.Pass_Time);  //获取时间间隔
-			//OSSemPend(GPS_DataSem,0,&err);	//获取新位置
-			GPSHandle.New_Lon=GPS_Local_Change(Pos_Inf,1) ;
-			GPSHandle.New_Lat=GPS_Local_Change(Pos_Inf,0) ;
-			//OSSemPost(GPS_DataSem);
-			if(GPSHandle.Fixed_Cnt>=0)
+			Fixed_Cnt=Get_Space_Time(gps_info->Time,Pass_Time);  //获取时间间隔s
+			New_Lon=GPS_Local_Change(gps_info->Longitude,1) ;
+			New_Lat=GPS_Local_Change(gps_info->Latitude,0) ;
+			if(Fixed_Cnt>=0)
 			{
-				if(GPSHandle.Fixed_Cnt>DISTANCE_FRQ)
+				if(Fixed_Cnt>DISTANCE_FRQ)
 				{
-					#if GPS_PRINT
-					//DEBUG(PrintDevDebug,"超时,通过经纬度计算距离!\r\n");
-					#endif
-					GPSHandle.Speed_Distance=GPS2Point_Distance(GPSHandle.New_Lon,GPSHandle.New_Lat,GPSHandle.Old_Lon,GPSHandle.Old_Lat);
+				//	Trace(PrintDebug,"通过经纬度计算距离!\r\n");
+					IntvlDistanc=GPS2Point_Distance(New_Lon,New_Lat,Old_Lon,Old_Lat);
 					//该方式取得的里程均速大于180km/h，取180
-					if(GPSHandle.Speed_Distance>(180*GPSHandle.Fixed_Cnt)/3600.0)
+					if(IntvlDistanc>(180*Fixed_Cnt)/3600.0)
 					{
-						GPSHandle.Speed_Distance=0;	
+						IntvlDistanc=0;	
 						flag=1;
 					}	 
-		
 				}
 				else 
 				{
-					if(GPSHandle.GPS_INF.Speed>180)//速度限制
+					if(gps_info->Speed>180)//速度限制
 					{
-						GPSHandle.Speed_Distance=0;	
+						IntvlDistanc=0;	
 						flag=1;
 					}
 					else
 					{
-						GPSHandle.Speed_Distance=((GPSHandle.GPS_INF.Speed+GPSHandle.Last_Speed)/2.0)*GPSHandle.Fixed_Cnt/3600.0;//两点平均速度计算fixed_cnt内里程					
-						#if GPS_PRINT
-						//DEBUG(PrintDevDebug,"FIX_CNT:%d,Distance:%.02f\r\n",GPSHandle.Fixed_Cnt,GPSHandle.Speed_Distance);
-						#endif	
+						IntvlDistanc=((gps_info->Speed+Last_Speed)/2.0)*Fixed_Cnt/3600.0;//两点平均速度计算fixed_cnt内里程					
+					//	Trace(PrintDebug,"FIX_CNT:%d,Distance:%8.6f\r\n",Fixed_Cnt,IntvlDistanc);
 					}
 				}
 			}
 			else
 			{
-				GPSHandle.Speed_Distance=0;//时间有误
+				IntvlDistanc=0;//时间有误
+				Old_Lon = 0;
+				Old_Lat = 0;
 				flag=1;
-				#if GPS_PRINT
-				//DEBUG(PrintDevDebug,"GPS时间有误\r\n");
-				#endif	
+				DEBUG("GPS时间有误");
 			}
 			/*若无问题,更新旧数据*/
 			if(flag==0)
 			{
-				GPSHandle.Last_Speed=GPSHandle.GPS_INF.Speed;
-				GPSHandle.Old_Lon=GPSHandle.New_Lon;
-				GPSHandle.Old_Lat=GPSHandle.New_Lat;
-				oa_memcpy(GPSHandle.Pass_Time,Time,6);	//更新时间
+				Last_Speed=gps_info->Speed;
+				Old_Lon=New_Lon;
+				Old_Lat=New_Lat;
+				memcpy(Pass_Time,gps_info->Time,6);	//更新时间
 			}
-			return 	GPSHandle.Speed_Distance;
+			return 	IntvlDistanc;
 		}	
 	}
 	else
 	{
-		#if GPS_PRINT
-		//DEBUG(PrintDevDebug,"未定位!不统计里程\r\n");
-		#endif
+//		Trace(PrintDevbug,"未定位!不统计里程\r\n");
 		return 0;
 	}			
-}
+}  
 /*********************************************************
 *Function:       GPS_GetDistance(u8 *TimeStr)
 *Description:    对GPS进行天线检测和设定，启动GPS
@@ -2816,13 +2808,13 @@ static u8 HowManyDays(u8 year ,u8 month)
 *Return:        时间间隔长度
 *Others:          
 *********************************************************/
-static s32 Get_Space_Time(u8 *Now_Time,u8 *Pass_Time)
+s32 Get_Space_Time(u8 *Now_Time,u8 *Pass_Time)
 {
 	u32 GPS_Second_Cnt=0;
 	u32	Pass_Time_Sencond_Cnt=0;
 	u32 pass_day;
 	pass_day=diff_day(Pass_Time,Now_Time);
-	if(pass_day>=0)
+	if(pass_day>=(u32)0)
 	{
 		GPS_Second_Cnt=(((Now_Time[3]&0xF0)>>4)*10+(Now_Time[3]&0x0F))*3600+(((Now_Time[4]&0xF0)>>4)*10+(Now_Time[4]&0x0F))*60+(((Now_Time[5]&0xF0)>>4)*10+(Now_Time[5]&0x0F))	 ;
 		Pass_Time_Sencond_Cnt=(((Pass_Time[3]&0xF0)>>4)*10+(Pass_Time[3]&0x0F))*3600+(((Pass_Time[4]&0xF0)>>4)*10+(Pass_Time[4]&0x0F))*60+(((Pass_Time[5]&0xF0)>>4)*10+(Pass_Time[5]&0x0F))	 ;
@@ -2832,7 +2824,7 @@ static s32 Get_Space_Time(u8 *Now_Time,u8 *Pass_Time)
 			GPS_Second_Cnt+=24*3600;
 			return 	  GPS_Second_Cnt- Pass_Time_Sencond_Cnt+(pass_day-1)*24*3600;
 		}
-		else if((Pass_Time_Sencond_Cnt<GPS_Second_Cnt)&&(pass_day==0))
+		else if((Pass_Time_Sencond_Cnt<=GPS_Second_Cnt)&&(pass_day==0))
 		{
 			return 	  GPS_Second_Cnt- Pass_Time_Sencond_Cnt;	
 		}
@@ -2972,7 +2964,7 @@ float GPS2Point_Distance(float New_Point_Lon,float New_Point_Lat,float Old_Point
 *Return:         转换后°数
 *Others:          
 *********************************************************/
-static float GPS_Local_Change(STRUCT_RMC POS_Inf,u8 Mode)
+float GPS_Local_Change(u8 *Lon2Lat,u8 Mode)
 {
 	float    Temp=0;
 	u8 i=0;
@@ -2982,11 +2974,11 @@ static float GPS_Local_Change(STRUCT_RMC POS_Inf,u8 Mode)
 	{
 		for(;i<3;i++)
 		{
-			Degrees	=Degrees*10+POS_Inf.Longitude[i]-0x30;
+			Degrees	=Degrees*10+(*(Lon2Lat+i))-0x30;
 		}
 		for(;i<9;i++)
 		{
-			Minutes	=Minutes*10+POS_Inf.Longitude[i]-0x30;	
+			Minutes	=Minutes*10+(*(Lon2Lat+i))-0x30;	
 		}
 		Temp= Degrees+ ((Minutes+0.0)/powme(10,4))/60;
 		return Temp;
@@ -2995,13 +2987,14 @@ static float GPS_Local_Change(STRUCT_RMC POS_Inf,u8 Mode)
 	{
 		for(;i<2;i++)
 		{
-			Degrees	=Degrees*10+POS_Inf.Latitude[i]-0x30;
+			Degrees	=Degrees*10+(*(Lon2Lat+i))-0x30;
 		}
 		for(;i<8;i++)
 		{
-			Minutes	=Minutes*10+POS_Inf.Latitude[i]-0x30;	
+			Minutes	=Minutes*10+(*(Lon2Lat+i))-0x30;	
 		}
 		Temp= Degrees+ ((Minutes+0.0)/powme(10,4))/60;
 		return Temp;
 	}
 }
+
