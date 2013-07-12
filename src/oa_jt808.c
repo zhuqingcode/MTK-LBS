@@ -4358,6 +4358,7 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 		oa_int32 handle, ret;
 		TOTAL_MILE temp;
 		oa_uint32 dummy_read;
+		oa_memset(&temp, 0x0, sizeof(temp));
 		handle = oa_fopen(MILEAGE_FILE);
 		if (handle < 0){
 			DEBUG("mileage file open err!");
@@ -4366,13 +4367,14 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 		else{
 			ret = oa_fread(handle, &temp, sizeof(TOTAL_MILE), &dummy_read);
 			if ((ret < 0) || (dummy_read != sizeof(TOTAL_MILE))) {
-				OA_DEBUG_USER("read mileage err!");
+				DEBUG("read mileage err!");
 				alarmflag = 0;
 			}
 			alarmflag = temp.total_mileage;
+			DEBUG("read miles:%d", alarmflag);
 			ret = oa_fclose(handle);
 			if (ret < 0){
-				OA_DEBUG_USER("close file err!", __FILE__,  __func__, __LINE__);
+				DEBUG("close file err!");
 				oa_fdelete(MILEAGE_FILE);
 			}
 		}
@@ -4381,20 +4383,25 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 	int_to_char(pbuf, alarmflag); //100M
 	pbuf+=4;
 	*pbuflen += 6;
+#if 0
+	//----------
 	*pbuf++=0x02;//油量
 	*pbuf++=0x02;
 	*pbuf++=0x00;	//暂定
 	*pbuf++=0x64;
 	*pbuflen +=4;
+	//----------
 	*pbuf++=0x03;//行驶记录仪速度
 	*pbuf++=0x02;
 //	short_to_char(pbuf,gDriveRecodSpeed);  //??????	 
 	memset(pbuf,0x00,2);
 	pbuf+=2;
 	*pbuflen +=4;
+#endif
+	//-----------
 	*pbuf++=0x11;//超速报警附加信息
 	*pbuf++=0x01;
-	*pbuf++=0x00; //暂定
+	*pbuf++=0x00; //??????????????????????????????????????????????????????????????????????
 	*pbuflen +=3;
 /*	*pbuf=0x12;//进出区域或路线
 	pbuf++;
