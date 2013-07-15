@@ -31,6 +31,9 @@
  #include "oa_blinddata.h"
  #include "oa_gps.h"
  #include "oa_jt808.h"
+ #include "oa_alarm.h"
+
+ area_alarm_addition_struct area_alarm_addition_var = {{no_spec},{0},{0}};
  /*********************************************************
 *Function:     has_areadata_dir_n_c()
 *Description:  if system desn't have area data directory,create it 

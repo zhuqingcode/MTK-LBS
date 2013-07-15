@@ -42,4 +42,17 @@ typedef struct
 	os_kind kind;
 	u32 id;
 }os_struct;
+
+typedef enum
+{
+	out2in,
+	in2out,
+}in_out_kind;
+
+typedef struct
+{
+	os_kind area_kind;
+	u32 id;
+	in_out_kind in_out;
+}area_alarm_addition_struct;
 #endif

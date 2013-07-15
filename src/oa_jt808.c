@@ -46,6 +46,7 @@ extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
 extern timeout_struct timeout_var;
 extern os_struct overspeed_var;
+extern area_alarm_addition_struct area_alarm_addition_var;
 dev_control_type control_type = none;
 upgrade_paras up_paras;
 action_kind plat_paraset = 0x0;
@@ -4457,6 +4458,7 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 	else{
 		*pbuf++=overspeed_var.kind;
 		int_to_char(pbuf, overspeed_var.id);
+		pbuf+=4;
 		*pbuflen += 7;
 	}
 	
@@ -4465,7 +4467,13 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 	pbuf++;
 	*pbuf=0x06;
 	pbuf++;
-	memset(pbuf,0x0,6);
+	if (area_alarm_addition_var.area_kind == no_spec) memset(pbuf,0x0,6);
+	else{
+		*pbuf++ = area_alarm_addition_var.area_kind;
+		int_to_char(pbuf, area_alarm_addition_var.id);
+		pbuf+=4;
+		*pbuf++ = area_alarm_addition_var.in_out;
+	}
 	*pbuflen +=8;
 /*	*pbuf=0x13;//进出区域或路线
 	pbuf++;
