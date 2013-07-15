@@ -2355,6 +2355,49 @@ static u8 ServReq_Textinfo(u8 *pbuf, u16 buflen)
 	}
 }
 /*********************************************************
+*Function:      handle_aritifial_ack_alarm()
+*Description:  handle artifial ack alarm
+*Return:        void
+*Others:         
+*********************************************************/
+u8 handle_aritifial_ack_alarm(u8 *pbuf, u16 buflen)
+{
+	u32 alarm_bit;
+
+	if (NULL == pbuf || buflen == 0){
+		DEBUG("handle_aritifial_ack_alarm param error!");
+		return 1;
+	}
+
+	char_to_int(pbuf+2, &alarm_bit);
+	if (alarm_bit & ALARM_EMERGENCY_k){
+		DEBUG("confirm ALARM_EMERGENCY_k");
+		if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == SET){
+			WriteAlarmPara(RESET, StaAlarm0, ALARM_EMERGENCY_k);
+			return 0;
+		}
+		else return 1;
+	}
+	else if (alarm_bit & ALARM_ENTER_AREA){
+		DEBUG("confirm ALARM_ENTER_AREA");
+		if (ReadAlarmPara(StaAlarm0, ALARM_ENTER_AREA) == SET){
+			WriteAlarmPara(RESET, StaAlarm0, ALARM_ENTER_AREA);
+			return 0;
+		}
+		else return 1;
+	}
+	else if (alarm_bit & ALARM_TOUCH_LINE_k){
+		DEBUG("confirm ALARM_TOUCH_LINE_k");
+		if (ReadAlarmPara(StaAlarm0, ALARM_TOUCH_LINE_k) == SET){
+			WriteAlarmPara(RESET, StaAlarm0, ALARM_TOUCH_LINE_k);
+			return 0;
+		}
+		else return 1;
+	}
+
+	return 1;
+}
+/*********************************************************
 *Function:     set_round_area
 *Description:  下发圆形区域
 *Calls:          
@@ -2653,7 +2696,11 @@ u8 JT808_ServReq_handle(u16 ServReqMsgid,u8 *msgbody,u16 msgbodylen/*,u8 *sendbu
 			break;
 		}
 //status=3 为暂时处理
-		
+		case ARTIFICIAL_ACK_ALARM:{
+			status = handle_aritifial_ack_alarm(msgbody, msgbodylen);
+			Write_ProtclHandl(eRsp2ServSeq,&status,1);
+			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
+		}break;
 		case TEXT_DOWNLOAD:
 		{
 			status = ServReq_Textinfo(msgbody,msgbodylen);
