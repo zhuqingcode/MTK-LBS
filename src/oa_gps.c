@@ -31,12 +31,13 @@
 #include "oa_jt808.h"
 #include "oa_platform.h"
 #include "oa_debug.h"
+#include "oa_alarm.h"
 #define PROTCL_JT808
 //#define GPS_INTVL 50	//50ticks gps任务运行间隔
 #define CHECK_GPS_ERR	(50)	//判断gps模块异常的时间
 #define UPDATE_DISTANC  0.3	//行驶里程大于0.3km时做一次里程统计
 const float EPSINON = 0.00001;
-
+os_struct overspeed_var = {{no_spec}, {0}};
 extern DEVICE_PARAMS dev_now_params;
 extern DEV_PLAT_PARAS dev_running;
 /*********************************************************
@@ -261,6 +262,7 @@ void oa_app_gps(void)
 			if (gps_info.Speed > speed){//handle this alarm & upload instantly
 				DEBUG("over speed");
 				if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == RESET){
+					overspeed_var.kind = no_spec;
 					handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 					handle_alarm_sms(ALARM_OVER_SPEED);
 				}

@@ -39,11 +39,13 @@
 #include "oa_debug.h"
 #include "oa_app.h"
 #include "oa_sms.h"
+#include "oa_alarm.h"
 #define PRINT_SAMEPARA	DEBUG(" this parameter is same as the original, so I do nothing...")
 #define PORT_MAX 65535
 extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
 extern timeout_struct timeout_var;
+extern os_struct overspeed_var;
 dev_control_type control_type = none;
 upgrade_paras up_paras;
 action_kind plat_paraset = 0x0;
@@ -4448,15 +4450,24 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 	//-----------
 	*pbuf++=0x11;//超速报警附加信息
 	*pbuf++=0x01;
-	*pbuf++=0x00; //??????????????????????????????????????????????????????????????????????
-	*pbuflen +=3;
-/*	*pbuf=0x12;//进出区域或路线
+	if (overspeed_var.kind == no_spec){
+		*pbuf++=0x00;
+		*pbuflen += 3;
+	}
+	else{
+		*pbuf++=overspeed_var.kind;
+		int_to_char(pbuf, overspeed_var.id);
+		*pbuflen += 7;
+	}
+	
+	//-----------
+	*pbuf=0x12;//进出区域或路线
 	pbuf++;
 	*pbuf=0x06;
 	pbuf++;
 	memset(pbuf,0x0,6);
 	*pbuflen +=8;
-	*pbuf=0x13;//进出区域或路线
+/*	*pbuf=0x13;//进出区域或路线
 	pbuf++;
 	*pbuf=0x07;
 	pbuf++;
