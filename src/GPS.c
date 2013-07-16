@@ -2948,9 +2948,9 @@ float GPS2Point_Distance(float New_Point_Lon,float New_Point_Lat,float Old_Point
 {
 	float    Temp;
 	float    x,y;
-    x=(New_Point_Lon-Old_Point_Lon)*Pi*R*cos( ((New_Point_Lat+Old_Pont_Lat)/2) *Pi/180)/180;  
+    x=(New_Point_Lon-Old_Point_Lon)*Pi*R*oa_cos( ((New_Point_Lat+Old_Pont_Lat)/2) *Pi/180)/180;  
     y=(New_Point_Lat-Old_Pont_Lat)*Pi*R/180;  
-    Temp=hypot(x,y);  
+    Temp=myhypot(x,y);  
     return Temp; 
 }
 /*********************************************************

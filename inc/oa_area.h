@@ -117,8 +117,8 @@ typedef enum
 
 typedef enum
 {
+	area_err,
 	area_inside,
 	area_outside,
-	area_err,
 }area_status_enum;
 #endif

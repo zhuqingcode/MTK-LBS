@@ -4474,7 +4474,7 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 		pbuf+=4;
 		*pbuf++ = area_alarm_addition_var.in_out;
 	}
-	*pbuflen +=8;
+	*pbuflen += 8;
 /*	*pbuf=0x13;//进出区域或路线
 	pbuf++;
 	*pbuf=0x07;

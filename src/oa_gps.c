@@ -298,6 +298,7 @@ void oa_app_gps(void)
 			DEBUG("miles:%f", IntvlDistanc);
 			if (IntvlDistanc - UPDATE_DISTANC >= EPSINON){
 				//GpsDistancCacul(&IntvlDistanc);//changed to statement below
+				DEBUG("statistics miles");
 				ret = mile_stat_add(IntvlDistanc);
 				if (OA_TRUE == ret){
 					IntvlDistanc -= UPDATE_DISTANC;//IntvlDistanc = 0.0;

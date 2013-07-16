@@ -202,6 +202,16 @@ oa_uint32 atobi(const char *src, oa_uint8 len)
 	return (oa_uint32)bi_tmp;
 }
 /*********************************************************
+*Function:     myhypot()
+*Description:  myatoi for solving mtk atoi's probrem : atoi("90") = 0;
+*Return:		void
+*Others:         
+*********************************************************/
+float myhypot(float f0, float f1)
+{
+	return oa_sqrt(f0*f0 + f1*f1);
+}
+/*********************************************************
 *Function:     asc2uc()
 *Description: acs 2 uc
 *Return:		void
