@@ -322,7 +322,6 @@ u32 GPS_DataAnaly(void)
 					            	GPSHandle.GPS_INF.Latitude[GPSHandle.CntTemp-1]=GPSHandle.Data;
 					            break;
 								case 9:
-								break;
 								case 10:
 								case 11:
 								case 12:
@@ -513,7 +512,8 @@ u32 GPS_DataAnaly(void)
 								//GPSHandle.GPS_INF.Speed=(u16)((GPSHandle.Speed_Temp*1852)/(1000*( pow(10,GPSHandle.dot)+0.0)));//(GPSHandle.Speed_Temp*1852)/1000/( pow(10,GPSHandle.dot));//(float)
 								GPSHandle.GPS_INF.Speed=(u16)((GPSHandle.Speed_Temp*1852)/(1000*( powme(10,GPSHandle.dot)+0.0)));//(GPSHandle.Speed_Temp*1852)/1000/( pow(10,GPSHandle.dot));//(float)
 								//DEBUG("Speed_Temp:%u dot:%u pow:%d", GPSHandle.Speed_Temp, GPSHandle.dot, powme(10,GPSHandle.dot));
-								
+								if (GPSHandle.GPS_INF.Speed < 0) GPSHandle.GPS_INF.Speed = 0;
+								else if (GPSHandle.GPS_INF.Speed > 180) GPSHandle.GPS_INF.Speed = 180;
 							}
 							GPSHandle.CntTemp++;	
 						}
