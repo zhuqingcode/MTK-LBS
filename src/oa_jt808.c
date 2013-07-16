@@ -2442,25 +2442,33 @@ static u8 set_round_area(u8 *pbuf, u16 buflen)
 		}break;
 		default:{
 			DEBUG("设置圆形区域:错误");
+			return 1;
 		}break;
 	}
 	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
-	if (area_num > MAX_AREA_SUM){
-		DEBUG("area num is too large");
-		area_num = 24;
+	if (area_num > MAX_AREA_SUM && option == 0){
+		if (option == 0){
+			DEBUG("area num is too large, only update 24st");
+			area_num = 24;
+		}
+		else if (option == 1 || option == 2){
+			DEBUG("area num is too large, don't do it");
+			return 1;
+		}
+		
 	}
 	
 	for(i=0;i<area_num;i++)
 	{
-		SaveAreaData(pbuf,Circular_Area,option,&read_len);  //保存
+		ret = SaveAreaData(pbuf,Circular_Area,option,&read_len);  //保存
 		if(option == 0)	 //如果是更新操作，只在第一次清除，后面则改为追加
 		{
 			option = 1;//
 		}
 		pbuf+=read_len;
 	}
-	return 1;
+	return ret;
 }
 /*********************************************************
 *Function:     set_rect_area
@@ -2478,6 +2486,7 @@ static u8 set_rect_area(u8 *pbuf, u16 buflen)
 	u8 	option;//操作类型  0:更新  1:追加 2:修改
 	u8 area_num;
 	u16 read_len;
+	u8 ret;
 	u8 i;
 
 	if((pbuf==NULL)||(buflen==0))
@@ -2502,25 +2511,33 @@ static u8 set_rect_area(u8 *pbuf, u16 buflen)
 		}break;
 		default:{
 			DEBUG("设置矩形区域:错误");
+			return 1;
 		}break;
 	}
 	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
-	if (area_num > MAX_AREA_SUM){
-		DEBUG("area num is too large");
-		area_num = 24;
+	if (area_num > MAX_AREA_SUM && option == 0){
+		if (option == 0){
+			DEBUG("area num is too large, only update 24st");
+			area_num = 24;
+		}
+		else if (option == 1 || option == 2){
+			DEBUG("area num is too large, don't do it");
+			return 1;
+		}
+		
 	}
 	
 	for(i=0;i<area_num;i++)
 	{
-		SaveAreaData(pbuf,Rectangle_Area,option,&read_len);  //保存
+		ret = SaveAreaData(pbuf,Rectangle_Area,option,&read_len);  //保存
 		if(option == 0)	 //如果是更新操作，只在第一次清除，后面则改为追加
 		{
 			option = 1;//
 		}
 		pbuf+=read_len;
 	}
-	return 1;
+	return ret;
 }
 	
 /*********************************************************
@@ -2540,6 +2557,7 @@ static u8 set_poly_area(u8 *pbuf, u16 buflen)
 	u8 area_num;
 	u16 read_len;
 	u8 i;
+	u8 ret;
 
 	if((pbuf==NULL)||(buflen==0))
 	{
@@ -2563,25 +2581,33 @@ static u8 set_poly_area(u8 *pbuf, u16 buflen)
 		}break;
 		default:{
 			DEBUG("设置多边形区域:错误");
+			return 1;
 		}break;
 	}
 	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
-	if (area_num > MAX_AREA_SUM){
-		DEBUG("area num is too large");
-		area_num = 24;
+	if (area_num > MAX_AREA_SUM && option == 0){
+		if (option == 0){
+			DEBUG("area num is too large, only update 24st");
+			area_num = 24;
+		}
+		else if (option == 1 || option == 2){
+			DEBUG("area num is too large, don't do it");
+			return 1;
+		}
+		
 	}
 	
 	for(i=0;i<area_num;i++)
 	{
-		SaveAreaData(pbuf,Poly_Area,option,&read_len);  //保存
+		ret = SaveAreaData(pbuf,Poly_Area,option,&read_len);  //保存
 		if(option == 0)	 //如果是更新操作，只在第一次清除，后面则改为追加
 		{
 			option = 1;//
 		}
 		pbuf+=read_len;
 	}
-	return 1;
+	return ret;
 }
 /*********************************************************
 *Function:     del_area_message
@@ -2769,8 +2795,7 @@ u8 JT808_ServReq_handle(u16 ServReqMsgid,u8 *msgbody,u16 msgbodylen/*,u8 *sendbu
 		}
 		#endif
 		case SET_ROUND_AREA:
-			set_round_area(msgbody,msgbodylen);
-			status=0;
+			status = set_round_area(msgbody,msgbodylen);
 			Write_ProtclHandl(eRsp2ServSeq,&status,1);
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
 		break;
@@ -2787,14 +2812,12 @@ u8 JT808_ServReq_handle(u16 ServReqMsgid,u8 *msgbody,u16 msgbodylen/*,u8 *sendbu
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
 		break;
 		case DEL_SQUARE_AREA:
-			del_area_message(msgbody,msgbodylen,Rectangle_Area);
-			status=0;
+			status = del_area_message(msgbody,msgbodylen,Rectangle_Area);
 			Write_ProtclHandl(eRsp2ServSeq,&status,1);
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
 		break;
 		case SET_POLYGON_AREA:
-			set_poly_area(msgbody,msgbodylen);
-			status=0;
+			status = set_poly_area(msgbody,msgbodylen);
 			Write_ProtclHandl(eRsp2ServSeq,&status,1);
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
 		break;
@@ -4467,7 +4490,7 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 	pbuf++;
 	*pbuf=0x06;
 	pbuf++;
-	if (area_alarm_addition_var.area_kind == no_spec) memset(pbuf,0x0,6);
+	if (area_alarm_addition_var.area_kind == no_spec) oa_memset(pbuf,0x0,6);
 	else{
 		*pbuf++ = area_alarm_addition_var.area_kind;
 		int_to_char(pbuf, area_alarm_addition_var.id);

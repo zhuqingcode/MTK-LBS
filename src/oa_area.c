@@ -135,6 +135,18 @@ oa_bool r_w_circle_area_data_file(circle_area_item *p_item, r_w_enum r_w, u8 pos
 						oa_fclose(handle);
 						return OA_TRUE;
 					}
+					else if (circle_area_var.area_id == p_item->area_id && circle_area_var.is_valid == valid){
+						oa_fseek(handle, offset, OA_FILE_BEGIN);
+						oa_memcpy(&circle_area_var, p_item, sizeof(circle_area_item));
+						ret = oa_fwrite(handle, &circle_area_var, sizeof(circle_area_item), &dummy_write);
+						if ((ret < 0) || (dummy_write != sizeof(circle_area_item))){
+							DEBUG("write err!");
+							oa_fclose(handle);
+							return OA_FALSE;
+						}
+						oa_fclose(handle);
+						return OA_TRUE;
+					}
 				}
 				else if (alter_area == option){
 					if (circle_area_var.area_id == p_item->area_id && circle_area_var.is_valid == valid){
@@ -235,6 +247,18 @@ oa_bool r_w_rect_area_data_file(rect_area_item *p_item, r_w_enum r_w, u8 pos, u8
 						oa_fclose(handle);
 						return OA_TRUE;
 					}
+					else if (rect_area_var.area_id == p_item->area_id && rect_area_var.is_valid == valid){
+						oa_fseek(handle, offset, OA_FILE_BEGIN);
+						oa_memcpy(&rect_area_var, p_item, sizeof(rect_area_var));
+						ret = oa_fwrite(handle, &rect_area_var, sizeof(rect_area_var), &dummy_write);
+						if ((ret < 0) || (dummy_write != sizeof(rect_area_var))){
+							DEBUG("write err!");
+							oa_fclose(handle);
+							return OA_FALSE;
+						}
+						oa_fclose(handle);
+						return OA_TRUE;
+					}
 				}
 				else if (alter_area == option){
 					if (rect_area_var.area_id == p_item->area_id && rect_area_var.is_valid == valid){
@@ -324,6 +348,18 @@ oa_bool r_w_poly_area_data_file(poly_area_item *p_item, r_w_enum r_w, u8 pos, u8
 				
 				if (add_area == option){
 					if (poly_area_var.is_valid == invalid){
+						oa_fseek(handle, offset, OA_FILE_BEGIN);
+						oa_memcpy(&poly_area_var, p_item, sizeof(poly_area_var));
+						ret = oa_fwrite(handle, &poly_area_var, sizeof(poly_area_var), &dummy_write);
+						if ((ret < 0) || (dummy_write != sizeof(poly_area_var))){
+							DEBUG("write err!");
+							oa_fclose(handle);
+							return OA_FALSE;
+						}
+						oa_fclose(handle);
+						return OA_TRUE;
+					}
+					else if (poly_area_var.area_id == p_item->area_id && poly_area_var.is_valid == valid){
 						oa_fseek(handle, offset, OA_FILE_BEGIN);
 						oa_memcpy(&poly_area_var, p_item, sizeof(poly_area_var));
 						ret = oa_fwrite(handle, &poly_area_var, sizeof(poly_area_var), &dummy_write);
@@ -440,7 +476,13 @@ oa_bool write_circle_area_data(u8 *buf, u16 *read_len, u8 option)
 	//-----------------------------------------------
 	circle_area_var.is_valid = valid;
 	ret = r_w_circle_area_data_file(&circle_area_var, file_write, 0/*has no effect*/, option);
-	if (OA_TRUE == ret) return OA_TRUE;	
+	if (OA_TRUE == ret) return OA_TRUE;
+	else if (OA_FALSE == ret && option == alter_area){
+		option = add_area;
+		ret = r_w_circle_area_data_file(&circle_area_var, file_write, 0/*has no effect*/, option);
+		if (OA_TRUE == ret) return OA_TRUE;
+		else return OA_FALSE;
+	}
 	else return OA_FALSE;
 }
 
@@ -530,7 +572,13 @@ oa_bool write_rect_area_data(u8 *buf, u16 *read_len, u8 option)
 	//-----------------------------------------------
 	rect_area_var.is_valid = valid;
 	ret = r_w_rect_area_data_file(&rect_area_var, file_write, 0/*has no effect*/, option);
-	if (OA_TRUE == ret) return OA_TRUE;	
+	if (OA_TRUE == ret) return OA_TRUE;
+	else if (OA_FALSE == ret && option == alter_area){
+		option = add_area;
+		ret = r_w_rect_area_data_file(&rect_area_var, file_write, 0/*has no effect*/, option);
+		if (OA_TRUE == ret) return OA_TRUE;
+		else return OA_FALSE;
+	}
 	else return OA_FALSE;
 }
 /*********************************************************
@@ -663,7 +711,13 @@ oa_bool write_poly_area_data(u8 *buf, u16 *read_len, u8 option)
 	//-----------------------------------------------
 	poly_area_var.is_valid = valid;
 	ret = r_w_poly_area_data_file(&poly_area_var, file_write, 0/*has no effect*/, option);
-	if (OA_TRUE == ret) return OA_TRUE;	
+	if (OA_TRUE == ret) return OA_TRUE;
+	else if (OA_FALSE == ret && option == alter_area){
+		option = add_area;
+		ret = r_w_poly_area_data_file(&poly_area_var, file_write, 0/*has no effect*/, option);
+		if (OA_TRUE == ret) return OA_TRUE;
+		else return OA_FALSE;
+	}
 	else return OA_FALSE;
 }
 /*********************************************************
@@ -923,7 +977,11 @@ void circle_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur
 							res = CompareTime(circle_area_var.start_time, circle_area_var.stop_time, time, 2);
 						else res = CompareTime(circle_area_var.start_time, circle_area_var.stop_time, time, 3);
 					}
-					else continue;
+					else{//if it is not cycle
+						res = CompareTime(circle_area_var.start_time, circle_area_var.stop_time, time, 0);
+						if (!res) del_area_data(circle_area_var.area_id, Circular_Area, one_area);
+						else if (res == 2) res = 0;
+					}
 					if (0 == res) continue;
 					else if (1 == res){
 						i_o = Circular_Judge(lon, lat, &circle_area_desc);
@@ -1009,7 +1067,12 @@ void rect_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur,
 							res = CompareTime(rect_area_var.start_time, rect_area_var.stop_time, time, 2);
 						else res = CompareTime(rect_area_var.start_time, rect_area_var.stop_time, time, 3);
 					}
-					else continue;
+					else{//if it is not cycle
+						res = CompareTime(rect_area_var.start_time, rect_area_var.stop_time, time, 0);
+						if (!res) del_area_data(rect_area_var.area_id, Rectangle_Area, one_area);
+						else if (res == 2) res = 0;
+					}
+					
 					if (0 == res) continue;
 					else if (1 == res){
 						i_o = poly_Judge(lon, lat, &rect_area_desc, 4);
@@ -1093,7 +1156,11 @@ void poly_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur,
 							res = CompareTime(poly_area_var.start_time, poly_area_var.stop_time, time, 2);
 						else res = CompareTime(poly_area_var.start_time, poly_area_var.stop_time, time, 3);
 					}
-					else continue;
+					else{//if it is not cycle
+						res = CompareTime(poly_area_var.start_time, poly_area_var.stop_time, time, 0);
+						if (!res) del_area_data(poly_area_var.area_id, Poly_Area, one_area);
+						else if (res == 2) res = 0;
+					}
 					if (0 == res) continue;
 					else if (1 == res){
 						i_o = poly_Judge(lon, lat, &poly_area_desc, poly_area_var.total_point);
