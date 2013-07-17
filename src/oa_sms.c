@@ -67,6 +67,7 @@ oa_char *p_keyword[] = {
  Sub_User,
  Sub_Pwd,
  TEL,
+ NETTYPE,
  VPDNUSR,
  VPDNPWD,
  Rpt_strategy,
@@ -112,6 +113,7 @@ oa_char *p_keyword[] = {
  STATICS,
  GPS,
  UPDATE,
+ SNUMS,
  VERSA,
  CLRLOG,
  AUTHEN,
@@ -119,38 +121,6 @@ oa_char *p_keyword[] = {
  DEVID,
 };
 oa_uint8 KEYWORDS_SIZE = sizeof(p_keyword)/4;
-#if 0
-/*********************************************************
-*Function:      status_extract()
-*Description:  search key word in message
-*Return:        void
-*Others:         
-*********************************************************/
-nb_kind telecom_num_check(oa_char *nb)
-{
-	if (NULL == nb){
-		DEBUG("paras err!");
-		return err_nb;
-	}
-#if 0
-	if(nb[3] == '1'){
-		if (nb[4] == '3' || nb[4] == '5' || nb[4] == '8'){
-			if (nb[5] == '3' || nb[5] == '0' || nb[5] == '9'){
-				return tele_nb;
-			}
-			else return mobe_nb;
-		}
-		else return mobe_nb;
-	}
-	else{
-		return err_nb;
-	}
-#endif
-	if ((!oa_strncmp(nb, "133", 3)) || (!oa_strncmp(nb, "153", 3)) 
-		|| (!oa_strncmp(nb, "180", 3)) || (!oa_strncmp(nb, "189", 3)) )	return tele_nb;
-	else return mobe_nb;
-}
-#endif
 //unicode
 oa_uint8 termID[] = {0x7e,0xc8,0x7a,0xef,0x7f,0x16,0x53,0xf7,0x0,':'};//"ÖÕ¶Ë±àºÅ:"
 oa_uint8 CardNum[] = {0x53,0x61,0x53,0xF7,0x0,':'};//"¿¨ºÅ:"
@@ -542,41 +512,6 @@ void gps_extract(oa_char *enquire_temp, u8 *p_len, sms_or_uart which){
 		}
 	}
 }
-#if 0
-/*********************************************************
-*Function:      need_ack_check()
-*Description:  search key word in message
-*Return:        void
-*Others:         
-*********************************************************/
-ack_kind need_ack_check(oa_char *p)
-{
-	oa_char *p_SEMICOLON = NULL; 
-	if (NULL == p){
-		DEBUG(" err!");
-		return ackerr;
-	}
-	p_SEMICOLON = oa_strchr(p, SEMICOLON);
-	if (p_SEMICOLON != NULL){
-		if (0x0 != *(p_SEMICOLON+2)){
-			DEBUG(" format err!");
-			return ackerr;
-		}
-		if (*(p_SEMICOLON+1) == 'A' || *(p_SEMICOLON+1) == 'a')	return ack;
-		else if (*(p_SEMICOLON+1) == 'N' || *(p_SEMICOLON+1) == 'n')	return noack;
-		else if (*(p_SEMICOLON+1) == 0x0)	return noack;
-		else{
-			DEBUG(" format err!");
-			return ackerr;
-		}
-	}
-	else	{
-		DEBUG(" format err!");
-		return ackerr;
-		//return noack;
-	}	
-}
-#endif
 /*********************************************************
 *Function:      need_ack_check()
 *Description:  search key word in message
@@ -682,9 +617,12 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 				}
 			}break;
 			case e_Rpttime_sleep:
+			case e_Rpttime_alarm:
+			case e_Rptdis_alarm:
 			case e_Rpttime_def:
 			case e_Rptcog:
 			case e_overspeed:
+			case e_overspeedtime:
 			case e_min_resttime:
 			case e_daydrivetime:
 			case e_tireddrivetime:
@@ -801,91 +739,11 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 		}
 		
 	}
-#if 0
-	else if (*p == SEMICOLON){//means enquiry
-		p_set->kind = enquire;
-	}
-	else{
-		DEBUG(" format err!");
+	else if (*p != SEMICOLON){//means enquiry
 		return OA_FALSE;
 	}
-#endif
 	return OA_TRUE;
 }
-#if 0
-/*********************************************************
-*Function:      lookfor_keywords_loop()
-*Description:  search key word in message
-*Return:        void
-*Others:         
-*********************************************************/
-e_keyword lookfor_keywords_loop(u8 *p_sms, u16 sms_len, keyword_context *p_set, oa_uint8 e_i, sms_or_uart which)
-{
-	oa_char *p_key = NULL;
-	oa_char temp[256] = {0x0};
-	oa_char ch;
-	ack_kind ack_ret;
-	oa_uint8 e_len;
-	oa_bool ret;
-//	oa_uint8 e_i;
-	
-	if (NULL == p_set || e_i == e_none){
-		DEBUG(" p_set err!");
-		return e_none;
-	}
-	
-	if (sms == which){
-		if (NULL == p_set || e_i == e_none){
-			DEBUG(" p_set err!");
-			return e_none;
-		}
-		//p_key = oa_strstr(message.data, p_keyword[e_i]);
-		oa_memcpy(temp, message.data, sms_len);
-		p_key = oa_strstr(temp, p_keyword[e_i]);
-	}
-	else if (uart == which){
-		if (NULL == p_set || e_i == e_none){
-			DEBUG(" p_set err!");
-			return e_none;
-		}
-		p_key = oa_strstr(uart_contain.buf, p_keyword[e_i]);
-	}
-	else if (scrn == which){
-		if (NULL == p_set || NULL == p_sms || sms_len > 255){
-			DEBUG(" p_set err!");
-			return e_none;
-		}
-		oa_memcpy(temp, p_sms, sms_len);
-		p_key = oa_strstr(temp, p_keyword[e_i]);
-	}
-	
-	if (NULL != p_key){
-		if (sms == which){
-			if (p_key != &temp[0])		return e_none;
-		}
-		else if (uart == which){
-			if (p_key != &uart_contain.buf[0])		return e_none;
-		}
-		else if (scrn == which){
-			if (p_key != &temp[0])		return e_none;
-		}
-		
-		//need ack check
-		ack_ret = need_ack_check(p_key);
-		if (ack_ret == ackerr)	return e_none;
-		else if (ack_ret == ack)	p_set->need_ack = OA_TRUE;//means need ack
-		else if (ack_ret == noack)  p_set->need_ack = OA_FALSE;
-		//set/enquiry check
-		e_len = oa_strlen(p_keyword[e_i]);
-		ret = set_enquiry_check(p_key, e_len, p_set, e_i);
-		if (OA_FALSE == ret) return e_none;
-		else return e_i;
-	}
-
-
-	return e_none;
-}
-#endif
 /*********************************************************
 *Function:      lookfor_keywords_loop()
 *Description:  search key word in message
@@ -952,285 +810,6 @@ e_keyword look4keywords4ms(oa_char *p_sms, u16 sms_len, keyword_context *p_set, 
 
 	return e_none;
 }
-#if 0
-/*********************************************************
-*Function:      handle_keyword()
-*Description:  handle the keyword
-*Return:        void
-*Others:         
-*********************************************************/
-void sms_send_feedback_func(os_sms_result send_ret)
-{
-	if (OA_SMS_OK != send_ret){
-		DEBUG("sms send err:%d......send again", send_ret);
-		oa_sms_send_req(sms_send_feedback_func, sms_fail.deliver_num, sms_fail.data, sms_fail.len, sms_fail.dcs);
-	}
-	else if (OA_SMS_OK == send_ret){
-		DEBUG("sms send ok");
-		//oa_at_cmd_demo("at+cpms?\r\n");
-		//oa_at_cmd_demo_submit();
-		//delete it
-		oa_at_cmd_demo("at+cmgd=1,4\r\n");
-		oa_at_cmd_demo_submit();
-		//oa_at_cmd_demo("at+cpms?\r\n");
-		//oa_at_cmd_demo_submit();
-		oa_memset(&sms_fail, 0x0, sizeof(sms_fail));
-	}
-}
-#endif
-#if 0
-/*********************************************************
-*Function:      handle_keyword()
-*Description:  handle the keyword
-*Return:        void
-*Others:         
-*********************************************************/
-void handle_common(e_keyword key_kind, keyword_context *p_set, sms_or_uart which, 
-															u8 *p_fbk, u16 *p_fbk_len)
-{
-	oa_bool ret;
-	char temp[16] = {0x0};
-	char enquire_temp[128] = {0x0};
-	#if 0
-	if (p_set->kind == set){
-		if (sms == which){
-			oa_sms_send_req(sms_send_feedback_func, message.deliver_num, message.data, message.len-2, message.dcs);
-			oa_memcpy(sms_fail.data, message.data, message.len-2);// 2 means ";A"
-			sms_fail.len = message.len-2;
-		}
-		else if (uart == which){
-			//handle uart here
-			oa_uart_write(OA_UART3, uart_contain.buf, uart_contain.len-2);
-		}
-		
-		
-	}
-	#endif
-	//if (p_set->kind == enquire || set == p_set->kind){//else if (p_set->kind == enquire){
-	if (p_set->need_ack == OA_TRUE){
-		switch(key_kind){
-			case e_HB:{
-				sprintf(enquire_temp, "Hearttime:%d;"/*very important here*/, dev_now_params.heartbeat_interval);
-			}break;
-			case e_RSP_TCP:{
-				sprintf(enquire_temp, "RSP_TCP:%d;"/*very important here*/, dev_now_params.tcp_ack_timeout);
-			}break;
-			case e_RSP_UDP:{
-				sprintf(enquire_temp, "RSP_UDP:%d;"/*very important here*/, dev_now_params.udp_ack_timeout);
-			}break;
-			case e_RSP_SMS:{
-				sprintf(enquire_temp, "RSP_SMS:%d;"/*very important here*/, dev_now_params.sms_ack_timeout);
-			}break;
-			case e_Retry_TCP:{
-				sprintf(enquire_temp, "Retry_TCP:%d;"/*very important here*/, dev_now_params.tcp_retrans_times);
-			}break;
-			case e_Retry_UDP:{
-				sprintf(enquire_temp, "Retry_UDP:%d;"/*very important here*/, dev_now_params.udp_retrans_times);
-			}break;
-			case e_Retry_SMS:{
-				sprintf(enquire_temp, "Retry_SMS:%d;"/*very important here*/, dev_now_params.sms_retrans_times);
-			}break;
-			case e_IP:{
-				oa_strcat(enquire_temp, "IP:");
-				oa_strcat(enquire_temp, dev_now_params.m_server_ip);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_TCPPORT:{
-				sprintf(enquire_temp, "TCPPORT:%d;"/*very important here*/, dev_now_params.server_tcp_port);
-			}break;
-			case e_UDPPORT:{
-				sprintf(enquire_temp, "UDPPORT:%d;"/*very important here*/, dev_now_params.server_udp_port);
-			}break;
-			case e_TEL:{
-				oa_strcat(enquire_temp, "TEL:");
-				oa_strcat(enquire_temp, dev_now_params.term_tel_num);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_Rpt_strategy:{
-				sprintf(enquire_temp, "Rpt_strategy:%d;", dev_now_params.report_strategy);
-			}break;
-			case e_Rpttime_sleep:{
-				sprintf(enquire_temp, "Rpttime_sleep:%d;", dev_now_params.sleep_reporttime);
-			}break;
-			case e_Rpttime_def:{
-				sprintf(enquire_temp, "Rpttime_def:%d;", dev_now_params.default_reporttime);
-			}break;
-			case e_servertel:{
-				oa_strcat(enquire_temp, "servertel:");
-				oa_strcat(enquire_temp, dev_now_params.monitor_platform_num);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_resettel:{
-				oa_strcat(enquire_temp, "resettel:");
-				oa_strcat(enquire_temp, dev_now_params.reset_num);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_factorysettel:{
-				oa_strcat(enquire_temp, "factorysettel:");
-				oa_strcat(enquire_temp, dev_now_params.restore_factory_settings_num);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_alarmsmstel:{
-				oa_strcat(enquire_temp, "alarmsmstel:");
-				oa_strcat(enquire_temp, dev_now_params.terminal_sms_num);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_swh_alarmmask:{
-				oa_char tmp[33] = {0x0};
-				oa_itoa(dev_now_params.alarm_mask, tmp, BI);
-				oa_strcat(enquire_temp, "swh_alarmmask:");
-				oa_strcat(enquire_temp, tmp);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_swh_alarmsms:{
-				oa_char tmp[33] = {0x0};
-				oa_itoa(dev_now_params.alarm_send_sms_mask, tmp, BI);
-				//DEBUG(" temp:%s!", tmp);
-				oa_strcat(enquire_temp, "swh_alarmsms:");
-				oa_strcat(enquire_temp, tmp);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_overspeed:{
-				sprintf(enquire_temp, "overspeed:%d;", dev_now_params.max_speed);
-			}break;
-			case e_overspeedtime:{
-				sprintf(enquire_temp, "overspeedtime:%d;", dev_now_params.speed_duration);
-			}break;
-			case e_min_resttime:{
-				sprintf(enquire_temp, "min_resttime:%d;", dev_now_params.min_rest_time);
-			}break;
-			case e_max_parktime:{
-				sprintf(enquire_temp, "max_parktime:%d;", dev_now_params.max_park_time);
-			}break;
-			case e_daydrivetime:{
-				sprintf(enquire_temp, "daydrivetime:%d;", dev_now_params.day_add_drive_time_threshold);
-			}break;
-			case e_tireddrivetime:{
-				sprintf(enquire_temp, "tireddrivetime:%d;", dev_now_params.continuous_drive_time_threshold);
-			}break;
-			case e_provincID:{
-				sprintf(enquire_temp, "provincID:%d;", dev_now_params.vehicle_province_id);
-			}break;
-			case e_cityID:{
-				sprintf(enquire_temp, "cityID:%d;", dev_now_params.vehicle_city_id);
-			}break;
-			case e_carID:{
-				oa_strcat(enquire_temp, "carID:");
-				oa_strcat(enquire_temp, dev_now_params.vehicle_license);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_carcolor:{
-				sprintf(enquire_temp, "carcolor:%d;", dev_now_params.plate_color);
-			}break;
-			case e_UPIP:{
-				oa_strcat(enquire_temp, "UPIP:");
-				oa_strcat(enquire_temp, dev_now_params.update_server_ip);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_UPPORT:{
-				sprintf(enquire_temp, "UPPORT:%d;", dev_now_params.update_server_port);
-			}break;
-			case e_UPFTPUSR:{
-				oa_strcat(enquire_temp, "UPFTPUSR:");
-				oa_strcat(enquire_temp, dev_now_params.ftpusr);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_UPFTPPWD:{
-				oa_strcat(enquire_temp, "UPFTPPWD:");
-				oa_strcat(enquire_temp, dev_now_params.ftppwd);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_UPPROG_NAME:{
-				oa_strcat(enquire_temp, "UPPROG_NAME:");
-				oa_strcat(enquire_temp, dev_now_params.ftp_prog_name);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_STATUS:{
-				status_extract(enquire_temp);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_GPS:{
-				gps_extract(enquire_temp);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_dev_lock:{
-				sprintf(enquire_temp, "dev_lock:%d;", now_use_lock.lock);
-			}break;
-			case e_UPDATE:{
-				oa_strcat(enquire_temp, "doing update;");
-			}break;
-			case e_VERSA:{
-				oa_strcat(temp, "HW,");
-				oa_strcat(temp, OA_HW_VERSION_NO);
-				oa_strcat(temp, ";");
-				oa_strcat(enquire_temp, temp);
-				oa_strcat(enquire_temp, "SW,");
-				oa_strcat(enquire_temp, OA_SW_VERSION_NO);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_CLRLOG:{
-				oa_strcat(enquire_temp, "CLRLOG");
-				oa_strcat(enquire_temp, ";");
-			}break;
-			case e_AUTHEN:{
-				oa_uint8 code[AUTHEN_CODE_MAX_LEN] = 0x0;
-				oa_uint8 len;
-				if (read_authen_code(code, &len)){
-					oa_strcat(enquire_temp, code);
-					oa_strcat(enquire_temp, ";");
-				}
-			}break;	
-			case e_RESTART:{
-				oa_strcat(enquire_temp, "RESTART OK;");
-			}break;
-			case e_DEVID:{
-				oa_strcat(enquire_temp, dev_now_params.term_id);
-				oa_strcat(enquire_temp, ";");
-			}break;
-			default:{
-				oa_strcat(enquire_temp, "not support!");
-			}break;
-		}
-		
-		if (sms == which){
-			oa_char nb_tmp[4] = {0x0};
-			nb_kind nb = err_nb;
-			oa_strncpy(nb_tmp, &message.deliver_num[3], 3);
-			nb = telecom_num_check(nb_tmp);
-			if (tele_nb == nb){
-				//DEBUG("enquire_temp:%s nb:%s", enquire_temp, message.deliver_num);
-				oa_sms_test_dfalp(enquire_temp, message.deliver_num);
-			}
-			else if (err_nb != nb){
-				oa_sms_send_req(sms_send_feedback_func, message.deliver_num, enquire_temp, oa_strlen(enquire_temp), message.dcs);
-				oa_memcpy(sms_fail.data, enquire_temp, oa_strlen(enquire_temp));
-				sms_fail.len = oa_strlen(enquire_temp);
-				oa_memcpy(sms_fail.deliver_num, message.deliver_num, oa_strlen(message.deliver_num));
-				sms_fail.dcs = message.dcs;
-			}
-			
-		}
-		else if (uart == which){
-			//handle uart here
-			oa_uart_write(OA_UART3, enquire_temp, oa_strlen(enquire_temp));
-		}
-		else if (scrn == which){
-			*p_fbk_len = oa_strlen(enquire_temp);
-			oa_memcpy(p_fbk, enquire_temp, *p_fbk_len);
-		}
-		
- 	}
-#if 0
-	if (sms == which){
-		oa_memcpy(sms_fail.deliver_num, message.deliver_num, oa_strlen(message.deliver_num));
-		sms_fail.dcs = message.dcs;
-	}
-	else if (scrn == which){
-		
-	}
-#endif
-}
-#endif
 /*********************************************************
 *Function:      handle_keyword4ms()
 *Description:  handle the keyword for multiple sms
@@ -1281,11 +860,18 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 			oa_strcat(enquire_temp, dev_now_params.term_tel_num);
 			oa_strcat(enquire_temp, ";");
 		}break;
+		case e_NETTYPE:{
+			if (g_soc_context.soc_addr.sock_type == OA_SOCK_STREAM) oa_strcat(enquire_temp, "NETTYPE:TCP;");
+			else oa_strcat(enquire_temp, "NETTYPE:UDP;");
+		}break;
 		case e_Rpt_strategy:{
 			sprintf(enquire_temp, "Rpt_strategy:%d;", dev_now_params.report_strategy);
 		}break;
 		case e_Rpttime_sleep:{
 			sprintf(enquire_temp, "Rpttime_sleep:%d;", dev_now_params.sleep_reporttime);
+		}break;
+		case e_Rpttime_alarm:{
+			sprintf(enquire_temp, "Rpttime_alarm:%d;", dev_now_params.urgent_reporttime);
 		}break;
 		case e_Rpttime_def:{
 			sprintf(enquire_temp, "Rpttime_def:%d;", dev_now_params.default_reporttime);
@@ -1393,6 +979,11 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 		}break;
 		case e_UPDATE:{
 			oa_strcat(enquire_temp, "doing update;");
+		}break;
+		case e_SNUMS:{
+			oa_strcat(enquire_temp, "SNUMS:");
+			oa_strcat(enquire_temp, dev_now_params.term_id);
+			oa_strcat(enquire_temp, ";");
 		}break;
 		case e_VERSA:{
 			oa_strcat(temp, "HW,");
@@ -1562,682 +1153,6 @@ void dev_action_handle(keyword_context *p_set, sms_or_uart which)
 
 	p_set->act_kind = no_act;
 }
-#if 0
-/*********************************************************
-*Function:      handle_keyword()
-*Description:  handle the keyword
-*Return:        void
-*Others:         
-*********************************************************/
-void handle_keyword(u16 *p_act, u8 *p_fbk, u16 *p_fbk_len, e_keyword key_kind, 
-										keyword_context *p_set, sms_or_uart which)
-{
-	oa_bool ret;
-	char temp[16] = {0x0};
-	char enquire_temp[64] = {0x0};
-	switch (key_kind){
-		case e_HB:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.heartbeat_interval == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-
-				}
-				else{
-					dev_now_params.heartbeat_interval = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_RSP_TCP:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.tcp_ack_timeout == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-
-				}
-				else{
-					dev_now_params.tcp_ack_timeout = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_RSP_UDP:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.udp_ack_timeout == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-
-				}
-				else{
-					dev_now_params.udp_ack_timeout = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_RSP_SMS:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.sms_ack_timeout == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-
-				}
-				else{
-					dev_now_params.sms_ack_timeout = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_Retry_TCP:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.tcp_retrans_times == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-
-				}
-				else{
-					dev_now_params.tcp_retrans_times = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_Retry_UDP:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.udp_retrans_times == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-
-				}
-				else{
-					dev_now_params.udp_retrans_times = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_Retry_SMS:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.sms_retrans_times == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-
-				}
-				else{
-					dev_now_params.sms_retrans_times = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_IP:{
-			if (p_set->kind == set){
-				u8 ip_len;
-				if (oa_strlen(dev_now_params.m_server_ip) == oa_strlen(p_set->context.con_ch)){//length is equal
-					ip_len = oa_strlen(dev_now_params.m_server_ip);
-					if (!oa_strncmp(dev_now_params.m_server_ip, p_set->context.con_ch, ip_len)){
-						PRINT_SAMEPARA;
-						p_set->act_kind = no_act;
-						break;
-					}
-					else{//not equal
-						oa_memset(dev_now_params.m_server_ip, 0x0, sizeof(dev_now_params.m_server_ip));
-						oa_memcpy(dev_now_params.m_server_ip, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = reconn;
-					}
-				}
-				else{//not equal
-					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
-					oa_memset(dev_now_params.m_server_ip, 0x0, sizeof(dev_now_params.m_server_ip));
-					oa_memcpy(dev_now_params.m_server_ip, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
-					p_set->act_kind = reconn;
-				}
-			}		
-		}break;
-		case e_TCPPORT:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.server_tcp_port == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-
-				}
-				else{
-					dev_now_params.server_tcp_port = p_set->context.con_int;
-					p_set->act_kind = reconn;
-				}
-			}	
-		}break;
-		case e_UDPPORT:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.server_udp_port == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-
-				}
-				else{
-					dev_now_params.server_udp_port = p_set->context.con_int;
-					p_set->act_kind = reconn;
-				}
-			}	
-		}break;
-		case e_TEL:{
-			if (p_set->kind == set){
-				if (oa_strlen(dev_now_params.term_tel_num) == oa_strlen(p_set->context.con_ch)){
-					if (!oa_strncmp(dev_now_params.term_tel_num, p_set->context.con_ch, oa_strlen(dev_now_params.term_tel_num))){
-						PRINT_SAMEPARA;
-						p_set->act_kind = no_act;
-						break;
-					}
-					else{//not equal
-						oa_memset(dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
-						oa_memcpy(dev_now_params.term_tel_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
-					}
-				}
-				else{
-					oa_memset(dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
-					oa_memcpy(dev_now_params.term_tel_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_Rpt_strategy:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.report_strategy == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-				}
-				else{
-					dev_now_params.report_strategy = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-				
-			}
-		}break;
-		case e_Rpttime_sleep:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.sleep_reporttime == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-				}
-				else{
-					dev_now_params.sleep_reporttime = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_Rpttime_def:{
-			if (p_set->kind == set){
-				if (dev_now_params.default_reporttime == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-				}
-				else{
-					dev_now_params.default_reporttime = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_servertel:{
-			if (p_set->kind == set){
-				if (oa_strlen(dev_now_params.monitor_platform_num) == oa_strlen(p_set->context.con_ch)){
-					if (!oa_strncmp(dev_now_params.monitor_platform_num, p_set->context.con_ch, oa_strlen(dev_now_params.monitor_platform_num))){
-						PRINT_SAMEPARA;
-						p_set->act_kind = no_act;
-						break;
-					}
-					else{//not equal
-						oa_memset(dev_now_params.monitor_platform_num, 0x0, sizeof(dev_now_params.monitor_platform_num));
-						oa_memcpy(dev_now_params.monitor_platform_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
-					}
-				}
-				else{//not equal
-					oa_memset(dev_now_params.monitor_platform_num, 0x0, sizeof(dev_now_params.monitor_platform_num));
-					oa_memcpy(dev_now_params.monitor_platform_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					p_set->act_kind = para_save;
-					
-				}
-			}
-		}break;
-		case e_resettel:{
-			if (p_set->kind == set){
-				if (oa_strlen(dev_now_params.reset_num) == oa_strlen(p_set->context.con_ch)){
-					if (!oa_strncmp(dev_now_params.reset_num, p_set->context.con_ch, oa_strlen(dev_now_params.reset_num))){
-						PRINT_SAMEPARA;
-						p_set->act_kind = no_act;
-						break;
-
-					}
-					else{//not equal
-						oa_memset(dev_now_params.reset_num, 0x0, sizeof(dev_now_params.reset_num));
-						oa_memcpy(dev_now_params.reset_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
-					}
-				}
-				else{//not equal
-					oa_memset(dev_now_params.reset_num, 0x0, sizeof(dev_now_params.reset_num));
-					oa_memcpy(dev_now_params.reset_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					p_set->act_kind = para_save;
-					
-				}
-			}
-		}break;
-		case e_factorysettel:{
-			if (p_set->kind == set){
-				if (oa_strlen(dev_now_params.restore_factory_settings_num) == oa_strlen(p_set->context.con_ch)){
-					if (!oa_strncmp(dev_now_params.restore_factory_settings_num, p_set->context.con_ch, oa_strlen(dev_now_params.restore_factory_settings_num))){
-						PRINT_SAMEPARA;
-						p_set->act_kind = no_act;
-						break;
-
-					}
-					else{//not equal
-						oa_memset(dev_now_params.restore_factory_settings_num, 0x0, sizeof(dev_now_params.restore_factory_settings_num));
-						oa_memcpy(dev_now_params.restore_factory_settings_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
-					}
-				}
-				else{//not equal
-					oa_memset(dev_now_params.restore_factory_settings_num, 0x0, sizeof(dev_now_params.restore_factory_settings_num));
-					oa_memcpy(dev_now_params.restore_factory_settings_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					p_set->act_kind = para_save;
-
-				}
-			}
-			
-		}break;
-		case e_alarmsmstel:{
-			if (p_set->kind == set){
-				if (oa_strlen(dev_now_params.terminal_sms_num) == oa_strlen(p_set->context.con_ch)){
-					if (!oa_strncmp(dev_now_params.terminal_sms_num, p_set->context.con_ch, oa_strlen(dev_now_params.terminal_sms_num))){
-						PRINT_SAMEPARA;
-						p_set->act_kind = no_act;
-						break;
-
-					}
-					else{//not equal
-						oa_memset(dev_now_params.terminal_sms_num, 0x0, sizeof(dev_now_params.terminal_sms_num));
-						oa_memcpy(dev_now_params.terminal_sms_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
-					}
-				}
-				else{//not equal
-					oa_memset(dev_now_params.terminal_sms_num, 0x0, sizeof(dev_now_params.terminal_sms_num));
-					oa_memcpy(dev_now_params.terminal_sms_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					p_set->act_kind = para_save;
-					
-				}
-			}
-		}break;
-		case e_swh_alarmmask:{
-			if (p_set->kind == set){
-				if (dev_now_params.alarm_mask == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-				}
-				else{//not equal
-					dev_now_params.alarm_mask = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_swh_alarmsms:{
-			if (p_set->kind == set){
-				if (dev_now_params.alarm_send_sms_mask == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-				}
-				else{//not equal
-					dev_now_params.alarm_send_sms_mask = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_overspeed:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.max_speed == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-				}
-				else{
-					dev_now_params.max_speed = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_overspeedtime:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.speed_duration == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-				}
-				else{
-					dev_now_params.speed_duration = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_daydrivetime:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.day_add_drive_time_threshold == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-				}
-				else{
-					dev_now_params.day_add_drive_time_threshold = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_tireddrivetime:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.continuous_drive_time_threshold == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-				}
-				else{
-					dev_now_params.continuous_drive_time_threshold = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_min_resttime:{
-			if (p_set->kind == set){
-				if (dev_now_params.min_rest_time == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-				}
-				else{
-					dev_now_params.min_rest_time = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_max_parktime:{
-			if (p_set->kind == set){
-				if (dev_now_params.max_park_time == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-				}
-				else{
-					dev_now_params.max_park_time = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_provincID:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.vehicle_province_id == (u16)p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-				}
-				else{
-					dev_now_params.vehicle_province_id = (u16)p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_cityID:{
-			if (p_set->kind == set){
-				if (dev_now_params.vehicle_city_id == (u16)p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-				}
-				else{
-					dev_now_params.vehicle_city_id = (u16)p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_carID:{
-			if (p_set->kind == set){
-				if (oa_strlen(dev_now_params.vehicle_license) == oa_strlen(p_set->context.con_ch)){
-					if (!oa_strncmp(dev_now_params.vehicle_license, p_set->context.con_ch, oa_strlen(dev_now_params.vehicle_license))){
-						PRINT_SAMEPARA;
-						p_set->act_kind = no_act;
-						break;
-
-					}
-					else{//not equal
-						oa_memset(dev_now_params.vehicle_license, 0x0, sizeof(dev_now_params.vehicle_license));
-						oa_memcpy(dev_now_params.vehicle_license, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
-					}
-				}
-				else{//not equal
-						oa_memset(dev_now_params.vehicle_license, 0x0, sizeof(dev_now_params.vehicle_license));
-						oa_memcpy(dev_now_params.vehicle_license, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
-				}
-				
-			}
-		}break;
-		case e_carcolor:{
-			if (p_set->kind == set){
-				if (dev_now_params.plate_color == (u8)p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-				}
-				else{
-					dev_now_params.plate_color = (u8)p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_UPIP:{
-			if (p_set->kind == set){
-				u8 ip_len;
-				if (oa_strlen(dev_now_params.update_server_ip) == oa_strlen(p_set->context.con_ch)){//length is equal
-					ip_len = oa_strlen(dev_now_params.update_server_ip);
-					if (!oa_strncmp(dev_now_params.update_server_ip, p_set->context.con_ch, ip_len)){
-						PRINT_SAMEPARA;
-						p_set->act_kind = no_act;
-						break;
-					}
-					else{//not equal
-						oa_memset(dev_now_params.update_server_ip, 0x0, sizeof(dev_now_params.update_server_ip));
-						oa_memcpy(dev_now_params.update_server_ip, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
-					}
-				}
-				else{//not equal
-					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
-					oa_memset(dev_now_params.update_server_ip, 0x0, sizeof(dev_now_params.update_server_ip));
-					oa_memcpy(dev_now_params.update_server_ip, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
-					p_set->act_kind = para_save;
-				}
-			}	
-		}break;
-		case e_UPPORT:{
-			if (p_set->kind == set)	{
-				if (dev_now_params.update_server_port == p_set->context.con_int){
-					PRINT_SAMEPARA;
-					p_set->act_kind = no_act;
-					break;
-
-				}
-				else{
-					dev_now_params.update_server_port = p_set->context.con_int;
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_UPFTPUSR:{
-			if (p_set->kind == set){
-				u8 ip_len;
-				if (oa_strlen(dev_now_params.ftpusr) == oa_strlen(p_set->context.con_ch)){//length is equal
-					ip_len = oa_strlen(dev_now_params.ftpusr);
-					if (!oa_strncmp(dev_now_params.ftpusr, p_set->context.con_ch, ip_len)){
-						PRINT_SAMEPARA;
-						p_set->act_kind = no_act;
-						break;
-					}
-					else{//not equal
-						oa_memset(dev_now_params.ftpusr, 0x0, sizeof(dev_now_params.ftpusr));
-						oa_memcpy(dev_now_params.ftpusr, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
-					}
-				}
-				else{//not equal
-					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
-					oa_memset(dev_now_params.ftpusr, 0x0, sizeof(dev_now_params.ftpusr));
-					oa_memcpy(dev_now_params.ftpusr, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_UPFTPPWD:{
-			if (p_set->kind == set){
-				u8 ip_len;
-				if (oa_strlen(dev_now_params.ftppwd) == oa_strlen(p_set->context.con_ch)){//length is equal
-					ip_len = oa_strlen(dev_now_params.ftppwd);
-					if (!oa_strncmp(dev_now_params.ftppwd, p_set->context.con_ch, ip_len)){
-						PRINT_SAMEPARA;
-						p_set->act_kind = no_act;
-						break;
-					}
-					else{//not equal
-						oa_memset(dev_now_params.ftppwd, 0x0, sizeof(dev_now_params.ftpusr));
-						oa_memcpy(dev_now_params.ftppwd, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
-					}
-				}
-				else{//not equal
-					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
-					oa_memset(dev_now_params.ftppwd, 0x0, sizeof(dev_now_params.ftppwd));
-					oa_memcpy(dev_now_params.ftppwd, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_UPPROG_NAME:{
-			if (p_set->kind == set){
-				u8 ip_len;
-				if (oa_strlen(dev_now_params.ftp_prog_name) == oa_strlen(p_set->context.con_ch)){//length is equal
-					ip_len = oa_strlen(dev_now_params.ftp_prog_name);
-					if (!oa_strncmp(dev_now_params.ftp_prog_name, p_set->context.con_ch, ip_len)){
-						PRINT_SAMEPARA;
-						p_set->act_kind = no_act;
-						break;
-					}
-					else{//not equal
-						oa_memset(dev_now_params.ftp_prog_name, 0x0, sizeof(dev_now_params.ftp_prog_name));
-						oa_memcpy(dev_now_params.ftp_prog_name, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = para_save;
-					}
-				}
-				else{//not equal
-					//DEBUG(" oa_strlen(p_set->context.con_ch):%d!", oa_strlen(p_set->context.con_ch));
-					oa_memset(dev_now_params.ftp_prog_name, 0x0, sizeof(dev_now_params.ftp_prog_name));
-					oa_memcpy(dev_now_params.ftp_prog_name, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					//DEBUG(" m_server_ip:%s!", dev_now_params.m_server_ip);
-					p_set->act_kind = para_save;
-				}
-			}
-		}break;
-		case e_STATUS:{
-			
-		}break;
-		case e_GPS:{
-
-		}break;
-		case e_CLRLOG:{
-			p_set->act_kind = clr_log;
-		}break;
-		case e_AUTHEN:{
-			if (p_set->kind == set){
-				if (p_set->context.con_ch[0] == 0xff)	p_set->act_kind = clr_authcode;
-				else if (oa_strlen(p_set->context.con_ch) > 0){
-					p_set->act_kind = update_authcode;
-				}
-			}			
-		}break;
-		case e_UPDATE:{
-			p_set->act_kind = update;
-		}break;
-		case e_VERSA:{
-
-		}break;
-		case e_RESTART:{
-			p_set->act_kind = reset;
-		}break;
-		case e_dev_lock:{
-			if (p_set->kind == set){
-				if (p_set->context.con_int == UNLOCK){
-					if (use_is_lock())	use_unlock();
-				}
-				
-			}
-		}break;
-		case e_DEVID:{
-			if (p_set->kind == set){
-				if (!oa_strncmp(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN)){
-						PRINT_SAMEPARA;
-						p_set->act_kind = no_act;
-						break;
-					}
-					else{//not equal
-						oa_memset(dev_now_params.term_id, 0x0, sizeof(dev_now_params.term_id));
-						oa_memcpy(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN);
-						p_set->act_kind = para_save;
-					}
-			}
-		}break;
-		case e_none:{
-			DEBUG(" not support!");
-		}break;
-		default:{
-			DEBUG(" not support!");
-			break;
-		}
-	}
-	
-	if (p_set->need_ack == OA_TRUE){
-		if (sms == which || uart == which){
-			handle_common(key_kind, p_set, which, NULL, NULL);
-		}
-		else if (scrn == which){
-			handle_common(key_kind, p_set, which, p_fbk, p_fbk_len);
-			*p_act |= Sms_Ack_Enable;
-		}
-	}
-	else{
-		if (scrn == which){
-			*p_act &= ~Sms_Ack_Enable;
-			*p_act |= Sms_Ack_Force_DISABLE;
-		}
-	}
-
-	dev_action_handle(p_set);
-
-	
-}
-#endif
 /*********************************************************
 *Function:      handle_keyword4ms()
 *Description:  handle the keyword for mutiple sms
@@ -2448,6 +1363,19 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.sleep_reporttime = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_Rpttime_alarm:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.urgent_reporttime == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.urgent_reporttime = p_set->context.con_int;
 					p_set->act_kind = para_save;
 				}
 			}
@@ -2870,6 +1798,7 @@ void handle_keyword4ms(e_keyword key_kind,
 		case e_UPDATE:{
 			p_set->act_kind = update;
 		}break;
+		case e_SNUMS:
 		case e_VERSA:{
 
 		}break;
