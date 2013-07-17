@@ -98,6 +98,7 @@
 #define STATICS "STATICS"
 #define GPS "GPS"
 #define UPDATE "UPDATE"
+#define SNUMS "SNUMS"
 #define VERSA "VERSA"
 #define CLRLOG "CLRLOG"
 #define AUTHEN "AUTHEN"
@@ -178,6 +179,7 @@ typedef enum
 	e_STATICS,
 	e_GPS,
 	e_UPDATE,
+	e_SNUMS,
 	e_VERSA,
 	e_CLRLOG,
 	e_AUTHEN,
