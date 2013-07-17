@@ -616,10 +616,13 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 					return OA_FALSE;
 				}
 			}break;
+			case e_Rpttime_unlog:
 			case e_Rpttime_sleep:
 			case e_Rpttime_alarm:
 			case e_Rptdis_alarm:
 			case e_Rpttime_def:
+			case e_Rptdis_unlog:
+			case e_Rptdis_sleep:
 			case e_Rptcog:
 			case e_overspeed:
 			case e_overspeedtime:
@@ -867,6 +870,9 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 		case e_Rpt_strategy:{
 			sprintf(enquire_temp, "Rpt_strategy:%d;", dev_now_params.report_strategy);
 		}break;
+		case e_Rpttime_unlog:{
+			sprintf(enquire_temp, "Rpttime_unlog:%d;", dev_now_params.unlogin_reporttime);
+		}break;
 		case e_Rpttime_sleep:{
 			sprintf(enquire_temp, "Rpttime_sleep:%d;", dev_now_params.sleep_reporttime);
 		}break;
@@ -875,6 +881,12 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 		}break;
 		case e_Rpttime_def:{
 			sprintf(enquire_temp, "Rpttime_def:%d;", dev_now_params.default_reporttime);
+		}break;
+		case e_Rptdis_unlog:{
+			sprintf(enquire_temp, "Rptdis_unlog:%d;", dev_now_params.unlogin_reportdistance);
+		}break;
+		case e_Rptdis_sleep:{
+			sprintf(enquire_temp, "Rptdis_sleep:%d;", dev_now_params.sleep_reportdistance);
 		}break;
 		case e_Rptcog:{
 			sprintf(enquire_temp, "Rptcog:%d;", dev_now_params.corner_reportangle);
@@ -1354,6 +1366,19 @@ void handle_keyword4ms(e_keyword key_kind,
 				
 			}
 		}break;
+		case e_Rpttime_unlog:{
+			if (p_set->kind == set)	{
+				if (dev_now_params.unlogin_reporttime == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.unlogin_reporttime = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
 		case e_Rpttime_sleep:{
 			if (p_set->kind == set)	{
 				if (dev_now_params.sleep_reporttime == p_set->context.con_int){
@@ -1389,6 +1414,32 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.default_reporttime = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_Rptdis_unlog:{
+			if (p_set->kind == set){
+				if (dev_now_params.unlogin_reportdistance == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.unlogin_reportdistance = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_Rptdis_sleep:{
+			if (p_set->kind == set){
+				if (dev_now_params.sleep_reportdistance == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.sleep_reportdistance = p_set->context.con_int;
 					p_set->act_kind = para_save;
 				}
 			}
