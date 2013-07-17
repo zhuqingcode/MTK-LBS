@@ -24,23 +24,31 @@
  *   zhuqing.
  *
  ****************************************************************************/
-#ifndef __OA_DEBUG_H__
-#define __OA_DEBUG_H__
-#define DEBUG_K 0
-#define DEBUG_U 1
-#define DEBUG_N 2
+#include <stdio.h>  
+#include <stdarg.h>
+#include "oa_type.h"
+#include "oa_api.h"
+#define OA_DEBUG_BUF_MAXLEN 256
 
-
-#define DEBUG_LEVEL DEBUG_U
-
-#if (DEBUG_K == DEBUG_LEVEL)
-#define DEBUG(format,...) debug_no_n("("__FILE__" %s %d):"format"\r\n", __func__, __LINE__, ##__VA_ARGS__)
-#define DEBUG_N(format,...) debug_no_n(""format"\r\n", ##__VA_ARGS__)
-#elif (DEBUG_U == DEBUG_LEVEL)
-#define DEBUG(format,...) debug_no_n(""format"\r\n", ##__VA_ARGS__)
-#define DEBUG_N(format,...) debug_no_n(""format"\r\n", ##__VA_ARGS__)
-#elif (DEBUG_N == DEBUG_LEVEL)
-#define DEBUG(format,...)
-#define DEBUG_N(format,...)
-#endif
+void debug_no_n(oa_char *fmt, ...)
+{
+	oa_char tmp_buffer[256] = {0};
+	u8 cnt;
+	va_list list;
+	va_start(list, fmt);
+	cnt = _vsnprintf(tmp_buffer, OA_DEBUG_BUF_MAXLEN, fmt, list);
+	va_end(list);
+	oa_uart_write(OA_UART1,(oa_uint8 *)tmp_buffer, cnt);
+}
+#if 0
+int debug_no_n(const char *fmt, ...)
+{
+	va_list args;
+	int i;
+	oa_char printbuf[256] = {0};
+	va_start(args, fmt);
+	oa_uart_write(OA_UART1, printbuf, i=vsprintf(printbuf, fmt, args));
+	va_end(args);
+	return i;
+}
 #endif

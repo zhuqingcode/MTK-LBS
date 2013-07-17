@@ -291,7 +291,7 @@ oa_int16 oa_soc_send_req(void)
 				u16 i;
 				DEBUG("sendlen:%d data:", len);
 				for (i=0; i<len; i++){
-					OA_DEBUG_USER("%02x ", g_soc_context.gprs_tx_pending_data[i]);
+					debug_no_n("%02x ", g_soc_context.gprs_tx_pending_data[i]);
 				}
 				DEBUG();
 				
@@ -400,7 +400,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 		u16 i;
 		DEBUG_N("receive len:%d data:", len);
 		for(i=0; i<len; i++){
-			OA_DEBUG_USER("%02x ", data[i]);
+			debug_no_n("%02x ", data[i]);
 		}
 		DEBUG();
 	}
