@@ -888,6 +888,9 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 		case e_Rptdis_sleep:{
 			sprintf(enquire_temp, "Rptdis_sleep:%d;", dev_now_params.sleep_reportdistance);
 		}break;
+		case e_Rptdis_alarm:{
+			sprintf(enquire_temp, "Rptdis_alarm:%d;", dev_now_params.urgent_reportdistance);
+		}break;
 		case e_Rptcog:{
 			sprintf(enquire_temp, "Rptcog:%d;", dev_now_params.corner_reportangle);
 		}break;
@@ -1440,6 +1443,19 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.sleep_reportdistance = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_Rptdis_alarm:{
+			if (p_set->kind == set){
+				if (dev_now_params.urgent_reportdistance == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.urgent_reportdistance = p_set->context.con_int;
 					p_set->act_kind = para_save;
 				}
 			}
