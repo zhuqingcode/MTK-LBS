@@ -107,6 +107,7 @@ void oa_app_gps(void)
 	static FP32 IntvlDistanc = 0.0;
 	STRUCT_RMC gps_info;
 	u32 speed;
+	static u32 os_times;
 	static u32 upload_times;
 	static u32 driver_time;
 	static u32 relax_time;
@@ -177,6 +178,7 @@ void oa_app_gps(void)
 		//clear it
 		if (ModelCnt > 0) ModelCnt = 0;
 		if (result & NMEA_RMC_OK){//gps data handle
+			oa_memset(&gps_info, 0x0, sizeof(gps_info));
 			GPS_GetPosition(&gps_info);//copy gps data into 'gps_info'
 			//just for printing
 			if (infoprintCnt++ >= 15){
@@ -260,15 +262,20 @@ void oa_app_gps(void)
 			}
 			
 			if (gps_info.Speed > speed){//handle this alarm & upload instantly
-				DEBUG("over speed");
-				if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == RESET){
-					overspeed_var.kind = no_spec;
-					handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
-					handle_alarm_sms(ALARM_OVER_SPEED);
+				os_times++;
+				if (os_times > dev_now_params.speed_duration){
+					DEBUG("over speed");
+					if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == RESET){
+						overspeed_var.kind = no_spec;
+						handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
+						handle_alarm_sms(ALARM_OVER_SPEED);
+					}
 				}
+				
 				
 			}
 			else if (gps_info.Speed <= speed){
+				os_times = 0;
 				if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET){
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 					DEBUG("cancel over speed");
@@ -295,7 +302,7 @@ void oa_app_gps(void)
 			}
 			//--------------------------mileage statistis-----------------------------
 			IntvlDistanc += GPS_IntvlDistanc(&gps_info); //km
-			DEBUG("miles:%f", IntvlDistanc);
+			DEBUG("miles:%d", (u32)IntvlDistanc * 10);
 			if (IntvlDistanc - UPDATE_DISTANC >= EPSINON){
 				//GpsDistancCacul(&IntvlDistanc);//changed to statement below
 				DEBUG("statistics miles");
