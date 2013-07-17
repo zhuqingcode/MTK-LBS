@@ -801,15 +801,9 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 		}
 		
 	}
-#if 0
-	else if (*p == SEMICOLON){//means enquiry
-		p_set->kind = enquire;
-	}
-	else{
-		DEBUG(" format err!");
+	else if (*p != SEMICOLON){//means enquiry
 		return OA_FALSE;
 	}
-#endif
 	return OA_TRUE;
 }
 #if 0
