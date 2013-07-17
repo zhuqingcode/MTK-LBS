@@ -617,10 +617,12 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 				}
 			}break;
 			case e_Rpttime_sleep:
+			case e_Rpttime_alarm:
 			case e_Rptdis_alarm:
 			case e_Rpttime_def:
 			case e_Rptcog:
 			case e_overspeed:
+			case e_overspeedtime:
 			case e_min_resttime:
 			case e_daydrivetime:
 			case e_tireddrivetime:
@@ -859,8 +861,8 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 			oa_strcat(enquire_temp, ";");
 		}break;
 		case e_NETTYPE:{
-			if (g_soc_context.soc_addr.sock_type == OA_SOCK_STREAM) oa_strcat(enquire_temp, "TCP;");
-			else oa_strcat(enquire_temp, "UDP;");
+			if (g_soc_context.soc_addr.sock_type == OA_SOCK_STREAM) oa_strcat(enquire_temp, "NETTYPE:TCP;");
+			else oa_strcat(enquire_temp, "NETTYPE:UDP;");
 		}break;
 		case e_Rpt_strategy:{
 			sprintf(enquire_temp, "Rpt_strategy:%d;", dev_now_params.report_strategy);
@@ -1796,6 +1798,7 @@ void handle_keyword4ms(e_keyword key_kind,
 		case e_UPDATE:{
 			p_set->act_kind = update;
 		}break;
+		case e_SNUMS:
 		case e_VERSA:{
 
 		}break;
