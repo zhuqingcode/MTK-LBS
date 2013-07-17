@@ -396,7 +396,7 @@ void oa_app_gps(void)
 		}
 		if (result & NMEA_GGA_OK){//高度定位OK
 //				GPS_GetPosition(&gps_info);
-//				DEBUG(PrintDebug," Height: %d\r\n",gps_info.Height);
+				DEBUG("NMEA_GGA_OK");
 		}
 		else if (result & NMEA_GGA_UNFIXED){
 			DEBUG("NMEA_GGA_UNFIXED!");

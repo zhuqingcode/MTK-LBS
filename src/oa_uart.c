@@ -119,7 +119,7 @@ void oa_app_uart2_recv( void * param, oa_uint32 len)
 		oa_memcpy(gps_data.buffer, pBuf, len);
 		gps_data.data_len = len;
 		gps_data.has_new_data = OA_TRUE;
-		//Trace("(%s:%s:%d):%s", __FILE__, __func__, __LINE__, gps_data.buffer);
+		//DEBUG("%s", gps_data.buffer);
 		//oa_app_gps();
 	}
 #if 0
