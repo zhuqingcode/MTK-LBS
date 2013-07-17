@@ -67,6 +67,7 @@ oa_char *p_keyword[] = {
  Sub_User,
  Sub_Pwd,
  TEL,
+ NETTYPE,
  VPDNUSR,
  VPDNPWD,
  Rpt_strategy,
@@ -120,38 +121,6 @@ oa_char *p_keyword[] = {
  DEVID,
 };
 oa_uint8 KEYWORDS_SIZE = sizeof(p_keyword)/4;
-#if 0
-/*********************************************************
-*Function:      status_extract()
-*Description:  search key word in message
-*Return:        void
-*Others:         
-*********************************************************/
-nb_kind telecom_num_check(oa_char *nb)
-{
-	if (NULL == nb){
-		DEBUG("paras err!");
-		return err_nb;
-	}
-#if 0
-	if(nb[3] == '1'){
-		if (nb[4] == '3' || nb[4] == '5' || nb[4] == '8'){
-			if (nb[5] == '3' || nb[5] == '0' || nb[5] == '9'){
-				return tele_nb;
-			}
-			else return mobe_nb;
-		}
-		else return mobe_nb;
-	}
-	else{
-		return err_nb;
-	}
-#endif
-	if ((!oa_strncmp(nb, "133", 3)) || (!oa_strncmp(nb, "153", 3)) 
-		|| (!oa_strncmp(nb, "180", 3)) || (!oa_strncmp(nb, "189", 3)) )	return tele_nb;
-	else return mobe_nb;
-}
-#endif
 //unicode
 oa_uint8 termID[] = {0x7e,0xc8,0x7a,0xef,0x7f,0x16,0x53,0xf7,0x0,':'};//"÷’∂À±‡∫≈:"
 oa_uint8 CardNum[] = {0x53,0x61,0x53,0xF7,0x0,':'};//"ø®∫≈:"
@@ -888,6 +857,10 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 			oa_strcat(enquire_temp, "TEL:");
 			oa_strcat(enquire_temp, dev_now_params.term_tel_num);
 			oa_strcat(enquire_temp, ";");
+		}break;
+		case e_NETTYPE:{
+			if (g_soc_context.soc_addr.sock_type == OA_SOCK_STREAM) oa_strcat(enquire_temp, "TCP;");
+			else oa_strcat(enquire_temp, "UDP;");
 		}break;
 		case e_Rpt_strategy:{
 			sprintf(enquire_temp, "Rpt_strategy:%d;", dev_now_params.report_strategy);

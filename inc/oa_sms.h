@@ -53,6 +53,7 @@
 #define Sub_User "Sub_User"
 #define Sub_Pwd "Sub_Pwd"
 #define TEL "TEL"
+#define NETTYPE "NETTYPE"
 #define VPDNUSR "VPDNUSR"
 #define VPDNPWD "VPDNPWD"
 #define Rpt_strategy "Rpt_strategy"
@@ -134,6 +135,7 @@ typedef enum
 	e_Sub_User,
 	e_Sub_Pwd,
 	e_TEL,
+	e_NETTYPE,
 	e_VPDNUSR,
 	e_VPDNPWD,
 	e_Rpt_strategy,
