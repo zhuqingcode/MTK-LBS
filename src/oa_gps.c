@@ -302,7 +302,8 @@ void oa_app_gps(void)
 			}
 			//--------------------------mileage statistis-----------------------------
 			IntvlDistanc += GPS_IntvlDistanc(&gps_info); //km
-			DEBUG("miles:%d", (u32)IntvlDistanc * 10);
+			OA_DEBUG_USER("miles:%f", IntvlDistanc);
+			DEBUG("(u32)IntvlDistanc * 10:%d", (u32)(IntvlDistanc * 10));
 			if (IntvlDistanc - UPDATE_DISTANC >= EPSINON){
 				//GpsDistancCacul(&IntvlDistanc);//changed to statement below
 				DEBUG("statistics miles");
