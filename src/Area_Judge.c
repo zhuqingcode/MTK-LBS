@@ -1221,7 +1221,6 @@ u8 Circular_Judge(u32 now_lon,u32 now_lat,Cir_Area_Desc *point_data)
 	OA_DEBUG_USER("now_lon_f:%lf now_lat_f:%lf Cent_lon_f:%lf Cent_lat_f:%lf", now_lon_f, now_lat_f, Cent_lon_f, Cent_lat_f);
 	OA_DEBUG_USER("%lf vs %lf", (GPS2Point_Distance(now_lon_f,now_lat_f,Cent_lon_f,Cent_lat_f)*1000.0f), 1.0f * point_data->rad);
 	if(GPS2Point_Distance(now_lon_f,now_lat_f,Cent_lon_f,Cent_lat_f)*1000.0f > 1.0f * point_data->rad)
-
 	{
 		return 0;
 	}
@@ -1289,7 +1288,7 @@ u8 poly_Judge(u32 lon,u32 lat,Poly_Area_Desc *point_data,u16 polySides)
 //	xz *= ((double)p2lon - (double)p1lon);
 //	xz /= ((double)p2lat - (double)p1lat);
 //	xz +=  (double)p1lon;
-	if ( (u32)xz > lon ) 
+	if ( xz > lon ) 
 	  res++;
 	}
 	return (res % 2 == 1); 

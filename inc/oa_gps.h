@@ -269,6 +269,7 @@ u8 GetPosinf(u8 *Str,u8 Filed,u8 Mode);
 u8 GPS_GetTime(u8 *TimeStr);/*获取GPS时间BCD码*/
 u8 GPS_GetPosition(STRUCT_RMC *gps_info);/*获取GPS数据*/
 u8 GPS_GetFixStatus(void);	 /*获取GPS定位状态*/
+
 oa_double GPS2Point_Distance(oa_double New_Point_Lon,oa_double New_Point_Lat,oa_double Old_Point_Lon,oa_double Old_Pont_Lat );
 //#endif
 //------------------------------------------

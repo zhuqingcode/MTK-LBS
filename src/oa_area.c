@@ -207,9 +207,7 @@ oa_bool r_w_rect_area_data_file(rect_area_item *p_item, r_w_enum r_w, u8 pos, u8
 			}
 		}
 	}
-
 	oa_memset(&rect_area_var, 0x0, sizeof(rect_area_var));
-	
 	if(r_w == file_read){
 		offset = pos * sizeof(rect_area_var);
 		oa_fseek(handle, offset, OA_FILE_BEGIN);
@@ -321,9 +319,7 @@ oa_bool r_w_poly_area_data_file(poly_area_item *p_item, r_w_enum r_w, u8 pos, u8
 			}
 		}
 	}
-
 	oa_memset(&poly_area_var, 0x0, sizeof(poly_area_var));
-	
 	if(r_w == file_read){
 		offset = pos * sizeof(poly_area_var);
 		oa_fseek(handle, offset, OA_FILE_BEGIN);
