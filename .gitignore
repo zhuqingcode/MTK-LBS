@@ -1,0 +1,10 @@
+*.[oa]
+*.txt
+*.lib
+out
+obj
+mak
+log
+lib
+make.bat
+clean.bat
