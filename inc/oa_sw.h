@@ -27,7 +27,7 @@
 #ifndef __OA_SW_H__
 #define __OA_SW_H__
 
-#define OA_SW_VERSION_NO "V 00.00.00.00.02"
+#define OA_SW_VERSION_NO "V 00.00.00.00.03"
 
 
 #endif

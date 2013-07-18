@@ -291,7 +291,7 @@ oa_int16 oa_soc_send_req(void)
 				u16 i;
 				DEBUG("sendlen:%d data:", len);
 				for (i=0; i<len; i++){
-					OA_DEBUG_USER("%02x ", g_soc_context.gprs_tx_pending_data[i]);
+					debug_no_n("%02x ", g_soc_context.gprs_tx_pending_data[i]);
 				}
 				DEBUG();
 				
@@ -400,7 +400,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 		u16 i;
 		DEBUG_N("receive len:%d data:", len);
 		for(i=0; i<len; i++){
-			OA_DEBUG_USER("%02x ", data[i]);
+			debug_no_n("%02x ", data[i]);
 		}
 		DEBUG();
 	}
@@ -473,7 +473,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 				case RspMsgerr:
 				case RspUnsurport:{
 					//case authen
-					DEBUG("plat common ack fail : %d", ret);
+					DEBUG("plat common ack fail : %d", sProtclHandl.PlatComrsp.Rslt);
 					if (dev_running.doing_what == authen && dev_running.plat_status == OFFLINE){
 						dev_running.plat_switch = OA_TRUE;//if authen err, do it again
 						if (use_is_lock()){//locked

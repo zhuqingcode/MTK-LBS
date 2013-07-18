@@ -1774,7 +1774,8 @@ extern oa_uint8 oa_network_get_signal_level(void);
 //Get the GSM plmn lac cell_id information
 extern oa_bool oa_network_get_location_info(oa_nw_info_location_info_struct *loc_info);
 
-void * oa_reserve_dummy0(void * p);
+/*query tcp send queue data len & check tcp state by socket_id.*/
+void * oa_query_tcpip_no_ack(void * p);
 void * oa_reserve_dummy1(void * p);
 void * oa_reserve_dummy2(void * p);
 void * oa_reserve_dummy3(void * p);

@@ -60,7 +60,6 @@ typedef signed long long oa_int64;
 typedef double oa_double;
 typedef oa_uint32 oa_size_t;
 typedef int oa_fs_handle;
-typedef float oa_float;
 //typedef unsigned int oa_evshed_id;
 typedef struct oa_lcd_dll_node oa_lcd_dll_node;
 struct oa_lcd_dll_node
@@ -234,14 +233,13 @@ typedef enum
     OA_KEY_MAX, 
 }oa_key;
 
-#define OA_UART_BUFFER_SIZE 512//1024
+#define OA_UART_BUFFER_SIZE 1024
 #define UART3_MAX_SIZE 256
 typedef struct
 {
 	oa_char buf[UART3_MAX_SIZE];
 	oa_uint8 len;
 }uart_struct;
-
 typedef oa_uint32 oa_uart_baudrate;
 
 typedef enum {
@@ -381,6 +379,10 @@ typedef enum{
     OA_TIMER_ID_UART3_READ_DELAY,//=93 ,    //reserved  
     OA_TIMER_ID_CMD_TIMEOUT,// = 94, //OA_APP_ID_TIMER_MAX is 94,  //reserved
 #endif    
+    OA_TIMER_ID_UART1_READ_DELAY,   //system reserved,do not use and delete
+    OA_TIMER_ID_UART2_READ_DELAY,   //system reserved,do not use and delete
+    OA_TIMER_ID_UART3_READ_DELAY,  //system reserved,do not use and delete
+
     OA_MAX_TIMER
 }oa_timer_id;
 
@@ -809,17 +811,18 @@ typedef enum
 } oa_chset_enum;
 
 typedef enum {
-    OA_AUD_PATH_NORMAL   =0x0 , /* Normal path */
-    //oa_AUD_PATH_HEADSET     , /* HeadSet (Earphone) path */
-    OA_AUD_PATH_LOUDSPK = 0x02    , /* Loudspeaker path */
+    OA_AUD_PATH_NORMAL   =0x00,  /* Normal path */
+    OA_AUD_PATH_HEADSET = 0x01,  /* HeadSet (Earphone) path */
+    OA_AUD_PATH_LOUDSPK = 0x02,  /* Loudspeaker path */
     OA_MAX_AUD_PATH_NUM     
 }oa_aud_path_enum;
 
 /* Define the audio device type */
 typedef enum {
-    OA_AUDIO_DEVICE_MIC1 = 0 ,    /* ME */
-    OA_AUDIO_DEVICE_MIC2     ,    /* Headset */
-    OA_AUDIO_DEVICE_FMRR          /* FM Radio */
+    OA_AUDIO_DEVICE_MIC1 = 0 ,   /* ME */
+    OA_AUDIO_DEVICE_MIC2,          /* Headset */
+    OA_AUDIO_DEVICE_FMRR,         /* FM Radio */
+    OA_AUDIO_DEVICE_MIC3,          /* Loud Spkear */  
 }oa_audio_input_path_enum;
 
 typedef enum
@@ -1480,5 +1483,14 @@ typedef union
    oa_i2c_ctrl_enable_dma_t rEnableDMA; /* Use DMA to transfer data. Note: Before you do this, please make sure that driver support DMA mode */
    oa_i2c_ctrl_set_slave_address_t rSetSlaveAddress; /* Set slave address of sensor */
 }oa_hw_i2c_ctrl_data_t;
+
+
+/*query tcp send queue data len & check tcp state by socket_id.*/
+typedef struct
+{
+  oa_int8 socket_id;
+  oa_uint32 pTcpSendQueueDataLen;
+  oa_uint8 pTcpState;
+}oa_query_tcpip_no_ack_t;
 
 #endif /* __OA_TYPE_H__ */

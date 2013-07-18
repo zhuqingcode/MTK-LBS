@@ -39,11 +39,14 @@
 #include "oa_debug.h"
 #include "oa_app.h"
 #include "oa_sms.h"
+#include "oa_alarm.h"
 #define PRINT_SAMEPARA	DEBUG(" this parameter is same as the original, so I do nothing...")
 #define PORT_MAX 65535
 extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
 extern timeout_struct timeout_var;
+extern os_struct overspeed_var;
+extern area_alarm_addition_struct area_alarm_addition_var;
 dev_control_type control_type = none;
 upgrade_paras up_paras;
 action_kind plat_paraset = 0x0;
@@ -2355,6 +2358,49 @@ static u8 ServReq_Textinfo(u8 *pbuf, u16 buflen)
 	}
 }
 /*********************************************************
+*Function:      handle_aritifial_ack_alarm()
+*Description:  handle artifial ack alarm
+*Return:        void
+*Others:         
+*********************************************************/
+u8 handle_aritifial_ack_alarm(u8 *pbuf, u16 buflen)
+{
+	u32 alarm_bit;
+
+	if (NULL == pbuf || buflen == 0){
+		DEBUG("handle_aritifial_ack_alarm param error!");
+		return 1;
+	}
+
+	char_to_int(pbuf+2, &alarm_bit);
+	if (alarm_bit & ALARM_EMERGENCY_k){
+		DEBUG("confirm ALARM_EMERGENCY_k");
+		if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == SET){
+			WriteAlarmPara(RESET, StaAlarm0, ALARM_EMERGENCY_k);
+			return 0;
+		}
+		else return 1;
+	}
+	else if (alarm_bit & ALARM_ENTER_AREA){
+		DEBUG("confirm ALARM_ENTER_AREA");
+		if (ReadAlarmPara(StaAlarm0, ALARM_ENTER_AREA) == SET){
+			WriteAlarmPara(RESET, StaAlarm0, ALARM_ENTER_AREA);
+			return 0;
+		}
+		else return 1;
+	}
+	else if (alarm_bit & ALARM_TOUCH_LINE_k){
+		DEBUG("confirm ALARM_TOUCH_LINE_k");
+		if (ReadAlarmPara(StaAlarm0, ALARM_TOUCH_LINE_k) == SET){
+			WriteAlarmPara(RESET, StaAlarm0, ALARM_TOUCH_LINE_k);
+			return 0;
+		}
+		else return 1;
+	}
+
+	return 1;
+}
+/*********************************************************
 *Function:     set_round_area
 *Description:  下发圆形区域
 *Calls:          
@@ -2396,25 +2442,33 @@ static u8 set_round_area(u8 *pbuf, u16 buflen)
 		}break;
 		default:{
 			DEBUG("设置圆形区域:错误");
+			return 1;
 		}break;
 	}
 	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
-	if (area_num > MAX_AREA_SUM){
-		DEBUG("area num is too large");
-		area_num = 24;
+	if (area_num > MAX_AREA_SUM && option == 0){
+		if (option == 0){
+			DEBUG("area num is too large, only update 24st");
+			area_num = 24;
+		}
+		else if (option == 1 || option == 2){
+			DEBUG("area num is too large, don't do it");
+			return 1;
+		}
+		
 	}
 	
 	for(i=0;i<area_num;i++)
 	{
-		SaveAreaData(pbuf,Circular_Area,option,&read_len);  //保存
+		ret = SaveAreaData(pbuf,Circular_Area,option,&read_len);  //保存
 		if(option == 0)	 //如果是更新操作，只在第一次清除，后面则改为追加
 		{
 			option = 1;//
 		}
 		pbuf+=read_len;
 	}
-	return 1;
+	return ret;
 }
 /*********************************************************
 *Function:     set_rect_area
@@ -2432,6 +2486,7 @@ static u8 set_rect_area(u8 *pbuf, u16 buflen)
 	u8 	option;//操作类型  0:更新  1:追加 2:修改
 	u8 area_num;
 	u16 read_len;
+	u8 ret;
 	u8 i;
 
 	if((pbuf==NULL)||(buflen==0))
@@ -2456,25 +2511,33 @@ static u8 set_rect_area(u8 *pbuf, u16 buflen)
 		}break;
 		default:{
 			DEBUG("设置矩形区域:错误");
+			return 1;
 		}break;
 	}
 	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
-	if (area_num > MAX_AREA_SUM){
-		DEBUG("area num is too large");
-		area_num = 24;
+	if (area_num > MAX_AREA_SUM && option == 0){
+		if (option == 0){
+			DEBUG("area num is too large, only update 24st");
+			area_num = 24;
+		}
+		else if (option == 1 || option == 2){
+			DEBUG("area num is too large, don't do it");
+			return 1;
+		}
+		
 	}
 	
 	for(i=0;i<area_num;i++)
 	{
-		SaveAreaData(pbuf,Rectangle_Area,option,&read_len);  //保存
+		ret = SaveAreaData(pbuf,Rectangle_Area,option,&read_len);  //保存
 		if(option == 0)	 //如果是更新操作，只在第一次清除，后面则改为追加
 		{
 			option = 1;//
 		}
 		pbuf+=read_len;
 	}
-	return 1;
+	return ret;
 }
 	
 /*********************************************************
@@ -2494,6 +2557,7 @@ static u8 set_poly_area(u8 *pbuf, u16 buflen)
 	u8 area_num;
 	u16 read_len;
 	u8 i;
+	u8 ret;
 
 	if((pbuf==NULL)||(buflen==0))
 	{
@@ -2517,25 +2581,33 @@ static u8 set_poly_area(u8 *pbuf, u16 buflen)
 		}break;
 		default:{
 			DEBUG("设置多边形区域:错误");
+			return 1;
 		}break;
 	}
 	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
-	if (area_num > MAX_AREA_SUM){
-		DEBUG("area num is too large");
-		area_num = 24;
+	if (area_num > MAX_AREA_SUM && option == 0){
+		if (option == 0){
+			DEBUG("area num is too large, only update 24st");
+			area_num = 24;
+		}
+		else if (option == 1 || option == 2){
+			DEBUG("area num is too large, don't do it");
+			return 1;
+		}
+		
 	}
 	
 	for(i=0;i<area_num;i++)
 	{
-		SaveAreaData(pbuf,Poly_Area,option,&read_len);  //保存
+		ret = SaveAreaData(pbuf,Poly_Area,option,&read_len);  //保存
 		if(option == 0)	 //如果是更新操作，只在第一次清除，后面则改为追加
 		{
 			option = 1;//
 		}
 		pbuf+=read_len;
 	}
-	return 1;
+	return ret;
 }
 /*********************************************************
 *Function:     del_area_message
@@ -2653,7 +2725,11 @@ u8 JT808_ServReq_handle(u16 ServReqMsgid,u8 *msgbody,u16 msgbodylen/*,u8 *sendbu
 			break;
 		}
 //status=3 为暂时处理
-		
+		case ARTIFICIAL_ACK_ALARM:{
+			status = handle_aritifial_ack_alarm(msgbody, msgbodylen);
+			Write_ProtclHandl(eRsp2ServSeq,&status,1);
+			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
+		}break;
 		case TEXT_DOWNLOAD:
 		{
 			status = ServReq_Textinfo(msgbody,msgbodylen);
@@ -2719,8 +2795,7 @@ u8 JT808_ServReq_handle(u16 ServReqMsgid,u8 *msgbody,u16 msgbodylen/*,u8 *sendbu
 		}
 		#endif
 		case SET_ROUND_AREA:
-			set_round_area(msgbody,msgbodylen);
-			status=0;
+			status = set_round_area(msgbody,msgbodylen);
 			Write_ProtclHandl(eRsp2ServSeq,&status,1);
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
 		break;
@@ -2737,14 +2812,12 @@ u8 JT808_ServReq_handle(u16 ServReqMsgid,u8 *msgbody,u16 msgbodylen/*,u8 *sendbu
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
 		break;
 		case DEL_SQUARE_AREA:
-			del_area_message(msgbody,msgbodylen,Rectangle_Area);
-			status=0;
+			status = del_area_message(msgbody,msgbodylen,Rectangle_Area);
 			Write_ProtclHandl(eRsp2ServSeq,&status,1);
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
 		break;
 		case SET_POLYGON_AREA:
-			set_poly_area(msgbody,msgbodylen);
-			status=0;
+			status = set_poly_area(msgbody,msgbodylen);
 			Write_ProtclHandl(eRsp2ServSeq,&status,1);
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
 		break;
@@ -4358,6 +4431,7 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 		oa_int32 handle, ret;
 		TOTAL_MILE temp;
 		oa_uint32 dummy_read;
+		oa_memset(&temp, 0x0, sizeof(temp));
 		handle = oa_fopen(MILEAGE_FILE);
 		if (handle < 0){
 			DEBUG("mileage file open err!");
@@ -4366,13 +4440,14 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 		else{
 			ret = oa_fread(handle, &temp, sizeof(TOTAL_MILE), &dummy_read);
 			if ((ret < 0) || (dummy_read != sizeof(TOTAL_MILE))) {
-				OA_DEBUG_USER("read mileage err!");
+				DEBUG("read mileage err!");
 				alarmflag = 0;
 			}
 			alarmflag = temp.total_mileage;
+			DEBUG("read miles:%d", alarmflag);
 			ret = oa_fclose(handle);
 			if (ret < 0){
-				OA_DEBUG_USER("close file err!", __FILE__,  __func__, __LINE__);
+				DEBUG("close file err!");
 				oa_fdelete(MILEAGE_FILE);
 			}
 		}
@@ -4381,28 +4456,49 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 	int_to_char(pbuf, alarmflag); //100M
 	pbuf+=4;
 	*pbuflen += 6;
+#if 0
+	//----------
 	*pbuf++=0x02;//油量
 	*pbuf++=0x02;
 	*pbuf++=0x00;	//暂定
 	*pbuf++=0x64;
 	*pbuflen +=4;
+	//----------
 	*pbuf++=0x03;//行驶记录仪速度
 	*pbuf++=0x02;
 //	short_to_char(pbuf,gDriveRecodSpeed);  //??????	 
 	memset(pbuf,0x00,2);
 	pbuf+=2;
 	*pbuflen +=4;
+#endif
+	//-----------
 	*pbuf++=0x11;//超速报警附加信息
 	*pbuf++=0x01;
-	*pbuf++=0x00; //暂定
-	*pbuflen +=3;
-/*	*pbuf=0x12;//进出区域或路线
+	if (overspeed_var.kind == no_spec){
+		*pbuf++=0x00;
+		*pbuflen += 3;
+	}
+	else{
+		*pbuf++=overspeed_var.kind;
+		int_to_char(pbuf, overspeed_var.id);
+		pbuf+=4;
+		*pbuflen += 7;
+	}
+	
+	//-----------
+	*pbuf=0x12;//进出区域或路线
 	pbuf++;
 	*pbuf=0x06;
 	pbuf++;
-	memset(pbuf,0x0,6);
-	*pbuflen +=8;
-	*pbuf=0x13;//进出区域或路线
+	if (area_alarm_addition_var.area_kind == no_spec) oa_memset(pbuf,0x0,6);
+	else{
+		*pbuf++ = area_alarm_addition_var.area_kind;
+		int_to_char(pbuf, area_alarm_addition_var.id);
+		pbuf+=4;
+		*pbuf++ = area_alarm_addition_var.in_out;
+	}
+	*pbuflen += 8;
+/*	*pbuf=0x13;//进出区域或路线
 	pbuf++;
 	*pbuf=0x07;
 	pbuf++;
@@ -5405,11 +5501,11 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 *Others:         
 *********************************************************/
 extern u16 total_write;
-u16 DevReq2ServPackag_build_blind(u16 ReqMsgId) //即时上传数据
+oa_bool DevReq2ServPackag_build_blind(u16 ReqMsgId) //即时上传数据
 {
 	u8 pbuf[DATA_MAX_LEN] = 0;
 	u16 U16Temp = 0;
-	oa_bool ret = 0;
+	oa_bool ret;
 	//pbuf = getEmptybuf();
 	if (NULL != pbuf){
 		//pbuf[0..1]:data length after enpacketing

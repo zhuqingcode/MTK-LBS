@@ -466,8 +466,8 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 																&pSchedulScrnHandle->len3);
 			if (pSchedulScrnHandle->Status == UnDefinedSms){//非辅助短信
 				//OSTimeDly(30);
-				pSchedulScrnHandle->len3 = strlen("非辅助短信！");
-				Mem_Copy(pSchedulScrnHandle->DataBuf2, "非辅助短信！", pSchedulScrnHandle->len3);
+				pSchedulScrnHandle->len3 = oa_strlen("sms err!");
+				Mem_Copy(pSchedulScrnHandle->DataBuf2, "sms err!", pSchedulScrnHandle->len3);
 				//if (ActionOK != SScrn_CenterSMS_Send(pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3))
 				//	DEBUG("SchedulScrn_Task:Send Ack-Sms failed");
 				oa_memset(&s_s, 0x0, sizeof(s_s));
@@ -490,17 +490,8 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 				{
 					DEBUG("scrn data:%s len:%d", pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3);
 					oa_memset(&s_s, 0x0, sizeof(s_s));
-					if (pSchedulScrnHandle->DevAct & CHINESE_SMS_ENABLE){
-						u8 temp[256] = {0x0};
-						u8 len = 0;
-						SMS_EnglishUniToGBK(pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3, temp, &len);
-						oa_memcpy(s_s.sendbuf, temp, len);
-						s_s.buflen = len;
-					}
-					else{
-						oa_memcpy(s_s.sendbuf, pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3);
-						s_s.buflen = pSchedulScrnHandle->len3;
-					}
+					oa_memcpy(s_s.sendbuf, pSchedulScrnHandle->DataBuf2, pSchedulScrnHandle->len3);
+					s_s.buflen = pSchedulScrnHandle->len3;
 					oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
 					//app_CentersmsAckAction(pSchedulScrnHandle->DevAct,pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->len3);
 				}

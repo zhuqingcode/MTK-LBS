@@ -329,12 +329,11 @@ void oa_app_plat_data(void *param)
 					DEBUG("build heartbeat packet err!");
 				}
 				else{
+					print_rtc_time();
+					DEBUG("$$$send one heartbeat packet");
 					soc_ret = oa_soc_send_req();
 					if (build_ret == soc_ret){
 						hbeat_counter = 0;
-						DEBUG("$$$");
-						print_rtc_time();
-						DEBUG("send one heartbeat packet");
 					}
 				}
 			}

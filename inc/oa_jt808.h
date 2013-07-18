@@ -184,6 +184,7 @@ enum _MSG_ID_e
 	GET_LOCATION	=	0x8201,			//位置信息查询
 	GET_LOCATION_rsp=	0x0201,			//位置信息查询应答
 	TRACK_LOCATION_CTL	=	0x8202,		//临时位置跟踪控制
+	ARTIFICIAL_ACK_ALARM = 0x8203,			//人工确认报警
 	TEXT_DOWNLOAD	=	0x8300,			//文本信息下发
 	SET_EVENT		=	0x8301,			//事件设置
 	REPORT_EVENT	=	0x0301,			//事件报告
