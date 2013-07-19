@@ -1290,7 +1290,7 @@ u8 poly_Judge(u32 lon,u32 lat,Poly_Area_Desc *point_data,u16 polySides)
 //	xz *= ((double)p2lon - (double)p1lon);
 //	xz /= ((double)p2lat - (double)p1lat);
 //	xz +=  (double)p1lon;
-	if ( xz > lon ) 
+	if ( xz > lon * 1.0 ) 
 	  res++;
 	}
 	return (res % 2 == 1); 

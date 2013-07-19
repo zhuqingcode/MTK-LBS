@@ -2957,7 +2957,7 @@ void GPS2Point_Distance(oa_double New_Point_Lon,oa_double New_Point_Lat,oa_doubl
 	y=(New_Point_Lat-Old_Pont_Lat)*Pi*R/180;  
 	//Temp=myhypot(x, y);
 	Temp = hypot(x, y);
-	OA_DEBUG_USER("x:%lf y:%lf Temp:%lf myhypot:%lf", x, y, Temp, hypot(x,y));
+	//OA_DEBUG_USER("x:%lf y:%lf Temp:%lf myhypot:%lf", x, y, Temp, hypot(x,y));
 	*res = Temp;
 }
 /*********************************************************
