@@ -26,6 +26,7 @@
  ****************************************************************************/
  #include "oa_type.h"
  #include "oa_debug.h"
+ #include <math.h>
  /*********************************************************
 *Function:     digit_check()
 *Description:  digit_check
@@ -207,8 +208,9 @@ oa_uint32 atobi(const char *src, oa_uint8 len)
 *Return:		void
 *Others:         
 *********************************************************/
-float myhypot(float f0, float f1)
+oa_double myhypot(oa_double f0, oa_double f1)
 {
+	OA_DEBUG_USER("f0:%lf f1:%lf sqrt():%lf", f0, f1, oa_sqrt(f0*f0 + f1*f1));
 	return oa_sqrt(f0*f0 + f1*f1);
 }
 /*********************************************************

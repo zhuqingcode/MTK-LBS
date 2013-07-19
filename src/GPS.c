@@ -79,7 +79,7 @@ static void UTC_To_RTC(STRUCT_RMC *POS_Inf);
 void GPS_CFG_NAV_SET(void);
 static u8 HowManyDays(u8 year ,u8 month);
 static s32 Get_Space_Time(u8 *Now_Time,u8 *Pass_Time);
-float GPS_Local_Change(u8 *Lon2Lat,u8 Mode);
+float GPS_Local_Change(u8 *Lon2Lat,u8 Mode, float *res);
 static int diff_day (unsigned char* date1,unsigned char *date2 ); /*天数计算*/
 static int count_day ( int year, int month, int day, int flag );  /*天数计算*/
 #define leap(year) ((year%4==0&&year%100!=0)||(year%400==0))  /*闰年判断*/
@@ -144,6 +144,12 @@ u32 GPS_DataAnaly(void)
 						{
 							
 							GPSHandle.CHK_A='G';
+							GPSHandle.Step++;	
+						}
+						else if(GPSHandle.Data=='B')//北斗定位
+						{
+							
+							GPSHandle.CHK_A='B';
 							GPSHandle.Step++;	
 						}
 						else
@@ -250,7 +256,7 @@ u32 GPS_DataAnaly(void)
 								GPSHandle.Step++;		
 							}
 			            }
-						else if(GPSHandle.CntTemp<10)
+						else if(GPSHandle.CntTemp<11)
 						{
 							if(GPSHandle.Data==',')
 							{
@@ -322,7 +328,6 @@ u32 GPS_DataAnaly(void)
 					            	GPSHandle.GPS_INF.Latitude[GPSHandle.CntTemp-1]=GPSHandle.Data;
 					            break;
 								case 9:
-								break;
 								case 10:
 								case 11:
 								case 12:
@@ -414,7 +419,6 @@ u32 GPS_DataAnaly(void)
 					            	GPSHandle.GPS_INF.Longitude[GPSHandle.CntTemp-1]=GPSHandle.Data;
 					            break;
 								case 10:
-								break;
 								case 11:
 								case 12:
 								case 13:
@@ -513,7 +517,8 @@ u32 GPS_DataAnaly(void)
 								//GPSHandle.GPS_INF.Speed=(u16)((GPSHandle.Speed_Temp*1852)/(1000*( pow(10,GPSHandle.dot)+0.0)));//(GPSHandle.Speed_Temp*1852)/1000/( pow(10,GPSHandle.dot));//(float)
 								GPSHandle.GPS_INF.Speed=(u16)((GPSHandle.Speed_Temp*1852)/(1000*( powme(10,GPSHandle.dot)+0.0)));//(GPSHandle.Speed_Temp*1852)/1000/( pow(10,GPSHandle.dot));//(float)
 								//DEBUG("Speed_Temp:%u dot:%u pow:%d", GPSHandle.Speed_Temp, GPSHandle.dot, powme(10,GPSHandle.dot));
-								
+								if (GPSHandle.GPS_INF.Speed < 0) GPSHandle.GPS_INF.Speed = 0;
+								else if (GPSHandle.GPS_INF.Speed > 180) GPSHandle.GPS_INF.Speed = 180;
 							}
 							GPSHandle.CntTemp++;	
 						}
@@ -719,195 +724,6 @@ u32 GPS_DataAnaly(void)
 							GPSHandle.Step=0;
 						}
 					break ;
-/*					case 50://GPTXT
-						if(GPSHandle.Data=='X')
-						{
-							GPSHandle.Step++;
-						}
-						else
-						{
-							GPSHandle.Step=0;	
-						}
-					break;	   
-					case 51:
-						if(GPSHandle.Data=='T')	 //GPTXT
-						{
-							GPSHandle.Step++;
-						}
-						else
-						{
-							GPSHandle.Step=0;	
-						}
-					break;
-					case 52:
-						if(GPSHandle.Data==',')
-						{
-							GPSHandle.dot++;
-							if(GPSHandle.dot==4)
-							{
-								GPSHandle.Step++;
-							}
-						}
-					break;
-					case 53:
-						if(GPSHandle.Data=='A')
-						{
-							GPSHandle.Step++;
-						}
-						else
-						{
-							GPSHandle.Step=0;	
-						}
-					break; 
-					case 54:
-						if(GPSHandle.Data=='N')
-						{
-							GPSHandle.Step++;
-						}
-						else
-						{
-							GPSHandle.Step=0;	
-						}
-					break;
-					case 55:
-						if(GPSHandle.Data=='T')
-						{
-							GPSHandle.Step++;
-						}
-						else
-						{
-							GPSHandle.Step=0;	
-						}
-					break;
-					case 56:
-						if(GPSHandle.Data=='S')
-						{
-							GPSHandle.Step++;
-						}
-						else
-						{
-							GPSHandle.Step=0;	
-						}
-					break;
-					case 57:
-						if(GPSHandle.Data=='T')
-						{
-							GPSHandle.Step++;
-						}
-						else
-						{
-							GPSHandle.Step=0;	
-						}
-					break;
-					case 58:
-						if(GPSHandle.Data=='A')
-						{
-							GPSHandle.Step++;
-						}
-						else
-						{
-							GPSHandle.Step=0;	
-						}
-					break;
-					case 59:
-						if(GPSHandle.Data=='T')
-						{
-							GPSHandle.Step++;
-						}
-						else
-						{
-							GPSHandle.Step=0;	
-						}
-					break;
-					case 60:
-						if(GPSHandle.Data=='U')
-						{
-							GPSHandle.Step++;
-						}
-						else
-						{
-							GPSHandle.Step=0;	
-						}
-					break;
-					case 61:
-						if(GPSHandle.Data=='S')	 	//天线状态字句
-						{
-							GPSHandle.Step++;
-						}
-						else
-						{
-							GPSHandle.Step=0;	
-						}
-					break;
-					case 62:
-						if(GPSHandle.Data=='=')
-						{
-							GPSHandle.CntTemp=0;
-							GPSHandle.Step++;
-						}
-						else
-						{
-							GPSHandle.Step=0;	
-						}
-					break;
-					case 63:
-						if (GPSHandle.CntTemp<9)
-						{
-							if(GPSHandle.Data!='*')
-							{
-								GPSHandle.GPTXT[GPSHandle.CntTemp]	 =GPSHandle.Data;
-								GPSHandle.CntTemp++;
-							}
-							else
-							{
-								if(GPSHandle.CntTemp==2)//OK
-								{
-									if(strncmp(GPSHandle.GPTXT,"OK",GPSHandle.CntTemp)==0)		//天线正常
-									{
-										GPSHandle.GPS_INF.Ant_Status=GPS_ANT_OK;
-										UpdatePos(&(GPSHandle.GPS_INF),ANTUPDATE);
-									}
-									else
-									{
-										GPSHandle.Step=0;
-									}
-								}
-								else if(GPSHandle.CntTemp==4)//OPEN
-								{
-									if(strncmp(GPSHandle.GPTXT,"OPEN",GPSHandle.CntTemp)==0)		//天线开路
-									{
-										GPSHandle.GPS_INF.Ant_Status=GPS_ANT_OPEN;
-										UpdatePos(&(GPSHandle.GPS_INF),ANTUPDATE);
-														
-									}
-									else 
-									{
-										GPSHandle.Step=0;		
-									}		
-								}
-								else if(GPSHandle.CntTemp==5)//SHORT
-								{
-									if(strncmp(GPSHandle.GPTXT,"SHORT",GPSHandle.CntTemp)==0)	//天线短路
-									{
-										GPSHandle.GPS_INF.Ant_Status=GPS_ANT_SHORT;
-										UpdatePos(&(GPSHandle.GPS_INF),ANTUPDATE);		
-									}
-									else
-									{
-										GPSHandle.Step=0;	
-									}
-								}
-								else
-								{
-									GPSHandle.Step=0;	
-								}
-							}
-						}
-						else
-						{
-							GPSHandle.Step=0;		
-						}
-					break;	*/
 					case 70://GPGGA
 						GPSHandle.CHK_A^=GPSHandle.Data;
 						if(GPSHandle.Data=='G')
@@ -1271,107 +1087,6 @@ u32 GPS_DataAnaly(void)
 						}
 					}
 					break;
-					/*case 200:
-					{
-						if(GPSHandle.Data==0x09)					//查看天线状态的
-						{
-							GPSHandle.CHK_A+=GPSHandle.Data;
-							GPSHandle.CHK_B+=GPSHandle.CHK_A;
-							GPSHandle.Step++;
-							GPSHandle.Msg_Data_Len=0;
-						}
-						else
-						{
-							GPSHandle.Step=0;	
-						}
-					}
-					break;
-					case 201:
-					{
-						GPSHandle.CHK_A+=GPSHandle.Data;
-						GPSHandle.CHK_B+=GPSHandle.CHK_A;
-						GPSHandle.Msg_Data_Len=GPSHandle.Data;
-						GPSHandle.Step++;	
-					}
-					break;
-					case 202:
-					{
-						GPSHandle.CHK_A+=GPSHandle.Data;
-						GPSHandle.CHK_B+=GPSHandle.CHK_A;
-						GPSHandle.Msg_Data_Len=GPSHandle.Msg_Data_Len+(GPSHandle.Data<<8);
-						GPSHandle.CntTemp=0;
-						GPSHandle.Step++;	
-					}
-					break;
-					case 203:
-					{
-						GPSHandle.CHK_A+=GPSHandle.Data;
-						GPSHandle.CHK_B+=GPSHandle.CHK_A;
-						GPSHandle.CntTemp++;
-						if(GPSHandle.CntTemp>=GPSHandle.Msg_Data_Len)	 //收到最后一个字节
-						{
-							GPSHandle.Step++;	
-						}
-						else if(GPSHandle.CntTemp==21)		//天线状态字节
-						{
-							GPSHandle.GPSDataType= GPSHandle.Data;		
-						}
-					}
-					break;
-					case 204:
-					{
-						if(GPSHandle.CHK_A==GPSHandle.Data)	 			//匹配校验值
-						{
-							GPSHandle.Step++;	
-						}
-						else
-						{
-							GPSHandle.GPSDataType= UBX_CHECK_ERROR  ;	
-							GPSHandle.Step++;
-						}
-					}
-					break;
-					case 205:
-					{
-						if(GPSHandle.GPSDataType ==UBX_CHECK_ERROR)	
-						{
-							GPSHandle.Step=0;
-							return 	GPSHandle.GPSDataType;
-						}
-						else  if(GPSHandle.CHK_B==GPSHandle.Data)
-						{
-							GPSHandle.Step=0;
-							switch(GPSHandle.GPSDataType)
-							{
-								case 0x00:			//初始化
-									GPSHandle.GPS_INF.Ant_Status=GPS_ANT_INIT;
-									UpdatePos(&(GPSHandle.GPS_INF),ACCOFFUPDATE);
-								break;
-								case 0x01:
-									GPSHandle.GPS_INF.Ant_Status=GPS_ANT_UNKNOW;
-								break;
-								case 0x02:
-									GPSHandle.GPS_INF.Ant_Status=GPS_ANT_OK;
-								break;
-								case 0x03:
-									GPSHandle.GPS_INF.Ant_Status=GPS_ANT_SHORT;
-								break;
-								case 0x04:
-									GPSHandle.GPS_INF.Ant_Status=GPS_ANT_OPEN;
-								break;
-								default:
-								break;	
-							}
-							UpdatePos(&(GPSHandle.GPS_INF),ANTUPDATE);
-							GPSHandle.GPSDataType=UBX_MON_ANT_OK;
-							GPSHandle.GPSAnalyFlag=GPSAnalyOK;	
-						}
-						else
-						{
-							GPSHandle.Step=0;		 
-						}
-					}
-					break; */
 					#endif
 					default:
 						GPSHandle.Step=0;
@@ -1665,7 +1380,7 @@ u8 GetPosinfASC(u8 *Str,u8 StrSize,u8 *Strlen,u8 Filed)
 *Return:        0:获取时间成功. 1:获取失败，一般是因为未定位
 *Others:        32位无符号整型值，单位km 
 *********************************************************/
-FP32 GPS_IntvlDistanc(STRUCT_RMC *gps_info)
+FP32 GPS_IntvlDistanc(STRUCT_RMC *gps_info, float *res)
 {
 	static FP32  Old_Lon = 0;	/*上一点纬度*/
 	static FP32  Old_Lat = 0;	/*上一点经度*/
@@ -1680,6 +1395,7 @@ FP32 GPS_IntvlDistanc(STRUCT_RMC *gps_info)
 //	u8 Time[6];
 //	u8 err;
 	u8 flag=0;//正确标志
+	oa_double temp = 0.0;
 //	u8 status=0;
 //	app_GetPosinf(&status,GPSFixedStatus,0);
 	if(gps_info->Fix_Status == GPS_FIXED)	   //如果在定位状态
@@ -1687,23 +1403,25 @@ FP32 GPS_IntvlDistanc(STRUCT_RMC *gps_info)
 	//	Trace(PrintDebug,"计算距离!\r\n");
 		if((Old_Lon==0)&&(Old_Lat==0))//首次定位
 		{
-			Old_Lon=GPS_Local_Change(gps_info->Longitude,1) ;
-			Old_Lat=GPS_Local_Change(gps_info->Latitude,0) ;
+			/*Old_Lon=*/GPS_Local_Change(gps_info->Longitude,1, &Old_Lon) ;
+			/*Old_Lat=*/GPS_Local_Change(gps_info->Latitude,0, &Old_Lat) ;
 			Fixed_Cnt=0;
 			memcpy(Pass_Time,gps_info->Time,6);
+			*res = 0;
 			return 0;	
 		}
 		else
 		{
 			Fixed_Cnt=Get_Space_Time(gps_info->Time,Pass_Time);  //获取时间间隔s
-			New_Lon=GPS_Local_Change(gps_info->Longitude,1) ;
-			New_Lat=GPS_Local_Change(gps_info->Latitude,0) ;
+			/*New_Lon=*/GPS_Local_Change(gps_info->Longitude,1, &New_Lon) ;
+			/*New_Lat=*/GPS_Local_Change(gps_info->Latitude,0, &New_Lat) ;
 			if(Fixed_Cnt>=0)
 			{
 				if(Fixed_Cnt>DISTANCE_FRQ)
 				{
 				//	Trace(PrintDebug,"通过经纬度计算距离!\r\n");
-					IntvlDistanc=GPS2Point_Distance(New_Lon,New_Lat,Old_Lon,Old_Lat);
+					GPS2Point_Distance(New_Lon,New_Lat,Old_Lon,Old_Lat, &temp);
+					IntvlDistanc = temp;
 					//该方式取得的里程均速大于180km/h，取180
 					if(IntvlDistanc>(180*Fixed_Cnt)/3600.0)
 					{
@@ -1741,12 +1459,14 @@ FP32 GPS_IntvlDistanc(STRUCT_RMC *gps_info)
 				Old_Lat=New_Lat;
 				memcpy(Pass_Time,gps_info->Time,6);	//更新时间
 			}
+			*res = IntvlDistanc;
 			return 	IntvlDistanc;
 		}	
 	}
 	else
 	{
 //		Trace(PrintDevbug,"未定位!不统计里程\r\n");
+		*res = 0;
 		return 0;
 	}			
 }  
@@ -2944,14 +2664,16 @@ static int count_day ( int year, int month, int day, int flag )
 *Return:         两点距离（km）
 *Others:          
 *********************************************************/
-float GPS2Point_Distance(float New_Point_Lon,float New_Point_Lat,float Old_Point_Lon,float Old_Pont_Lat )
+void GPS2Point_Distance(oa_double New_Point_Lon,oa_double New_Point_Lat,oa_double Old_Point_Lon,oa_double Old_Pont_Lat, oa_double *res )
 {
-	float    Temp;
-	float    x,y;
-    x=(New_Point_Lon-Old_Point_Lon)*Pi*R*oa_cos( ((New_Point_Lat+Old_Pont_Lat)/2) *Pi/180)/180;  
-    y=(New_Point_Lat-Old_Pont_Lat)*Pi*R/180;  
-    Temp=myhypot(x,y);  
-    return Temp; 
+	oa_double    Temp;
+	oa_double    x,y;
+	x=(New_Point_Lon-Old_Point_Lon)*Pi*R*oa_cos( ((New_Point_Lat+Old_Pont_Lat)/2) *Pi/180)/180;  
+	y=(New_Point_Lat-Old_Pont_Lat)*Pi*R/180;  
+	//Temp=myhypot(x, y);
+	Temp = hypot(x, y);
+	OA_DEBUG_USER("x:%lf y:%lf Temp:%lf myhypot:%lf", x, y, Temp, hypot(x,y));
+	*res = Temp;
 }
 /*********************************************************
 *Function:       GPS_Lon_Change()
@@ -2964,7 +2686,7 @@ float GPS2Point_Distance(float New_Point_Lon,float New_Point_Lat,float Old_Point
 *Return:         转换后°数
 *Others:          
 *********************************************************/
-float GPS_Local_Change(u8 *Lon2Lat,u8 Mode)
+float GPS_Local_Change(u8 *Lon2Lat,u8 Mode, float *res)
 {
 	float    Temp=0;
 	u8 i=0;
@@ -2981,6 +2703,7 @@ float GPS_Local_Change(u8 *Lon2Lat,u8 Mode)
 			Minutes	=Minutes*10+(*(Lon2Lat+i))-0x30;	
 		}
 		Temp= Degrees+ ((Minutes+0.0)/powme(10,4))/60;
+		*res = Temp;
 		return Temp;
 	}
 	else						   		/*纬度*/
@@ -2994,6 +2717,7 @@ float GPS_Local_Change(u8 *Lon2Lat,u8 Mode)
 			Minutes	=Minutes*10+(*(Lon2Lat+i))-0x30;	
 		}
 		Temp= Degrees+ ((Minutes+0.0)/powme(10,4))/60;
+		*res = Temp;
 		return Temp;
 	}
 }

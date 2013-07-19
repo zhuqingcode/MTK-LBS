@@ -95,7 +95,7 @@ oa_bool r_w_circle_area_data_file(circle_area_item *p_item, r_w_enum r_w, u8 pos
 			}
 		}
 	}
-	
+	oa_memset(&circle_area_var, 0x0, sizeof(circle_area_var));
 	if(r_w == file_read){
 		offset = pos * sizeof(circle_area_item);
 		oa_fseek(handle, offset, OA_FILE_BEGIN);
@@ -207,7 +207,7 @@ oa_bool r_w_rect_area_data_file(rect_area_item *p_item, r_w_enum r_w, u8 pos, u8
 			}
 		}
 	}
-	
+	oa_memset(&rect_area_var, 0x0, sizeof(rect_area_var));
 	if(r_w == file_read){
 		offset = pos * sizeof(rect_area_var);
 		oa_fseek(handle, offset, OA_FILE_BEGIN);
@@ -319,7 +319,7 @@ oa_bool r_w_poly_area_data_file(poly_area_item *p_item, r_w_enum r_w, u8 pos, u8
 			}
 		}
 	}
-	
+	oa_memset(&poly_area_var, 0x0, sizeof(poly_area_var));
 	if(r_w == file_read){
 		offset = pos * sizeof(poly_area_var);
 		oa_fseek(handle, offset, OA_FILE_BEGIN);
@@ -957,6 +957,8 @@ void circle_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur
 	if (has_specific_file(CIRCLE_AREA_DATA)){
 		//handle circle area
 		for (i=0; i<MAX_AREA_SUM; i++){
+			oa_memset(&circle_area_var, 0x0, sizeof(circle_area_var));
+			oa_memset(&circle_area_desc, 0x0, sizeof(circle_area_desc));
 			//read circle area data
 			ret = r_w_circle_area_data_file(&circle_area_var, file_read, i, none_area);
 			if (OA_TRUE == ret && circle_area_var.is_valid == valid){
@@ -965,6 +967,7 @@ void circle_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur
 				circle_area_desc.lon = circle_area_var.center_point_lon;
 				circle_area_desc.rad = circle_area_var.radius;
 				p_id[i] = circle_area_var.area_id;
+				//DEBUG("read lat:%d lon:%d rad:%d id:%d", circle_area_desc.lat, circle_area_desc.lon, circle_area_desc.rad, circle_area_var.area_id);
 				//compare
 				if (1 == circle_area_var.area_para.depend_time){
 					//rtc is ok?
@@ -985,6 +988,7 @@ void circle_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur
 					if (0 == res) continue;
 					else if (1 == res){
 						i_o = Circular_Judge(lon, lat, &circle_area_desc);
+						//DEBUG("i_o:%d", i_o);
 						//inside
 						if (1 == i_o){
 							p_cur[i] = area_inside;
@@ -1002,6 +1006,7 @@ void circle_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur
 				}
 				else{
 					i_o = Circular_Judge(lon, lat, &circle_area_desc);
+					//DEBUG("i_o:%d", i_o);
 					//inside
 					if (1 == i_o){
 						p_cur[i] = area_inside;
@@ -1043,6 +1048,8 @@ void rect_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur,
 	if (has_specific_file(RECT_AREA_DATA)){
 		//handle rect area
 		for (i=0; i<MAX_AREA_SUM; i++){
+			oa_memset(&rect_area_var, 0x0, sizeof(rect_area_var));
+			oa_memset(&rect_area_desc, 0x0, sizeof(rect_area_desc));
 			//read rect area data
 			ret = r_w_rect_area_data_file(&rect_area_var, file_read, i, none_area);
 			if (OA_TRUE == ret && rect_area_var.is_valid == valid){
@@ -1134,6 +1141,8 @@ void poly_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur,
 	if (has_specific_file(POLY_AREA_DATA)){
 		//hande poly area
 		for (i=0; i<MAX_AREA_SUM; i++){
+			oa_memset(&poly_area_var, 0x0, sizeof(poly_area_var));
+			oa_memset(&poly_area_desc, 0x0, sizeof(poly_area_desc));
 			//read poly area data
 			ret = r_w_poly_area_data_file(&poly_area_var, file_read, i, none_area);
 			if (OA_TRUE == ret && poly_area_var.is_valid == valid){
@@ -1219,9 +1228,9 @@ void oa_app_area(void *para)
 	u16 speed;
 	u8 time[6];
 	u8 i;
-	area_status_enum cur_status_circle[MAX_AREA_SUM];
-	area_status_enum cur_status_rect[MAX_AREA_SUM];
-	area_status_enum cur_status_poly[MAX_AREA_SUM];
+	area_status_enum cur_status_circle[MAX_AREA_SUM] = 0;
+	area_status_enum cur_status_rect[MAX_AREA_SUM] = 0;
+	area_status_enum cur_status_poly[MAX_AREA_SUM] = 0;
 	static area_status_enum last_status_circle[MAX_AREA_SUM] = {0x0};
 	static area_status_enum last_status_rect[MAX_AREA_SUM] = {0x0};
 	static area_status_enum last_status_poly[MAX_AREA_SUM] = {0x0};
