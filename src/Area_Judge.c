@@ -1213,14 +1213,16 @@ static u8 Area_Judge_Process(u32 now_lon,u32 now_lat,Area_Desc *area_desc)
 u8 Circular_Judge(u32 now_lon,u32 now_lat,Cir_Area_Desc *point_data)
 {
 	oa_double now_lon_f,now_lat_f,Cent_lon_f,Cent_lat_f;
-
+	oa_double result, temp;
 	now_lon_f = (oa_double)now_lon/1000000;
 	now_lat_f =(oa_double)now_lat/1000000;
 	Cent_lon_f = (oa_double)point_data->lon/1000000;
 	Cent_lat_f = (oa_double)point_data->lat/1000000;
-	OA_DEBUG_USER("now_lon_f:%lf now_lat_f:%lf Cent_lon_f:%lf Cent_lat_f:%lf", now_lon_f, now_lat_f, Cent_lon_f, Cent_lat_f);
-	OA_DEBUG_USER("%lf vs %lf", (GPS2Point_Distance(now_lon_f,now_lat_f,Cent_lon_f,Cent_lat_f)*1000.0f), 1.0f * point_data->rad);
-	if(GPS2Point_Distance(now_lon_f,now_lat_f,Cent_lon_f,Cent_lat_f)*1000.0f > 1.0f * point_data->rad)
+	//OA_DEBUG_USER("now_lon_f:%lf now_lat_f:%lf Cent_lon_f:%lf Cent_lat_f:%lf", now_lon_f, now_lat_f, Cent_lon_f, Cent_lat_f);
+	GPS2Point_Distance(now_lon_f,now_lat_f,Cent_lon_f,Cent_lat_f, &temp);
+	result = temp * 1000.0;
+	//OA_DEBUG_USER("result:%f", result);
+	if(result > 1.0 * point_data->rad)
 	{
 		return 0;
 	}

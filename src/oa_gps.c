@@ -105,6 +105,7 @@ void oa_app_gps(void)
 	static u32 IntvlCog = 0;
 	static u8 infoprintCnt = 0;
 	static FP32 IntvlDistanc = 0.0;
+	float dis_cal = 0;
 	STRUCT_RMC gps_info;
 	u32 speed;
 	static u32 os_times;
@@ -301,10 +302,12 @@ void oa_app_gps(void)
 				}
 			}
 			//--------------------------mileage statistis-----------------------------
-			IntvlDistanc += GPS_IntvlDistanc(&gps_info); //km
+			//IntvlDistanc += GPS_IntvlDistanc(&gps_info, &dis_cal); //km
+			GPS_IntvlDistanc(&gps_info, &dis_cal);
+			IntvlDistanc += dis_cal;
 			OA_DEBUG_USER("miles:%f", IntvlDistanc);
 			DEBUG("(u32)IntvlDistanc * 10:%d", (u32)(IntvlDistanc * 10));
-			if (IntvlDistanc - UPDATE_DISTANC >= EPSINON){
+			if (IntvlDistanc >= UPDATE_DISTANC){
 				//GpsDistancCacul(&IntvlDistanc);//changed to statement below
 				DEBUG("statistics miles");
 				ret = mile_stat_add(IntvlDistanc);

@@ -967,7 +967,7 @@ void circle_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur
 				circle_area_desc.lon = circle_area_var.center_point_lon;
 				circle_area_desc.rad = circle_area_var.radius;
 				p_id[i] = circle_area_var.area_id;
-				DEBUG("read lat:%d lon:%d rad:%d id:%d", circle_area_desc.lat, circle_area_desc.lon, circle_area_desc.rad, circle_area_var.area_id);
+				//DEBUG("read lat:%d lon:%d rad:%d id:%d", circle_area_desc.lat, circle_area_desc.lon, circle_area_desc.rad, circle_area_var.area_id);
 				//compare
 				if (1 == circle_area_var.area_para.depend_time){
 					//rtc is ok?
@@ -988,7 +988,7 @@ void circle_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur
 					if (0 == res) continue;
 					else if (1 == res){
 						i_o = Circular_Judge(lon, lat, &circle_area_desc);
-						DEBUG("i_o:%d", i_o);
+						//DEBUG("i_o:%d", i_o);
 						//inside
 						if (1 == i_o){
 							p_cur[i] = area_inside;
@@ -1006,7 +1006,7 @@ void circle_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur
 				}
 				else{
 					i_o = Circular_Judge(lon, lat, &circle_area_desc);
-					DEBUG("i_o:%d", i_o);
+					//DEBUG("i_o:%d", i_o);
 					//inside
 					if (1 == i_o){
 						p_cur[i] = area_inside;

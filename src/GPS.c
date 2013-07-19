@@ -79,7 +79,7 @@ static void UTC_To_RTC(STRUCT_RMC *POS_Inf);
 void GPS_CFG_NAV_SET(void);
 static u8 HowManyDays(u8 year ,u8 month);
 static s32 Get_Space_Time(u8 *Now_Time,u8 *Pass_Time);
-float GPS_Local_Change(u8 *Lon2Lat,u8 Mode);
+float GPS_Local_Change(u8 *Lon2Lat,u8 Mode, float *res);
 static int diff_day (unsigned char* date1,unsigned char *date2 ); /*天数计算*/
 static int count_day ( int year, int month, int day, int flag );  /*天数计算*/
 #define leap(year) ((year%4==0&&year%100!=0)||(year%400==0))  /*闰年判断*/
@@ -1380,7 +1380,7 @@ u8 GetPosinfASC(u8 *Str,u8 StrSize,u8 *Strlen,u8 Filed)
 *Return:        0:获取时间成功. 1:获取失败，一般是因为未定位
 *Others:        32位无符号整型值，单位km 
 *********************************************************/
-FP32 GPS_IntvlDistanc(STRUCT_RMC *gps_info)
+FP32 GPS_IntvlDistanc(STRUCT_RMC *gps_info, float *res)
 {
 	static FP32  Old_Lon = 0;	/*上一点纬度*/
 	static FP32  Old_Lat = 0;	/*上一点经度*/
@@ -1395,6 +1395,7 @@ FP32 GPS_IntvlDistanc(STRUCT_RMC *gps_info)
 //	u8 Time[6];
 //	u8 err;
 	u8 flag=0;//正确标志
+	oa_double temp = 0.0;
 //	u8 status=0;
 //	app_GetPosinf(&status,GPSFixedStatus,0);
 	if(gps_info->Fix_Status == GPS_FIXED)	   //如果在定位状态
@@ -1402,23 +1403,25 @@ FP32 GPS_IntvlDistanc(STRUCT_RMC *gps_info)
 	//	Trace(PrintDebug,"计算距离!\r\n");
 		if((Old_Lon==0)&&(Old_Lat==0))//首次定位
 		{
-			Old_Lon=GPS_Local_Change(gps_info->Longitude,1) ;
-			Old_Lat=GPS_Local_Change(gps_info->Latitude,0) ;
+			/*Old_Lon=*/GPS_Local_Change(gps_info->Longitude,1, &Old_Lon) ;
+			/*Old_Lat=*/GPS_Local_Change(gps_info->Latitude,0, &Old_Lat) ;
 			Fixed_Cnt=0;
 			memcpy(Pass_Time,gps_info->Time,6);
+			*res = 0;
 			return 0;	
 		}
 		else
 		{
 			Fixed_Cnt=Get_Space_Time(gps_info->Time,Pass_Time);  //获取时间间隔s
-			New_Lon=GPS_Local_Change(gps_info->Longitude,1) ;
-			New_Lat=GPS_Local_Change(gps_info->Latitude,0) ;
+			/*New_Lon=*/GPS_Local_Change(gps_info->Longitude,1, &New_Lon) ;
+			/*New_Lat=*/GPS_Local_Change(gps_info->Latitude,0, &New_Lat) ;
 			if(Fixed_Cnt>=0)
 			{
 				if(Fixed_Cnt>DISTANCE_FRQ)
 				{
 				//	Trace(PrintDebug,"通过经纬度计算距离!\r\n");
-					IntvlDistanc=GPS2Point_Distance(New_Lon,New_Lat,Old_Lon,Old_Lat);
+					GPS2Point_Distance(New_Lon,New_Lat,Old_Lon,Old_Lat, &temp);
+					IntvlDistanc = temp;
 					//该方式取得的里程均速大于180km/h，取180
 					if(IntvlDistanc>(180*Fixed_Cnt)/3600.0)
 					{
@@ -1456,12 +1459,14 @@ FP32 GPS_IntvlDistanc(STRUCT_RMC *gps_info)
 				Old_Lat=New_Lat;
 				memcpy(Pass_Time,gps_info->Time,6);	//更新时间
 			}
+			*res = IntvlDistanc;
 			return 	IntvlDistanc;
 		}	
 	}
 	else
 	{
 //		Trace(PrintDevbug,"未定位!不统计里程\r\n");
+		*res = 0;
 		return 0;
 	}			
 }  
@@ -2659,7 +2664,7 @@ static int count_day ( int year, int month, int day, int flag )
 *Return:         两点距离（km）
 *Others:          
 *********************************************************/
-oa_double GPS2Point_Distance(oa_double New_Point_Lon,oa_double New_Point_Lat,oa_double Old_Point_Lon,oa_double Old_Pont_Lat )
+void GPS2Point_Distance(oa_double New_Point_Lon,oa_double New_Point_Lat,oa_double Old_Point_Lon,oa_double Old_Pont_Lat, oa_double *res )
 {
 	oa_double    Temp;
 	oa_double    x,y;
@@ -2668,7 +2673,7 @@ oa_double GPS2Point_Distance(oa_double New_Point_Lon,oa_double New_Point_Lat,oa_
 	//Temp=myhypot(x, y);
 	Temp = hypot(x, y);
 	OA_DEBUG_USER("x:%lf y:%lf Temp:%lf myhypot:%lf", x, y, Temp, hypot(x,y));
-	return Temp; 
+	*res = Temp;
 }
 /*********************************************************
 *Function:       GPS_Lon_Change()
@@ -2681,7 +2686,7 @@ oa_double GPS2Point_Distance(oa_double New_Point_Lon,oa_double New_Point_Lat,oa_
 *Return:         转换后°数
 *Others:          
 *********************************************************/
-float GPS_Local_Change(u8 *Lon2Lat,u8 Mode)
+float GPS_Local_Change(u8 *Lon2Lat,u8 Mode, float *res)
 {
 	float    Temp=0;
 	u8 i=0;
@@ -2698,6 +2703,7 @@ float GPS_Local_Change(u8 *Lon2Lat,u8 Mode)
 			Minutes	=Minutes*10+(*(Lon2Lat+i))-0x30;	
 		}
 		Temp= Degrees+ ((Minutes+0.0)/powme(10,4))/60;
+		*res = Temp;
 		return Temp;
 	}
 	else						   		/*纬度*/
@@ -2711,6 +2717,7 @@ float GPS_Local_Change(u8 *Lon2Lat,u8 Mode)
 			Minutes	=Minutes*10+(*(Lon2Lat+i))-0x30;	
 		}
 		Temp= Degrees+ ((Minutes+0.0)/powme(10,4))/60;
+		*res = Temp;
 		return Temp;
 	}
 }
