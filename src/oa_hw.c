@@ -181,10 +181,10 @@ void acc_status_detect(void *param)
 		//key shake
 		ret = oa_gpio_read(KEY_GPIO);
 		if (!ret){
-			if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == SET){
-				WriteAlarmPara(RESET, StaAlarm0, ALARM_EMERGENCY_k);
-				DEBUG("cancel key alarm");
-			}
+			//if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == SET){
+			//	WriteAlarmPara(RESET, StaAlarm0, ALARM_EMERGENCY_k);
+			//	DEBUG("cancel key alarm");
+			//}
 			ugent_last = OA_FALSE;
 		}
 	}
