@@ -146,12 +146,6 @@ u32 GPS_DataAnaly(void)
 							GPSHandle.CHK_A='G';
 							GPSHandle.Step++;	
 						}
-						else if(GPSHandle.Data=='B')//北斗定位
-						{
-							
-							GPSHandle.CHK_A='B';
-							GPSHandle.Step++;	
-						}
 						else
 						{
 							GPSHandle.Step=0;
@@ -256,7 +250,7 @@ u32 GPS_DataAnaly(void)
 								GPSHandle.Step++;		
 							}
 			            }
-						else if(GPSHandle.CntTemp<11)
+						else if(GPSHandle.CntTemp<10)
 						{
 							if(GPSHandle.Data==',')
 							{
@@ -328,6 +322,7 @@ u32 GPS_DataAnaly(void)
 					            	GPSHandle.GPS_INF.Latitude[GPSHandle.CntTemp-1]=GPSHandle.Data;
 					            break;
 								case 9:
+								break;
 								case 10:
 								case 11:
 								case 12:
@@ -419,6 +414,7 @@ u32 GPS_DataAnaly(void)
 					            	GPSHandle.GPS_INF.Longitude[GPSHandle.CntTemp-1]=GPSHandle.Data;
 					            break;
 								case 10:
+								break;
 								case 11:
 								case 12:
 								case 13:
@@ -517,8 +513,7 @@ u32 GPS_DataAnaly(void)
 								//GPSHandle.GPS_INF.Speed=(u16)((GPSHandle.Speed_Temp*1852)/(1000*( pow(10,GPSHandle.dot)+0.0)));//(GPSHandle.Speed_Temp*1852)/1000/( pow(10,GPSHandle.dot));//(float)
 								GPSHandle.GPS_INF.Speed=(u16)((GPSHandle.Speed_Temp*1852)/(1000*( powme(10,GPSHandle.dot)+0.0)));//(GPSHandle.Speed_Temp*1852)/1000/( pow(10,GPSHandle.dot));//(float)
 								//DEBUG("Speed_Temp:%u dot:%u pow:%d", GPSHandle.Speed_Temp, GPSHandle.dot, powme(10,GPSHandle.dot));
-								if (GPSHandle.GPS_INF.Speed < 0) GPSHandle.GPS_INF.Speed = 0;
-								else if (GPSHandle.GPS_INF.Speed > 180) GPSHandle.GPS_INF.Speed = 180;
+								
 							}
 							GPSHandle.CntTemp++;	
 						}
@@ -724,6 +719,195 @@ u32 GPS_DataAnaly(void)
 							GPSHandle.Step=0;
 						}
 					break ;
+/*					case 50://GPTXT
+						if(GPSHandle.Data=='X')
+						{
+							GPSHandle.Step++;
+						}
+						else
+						{
+							GPSHandle.Step=0;	
+						}
+					break;	   
+					case 51:
+						if(GPSHandle.Data=='T')	 //GPTXT
+						{
+							GPSHandle.Step++;
+						}
+						else
+						{
+							GPSHandle.Step=0;	
+						}
+					break;
+					case 52:
+						if(GPSHandle.Data==',')
+						{
+							GPSHandle.dot++;
+							if(GPSHandle.dot==4)
+							{
+								GPSHandle.Step++;
+							}
+						}
+					break;
+					case 53:
+						if(GPSHandle.Data=='A')
+						{
+							GPSHandle.Step++;
+						}
+						else
+						{
+							GPSHandle.Step=0;	
+						}
+					break; 
+					case 54:
+						if(GPSHandle.Data=='N')
+						{
+							GPSHandle.Step++;
+						}
+						else
+						{
+							GPSHandle.Step=0;	
+						}
+					break;
+					case 55:
+						if(GPSHandle.Data=='T')
+						{
+							GPSHandle.Step++;
+						}
+						else
+						{
+							GPSHandle.Step=0;	
+						}
+					break;
+					case 56:
+						if(GPSHandle.Data=='S')
+						{
+							GPSHandle.Step++;
+						}
+						else
+						{
+							GPSHandle.Step=0;	
+						}
+					break;
+					case 57:
+						if(GPSHandle.Data=='T')
+						{
+							GPSHandle.Step++;
+						}
+						else
+						{
+							GPSHandle.Step=0;	
+						}
+					break;
+					case 58:
+						if(GPSHandle.Data=='A')
+						{
+							GPSHandle.Step++;
+						}
+						else
+						{
+							GPSHandle.Step=0;	
+						}
+					break;
+					case 59:
+						if(GPSHandle.Data=='T')
+						{
+							GPSHandle.Step++;
+						}
+						else
+						{
+							GPSHandle.Step=0;	
+						}
+					break;
+					case 60:
+						if(GPSHandle.Data=='U')
+						{
+							GPSHandle.Step++;
+						}
+						else
+						{
+							GPSHandle.Step=0;	
+						}
+					break;
+					case 61:
+						if(GPSHandle.Data=='S')	 	//天线状态字句
+						{
+							GPSHandle.Step++;
+						}
+						else
+						{
+							GPSHandle.Step=0;	
+						}
+					break;
+					case 62:
+						if(GPSHandle.Data=='=')
+						{
+							GPSHandle.CntTemp=0;
+							GPSHandle.Step++;
+						}
+						else
+						{
+							GPSHandle.Step=0;	
+						}
+					break;
+					case 63:
+						if (GPSHandle.CntTemp<9)
+						{
+							if(GPSHandle.Data!='*')
+							{
+								GPSHandle.GPTXT[GPSHandle.CntTemp]	 =GPSHandle.Data;
+								GPSHandle.CntTemp++;
+							}
+							else
+							{
+								if(GPSHandle.CntTemp==2)//OK
+								{
+									if(strncmp(GPSHandle.GPTXT,"OK",GPSHandle.CntTemp)==0)		//天线正常
+									{
+										GPSHandle.GPS_INF.Ant_Status=GPS_ANT_OK;
+										UpdatePos(&(GPSHandle.GPS_INF),ANTUPDATE);
+									}
+									else
+									{
+										GPSHandle.Step=0;
+									}
+								}
+								else if(GPSHandle.CntTemp==4)//OPEN
+								{
+									if(strncmp(GPSHandle.GPTXT,"OPEN",GPSHandle.CntTemp)==0)		//天线开路
+									{
+										GPSHandle.GPS_INF.Ant_Status=GPS_ANT_OPEN;
+										UpdatePos(&(GPSHandle.GPS_INF),ANTUPDATE);
+														
+									}
+									else 
+									{
+										GPSHandle.Step=0;		
+									}		
+								}
+								else if(GPSHandle.CntTemp==5)//SHORT
+								{
+									if(strncmp(GPSHandle.GPTXT,"SHORT",GPSHandle.CntTemp)==0)	//天线短路
+									{
+										GPSHandle.GPS_INF.Ant_Status=GPS_ANT_SHORT;
+										UpdatePos(&(GPSHandle.GPS_INF),ANTUPDATE);		
+									}
+									else
+									{
+										GPSHandle.Step=0;	
+									}
+								}
+								else
+								{
+									GPSHandle.Step=0;	
+								}
+							}
+						}
+						else
+						{
+							GPSHandle.Step=0;		
+						}
+					break;	*/
 					case 70://GPGGA
 						GPSHandle.CHK_A^=GPSHandle.Data;
 						if(GPSHandle.Data=='G')
@@ -1087,6 +1271,107 @@ u32 GPS_DataAnaly(void)
 						}
 					}
 					break;
+					/*case 200:
+					{
+						if(GPSHandle.Data==0x09)					//查看天线状态的
+						{
+							GPSHandle.CHK_A+=GPSHandle.Data;
+							GPSHandle.CHK_B+=GPSHandle.CHK_A;
+							GPSHandle.Step++;
+							GPSHandle.Msg_Data_Len=0;
+						}
+						else
+						{
+							GPSHandle.Step=0;	
+						}
+					}
+					break;
+					case 201:
+					{
+						GPSHandle.CHK_A+=GPSHandle.Data;
+						GPSHandle.CHK_B+=GPSHandle.CHK_A;
+						GPSHandle.Msg_Data_Len=GPSHandle.Data;
+						GPSHandle.Step++;	
+					}
+					break;
+					case 202:
+					{
+						GPSHandle.CHK_A+=GPSHandle.Data;
+						GPSHandle.CHK_B+=GPSHandle.CHK_A;
+						GPSHandle.Msg_Data_Len=GPSHandle.Msg_Data_Len+(GPSHandle.Data<<8);
+						GPSHandle.CntTemp=0;
+						GPSHandle.Step++;	
+					}
+					break;
+					case 203:
+					{
+						GPSHandle.CHK_A+=GPSHandle.Data;
+						GPSHandle.CHK_B+=GPSHandle.CHK_A;
+						GPSHandle.CntTemp++;
+						if(GPSHandle.CntTemp>=GPSHandle.Msg_Data_Len)	 //收到最后一个字节
+						{
+							GPSHandle.Step++;	
+						}
+						else if(GPSHandle.CntTemp==21)		//天线状态字节
+						{
+							GPSHandle.GPSDataType= GPSHandle.Data;		
+						}
+					}
+					break;
+					case 204:
+					{
+						if(GPSHandle.CHK_A==GPSHandle.Data)	 			//匹配校验值
+						{
+							GPSHandle.Step++;	
+						}
+						else
+						{
+							GPSHandle.GPSDataType= UBX_CHECK_ERROR  ;	
+							GPSHandle.Step++;
+						}
+					}
+					break;
+					case 205:
+					{
+						if(GPSHandle.GPSDataType ==UBX_CHECK_ERROR)	
+						{
+							GPSHandle.Step=0;
+							return 	GPSHandle.GPSDataType;
+						}
+						else  if(GPSHandle.CHK_B==GPSHandle.Data)
+						{
+							GPSHandle.Step=0;
+							switch(GPSHandle.GPSDataType)
+							{
+								case 0x00:			//初始化
+									GPSHandle.GPS_INF.Ant_Status=GPS_ANT_INIT;
+									UpdatePos(&(GPSHandle.GPS_INF),ACCOFFUPDATE);
+								break;
+								case 0x01:
+									GPSHandle.GPS_INF.Ant_Status=GPS_ANT_UNKNOW;
+								break;
+								case 0x02:
+									GPSHandle.GPS_INF.Ant_Status=GPS_ANT_OK;
+								break;
+								case 0x03:
+									GPSHandle.GPS_INF.Ant_Status=GPS_ANT_SHORT;
+								break;
+								case 0x04:
+									GPSHandle.GPS_INF.Ant_Status=GPS_ANT_OPEN;
+								break;
+								default:
+								break;	
+							}
+							UpdatePos(&(GPSHandle.GPS_INF),ANTUPDATE);
+							GPSHandle.GPSDataType=UBX_MON_ANT_OK;
+							GPSHandle.GPSAnalyFlag=GPSAnalyOK;	
+						}
+						else
+						{
+							GPSHandle.Step=0;		 
+						}
+					}
+					break; */
 					#endif
 					default:
 						GPSHandle.Step=0;
