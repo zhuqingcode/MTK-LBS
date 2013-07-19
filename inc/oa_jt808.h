@@ -247,7 +247,7 @@ enum _MSG_ID_e
  ||RSA_DEV==Devmsg||ORDER_REQUEST==Devmsg ||ORDER_ACCEPT==Devmsg ||ORDER_DONE==Devmsg ||APTS_LINE_QUERY_rsp==Devmsg ||APTS_INTOUT_STATION==Devmsg)
 //平台下发命令字判断
 #define ISPrtclServMsg(Servmsg) (PLAT_COMMON_rsp==Servmsg|| REGISTERS_rsp==Servmsg|| SET_DEV_PARAM==Servmsg	\
-|| GET_DEV_PARAM==Servmsg ||DEV_CONTROL==Servmsg|| GET_LOCATION==Servmsg|| TRACK_LOCATION_CTL==Servmsg \
+|| GET_DEV_PARAM==Servmsg ||DEV_CONTROL==Servmsg|| GET_LOCATION==Servmsg|| TRACK_LOCATION_CTL==Servmsg || ARTIFICIAL_ACK_ALARM ==  Servmsg\
 || TEXT_DOWNLOAD==Servmsg|| SET_EVENT==Servmsg || ASK_DOWNLOAD==Servmsg|| DEMAND_MENU==Servmsg \
 || DEMAND_SERVER==Servmsg|| CALL_BACK==Servmsg|| SET_PHONEBOOK==Servmsg|| CAR_CTL==Servmsg|| SET_ROUND_AREA==Servmsg \
 || DEL_ROUND_AREA==Servmsg|| SET_SQUARE_AREA==Servmsg|| DEL_SQUARE_AREA==Servmsg|| SET_POLYGON_AREA==Servmsg \

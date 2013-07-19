@@ -56,10 +56,7 @@ static u32 AlarmFlag[StatusNum]={0};
 //#define UPDATA_BUFLEN_MAX	200
 //#define BUFFER_MAX_LEN 198
 //#define BUFFER_MAX_LEN DATA_MAX_LEN
-#if 0
-u8 Queue_ServUpdatabufindex[UPDATA_BUFNUM]; //posbufÐ´Èë¶ÓÁÐ±êÊ¾£¬0ÎªÕ¼ÓÃ£¬1Ê¹ÓÃÖÐ
-u8 ServUpdatabuf[UPDATA_BUFNUM][UPDATA_BUFLEN_MAX];
-#endif
+
 extern DEV_PLAT_PARAS dev_running;
 ProtocolHandle sProtclHandl = {0};
 
@@ -344,51 +341,6 @@ u8 Write_ProtclHandl(Protocol_Handle_e type, u8 *pbuf, u16 buflen)
 //	OSSemPend(JT808_PrtclHandPrtctSem, 0, &err);
 	switch(type)
 	{
-#if 0 //zq comment for mtk-lbs desn't support
-		case e_APTSStationinfo:
-			Mem_Copy(&sProtclHandl.stationInfo, pbuf, buflen);
-		break;
-		case e_CallcarOrder:
-		//	if(buflen-50>sizeof(sProtclHandl.stCallcarOrder.OrderContent)) //Êý¾Ý¹ý³ÌÎ´´¦Àí £¿£¿
-		//		return 1;
-			Mem_Copy(sProtclHandl.stCallcarOrder.OrderID,pbuf,50);
-			if(buflen-50>sizeof(sProtclHandl.stCallcarOrder.OrderContent)) //Êý¾Ý¹ý³ÌÎ´´¦Àí £¿£¿
-			{
-				sProtclHandl.stCallcarOrder.OrderContentlen=sizeof(sProtclHandl.stCallcarOrder.OrderContent);
-				Mem_Copy(sProtclHandl.stCallcarOrder.OrderContent,pbuf+50,sProtclHandl.stCallcarOrder.OrderContentlen);
-			}
-			else
-			{
-				sProtclHandl.stCallcarOrder.OrderContentlen=buflen-50;
-				Mem_Copy(sProtclHandl.stCallcarOrder.OrderContent,pbuf+50,sProtclHandl.stCallcarOrder.OrderContentlen);
-			}
-		break;
-		case e_CallcarInfoOrder:
-		//	if(buflen-50-20>sizeof(sProtclHandl.stCallcarOrder.OrderContent)) //Êý¾Ý¹ý³ÌÎ´´¦Àí £¿£¿
-		//		return 1;
-			Mem_Copy(sProtclHandl.stCallcarOrder.OrderID,pbuf,50);
-			Mem_Copy(sProtclHandl.stCallcarOrder.OrderTel,pbuf+50,20);
-			if(buflen-50-20>sizeof(sProtclHandl.stCallcarOrder.OrderContent)) //Êý¾Ý¹ý³ÌÎ´´¦Àí £¿£¿
-			{
-				sProtclHandl.stCallcarOrder.OrderContentlen=sizeof(sProtclHandl.stCallcarOrder.OrderContent);
-				Mem_Copy(sProtclHandl.stCallcarOrder.OrderContent,pbuf+70,sProtclHandl.stCallcarOrder.OrderContentlen);
-			}
-			else
-			{
-				sProtclHandl.stCallcarOrder.OrderContentlen=buflen-70;
-				Mem_Copy(sProtclHandl.stCallcarOrder.OrderContent,pbuf+70,sProtclHandl.stCallcarOrder.OrderContentlen);
-			}
-
-			sProtclHandl.stCallcarOrder.OrderContentlen=buflen-70;
-			Mem_Copy(sProtclHandl.stCallcarOrder.OrderContent,pbuf+70,buflen-70);
-		break;
-		case e_CallcarAccept:
-			sProtclHandl.CallcarAccept=*pbuf;
-		break;
-		case e_CallcarResult:
-			sProtclHandl.CallcarResult=*pbuf;
-		break;
-#endif
 		//·¢ËÍ
 		case eDevSeqid: //ÖÕ¶Ë·¢ËÍÁ÷Ë®ºÅ
 			Mem_Copy(sProtclHandl.DevSeqId,pbuf,sizeof(sProtclHandl.DevSeqId));
@@ -673,45 +625,6 @@ u8 JT808_dataChg(u8 flag, u8 *pstr, u16 strlen, u16 *Destlen)
 
 	return status;
 }
-#if 0
-//ÅÐ¶Ïlen³¤¶È×Ö·û´®ÊÇ·ñÎªIP IP¸ñÊ½xxx.xxx.xxx.xxx peijl_20120828 ÐÞ¸
-oa_bool ISAscIPValid (u8 *IP, u8 len)
-{
-	u8 i;
-	u8 pot=0;
-	u16 potdata=0;
-	if(IP==NULL)
-		return OA_FALSE;
-	if(len<7 ||len>15)
-		return OA_FALSE;
-	if(IP[0]=='.'||IP[len-1]=='.')
-		return OA_FALSE;
-	for(i=0;i<len-1;i++)
-	{
-		if(IP[i]=='.'&&IP[i+1]=='.')
-		return OA_FALSE;
-	}
-
-	for(i=0;i<len;i++)
-	{
-		if(IP[i]=='.')
-		{
-			if(potdata>255)
-				return OA_FALSE;
-			potdata=0;
-			pot++;
-		}
-		else if(IP[i]>='0'&&IP[i]<='9')
-			potdata=potdata*10+IP[i]-'0';
-		else
-			return OA_FALSE;
-	}
-	if((pot!=3)||(potdata>255))
-		return OA_FALSE;
-
-	return OA_TRUE;
-}
-#endif
 oa_bool ip_is_valued (u8 *ip, u8 len)
 {
 	u8 i;
@@ -2030,88 +1943,6 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 			break;
 		}
 		
-#if 0
-		case eOnlineUpgrad_Ctrl:	//ÎÞÏßÉý¼¶
-		{
-
-			step=0;
-			while(len<(msgbodylen-1)) //È¡Éý¼¶²ÎÊý
-			{
-				p = Str_Str(pmsgbody, ";");
-				if(p)
-				{
-					Paralen=p-pmsgbody;
-					if(Paralen)
-						if(ActionOK!=ServReq_DevCtrl_WritOnlineUpgraparam(step,pmsgbody,Paralen))
-							return 1;
-					step++; 
-					len+=(Paralen+1);
-					pmsgbody+=(Paralen+1);
-				}
-				else //×îºó²ÎÊý
-				{
-					Paralen=(msgbodylen-1)-len;
-					if(Paralen)
-						if(ActionOK!=ServReq_DevCtrl_WritOnlineUpgraparam(step,pmsgbody,Paralen))
-							return 1;
-					step++; 
-					len+=Paralen;
-					pmsgbody+=Paralen;
-				}
-			}
-			ReadLinkTaskPara(&i,NetStatusPara);
-			if(i&LinkTLSeverOk)
-			{
-			}
-			else
-			{WriteUpdateServPara(0,NULL,0,UpdateFlash);
-			WriteLinkTaskPara(ActionUpdateTL,ActionTypePara,SET);
-			SetUpgradStarttimeS(); //peijl_20121029 Ìí¼Ó£ºÉèÖÃÉý¼¶¼ÆÊ±¿ªÊ¼Ê±¼ä
-			}
-		}
-		break;
-
-		case eSpclServ_Ctrl:	//¿ØÖÆÖÕ¶ËÁ¬½ÓÖ¸¶¨·þÎñÆ÷
-		{
-			if(*pmsgbody==1) //ÇÐ»»»ØÖ÷¼à¿¼Æ½Ì¨
-			{
-				gServLimittim=0; //ÎÞÊ±ÏÞ
-				SetMonitServ(eMainServ);
-				WriteLinkTaskPara(ActionHXPPP|ActionLoginHX,ActionTypePara,SET);
-			}
-			else{ //ÇÐ»»µ½¼à¹ÜÆ½Ì¨
-				pmsgbody+=2;
-				step=0;
-				while(len<(msgbodylen-3)) //È¡²ÎÊý
-				{
-					p = Str_Str(pmsgbody, ";");
-					if(p)
-					{
-						Paralen=p-pmsgbody;
-						if(Paralen)
-							if(ActionOK!=ServReq_DevCtrl_WritSpclServparame(step,pmsgbody,Paralen))
-								return 1;
-						step++; 
-						len+=(Paralen+1);
-						pmsgbody+=(Paralen+1);
-					}
-					else //×îºó²ÎÊý
-					{
-						Paralen=(msgbodylen-3)-len;
-						if(Paralen)
-							if(ActionOK!=ServReq_DevCtrl_WritSpclServparame(step,pmsgbody,Paralen))
-								return 1;
-						step++; 
-						len+=Paralen;
-						pmsgbody+=Paralen;
-					}
-				}			
-				SetMonitServ(eSpclServ);
-				WriteLinkTaskPara(ActionHXPPP|ActionLoginHX,ActionTypePara,SET);
-			}
-		}
-		break;
-#endif	
 		case eSpclServ_Ctrl:{
 			oa_uint8 *p0 = NULL;
 			oa_uint8 *p1 = NULL;
@@ -2169,10 +2000,6 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 			//¶Ï¿ªÆ½Ì¨Á¬½Ó
 			//²ÎÊý±£´æflash
 			//½ÓÊÕÍ¨»°
-			#if 0//zq
-			Factory_Set();
-			WriteLinkTaskPara(ActionResetLbs,ActionTypePara,SET);
-			#endif
 			control_type = factory_setting;
 			//factory_set();
 			//oa_module_restart(NULL);
@@ -2180,69 +2007,11 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 		}
 		case eCloseDataCommu_Ctrl:	//¹Ø±ÕÊý¾ÝÍ¨ÐÅ
 		{  
-		#if 0
-			//¹Ø±ÕÒÑ´æÔÚµÄÁ¬½Ó£¬¶ø²»ÉèÖÃÖØÁ¬±êÖ¾
-			if(WCM_OK==WCM_IPLink_Query(SYS_CHANNEL))
-			{
-				if(WCM_OK!=WCM_IPCloseLink(SYS_CHANNEL))
-					return 1;
-				WriteLinkTaskPara(LinkHXSeverOk,NetStatusPara,RESET);
-			}
-			if(WCM_OK==WCM_IPLink_Query(UPDATE_CHANNEL))
-			{
-				if(WCM_OK!=WCM_IPCloseLink(UPDATE_CHANNEL))
-					return 1;
-				WriteLinkTaskPara(LinkTLSeverOk,NetStatusPara,RESET);
-			}
-			if(WCM_OK==WCM_GetPPPLinkStatus()) 
-			{
-				if(WCM_OK!=WCM_ClosePPPLink())
-				{	  //¹Ø±ÕÊ§°ÜÊ±£¬Ö¤Ã÷ÓëÆ½Ì¨ÈÔ±£³ÖÁ¬½Ó
-					WriteLinkTaskPara(LinkHXSeverOk,ActionTypePara,SET);					
-					return 1;
-				}
-				WriteLinkTaskPara(TLPPPOk|HXPPPOk,NetStatusPara,RESET);			
-			}
-		#endif
 			control_type = turnoff_datatraffic;
 			break;
 		}
 		case eCloseWCMCommu_Ctrl:	//¹Ø±ÕÎÞÏÞÍ¨ÐÅ
 		{ 
-		#if 0
-			//¹Ø±ÕÒÑ´æÔÚµÄÁ¬½Ó£¬¶ø²»ÉèÖÃÖØÁ¬±êÖ¾
-			if(WCM_OK==WCM_IPLink_Query(SYS_CHANNEL))
-			{
-				if(WCM_OK!=WCM_IPCloseLink(SYS_CHANNEL))
-					return 1;
-				WriteLinkTaskPara(LinkHXSeverOk,NetStatusPara,RESET);
-			}
-			if(WCM_OK==WCM_IPLink_Query(UPDATE_CHANNEL))
-			{
-				if(WCM_OK!=WCM_IPCloseLink(UPDATE_CHANNEL))
-					return 1;
-				WriteLinkTaskPara(LinkTLSeverOk,NetStatusPara,RESET);
-			}
-			if(WCM_OK==WCM_GetPPPLinkStatus()) 
-			{
-				if(WCM_OK!=WCM_ClosePPPLink())
-				{	  //¹Ø±ÕÊ§°ÜÊ±£¬Ö¤Ã÷ÓëÆ½Ì¨ÈÔ±£³ÖÁ¬½Ó
-					WriteLinkTaskPara(LinkHXSeverOk,ActionTypePara,SET);					
-					return 1;
-				}
-				WriteLinkTaskPara(TLPPPOk|HXPPPOk,NetStatusPara,RESET);			
-			}
-			//WCMÓ²¼þ¹Ø±Õ ÏÈÓÚµç»°¹Ò¶Ï
-
-
-			//µç»°
-			ReadTelPara(&i,eCallAction);
-			if(NoneAction!=i) //Íâ²¿¹Ò¶Ï
-			{	i=HangUp;
-				WriteTelPara(&i,eCallAction);
-			}
-			break;
-		#endif
 			control_type = turnoff_allwireless;
 			break;
 		}
@@ -3208,187 +2977,6 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 	}
 	return 0;					
 }
-#if 0
-/*************************************************************
-*Function:		Pro808Analysis
-*Description:	¶¨Î»ÏµÍ³½»±ê808Ð­Òé½âÎö.
-*				1.Ð­ÒéÐ£Ñé
-*				2.½âÎö£¬Êý¾Ý°ü·ÖÎªÖÕ¶ËÇëÇó»ØÓ¦ºÍÆ½Ì¨Ö÷¶¯ÇëÇó°ü
-*Calls:			many
-*Called By:      
-*Input:			data ½ÓÊÕµÄÆ½Ì¨Êý¾ÝÊ×µØÖ·
-				datalen ½ÓÊÕÆ½Ì¨Êý¾Ý³¤
-				sendbuf »º´æÇø
-				sendbuflen	»º³åÇøÊµ¼Ê³¤
-*Return:		unknown
-*Others:         
-**************************************************************/
-u8 JT808_PrtclAnaly(u8 *data,u16 datalen,u8 *sendbuf,u16 sendbuflen)
-{
-	u8 temp=0;
-	u8 *pbuf=data;
-	u16 ServmsgID=0;
-	u16 Reallen; //Ð­Òé°üÊµ¼Ê³¤¶È
-	u16  U16Temp;
-#if 0
-	if(0)
-	{
-	u16 test;
-	DEBUG(PrintDebug,"Raw Server data:!\r\n"); 	
-	for(test=0;test<datalen;test++)
-		DEBUG(PrintDebug,"%02x ",*(data+test));
-	DEBUG(PrintInfo,"\r\n");	
-	}
-#endif
-	if(NULL==data || datalen==0)  //Ð­Òé×îÐ¡³¤¶ÈÎ´¶¨Òå £¿£¿£¿
-		return RspPackgerr;	
-	//±êÊ¾Í·Î²ÅÐ¶Ï
-	if(*data!=0x7e || *(data+datalen-1)!=0x7e)
-		return RspPackgerr;	
-	//·´×ªÒå»¹Ô­Êý¾Ý
-	if(JT808_dataChg(0, data+1, datalen-2, &Reallen))
-	{
-		DEBUG("turning parameter error");
-		return RspPackgerr;
-	}
-	Reallen+=2; //¼ÓÉÏ±êÊ¾Í·Î²
-#if 0
-	if(0){
-	u8 test;
-	DEBUG(PrintDebug,"Server data after translition:!\r\n"); 	
-	for(test=0;test<Reallen;test++)
-		DEBUG(PrintDebug,"%02x ",*(data+test));
-	DEBUG(PrintInfo,"\r\n");
-	}
-#endif
-	//msgidÓÐÐ§ÐÔÅÐ¶Ï
-	char_to_short(data+1, &ServmsgID);
-	if(!ISPrtclServMsg(ServmsgID))
-	{
-		DEBUG("Unknown server message ID!");
-		return RspPackgerr;
-	}
-	//Ð£ÑéÎ»ÅÐ¶Ï
-	if(!XOR_Check(data+1,Reallen-3,&temp))
-	{
-		if(temp!=*(data+Reallen-2))	
-		{
-			DEBUG("Server data xor err!"); 	
-			return RspPackgerr;
-		}
-	}
-	else
-		return RspPackgerr;	    //Ó¦×·¼ÓÏûÏ¢´íÎóÓ¦´ð ???
-
-	pbuf++;//pbuf --> msg id
-	switch(ServmsgID)
-	{
-		/*4ÖÖÆ½Ì¨Ó¦´ð*/
-		case REGISTERS_rsp:	//×¢²áÓ¦´ð
-		{
-			LBS_PlatComRsp rsp;
-			memcpy(rsp.MsgId,pbuf,2);
-			pbuf+=sizeof(MSG_HEAD);
-			memcpy(rsp.SeqId,pbuf,2);
-			pbuf+=2;
-			rsp.Rslt=*pbuf;
-			if(rsp.Rslt==0)
-			{
-				pbuf++;
-				temp=Reallen-3-3-sizeof(MSG_HEAD);
-				if(temp>0)
-				{ 	//¼øÈ¨ÂëºÍÒÑ×¢²á×´Ì¬´æÈëflash
-					#if 0
-					Flash_Write_Buffer(NULL,0,DEV_REGSTA_ADDR,Sector_Erase);
-					Flash_Write_Buffer(&temp,1,DEV_AUTHEN_LEN_ADDR,Write_Mode);	
-					Flash_Write_Buffer(pbuf,temp,DEV_AUTHEN_ADDR,Write_Mode);
-					temp = Regin;
-					Flash_Write_Buffer(&temp,1,DEV_REGSTA_ADDR,Write_Mode);
-					#endif
-					authen_code_handle(pbuf, temp);//write Authentication Code
-				}
-			}
-			Write_ProtclHandl(eRsp2DevReq,(u8 *)&rsp,sizeof(LBS_PlatComRsp));	
-//			OSSemPost(JT808_ReqRspSem);
-			DEBUG("Recieve Registed result."); 	
-		}
-		break;
-		#if 0
-		case REPORT_MEDIA_DATA_rsp:	//¶àÃ½ÌåÊý¾ÝÉÏ´«Ó¦´ð
-		{
-			LBS_PlatComRsp rsp;
-			DEBUG("Recieve Result of media data uploading."); 	
-			memcpy(rsp.MsgId,pbuf,2);
-			pbuf+=sizeof(MSG_HEAD);
-			pbuf+=4; //media idÎÞÐ§
-			if(*pbuf==0)
-			{
-				rsp.Rslt=0;//³É¹¦
-			}
-			else
-			{
-		//	if(Reallen-3-5-sizeof(MSG_HEAD)>0)
-			//°üÁÐ±í---Ð­ÒéÎ´¶¨ £¿£¿£¿				
-				rsp.Rslt=1;//Ê§°Ü
-				DEBUG(PrintInfo,"Media data report failed!\r\n"); 	
-			}
-			Write_ProtclHandl(eRsp2DevReq,(u8 *)&rsp,sizeof(LBS_PlatComRsp));
-			OSSemPost(JT808_ReqRspSem);
-		}
-		#endif
-		break;
-		case PLAT_COMMON_rsp: //Æ½Ì¨Í¨ÓÃÓ¦´ð
-		{
-			LBS_PlatComRsp rsp;
-			DEBUG("Recieve common-response form moniter server."); 	
-			pbuf+=sizeof(MSG_HEAD);
-			memcpy(&rsp,pbuf,sizeof(LBS_PlatComRsp));
-			Write_ProtclHandl(eRsp2DevReq,(u8 *)&rsp,sizeof(LBS_PlatComRsp));	
-			DEBUG("Server common reply:\r\n"); 	
-			DEBUG("DevReqID    0x%02x%02x\r\n",*pbuf,*(pbuf+1)); 	
-			DEBUG("    DevReqmsgID 0x%02x%02x\r\n",*(pbuf+2),*(pbuf+3)); 	
-			DEBUG("    Rsp result  %02x\r\n",*(pbuf+4)); 	
-			//OSSemPost(JT808_ReqRspSem);
-		}
-		break;
-	/*	case RSA_PLAT: //Æ½Ì¨¹«Ô¿ÏÂ·¢
-		{
-			//Õâ¸öµØ·½µÄÊµÏÖÓÐ´ýÉÌÈ¶
-			if(1)//pprotHandle->DevMsgId==RSA_DEV)
-			{
-				Mem_Copy(pprotHandle->devreqrsp, pprotHandle->platreq, pprotHandle->platreqlen);
-				pprotHandle->devreqrsplen = pprotHandle->platreqlen;
-				OSSemPost(JT808_ReqRspSem);
-				break;
-			}
-			else
-			{
-				ServReq_808data_handle(pprotHandle);
-				break;
-			}
-		}
-	*/	//ÒÔÏÂNÖÖÎªÆ½Ì¨ÇëÇó
-		default:
-		{
-			Write_ProtclHandl(eServMsgid,pbuf,2);
-			Write_ProtclHandl(eServSeqid,(pbuf+10),2);
-			if(*(pbuf+2)&0x20) //ÓÐ·Ö°üÏî peijl_20120912
-			{
-				pbuf+=(sizeof(MSG_HEAD)+sizeof(MSG_HEAD_sub));
-				U16Temp=Reallen-3-(sizeof(MSG_HEAD)+sizeof(MSG_HEAD_sub));
-			}
-			else
-			{
-				pbuf+=sizeof(MSG_HEAD);
-				U16Temp=Reallen-3-sizeof(MSG_HEAD);
-			}
-			JT808_ServReq_handle(ServmsgID,pbuf,U16Temp,sendbuf,sendbuflen);
-		}
-		break;
-	}
-	return 0;					
-}
-#endif
 /*********************************************************
 *Function:       dev_common_rsp_buildbody
 *Description:   ÖÕ¶ËÍ¨ÓÃÓ¦´ð
@@ -5329,33 +4917,6 @@ u8 ReadAllBitAlarmPara(u8 AlarmSector,u32 *AlarmBits )
 //	OSSemPost(AlarmParaSem);
 	return 0;
 }
-#if 0
-/*----------------------------Î»ÖÃÐÅÏ¢¶ÓÁÐ²Ù×÷------------------------------*/
-/*È¡posbufµÄ¿ÕÒ»Î¬Êý×éµÄµØÖ·*/
-u8 *getEmptybuf()
-{
-	u8 i=0;
-	u8 j;
-	for(i=0;i<UPDATA_BUFNUM;i++)
-	{
-		if(Queue_ServUpdatabufindex[i]==0)
-		{
-			Queue_ServUpdatabufindex[i]=1;
-			j=i;
-			break; //return (u8 *)(posbuf[i]);
-		}
-	}
-	if(i<UPDATA_BUFNUM)
-	{
-//		DEBUG(PrintDebug,"position data index£º\r\n");	
-//		for(i=0;i<POSQUEUE_BUFNUM;i++)
-//			DEBUG(PrintDebug,"%d\r\n",posbufindex[i]);	
-		return (u8 *)(ServUpdatabuf[j]);
-	}
-	else
-		return (u8 *)0;
-}
-#endif
 /*********************************************************
 *Function:      escape_copy_to_send()
 *Description:  escape data & copy data to send buffer
