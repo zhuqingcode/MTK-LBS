@@ -98,6 +98,7 @@
 #define STATUS "STATUS"
 #define STATICS "STATICS"
 #define GPS "GPS"
+#define PARARST "PARARST"
 #define UPDATE "UPDATE"
 #define SNUMS "SNUMS"
 #define VERSA "VERSA"
@@ -180,6 +181,7 @@ typedef enum
 	e_STATUS,
 	e_STATICS,
 	e_GPS,
+	e_PARARST,
 	e_UPDATE,
 	e_SNUMS,
 	e_VERSA,
@@ -220,6 +222,7 @@ typedef enum
 	update_authcode,
 	reset,
 	rereg,
+	fac_set,
 	no_act = 0xf,
 }action_kind;
 

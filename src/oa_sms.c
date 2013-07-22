@@ -112,6 +112,7 @@ oa_char *p_keyword[] = {
  STATUS,
  STATICS,
  GPS,
+ PARARST,
  UPDATE,
  SNUMS,
  VERSA,
@@ -992,6 +993,9 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 			gps_extract(enquire_temp, &ret_len, which);
 			//oa_strcat(enquire_temp, ";");
 		}break;
+		case e_PARARST:{
+			oa_strcat(enquire_temp, "PARARST OK;");
+		}break;
 		case e_UPDATE:{
 			oa_strcat(enquire_temp, "doing update;");
 		}break;
@@ -1126,6 +1130,9 @@ void dev_action_handle(keyword_context *p_set, sms_or_uart which)
 				}
 				
 			}
+		}break;
+		case fac_set:{
+			do_factory_set();
 		}break;
 		default:break;
 	}
@@ -1850,6 +1857,9 @@ void handle_keyword4ms(e_keyword key_kind,
 		}break;
 		case e_GPS:{
 			p_set->s_k = sms_special;
+		}break;
+		case e_PARARST:{
+			p_set->act_kind = fac_set;
 		}break;
 		case e_CLRLOG:{
 			p_set->act_kind = clr_log;
