@@ -538,6 +538,8 @@ void oa_app_main(void)
 		//application initial, mainly about socket
 		oa_app_init();
 		//platform link task
+		//try to unlock with using default device parameters
+		try_unlock = OA_TRUE;
 		oa_timer_start(OA_APP_SCHEDULER_ID, oa_app_plat_link, NULL, OA_APP_PLAT_LINK_1ST);
 		//need to send restart sms?
 		need_send_sms_after_reset();
