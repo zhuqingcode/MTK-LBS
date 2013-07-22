@@ -1441,7 +1441,10 @@ if (UpdateMode == UpdateOnly){
 			plat_paraset = rereg;
 		}
 		break;
-		default:{DEBUG("not support!");}
+		default:{
+			DEBUG("not support!");
+			return 3;
+		}
 		break;
 	}
 }
@@ -1685,6 +1688,7 @@ static u8 ServReq_SetParam(u8 *pbuf, const u16 buflen)
 	u16 alllen=buflen;
 	u32 paramID;
 	u8 sta=1;
+	u8 ret = 0;
 	if(pbuf==NULL)
 	{
 		DEBUG("check_set_dev_param param error!");
@@ -1717,7 +1721,8 @@ static u8 ServReq_SetParam(u8 *pbuf, const u16 buflen)
 		alllen-=(5+len);
 	}
 	//所有参数写入flash,设置参数后终端相应动作
-	WriteLbsCfgPara(eCfaParaMax, NULL,0, UpdateFlash); //save it
+	ret = WriteLbsCfgPara(eCfaParaMax, NULL,0, UpdateFlash); //save it
+	if (ret == 3) return 3;//means unsupport
 //	WriteLinkTaskPara(devAct,ActionTypePara,SET);zq
 	return sta;
 }
