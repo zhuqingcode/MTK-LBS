@@ -621,6 +621,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 			case e_Rpttime_sleep:
 			case e_Rpttime_alarm:
 			case e_Rptdis_alarm:
+			case e_Rptdis_def:
 			case e_Rpttime_def:
 			case e_Rptdis_unlog:
 			case e_Rptdis_sleep:
@@ -888,6 +889,9 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 		}break;
 		case e_Rptdis_sleep:{
 			sprintf(enquire_temp, "Rptdis_sleep:%d;", dev_now_params.sleep_reportdistance);
+		}break;
+		case e_Rptdis_def:{
+			sprintf(enquire_temp, "default_reportdistance:%d;", dev_now_params.default_reportdistance);
 		}break;
 		case e_Rptdis_alarm:{
 			sprintf(enquire_temp, "Rptdis_alarm:%d;", dev_now_params.urgent_reportdistance);
@@ -1450,6 +1454,19 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.sleep_reportdistance = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_Rptdis_def:{
+			if (p_set->kind == set){
+				if (dev_now_params.default_reportdistance == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.default_reportdistance = p_set->context.con_int;
 					p_set->act_kind = para_save;
 				}
 			}
