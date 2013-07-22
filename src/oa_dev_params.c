@@ -97,7 +97,7 @@ DEVICE_PARAMS dev_def_params =
 	1200,						//min_rest_time
 	60000,						//max_park_time
 	//......
-	3,							//vehicle_odometer
+	0,							//vehicle_odometer
 	32,							//vehicle_province_id
 	100,							//vehicle_city_id
 	{"NJ001"},					//vehicle_license : carID

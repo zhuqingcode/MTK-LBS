@@ -71,6 +71,52 @@ oa_bool mile_stat_init(void)
 	return OA_TRUE;
 }
 /*********************************************************
+*Function:      mile_stat_init()
+*Description:  init the mileage statics
+*Return:        void
+*Others:         
+*********************************************************/
+oa_bool mile_stat_set_value(u32 value)
+{
+	oa_int32 handle, ret;
+	oa_uint32 dummy_read, dummy_write;
+	TOTAL_MILE mileage;
+	
+	handle = oa_fopen(MILEAGE_FILE);
+	if (handle < 0){
+		/* create new file for setting. */
+		handle = oa_fcreate(MILEAGE_FILE);
+		/* hope never return here. */
+		if (handle < 0){
+			DEBUG("Create mileage file failed!");
+			return OA_FALSE;
+		}
+		mileage.total_mileage = 0;
+		ret = oa_fwrite(handle, &mileage, sizeof(TOTAL_MILE), &dummy_write);
+		if ((ret < 0) || (dummy_write != sizeof(TOTAL_MILE))){
+			DEBUG("Init mileage file failed!");
+			return OA_FALSE;
+		}
+		DEBUG("Create mileage file ok!");    
+	}
+
+	oa_fseek(handle, 0, OA_FILE_BEGIN);
+	mileage.total_mileage = value;
+	ret = oa_fwrite(handle, &mileage, sizeof(TOTAL_MILE), &dummy_write);
+	if ((ret < 0) || (dummy_write != sizeof(TOTAL_MILE))){
+		DEBUG("set mileage err!");
+		oa_fclose(handle);
+		return OA_FALSE;
+	}
+	ret = oa_fclose(handle);
+	if (ret < 0){
+		DEBUG("close file err!");
+		oa_fdelete(MILEAGE_FILE);
+		return OA_FALSE;
+	}
+	return OA_TRUE;
+}
+/*********************************************************
 *Function:      mile_stat_add()
 *Description:  calculate the mileage statics
 *Return:        void

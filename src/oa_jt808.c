@@ -1375,7 +1375,7 @@ if (UpdateMode == UpdateOnly){
 			Mem_Copy((u8 *)&LbsCfgStruct.Color,pValue,len);		
 		break;
 		#endif
-		case eOdometer: //里程表精度
+		case eOdometer: //里程表初始值
 			DEBUG("Odometer");
 			//Mem_Copy((u8 *)&LbsCfgStruct.Odometer,pValue,len);		
 			if (len == 4){
@@ -1384,6 +1384,8 @@ if (UpdateMode == UpdateOnly){
 			else {
 				DEBUG("param err ");
 			}
+
+			mile_stat_set_value(dev_now_params.vehicle_odometer);
 		break;
 		case ePrivic:{
 			u16 U16Temp = 0;
