@@ -626,7 +626,7 @@ void print_key_dev_params(void)
 	DEBUG_N("Rpttime_alarm                      	 	:%d", dev_now_params.urgent_reporttime);
 	DEBUG_N("Rpttime_def                       	 	:%d", dev_now_params.default_reporttime);
 	DEBUG_N("Rptdis_unlog                       	 	:%d", dev_now_params.unlogin_reportdistance);
-	DEBUG_N("Rptdis_sleep                       	 	:%d", dev_now_params.default_reportdistance);
+	DEBUG_N("Rptdis_sleep                       	 	:%d", dev_now_params.sleep_reportdistance);
 	DEBUG_N("Rptdis_alarm                       	 	:%d", dev_now_params.urgent_reportdistance);
 	DEBUG_N("Rptdis_def                       	 	:%d", dev_now_params.default_reportdistance);
 	DEBUG_N("Rptcog                       	 	 	:%d", dev_now_params.corner_reportangle);
