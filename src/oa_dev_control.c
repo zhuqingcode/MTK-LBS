@@ -238,6 +238,7 @@ void do_socset_b4_unlock(){
 	oa_soc_setting_save();
 	/*Setting parameters*/
 	oa_soc_setting_init();
+	oa_soc_fill_addr_struct();
 }
 /*********************************************************
 *Function:     do_soc_reconn()

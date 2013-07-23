@@ -891,7 +891,7 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 			sprintf(enquire_temp, "Rptdis_sleep:%d;", dev_now_params.sleep_reportdistance);
 		}break;
 		case e_Rptdis_def:{
-			sprintf(enquire_temp, "default_reportdistance:%d;", dev_now_params.default_reportdistance);
+			sprintf(enquire_temp, "Rptdis_def:%d;", dev_now_params.default_reportdistance);
 		}break;
 		case e_Rptdis_alarm:{
 			sprintf(enquire_temp, "Rptdis_alarm:%d;", dev_now_params.urgent_reportdistance);
@@ -1018,8 +1018,7 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 			oa_strcat(enquire_temp, ";");
 		}break;
 		case e_CLRLOG:{
-			oa_strcat(enquire_temp, "CLRLOG");
-			oa_strcat(enquire_temp, ";");
+			oa_strcat(enquire_temp, "CLRLOG OK;");
 		}break;
 		case e_AUTHEN:{
 			oa_uint8 code[AUTHEN_CODE_MAX_LEN] = 0x0;

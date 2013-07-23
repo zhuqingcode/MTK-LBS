@@ -1464,6 +1464,7 @@ if (UpdateMode == UpdateOnly){
 		}
 		else{
 			DEBUG("save dev parameters err!");
+			return 1;
 		}
 		//msybe need reconnect!!!
 		

@@ -29,7 +29,7 @@
 #include "oa_type.h"
 #include "oa_api.h"
 #include "oa_setting.h"
-#define OA_APP_PLAT_LINK_1ST 5000
+#define OA_APP_PLAT_LINK_1ST 10000
 #define AUTHEN_FILE L"authen_file.ini"
 
 #define OA_APP_PLAT_LINK 1000// 1s
