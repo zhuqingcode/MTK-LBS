@@ -50,7 +50,7 @@ extern oa_bool try_unlock;
 * wait a period of time (for example, 5sec) to detach network,and then re-connect
 */
 #define OA_GPRS_WAITING_RELEASING 2000//10000 /*mSec*/
-
+#define OA_GPRS_WAITING_RESEND 10000
 //Gprs heartbeat time, for keep gprs connecting, default 60s, if not use heartbeat, set OA_GPRS_HEARTBEAT_TIME = 0
 #define OA_GPRS_HEARTBEAT_TIME 60
 
@@ -69,7 +69,7 @@ extern DEV_PLAT_PARAS dev_running;
 //-------------------------------------
 //for NOINIT buffer
 #define OA_GPRS_BUFFER_NOINIT_SIZE (oa_sram_noinit_get_size() - (1024*50))//500k-50k?
-
+void oa_soc_can_resend(void);
 void oa_soc_notify_ind_user_callback(void *inMsg);
 void oa_soc_init_fast(void)
 {
@@ -334,6 +334,7 @@ oa_int16 oa_soc_send_req(void)
 			g_soc_context.is_blocksend = OA_TRUE;
 			DEBUG("%s:sock_id=%d send block waiting!",__func__,g_soc_context.socket_id);
 			//wait for sending result , care event OA_SOC_WRITE in callback function oa_soc_notify_ind
+			oa_evshed_start(OA_EVSHED_ID_1, oa_soc_can_resend, NULL, OA_GPRS_WAITING_RESEND);
 			return 0;
 		}
 		else
@@ -351,7 +352,10 @@ oa_int16 oa_soc_send_req(void)
 	}
 }
 
-
+void oa_soc_can_resend(void){
+	DEBUG("%s called", __func__);
+	g_soc_context.is_blocksend = OA_FALSE;
+}
 void oa_soc_can_reconnect_again(void* param)
 {
 	DEBUG("%s called", __func__);
