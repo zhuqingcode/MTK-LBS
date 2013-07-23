@@ -570,7 +570,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 //Socket Notify Event indication handler framework
 void oa_soc_notify_ind_user_callback(void *inMsg)
 {
-	oa_int32 ret = 0;    
+	oa_int32 ret = 0;
 	oa_app_soc_notify_ind_struct *soc_notify = (oa_app_soc_notify_ind_struct*) inMsg;
 
 	//if other application's socket id, ignore it.
@@ -654,7 +654,12 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 			}
 			else{
 				DEBUG("%s:sock_id=%d connect fail err=%d!",__func__,soc_notify->socket_id,soc_notify->error_cause);
-				oa_soc_close_req( );
+				oa_soc_close_req();
+				if (use_is_lock()){
+					try_unlock = OA_FALSE;
+					dev_running.plat_switch = OA_TRUE;
+					dev_running.next_step = PLAT_SOC_INIT;
+				}
 			}
 			break;
 		}       

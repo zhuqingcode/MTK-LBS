@@ -112,6 +112,7 @@ oa_char *p_keyword[] = {
  STATUS,
  STATICS,
  GPS,
+ PARARST,
  UPDATE,
  SNUMS,
  VERSA,
@@ -620,6 +621,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 			case e_Rpttime_sleep:
 			case e_Rpttime_alarm:
 			case e_Rptdis_alarm:
+			case e_Rptdis_def:
 			case e_Rpttime_def:
 			case e_Rptdis_unlog:
 			case e_Rptdis_sleep:
@@ -888,6 +890,9 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 		case e_Rptdis_sleep:{
 			sprintf(enquire_temp, "Rptdis_sleep:%d;", dev_now_params.sleep_reportdistance);
 		}break;
+		case e_Rptdis_def:{
+			sprintf(enquire_temp, "Rptdis_def:%d;", dev_now_params.default_reportdistance);
+		}break;
 		case e_Rptdis_alarm:{
 			sprintf(enquire_temp, "Rptdis_alarm:%d;", dev_now_params.urgent_reportdistance);
 		}break;
@@ -992,6 +997,9 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 			gps_extract(enquire_temp, &ret_len, which);
 			//oa_strcat(enquire_temp, ";");
 		}break;
+		case e_PARARST:{
+			oa_strcat(enquire_temp, "PARARST OK;");
+		}break;
 		case e_UPDATE:{
 			oa_strcat(enquire_temp, "doing update;");
 		}break;
@@ -1010,8 +1018,7 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 			oa_strcat(enquire_temp, ";");
 		}break;
 		case e_CLRLOG:{
-			oa_strcat(enquire_temp, "CLRLOG");
-			oa_strcat(enquire_temp, ";");
+			oa_strcat(enquire_temp, "CLRLOG OK;");
 		}break;
 		case e_AUTHEN:{
 			oa_uint8 code[AUTHEN_CODE_MAX_LEN] = 0x0;
@@ -1126,6 +1133,9 @@ void dev_action_handle(keyword_context *p_set, sms_or_uart which)
 				}
 				
 			}
+		}break;
+		case fac_set:{
+			do_factory_set();
 		}break;
 		default:break;
 	}
@@ -1443,6 +1453,19 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.sleep_reportdistance = p_set->context.con_int;
+					p_set->act_kind = para_save;
+				}
+			}
+		}break;
+		case e_Rptdis_def:{
+			if (p_set->kind == set){
+				if (dev_now_params.default_reportdistance == p_set->context.con_int){
+					PRINT_SAMEPARA;
+					p_set->act_kind = no_act;
+					break;
+				}
+				else{
+					dev_now_params.default_reportdistance = p_set->context.con_int;
 					p_set->act_kind = para_save;
 				}
 			}
@@ -1850,6 +1873,9 @@ void handle_keyword4ms(e_keyword key_kind,
 		}break;
 		case e_GPS:{
 			p_set->s_k = sms_special;
+		}break;
+		case e_PARARST:{
+			p_set->act_kind = fac_set;
 		}break;
 		case e_CLRLOG:{
 			p_set->act_kind = clr_log;
