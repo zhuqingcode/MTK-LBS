@@ -274,6 +274,7 @@ typedef struct
 	oa_bool flag;//OA_TRUE:need to send restart sms.
 	oa_uint8 sms_nb[TEL_NUM_MAX_LEN];
 	sms_or_uart s_u;
+	oa_uint8 sms_con[32];
 }reset_struct;
 extern void oa_app_sms(void);
 #endif

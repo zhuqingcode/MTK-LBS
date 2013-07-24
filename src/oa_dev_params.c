@@ -41,7 +41,7 @@
 #include "oa_hw.h"
 #include "oa_debug.h"
 #include "oa_area.h"
-
+#define FS_PATH_NOT_FOUND -19
 extern oa_soc_set_parameter soc_cs;
 
 DEVICE_PARAMS dev_def_params =
@@ -349,8 +349,10 @@ oa_bool del_some_files(void)
 	
 	ret = oa_fremoveDir(BLINDDATA_DIRNAME);
 	if (ret < 0){
-		DEBUG("delete file:blinddata.dir err!");
-		return OA_FALSE;
+		if (ret != FS_PATH_NOT_FOUND){//means doesn't exist
+			DEBUG("delete file:blinddata.dir err! maybe it doesn't exist! ret:%d", ret);
+			return OA_FALSE;
+		}
 	}
 
 	handle = oa_fopen(DEV_PARAMS_FILE);
@@ -440,7 +442,7 @@ oa_bool del_some_files(void)
 			return OA_FALSE;
 		}
 	}
-
+#if 0
 	handle = oa_fopen(RESTART_FILE);
 	if (handle >= 0){
 		oa_fclose(handle);
@@ -451,7 +453,7 @@ oa_bool del_some_files(void)
 			return OA_FALSE;
 		}
 	}
-	
+#endif	
 	
 	return OA_TRUE;
 }

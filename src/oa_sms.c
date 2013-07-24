@@ -1097,7 +1097,7 @@ void dev_action_handle(keyword_context *p_set, sms_or_uart which)
 			ftp_update(NULL);
 		}break;
 		case reset:{
-			set_reset_flag(which);
+			set_reset_flag(which, "RESTART OK;");
 			do_reset();
 		}break;
 		case clr_log:{
@@ -1135,6 +1135,7 @@ void dev_action_handle(keyword_context *p_set, sms_or_uart which)
 			}
 		}break;
 		case fac_set:{
+			set_reset_flag(which, "PARARST OK;");
 			do_factory_set();
 		}break;
 		default:break;
