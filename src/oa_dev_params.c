@@ -41,7 +41,7 @@
 #include "oa_hw.h"
 #include "oa_debug.h"
 #include "oa_area.h"
-
+#define FS_PATH_NOT_FOUND -19
 extern oa_soc_set_parameter soc_cs;
 
 DEVICE_PARAMS dev_def_params =
@@ -349,8 +349,10 @@ oa_bool del_some_files(void)
 	
 	ret = oa_fremoveDir(BLINDDATA_DIRNAME);
 	if (ret < 0){
-		DEBUG("delete file:blinddata.dir err!");
-		return OA_FALSE;
+		if (ret != FS_PATH_NOT_FOUND){//means doesn't exist
+			DEBUG("delete file:blinddata.dir err! maybe it doesn't exist! ret:%d", ret);
+			return OA_FALSE;
+		}
 	}
 
 	handle = oa_fopen(DEV_PARAMS_FILE);
@@ -440,7 +442,7 @@ oa_bool del_some_files(void)
 			return OA_FALSE;
 		}
 	}
-
+#if 0
 	handle = oa_fopen(RESTART_FILE);
 	if (handle >= 0){
 		oa_fclose(handle);
@@ -451,7 +453,7 @@ oa_bool del_some_files(void)
 			return OA_FALSE;
 		}
 	}
-	
+#endif	
 	
 	return OA_TRUE;
 }
@@ -637,6 +639,7 @@ void print_key_dev_params(void)
 	DEBUG_N("alarmsmstel					:%s", dev_now_params.terminal_sms_num);
 	oa_myitoa(dev_now_params.alarm_mask, tmp);
 	DEBUG_N("swh_alarmmask					:%s", tmp);
+	oa_memset(tmp, 0x0, sizeof(tmp));
 	oa_myitoa(dev_now_params.alarm_send_sms_mask, tmp);
 	DEBUG_N("swh_alarmsms					:%s", tmp);
 	DEBUG_N("overspeed					:%d", dev_now_params.max_speed);

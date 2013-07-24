@@ -63,11 +63,11 @@ void do_reset(void)
 *Return:        void
 *Others:         
 *********************************************************/
-void set_reset_flag(sms_or_uart which)
+void set_reset_flag(sms_or_uart which, oa_uint8 *p_con)
 {
 	oa_int32 handle, ret;
 	oa_uint32 dummy_write;
-	reset_struct r_s;
+	reset_struct r_s = {0x0};
 	
 	handle = oa_fopen(RESTART_FILE);
 	if (handle < 0)
@@ -94,6 +94,7 @@ void set_reset_flag(sms_or_uart which)
 	r_s.flag = OA_TRUE;
 	if (which == sms)	oa_strcat(r_s.sms_nb, message.deliver_num);
 	r_s.s_u = which;
+	oa_strcpy(r_s.sms_con, p_con);
 	ret = oa_fwrite(handle, &r_s, sizeof(r_s), &dummy_write);
 	if ((ret < 0) || (dummy_write != sizeof(r_s)))
 	{
@@ -114,7 +115,7 @@ oa_bool need_send_sms_after_reset(void)
 	oa_int32 handle, ret;
 	oa_uint32 dummy_read;
 	reset_struct r_s;
-	
+	oa_uint8 con[32] = {0x0};
 	handle = oa_fopen(RESTART_FILE);
 	if (handle < 0) return OA_FALSE;
 
@@ -123,8 +124,9 @@ oa_bool need_send_sms_after_reset(void)
 	
 	if (r_s.flag == OA_TRUE){
 		DEBUG("send restart sms");
-		if (r_s.s_u == sms) oa_sms_test_dfalp("RESTART OK;", r_s.sms_nb);
-		else if (r_s.s_u == scrn) SScrn_CenterSMS_Send("RESTART OK;", oa_strlen("RESTART OK;"));
+		oa_memcpy(con, r_s.sms_con, oa_strlen(r_s.sms_con));
+		if (r_s.s_u == sms) oa_sms_test_dfalp(con, r_s.sms_nb);
+		else if (r_s.s_u == scrn) SScrn_CenterSMS_Send(con, oa_strlen(con));
 	}
 
 	oa_fclose(handle);
@@ -359,13 +361,17 @@ void ftp_update(upgrade_paras *p)
 {
 	oa_char para[64] = {0x0};
 	oa_char tmp[16] = {0x0};
-	
+	oa_bool ret;
 	oa_strcat(para, "ftp:");
 	if (p == NULL) oa_strcat(para, dev_now_params.update_server_ip);
 	else oa_strcat(para, p->ip);
 	oa_strcat(para, ",");
 	if (p == NULL) sprintf(tmp , "%d,", dev_now_params.update_server_port);
-	else sprintf(tmp , "%d,", p->port);
+	else{
+		//sprintf(tmp , "%d,", p->port);
+		oa_strcat(tmp, p->port_str);
+		oa_strcat(tmp, ",");
+	}
 	oa_strcat(para, tmp);
 	if (p == NULL) oa_strcat(para, dev_now_params.ftpusr);
 	else oa_strcat(para, p->usr);
@@ -378,5 +384,6 @@ void ftp_update(upgrade_paras *p)
 	oa_strcat(para, ",0");//8:print download bar & restart after finish
 	//oa_strcat(para, ",openatdll.dll,0");
 	DEBUG("update param:%s", para);
-	oa_start_ftp_upgrade(para);
+	ret = oa_start_ftp_upgrade(para);
+	if (ret) DEBUG("start to update");
 }

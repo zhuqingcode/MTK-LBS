@@ -1186,6 +1186,7 @@ typedef struct
 {
 	oa_uint8 ip[SERVER_IP_MAX_LEN];
 	oa_uint16 port;
+	oa_uint8 port_str[SERVER_IP_MAX_LEN];
 	oa_uint8 usr[SERVER_IP_MAX_LEN];
 	oa_uint8 pw[SERVER_IP_MAX_LEN];
 	oa_uint8 fw[SERVER_IP_MAX_LEN];
