@@ -1875,7 +1875,7 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 	u8 step=0;
 	if(pmsgbody==NULL)
 	{
-		DEBUG("LBS_DevCtlreq commandId error!",__FILE__, __func__, __LINE__);
+		DEBUG("LBS_DevCtlreq commandId error!");
 		return 1;
 	}
 	if(msgbodylen==0)
@@ -1891,6 +1891,7 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 			oa_uint8 *p3 = NULL;
 			oa_uint8 *p4 = NULL;
 			oa_uint8 *p5 = NULL;
+			oa_uint8 *p6 = NULL;
 			oa_uint8 *p_p = NULL;
 			oa_uint8 len;
 			DEBUG("wireless_updata");
@@ -1905,46 +1906,63 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 					else if (i == 2) p1 = p;//password
 					else if (i == 3) p2 = p;//ip
 					else if (i == 4) p3 = p;//tcp port
+					else if (i == 5) p6 = p;//udp port
 					else if (i == 8) p4 = p;//firmware
 					else if (i == 9) p5 = p;
 					p_p = p+1;
 					continue;
 				}
-				else DEBUG("paras err");
+				else{
+					DEBUG("paras err");
+					goto control_fail;
+				} 
 			}
 			len = p1 - (p0+1);
 			if (len > 0 && len < SERVER_IP_MAX_LEN){
 				oa_memcpy(up_paras.usr, p0+1, len);
 			}else{
 				DEBUG("paras err");
-				break;
+				goto control_fail;
 			}
 			len = p2 - (p1+1);
 			if (len > 0 && len < SERVER_IP_MAX_LEN){
 				oa_memcpy(up_paras.pw, p1+1, len);
 			}else{
 				DEBUG("paras err");
-				break;
+				goto control_fail;
 			}
 			len = p3 - (p2+1);
 			if (len > 0 && len < SERVER_IP_MAX_LEN){
 				oa_memcpy(up_paras.ip, p2+1, len);
 				if(!ip_is_valued(up_paras.ip, oa_strlen(up_paras.ip))){
 					DEBUG("ip err");
-					break;
+					goto control_fail;
 				}
 			}else{
 				DEBUG("paras err");
-				break;
+				goto control_fail;
 			}
 			
 			char_to_short(p3+1, &up_paras.port);
+			len = p6 - (p3+1);
+			if (len > 0){
+				oa_memcpy(up_paras.port_str, p3+1, len);
+				if (!oa_is_digit_str(up_paras.port_str, oa_strlen(up_paras.port_str))){
+					DEBUG("paras err");
+					goto control_fail;
+				}
+			}else{
+				DEBUG("paras err");
+				goto control_fail;
+			}
+			
 			len = p5 - (p4+1);
 			if (len > 0){
 				oa_memcpy(up_paras.fw, p4+1, len);
-			}else{
+			}
+			else{
 				DEBUG("paras err");
-				break;
+				goto control_fail;
 			}
 
 			control_type = wireless_update;
@@ -1969,18 +1987,21 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 					p_p = p+1;
 					continue;
 				}
-				else DEBUG("paras err");
+				else{
+					DEBUG("paras err");
+					goto control_fail;
+				}
 			}
 			len = p1 - (p0+1);
 			if (len > 0 && len < SERVER_IP_MAX_LEN){
 				oa_memcpy(up_paras.ip, p0+1, len);
 				if(!ip_is_valued(up_paras.ip, oa_strlen(up_paras.ip))){
 					DEBUG("ip err");
-					break;
+					goto control_fail;
 				}
 			}else{
 				DEBUG("paras err");
-				break;
+				goto control_fail;
 			}
 
 			char_to_short(p1+1, &up_paras.port);
@@ -2026,12 +2047,14 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 		default:
 		{
 	
-			DEBUG("LBS_DevCtlreq commandId error!",__FILE__, __func__, __LINE__);
+			DEBUG("LBS_DevCtlreq commandId error!");
 			return 0;
 		}
 	}
 	
 	return 0;
+control_fail:
+	return 1;
 }
 /*********************************************************
 *Function:     check_track_location_ctl

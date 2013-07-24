@@ -637,6 +637,7 @@ void print_key_dev_params(void)
 	DEBUG_N("alarmsmstel					:%s", dev_now_params.terminal_sms_num);
 	oa_myitoa(dev_now_params.alarm_mask, tmp);
 	DEBUG_N("swh_alarmmask					:%s", tmp);
+	oa_memset(tmp, 0x0, sizeof(tmp));
 	oa_myitoa(dev_now_params.alarm_send_sms_mask, tmp);
 	DEBUG_N("swh_alarmsms					:%s", tmp);
 	DEBUG_N("overspeed					:%d", dev_now_params.max_speed);

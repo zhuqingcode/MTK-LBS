@@ -359,13 +359,17 @@ void ftp_update(upgrade_paras *p)
 {
 	oa_char para[64] = {0x0};
 	oa_char tmp[16] = {0x0};
-	
+	oa_bool ret;
 	oa_strcat(para, "ftp:");
 	if (p == NULL) oa_strcat(para, dev_now_params.update_server_ip);
 	else oa_strcat(para, p->ip);
 	oa_strcat(para, ",");
 	if (p == NULL) sprintf(tmp , "%d,", dev_now_params.update_server_port);
-	else sprintf(tmp , "%d,", p->port);
+	else{
+		//sprintf(tmp , "%d,", p->port);
+		oa_strcat(tmp, p->port_str);
+		oa_strcat(tmp, ",");
+	}
 	oa_strcat(para, tmp);
 	if (p == NULL) oa_strcat(para, dev_now_params.ftpusr);
 	else oa_strcat(para, p->usr);
@@ -378,5 +382,6 @@ void ftp_update(upgrade_paras *p)
 	oa_strcat(para, ",0");//8:print download bar & restart after finish
 	//oa_strcat(para, ",openatdll.dll,0");
 	DEBUG("update param:%s", para);
-	oa_start_ftp_upgrade(para);
+	ret = oa_start_ftp_upgrade(para);
+	if (ret) DEBUG("start to update");
 }
