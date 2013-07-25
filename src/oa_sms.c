@@ -169,7 +169,7 @@ oa_uint8 wlj_gbk[] = {0xce,0xb4,0xc1,0xac,0xbd,0xd3};//"未连接"
 oa_uint8 fh_gbk[] = {';'};//";"
 
 oa_uint8 ydw_gbk[] = {0xD2,0xd1,0xb6,0xa8,0xce,0xbb};//"已定位"
-oa_uint8 wdw_gbk[] = {0xc1,0xb4,0xb6,0xa8,0xce,0xbb};//"未定位"
+oa_uint8 wdw_gbk[] = {0xce,0xb4,0xb6,0xa8,0xce,0xbb};//"未定位"
 oa_uint8 sj_gbk[] = {0xca,0xb1,0xbc,0xe4,':'};//"时间:"
 oa_uint8 wd_gbk[] = {0xce,0xb3,0xb6,0xc8,':'};//"纬度:"
 oa_uint8 jd_gbk[] = {0xbe,0xad,0xb6,0xc8,':'};//"经度:"
@@ -422,10 +422,11 @@ void gps_extract(oa_char *enquire_temp, u8 *p_len, sms_or_uart which){
 	else if (scrn == which){
 		//gps状态
 		oa_memcpy(tmp, gps_gbk, sizeof(gps_gbk));pos += sizeof(gps_gbk);
-		oa_memcpy(&tmp[pos], ydw_gbk, 6);pos += 6;
-		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+		
 
 		if (GPS_FIXED == Pos_Inf.Fix_Status){
+		oa_memcpy(&tmp[pos], ydw_gbk, 6);pos += 6;
+		oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
 		//时间
 		oa_memcpy(&tmp[pos], sj_gbk, sizeof(sj_gbk));pos += sizeof(sj_gbk);
 		t.nYear = ((Pos_Inf.Time[0]>>4)&0x0F)*10+ (Pos_Inf.Time[0]&0x0F);
@@ -493,7 +494,10 @@ void gps_extract(oa_char *enquire_temp, u8 *p_len, sms_or_uart which){
 			//未定位
 			oa_memcpy(&tmp[pos], wdw_gbk, sizeof(wdw_gbk));pos += sizeof(wdw_gbk);
 			oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+			
 			//模块
+			oa_memcpy(&tmp[pos], mk_gbk, sizeof(mk_gbk));pos += sizeof(mk_gbk);
+			//模块正常与否
 			if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){
 				oa_memcpy(&tmp[pos], bzc_gbk, sizeof(bzc_gbk));pos += sizeof(bzc_gbk);
 			}
@@ -501,6 +505,8 @@ void gps_extract(oa_char *enquire_temp, u8 *p_len, sms_or_uart which){
 				oa_memcpy(&tmp[pos], zc_gbk, sizeof(zc_gbk));pos += sizeof(zc_gbk);
 			}
 			oa_memcpy(&tmp[pos], fh_gbk, sizeof(fh_gbk));pos += sizeof(fh_gbk);
+			//天线
+			oa_memcpy(&tmp[pos], tx_gbk, sizeof(tx_gbk));pos += sizeof(tx_gbk);
 			if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ANTENNA) == SET){
 				oa_memcpy(&tmp[pos], dk_gbk, sizeof(dk_gbk));pos += sizeof(dk_gbk);
 			}
