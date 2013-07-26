@@ -270,6 +270,7 @@ void oa_app_gps(void)
 						overspeed_var.kind = no_spec;
 						handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 						handle_alarm_sms(ALARM_OVER_SPEED);
+						os_times = 0;
 					}
 				}
 				
@@ -291,6 +292,7 @@ void oa_app_gps(void)
 						handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
 						handle_alarm_sms(ALARM_OVERTIME_PARKING);
 						DEBUG("overtime park");
+						park_times = 0;
 					}
 				}
 			}
