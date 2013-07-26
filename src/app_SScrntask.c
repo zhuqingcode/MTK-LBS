@@ -219,19 +219,19 @@ void app_CentersmsAckAction(u16 Action,u8 *Sendbuf, u8 buflen)
 #if 0
 	if(Action&LBS_Reset_Enable)
 	{
-		Trace(PrintInfo,"SchedulScrn_Task:need to reset LBS.\r\n");
+		DEBUG(PrintInfo,"SchedulScrn_Task:need to reset LBS.");
 		WriteLinkTaskPara(ActionResetLbs,ActionTypePara,SET);						
 	}
 	if(Action&WCM_Reset_Enable)
 	{
-		Trace(PrintInfo,"SchedulScrn_Task: need to reset Wcm model.\r\n");
+		DEBUG(PrintInfo,"SchedulScrn_Task: need to reset Wcm model.");
 		WriteLinkTaskPara(ActionResetWCM,ActionTypePara,SET);	
 		WriteLinkTaskPara(0xFFFF,NetStatusPara,RESET);	
 	}
 	if(Action&HX_ReLogin_Enable)
 	{
 		u16 temp=0;
-		Trace(PrintInfo,"SchedulScrn_Task:need reLogin MONITER server.\r\n");
+		DEBUG(PrintInfo,"SchedulScrn_Task:need reLogin MONITER server.");
 		if(Action&DEVIC_UNREGIST_Enable) //peijl_130220 添加：车辆基本参数修改时从平台注销
 		{
 			WriteLinkTaskPara(ActionUnregistServ|ActionLoginHX,ActionTypePara,SET);
@@ -248,7 +248,7 @@ void app_CentersmsAckAction(u16 Action,u8 *Sendbuf, u8 buflen)
 	if(Action&HX_PPP_Enable)
 	{
 		u16 temp=0;
-		Trace(PrintInfo,"SchedulScrn_Task: need PPP redial.\r\n");
+		DEBUG(PrintInfo,"SchedulScrn_Task: need PPP redial.");
 		ReadLinkTaskPara(&temp,NetStatusPara);
 		if(temp&HXPPPOk)
 			WCM_ClosePPPLink(); //升级冲突否	
@@ -259,7 +259,7 @@ void app_CentersmsAckAction(u16 Action,u8 *Sendbuf, u8 buflen)
 	{						
 	//	if(0==Get_Upgradetype())
 		{
-			Trace(PrintDebug,"SchedulScrn_Task:Com Upgrade Cmd\r\n");
+			DEBUG(PrintDebug,"SchedulScrn_Task:Com Upgrade Cmd");
 			SetUpgradStarttimeS(); //设置升级计时开始时间
 			WriteLinkTaskPara(ActionUpdateTL,ActionTypePara,SET);
 		//	Set_Upgradetype(2); //???
@@ -316,7 +316,7 @@ u8 app_SScrndriverSign(u8 *DataBuf,const u8 buflen)
 				}
 				Signinfo.drverID[cnt]=U16Temp%10+'0';
 			}
-			Trace(PrintError,"SchedulScrn_Task:Driver ID  %s!\r\n",Signinfo.drverID);
+			DEBUG(PrintError,"SchedulScrn_Task:Driver ID  %s!",Signinfo.drverID);
 			//司机登录包其他信息
 			app_GetGPSStrct(&gps_info);
 			ReadDistanceData(Signinfo.mileag);
@@ -333,7 +333,7 @@ u8 app_SScrndriverSign(u8 *DataBuf,const u8 buflen)
 			
 			if(U16Temp>buflen)
 			{
-			Trace(PrintError,"SchedulScrn_Task:When uploading driver-sign infomation,buffer isn't enough!\r\n");
+			DEBUG(PrintError,"SchedulScrn_Task:When uploading driver-sign infomation,buffer isn't enough!");
 				U8Temp=ActionError;			
 			}
 			else
@@ -342,17 +342,17 @@ u8 app_SScrndriverSign(u8 *DataBuf,const u8 buflen)
 				if(ActionOK!=U8Temp)
 				{
 					WriteflashPack(eDriverSignData,DataBuf,U16Temp);
-					Trace(PrintDebug,"SchedulScrn_Task:saved Driver signed infomation to flash.\r\n");
+					DEBUG(PrintDebug,"SchedulScrn_Task:saved Driver signed infomation to flash.");
 				}
 				else
 				{
 					OSSemPend(DriverlogSem,3000,&U8Temp);
 					if(U8Temp==OS_ERR_NONE)
-						Trace(PrintDebug,"SchedulScrn_Task:Driver signed successfully!\r\n");
+						DEBUG(PrintDebug,"SchedulScrn_Task:Driver signed successfully!");
 					else
 					{
 						WriteflashPack(eDriverSignData,DataBuf,U16Temp);
-						Trace(PrintDebug,"SchedulScrn_Task:saved Driver signed infomation to flash.\r\n");
+						DEBUG(PrintDebug,"SchedulScrn_Task:saved Driver signed infomation to flash.");
 						U8Temp=ActionError;
 					}
 				}
@@ -503,7 +503,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 			SScrn_GetResult(pSchedulScrnHandle->TelNum,sizeof(pSchedulScrnHandle->TelNum),&pSchedulScrnHandle->len,UNICODE_SMS_CMD,TEL_NUM_ENUM);
 			SScrn_GetResult(pSchedulScrnHandle->DataBuf2,sizeof(pSchedulScrnHandle->DataBuf2),&pSchedulScrnHandle->len2,UNICODE_SMS_CMD,SMS_DAT_ENUM);
 			if(WCM_OK!=WCM_SendSMS(UNICOD_SMS,pSchedulScrnHandle->TelNum,pSchedulScrnHandle->len,pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->len2))
-				Trace(PrintDebug,"SchedulScrn_Task:WCM send message failed\r\n");
+				DEBUG(PrintDebug,"SchedulScrn_Task:WCM send message failed");
 		break;
 		
 		case SET_UDP_CMD:
@@ -512,9 +512,9 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 				if(!SScrn_GetResult((u8 *)&pSchedulScrnHandle->U16Temp,2,&pSchedulScrnHandle->len2,SET_UDP_CMD,PORT_ENUM))
 			{
 				pSchedulScrnHandle->DataBuf[pSchedulScrnHandle->len]='\0';
-				Trace(PrintInfo,"SchedulScrn_Task:set IP and udp port\r\n");
-				Trace(PrintDebug,"IP  :%s\r\n",pSchedulScrnHandle->DataBuf);
-				Trace(PrintDebug,"PORT:%d\r\n",pSchedulScrnHandle->U16Temp);
+				DEBUG(PrintInfo,"SchedulScrn_Task:set IP and udp port");
+				DEBUG(PrintDebug,"IP  :%s",pSchedulScrnHandle->DataBuf);
+				DEBUG(PrintDebug,"PORT:%d",pSchedulScrnHandle->U16Temp);
 
 				ReadLbsCfgPara(eIP,pSchedulScrnHandle->DataBuf2,&pSchedulScrnHandle->U8Temp);
 				if((pSchedulScrnHandle->U8Temp!=pSchedulScrnHandle->len) ||0!=(memcmp(pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->DataBuf,pSchedulScrnHandle->len)))
@@ -528,7 +528,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 						WCM_IPCloseLink(SYS_CHANNEL);
 					WriteLinkTaskPara(LinkHXSeverOk,NetStatusPara,RESET);
 					WriteLinkTaskPara(ActionLoginHX,ActionTypePara,SET);	
-					Trace(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.\r\n");
+					DEBUG(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.");
 				}
 				else
 				{
@@ -545,7 +545,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 							WCM_IPCloseLink(SYS_CHANNEL);
 						WriteLinkTaskPara(LinkHXSeverOk,NetStatusPara,RESET);
 						WriteLinkTaskPara(ActionLoginHX,ActionTypePara,SET);	
-						Trace(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.\r\n");
+						DEBUG(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.");
 						}				
 					}
 				}
@@ -580,7 +580,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//						WCM_IPCloseLink(SYS_CHANNEL);
 	//					WriteLinkTaskPara(LinkHXSeverOk,NetStatusPara,RESET);
 	//					WriteLinkTaskPara(ActionLoginHX,ActionTypePara,SET);	
-	//					Trace(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.\r\n");
+	//					DEBUG(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.");
 				}
 			}
 		break;
@@ -604,7 +604,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 						pSchedulScrnHandle->U8Temp=NoneAction;
 						WriteTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
 					}
-					Trace(PrintInfo,"SchedulScrn_Task: Dial %s\r\n",pSchedulScrnHandle->TelNum);
+					DEBUG(PrintInfo,"SchedulScrn_Task: Dial %s",pSchedulScrnHandle->TelNum);
 				}
 			}
 			else //作为第三方电话打出或电话监听过程，禁止电话打出
@@ -616,7 +616,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 			ReadTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
 			pSchedulScrnHandle->U8Temp=DevHangUp;
 			WriteTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
-			Trace(PrintInfo,"SchedulScrn_Task: hang up!\r\n");
+			DEBUG(PrintInfo,"SchedulScrn_Task: hang up!");
 		break;
 		case CALL_HANGON_CMD:
 			ReadTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
@@ -624,25 +624,25 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 			{
 				pSchedulScrnHandle->U8Temp=HandOn;
 				WriteTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
-				Trace(PrintInfo,"SchedulScrn_Task: Pick up the phone\r\n");
+				DEBUG(PrintInfo,"SchedulScrn_Task: Pick up the phone");
 			}
 		break;
 		case CALL_SPKSWITCH_CMD:
 			WriteTelPara(0,eHandFree);
-			Trace(PrintInfo,"SchedulScrn_Task: Set handfree-switch!\r\n");
+			DEBUG(PrintInfo,"SchedulScrn_Task: Set handfree-switch!");
 		break;
 		case ACK_CMD:
 			OSSemPost(SchedulAckSem);			
 		break;
 		case SET_SPK_CMD:
-			Trace(PrintInfo,"SchedulScrn_Task: Set SPK ");
+			DEBUG(PrintInfo,"SchedulScrn_Task: Set SPK ");
 			if(!SScrn_GetResult(&pSchedulScrnHandle->U8Temp,1,&pSchedulScrnHandle->len,SET_SPK_CMD,0))
 			{
 				WCM_SetSPKValue(pSchedulScrnHandle->U8Temp);
 			}
 		break;
 		case SET_MIC_CMD:
-			Trace(PrintInfo,"SchedulScrn_Task: Set MIC!\r\n");
+			DEBUG(PrintInfo,"SchedulScrn_Task: Set MIC!");
 			if(!SScrn_GetResult(&pSchedulScrnHandle->U8Temp,1,&pSchedulScrnHandle->len,SET_MIC_CMD,0))
 			{
 			#ifndef EVDO_USE
@@ -655,7 +655,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 			SScrn_Result_Send(0);
 			pSchedulScrnHandle->U8Temp=app_SScrndriverSign(pSchedulScrnHandle->DataBuf2,sizeof(pSchedulScrnHandle->DataBuf2));
 			if(pSchedulScrnHandle->U8Temp!=ActionOK)
-				Trace(PrintDebug,"SchedulScrn_Task: Driver log error!\r\n");
+				DEBUG(PrintDebug,"SchedulScrn_Task: Driver log error!");
 		break;
 #endif
 #endif
@@ -666,9 +666,9 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 				if(!SScrn_GetResult((u8 *)&pSchedulScrnHandle->U16Temp,2,&pSchedulScrnHandle->len2,SET_TCP_CMD,PORT_ENUM))
 			{
 				pSchedulScrnHandle->DataBuf[pSchedulScrnHandle->len]='\0';
-				Trace(PrintDebug,"SchedulScrn_Task:set IP and udp port\r\n");
-				Trace(PrintDebug,"IP  :%s\r\n",pSchedulScrnHandle->DataBuf);
-				Trace(PrintDebug,"PORT:%d\r\n",pSchedulScrnHandle->U16Temp);
+				DEBUG(PrintDebug,"SchedulScrn_Task:set IP and udp port");
+				DEBUG(PrintDebug,"IP  :%s",pSchedulScrnHandle->DataBuf);
+				DEBUG(PrintDebug,"PORT:%d",pSchedulScrnHandle->U16Temp);
 
 				ReadLbsCfgPara(eIP,pSchedulScrnHandle->DataBuf2,&pSchedulScrnHandle->U8Temp);
 				if((pSchedulScrnHandle->U8Temp!=pSchedulScrnHandle->len) ||0!=(memcmp(pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->DataBuf,pSchedulScrnHandle->len)))
@@ -681,7 +681,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 						WCM_IPCloseLink(SYS_CHANNEL);
 					WriteLinkTaskPara(LinkHXSeverOk,NetStatusPara,RESET);
 					WriteLinkTaskPara(ActionLoginHX,ActionTypePara,SET);	
-					Trace(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.\r\n");
+					DEBUG(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.");
 				}
 				else
 				{
@@ -698,7 +698,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 							WCM_IPCloseLink(SYS_CHANNEL);
 						WriteLinkTaskPara(LinkHXSeverOk,NetStatusPara,RESET);
 						WriteLinkTaskPara(ActionLoginHX,ActionTypePara,SET);	
-						Trace(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.\r\n");
+						DEBUG(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.");
 						}				
 					}
 				}
@@ -707,7 +707,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 #endif
 		case SCCRN_TIME_OUT:
 		case SCCRN_ERROR_RETURN:
-			//Trace(PrintInfo,"SScreen Rcvtask:No data\r\n");
+			//DEBUG(PrintInfo,"SScreen Rcvtask:No data");
 		default:
 		break;
 			
@@ -725,10 +725,10 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 				if(0==LineInfo_save2flash(Pstr->ROAD_NUM,Pstr->STA_DIRECTION,Pstr->STA_TOTAL_NUM,Pstr->ROAD_VER,Pstr->STA_DATALEN,Pstr->STA_DATA))
 				{
 					SScrn_CmdResult_Send(STATION_DOWNLOAD_RSP_CMD,Normal_Ack,0);
-					Trace(PrintInfo,"SchedulScrn_Task:Line information was downloaded successfully.\r\n");
+					DEBUG(PrintInfo,"SchedulScrn_Task:Line information was downloaded successfully.");
 				}else  //缓存区满
 				{	SScrn_CmdResult_Send(STATION_DOWNLOAD_RSP_CMD,Normal_Ack,1);
-					Trace(PrintInfo,"SchedulScrn_Task:can't download Line information !!!!!\r\n");
+					DEBUG(PrintInfo,"SchedulScrn_Task:can't download Line information !!!!!");
 				}
 			}
 			else
@@ -748,23 +748,23 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 					}
 					Flash_Write_Buffer((u8*)Pstr->SMS_DATA,128,DEBUS_SMS_DATA_ADDR+Pstr->STATE*sizeof(SCR_SMS_TEMPLET_DATA)+Pstr->F_OR_A*129,Write_Mode);
 					Flash_Write_Buffer((u8*)&Pstr->SMS_LEN,1,DEBUS_SMS_DATA_ADDR+Pstr->STATE*sizeof(SCR_SMS_TEMPLET_DATA)+Pstr->F_OR_A*129+1,Write_Mode);
-					Trace(PrintInfo,"SchedulScrn_Task:config SCR_SMS_TEMPLET successfully!!!!!\r\n");
+					DEBUG(PrintInfo,"SchedulScrn_Task:config SCR_SMS_TEMPLET successfully!!!!!");
 					SScrn_CmdResult_Send(SCR_SMS_DOWNLOAD_RSP_CMD,Normal_Ack,0);
 				}
 				else
 				{
 					SScrn_CmdResult_Send(SCR_SMS_DOWNLOAD_RSP_CMD,Normal_Ack,1);
-					Trace(PrintInfo,"SchedulScrn_Task:config SCR_SMS_TEMPLET failed!!!!!\r\n");
+					DEBUG(PrintInfo,"SchedulScrn_Task:config SCR_SMS_TEMPLET failed!!!!!");
 				}
 			}
 			else
 			{
 				SScrn_CmdResult_Send(SCR_SMS_DOWNLOAD_RSP_CMD,Normal_Ack,1);
-				Trace(PrintInfo,"SchedulScrn_Task:config SCR_SMS_TEMPLET failed!!!!!\r\n");
+				DEBUG(PrintInfo,"SchedulScrn_Task:config SCR_SMS_TEMPLET failed!!!!!");
 			}
 		break;
 		case UPDATA_REQ_CMD: //收到串口升级请求，下发当前版本信息
-			Trace(PrintInfo,"Requry for version upgrading by com.\r\n");
+			DEBUG(PrintInfo,"Requry for version upgrading by com.");
 			Flash_Read_Buffer(&pSchedulScrnHandle->U8Temp,1,DEV_HWVER_ADDR);
 			Flash_Read_Buffer(pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->U8Temp,DEV_HWVER_ADDR+1);
 			memcpy(&pSchedulScrnHandle->DataBuf2[pSchedulScrnHandle->U8Temp],SOFTWARE_VER,9);
@@ -777,7 +777,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 			{
 			if(0==SScrn_GetResult((u8 *)&ComUpdata.AllSize,sizeof(ComUpdata.AllSize),&pSchedulScrnHandle->len,UPDATA_PARA_CMD,DATA_SIZE_ENUM))
 				{
-				Trace(PrintInfo,"收到串口升级版本信息\r\n");
+				DEBUG(PrintInfo,"收到串口升级版本信息");
 				ComUpdata.CurPacket=0;
 				ComUpdata.Packetsize=250;//定长
 				gComUpflag=1;
@@ -802,7 +802,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 		break;
 		default:
 			OSTimeDly(5);
-		//	Trace(PrintInfo,"SScreen Rcvtask:unknown command type 0x%2x\r\n",pSchedulScrnHandle->Cmdtype);
+		//	DEBUG(PrintInfo,"SScreen Rcvtask:unknown command type 0x%2x",pSchedulScrnHandle->Cmdtype);
 		break;
 		
 #endif
@@ -819,8 +819,8 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//				switch(pSchedulScrnHandle->DataBuf[0])
 	//				{
 	//				case HEARTBEAT_ACK_CMD:
-	//					Trace(PrintDebug,"调度屏心跳应答-------------------------------\r\n");
-	//					Trace(PrintDebug,"SchedulScrn_Task:Heartbeat response.\r\n");
+	//					DEBUG(PrintDebug,"调度屏心跳应答-------------------------------");
+	//					DEBUG(PrintDebug,"SchedulScrn_Task:Heartbeat response.");
 	//					OSSemPost(ScrnHtbeatAck_Sem);
 	//				break;
 	//				case CALL_HANGON_CMD: //接电话
@@ -829,17 +829,17 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//					{
 	//						pSchedulScrnHandle->U8Temp=HandOn;
 	//						WriteTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
-	//						Trace(PrintInfo,"SchedulScrn_Task: Pick up the phone\r\n");
+	//						DEBUG(PrintInfo,"SchedulScrn_Task: Pick up the phone");
 	//					}
 	//				break;
 	//				case CALL_HANGOFF_CMD: //挂机
 	//					ReadTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
 	//					pSchedulScrnHandle->U8Temp=DevHangUp;
 	//					WriteTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
-	//					Trace(PrintInfo,"SchedulScrn_Task: hang up!\r\n");
+	//					DEBUG(PrintInfo,"SchedulScrn_Task: hang up!");
 	//				break;
 	//				case GET_SMS_FORMAT_CMD: //查询短信格式
-	//					Trace(PrintInfo,"SchedulScrn_Task: get SMS format of WCM.\r\n");
+	//					DEBUG(PrintInfo,"SchedulScrn_Task: get SMS format of WCM.");
 	//	
 	//				break;
 	//				case CALL_CENTER_CMD: //呼叫中心
@@ -859,10 +859,10 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//				if(0==SScrn_GetResult(pSchedulScrnHandle->DataBuf,sizeof(pSchedulScrnHandle->DataBuf),&pSchedulScrnHandle->len,N990_SENDSMS_CMD,SMS_DAT_ENUM))
 	//				{	u8 t=0;
 	//					pSchedulScrnHandle->TelNum[pSchedulScrnHandle->len2]='\0';
-	//					Trace(PrintInfo,"SchedulScrn_Task: 手机号-%s\r\n",pSchedulScrnHandle->TelNum);
+	//					DEBUG(PrintInfo,"SchedulScrn_Task: 手机号-%s",pSchedulScrnHandle->TelNum);
 	//					for(t=0;t<pSchedulScrnHandle->len;t++)
-	//	 				Trace(PrintInfo,"0x%02x ",pSchedulScrnHandle->DataBuf[t]);
-	//					Trace(PrintInfo,"\r\n");
+	//	 				DEBUG(PrintInfo,"0x%02x ",pSchedulScrnHandle->DataBuf[t]);
+	//					DEBUG(PrintInfo,"");
 	//	
 	//				if(0==memcmp(pSchedulScrnHandle->TelNum,"####",pSchedulScrnHandle->len2))  //中心短信
 	//				{//调度屏时将英文unicode短信转换成gbk
@@ -872,10 +872,10 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//							Mem_Copy(pSchedulScrnHandle->DataBuf,pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->len2);
 	//							pSchedulScrnHandle->len=pSchedulScrnHandle->len2;
 	//	
-	//					Trace(PrintInfo,"英文短信---------\r\n");
+	//					DEBUG(PrintInfo,"英文短信---------");
 	//					for(t=0;t<pSchedulScrnHandle->len;t++)
-	//	 				Trace(PrintInfo,"0x%02x ",pSchedulScrnHandle->DataBuf[t]);
-	//					Trace(PrintInfo,"\r\n");
+	//	 				DEBUG(PrintInfo,"0x%02x ",pSchedulScrnHandle->DataBuf[t]);
+	//					DEBUG(PrintInfo,"");
 	//	
 	//							pSchedulScrnHandle->DevAct=0; //peijl_130311 添加：初始值为0
 	//							pSchedulScrnHandle->Status=app_LbsAscSmsHandl(pSchedulScrnHandle->DataBuf,pSchedulScrnHandle->len,&pSchedulScrnHandle->DevAct,pSchedulScrnHandle->DataBuf2,&pSchedulScrnHandle->len2);
@@ -901,24 +901,24 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//			break;
 	//			case CALL_CAR_RSP_CMD: //抢单
 	//				Mem_Copy(gOrderInOperat,gLastOrder,50);
-	//				Trace(PrintInfo,"SchedulScrn_Task: Request the order-%s\r\n",gOrderInOperat);
+	//				DEBUG(PrintInfo,"SchedulScrn_Task: Request the order-%s",gOrderInOperat);
 	//	//			if(gOrderInOperatflag==1)
 	//				{
 	//				SScrn_GetResult(pSchedulScrnHandle->DataBuf,sizeof(pSchedulScrnHandle->DataBuf),&pSchedulScrnHandle->len,CALL_CAR_RSP_CMD,0);
 	//				pSchedulScrnHandle->DataBuf[pSchedulScrnHandle->len]='\0';
-	//				Trace(PrintInfo,"please wait for result......\r\n");
+	//				DEBUG(PrintInfo,"please wait for result......");
 	//				JT808_SendMsg(ORDER_REQUEST,1,0,pSchedulScrnHandle->DataBuf,sizeof(pSchedulScrnHandle->DataBuf));
 	//				//gOrderRequestTime; peijl_test 计数开始，1m无应答，抢答取消
 	//				}
 	//	//			else
 	//	//			{//抢答超时
-	//	//			Trace(PrintInfo,"Order-Request is forbidden!\r\n");
+	//	//			DEBUG(PrintInfo,"Order-Request is forbidden!");
 	//	//			}
 	//			break;
 	//			case PICKUP_PASSEGER_CMD: //接人
 	//				SScrn_GetResult(pSchedulScrnHandle->DataBuf,sizeof(pSchedulScrnHandle->DataBuf),&pSchedulScrnHandle->len,PICKUP_PASSEGER_CMD,0);
 	//				pSchedulScrnHandle->DataBuf[pSchedulScrnHandle->len]='\0';	
-	//				Trace(PrintInfo,"SchedulScrn_Task: Pick up the passegers,order %s is successful.\r\n",pSchedulScrnHandle->DataBuf);
+	//				DEBUG(PrintInfo,"SchedulScrn_Task: Pick up the passegers,order %s is successful.",pSchedulScrnHandle->DataBuf);
 	//				pSchedulScrnHandle->U8Temp=0;//接到人
 	//				Write_ProtclHandl(e_CallcarResult,&pSchedulScrnHandle->U8Temp,1);
 	//				JT808_SendMsg(ORDER_DONE,1,0,pSchedulScrnHandle->DataBuf,sizeof(pSchedulScrnHandle->DataBuf));
@@ -929,7 +929,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//				SScrn_GetResult(pSchedulScrnHandle->DataBuf2,sizeof(pSchedulScrnHandle->DataBuf2),&pSchedulScrnHandle->len2,PICKUP_PASSEGER_FAILED_CMD,1);
 	//				pSchedulScrnHandle->DataBuf[pSchedulScrnHandle->len]='\0';	
 	//				pSchedulScrnHandle->DataBuf2[pSchedulScrnHandle->len2]='\0';	
-	//				Trace(PrintInfo,"SchedulScrn_Task: Order %s was failed,reason was %s\r\n",pSchedulScrnHandle->DataBuf,pSchedulScrnHandle->DataBuf2);
+	//				DEBUG(PrintInfo,"SchedulScrn_Task: Order %s was failed,reason was %s",pSchedulScrnHandle->DataBuf,pSchedulScrnHandle->DataBuf2);
 	//				pSchedulScrnHandle->U8Temp=1;//未接到人
 	//				Write_ProtclHandl(e_CallcarResult,&pSchedulScrnHandle->U8Temp,1);
 	//				JT808_SendMsg(ORDER_DONE,1,1,pSchedulScrnHandle->DataBuf,sizeof(pSchedulScrnHandle->DataBuf));
@@ -941,7 +941,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	}
 	else
 	{
-		Trace(PrintInfo,"SchedulScrn_Task:没有对应的外设屏\r\n");
+		DEBUG(PrintInfo,"SchedulScrn_Task:没有对应的外设屏");
 		OSTimeDlyHMSM(0,1,0,0);
 	}
 
@@ -955,8 +955,8 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//			switch(pSchedulScrnHandle->DataBuf[0])
 	//			{
 	//			case HEARTBEAT_ACK_CMD:
-	//				Trace(PrintDebug,"调度屏心跳应答-------------------------------\r\n");
-	//				Trace(PrintDebug,"SchedulScrn_Task:Heartbeat response.\r\n");
+	//				DEBUG(PrintDebug,"调度屏心跳应答-------------------------------");
+	//				DEBUG(PrintDebug,"SchedulScrn_Task:Heartbeat response.");
 	//				OSSemPost(ScrnHtbeatAck_Sem);
 	//			break;
 	//			case CALL_HANGON_CMD: //接电话
@@ -965,17 +965,17 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//				{
 	//					pSchedulScrnHandle->U8Temp=HandOn;
 	//					WriteTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
-	//					Trace(PrintInfo,"SchedulScrn_Task: Pick up the phone\r\n");
+	//					DEBUG(PrintInfo,"SchedulScrn_Task: Pick up the phone");
 	//				}
 	//			break;
 	//			case CALL_HANGOFF_CMD: //挂机
 	//				ReadTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
 	//				pSchedulScrnHandle->U8Temp=DevHangUp;
 	//				WriteTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
-	//				Trace(PrintInfo,"SchedulScrn_Task: hang up!\r\n");
+	//				DEBUG(PrintInfo,"SchedulScrn_Task: hang up!");
 	//			break;
 	//			case GET_SMS_FORMAT_CMD: //查询短信格式
-	//				Trace(PrintInfo,"SchedulScrn_Task: get SMS format of WCM.\r\n");
+	//				DEBUG(PrintInfo,"SchedulScrn_Task: get SMS format of WCM.");
 	//
 	//			break;
 	//			case CALL_CENTER_CMD: //呼叫中心
@@ -995,10 +995,10 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//			if(0==SScrn_GetResult(pSchedulScrnHandle->DataBuf,sizeof(pSchedulScrnHandle->DataBuf),&pSchedulScrnHandle->len,N990_SENDSMS_CMD,SMS_DAT_ENUM))
 	//			{	u8 t=0;
 	//				pSchedulScrnHandle->TelNum[pSchedulScrnHandle->len2]='\0';
-	//				Trace(PrintInfo,"SchedulScrn_Task: 手机号-%s\r\n",pSchedulScrnHandle->TelNum);
+	//				DEBUG(PrintInfo,"SchedulScrn_Task: 手机号-%s",pSchedulScrnHandle->TelNum);
 	//				for(t=0;t<pSchedulScrnHandle->len;t++)
-	// 				Trace(PrintInfo,"0x%02x ",pSchedulScrnHandle->DataBuf[t]);
-	//				Trace(PrintInfo,"\r\n");
+	// 				DEBUG(PrintInfo,"0x%02x ",pSchedulScrnHandle->DataBuf[t]);
+	//				DEBUG(PrintInfo,"");
 	//
 	//			if(0==memcmp(pSchedulScrnHandle->TelNum,"####",pSchedulScrnHandle->len2))  //中心短信
 	//			{//调度屏时将英文unicode短信转换成gbk
@@ -1008,10 +1008,10 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//						Mem_Copy(pSchedulScrnHandle->DataBuf,pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->len2);
 	//						pSchedulScrnHandle->len=pSchedulScrnHandle->len2;
 	//
-	//				Trace(PrintInfo,"英文短信---------\r\n");
+	//				DEBUG(PrintInfo,"英文短信---------");
 	//				for(t=0;t<pSchedulScrnHandle->len;t++)
-	// 				Trace(PrintInfo,"0x%02x ",pSchedulScrnHandle->DataBuf[t]);
-	//				Trace(PrintInfo,"\r\n");
+	// 				DEBUG(PrintInfo,"0x%02x ",pSchedulScrnHandle->DataBuf[t]);
+	//				DEBUG(PrintInfo,"");
 	//
 	//						pSchedulScrnHandle->DevAct=0; //peijl_130311 添加：初始值为0
 	//						pSchedulScrnHandle->Status=app_LbsAscSmsHandl(pSchedulScrnHandle->DataBuf,pSchedulScrnHandle->len,&pSchedulScrnHandle->DevAct,pSchedulScrnHandle->DataBuf2,&pSchedulScrnHandle->len2);
@@ -1037,24 +1037,24 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//		break;
 	//		case CALL_CAR_RSP_CMD: //抢单
 	//			Mem_Copy(gOrderInOperat,gLastOrder,50);
-	//			Trace(PrintInfo,"SchedulScrn_Task: Request the order-%s\r\n",gOrderInOperat);
+	//			DEBUG(PrintInfo,"SchedulScrn_Task: Request the order-%s",gOrderInOperat);
 	////			if(gOrderInOperatflag==1)
 	//			{
 	//			SScrn_GetResult(pSchedulScrnHandle->DataBuf,sizeof(pSchedulScrnHandle->DataBuf),&pSchedulScrnHandle->len,CALL_CAR_RSP_CMD,0);
 	//			pSchedulScrnHandle->DataBuf[pSchedulScrnHandle->len]='\0';
-	//			Trace(PrintInfo,"please wait for result......\r\n");
+	//			DEBUG(PrintInfo,"please wait for result......");
 	//			JT808_SendMsg(ORDER_REQUEST,1,0,pSchedulScrnHandle->DataBuf,sizeof(pSchedulScrnHandle->DataBuf));
 	//			//gOrderRequestTime; peijl_test 计数开始，1m无应答，抢答取消
 	//			}
 	////			else
 	////			{//抢答超时
-	////			Trace(PrintInfo,"Order-Request is forbidden!\r\n");
+	////			DEBUG(PrintInfo,"Order-Request is forbidden!");
 	////			}
 	//		break;
 	//		case PICKUP_PASSEGER_CMD: //接人
 	//			SScrn_GetResult(pSchedulScrnHandle->DataBuf,sizeof(pSchedulScrnHandle->DataBuf),&pSchedulScrnHandle->len,PICKUP_PASSEGER_CMD,0);
 	//			pSchedulScrnHandle->DataBuf[pSchedulScrnHandle->len]='\0';	
-	//			Trace(PrintInfo,"SchedulScrn_Task: Pick up the passegers,order %s is successful.\r\n",pSchedulScrnHandle->DataBuf);
+	//			DEBUG(PrintInfo,"SchedulScrn_Task: Pick up the passegers,order %s is successful.",pSchedulScrnHandle->DataBuf);
 	//			pSchedulScrnHandle->U8Temp=0;//接到人
 	//			Write_ProtclHandl(e_CallcarResult,&pSchedulScrnHandle->U8Temp,1);
 	//			JT808_SendMsg(ORDER_DONE,1,0,pSchedulScrnHandle->DataBuf,sizeof(pSchedulScrnHandle->DataBuf));
@@ -1065,7 +1065,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//			SScrn_GetResult(pSchedulScrnHandle->DataBuf2,sizeof(pSchedulScrnHandle->DataBuf2),&pSchedulScrnHandle->len2,PICKUP_PASSEGER_FAILED_CMD,1);
 	//			pSchedulScrnHandle->DataBuf[pSchedulScrnHandle->len]='\0';	
 	//			pSchedulScrnHandle->DataBuf2[pSchedulScrnHandle->len2]='\0';	
-	//			Trace(PrintInfo,"SchedulScrn_Task: Order %s was failed,reason was %s\r\n",pSchedulScrnHandle->DataBuf,pSchedulScrnHandle->DataBuf2);
+	//			DEBUG(PrintInfo,"SchedulScrn_Task: Order %s was failed,reason was %s",pSchedulScrnHandle->DataBuf,pSchedulScrnHandle->DataBuf2);
 	//			pSchedulScrnHandle->U8Temp=1;//未接到人
 	//			Write_ProtclHandl(e_CallcarResult,&pSchedulScrnHandle->U8Temp,1);
 	//			JT808_SendMsg(ORDER_DONE,1,1,pSchedulScrnHandle->DataBuf,sizeof(pSchedulScrnHandle->DataBuf));
@@ -1098,7 +1098,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//				pSchedulScrnHandle->len2=strlen("非辅助短信！");
 	//				Mem_Copy(pSchedulScrnHandle->DataBuf2,"非辅助短信！",pSchedulScrnHandle->len2);
 	//				if(ActionOK!=SScrn_CenterSMS_Send(pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->len2))
-	//					Trace(PrintDebug,"SchedulScrn_Task:Send Ack-Sms failed\r\n");
+	//					DEBUG(PrintDebug,"SchedulScrn_Task:Send Ack-Sms failed");
 	//			}
 	//			else if(pSchedulScrnHandle->Status==ActionOK)//正确解析
 	//			{
@@ -1120,7 +1120,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//			SScrn_GetResult(pSchedulScrnHandle->TelNum,sizeof(pSchedulScrnHandle->TelNum),&pSchedulScrnHandle->len,UNICODE_SMS_CMD,TEL_NUM_ENUM);
 	//			SScrn_GetResult(pSchedulScrnHandle->DataBuf2,sizeof(pSchedulScrnHandle->DataBuf2),&pSchedulScrnHandle->len2,UNICODE_SMS_CMD,SMS_DAT_ENUM);
 	//			if(WCM_OK!=WCM_SendSMS(UNICOD_SMS,pSchedulScrnHandle->TelNum,pSchedulScrnHandle->len,pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->len2))
-	//				Trace(PrintDebug,"SchedulScrn_Task:WCM send message failed\r\n");
+	//				DEBUG(PrintDebug,"SchedulScrn_Task:WCM send message failed");
 	//		break;
 	//		case SET_UDP_CMD:
 	//			SScrn_Result_Send(0);
@@ -1128,9 +1128,9 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//				if(!SScrn_GetResult((u8 *)&pSchedulScrnHandle->U16Temp,2,&pSchedulScrnHandle->len2,SET_UDP_CMD,PORT_ENUM))
 	//			{
 	//				pSchedulScrnHandle->DataBuf[pSchedulScrnHandle->len]='\0';
-	//				Trace(PrintInfo,"SchedulScrn_Task:set IP and udp port\r\n");
-	//				Trace(PrintDebug,"IP  :%s\r\n",pSchedulScrnHandle->DataBuf);
-	//				Trace(PrintDebug,"PORT:%d\r\n",pSchedulScrnHandle->U16Temp);
+	//				DEBUG(PrintInfo,"SchedulScrn_Task:set IP and udp port");
+	//				DEBUG(PrintDebug,"IP  :%s",pSchedulScrnHandle->DataBuf);
+	//				DEBUG(PrintDebug,"PORT:%d",pSchedulScrnHandle->U16Temp);
 	//
 	//				ReadLbsCfgPara(eIP,pSchedulScrnHandle->DataBuf2,&pSchedulScrnHandle->U8Temp);
 	//				if((pSchedulScrnHandle->U8Temp!=pSchedulScrnHandle->len) ||0!=(memcmp(pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->DataBuf,pSchedulScrnHandle->len)))
@@ -1144,7 +1144,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//						WCM_IPCloseLink(SYS_CHANNEL);
 	//					WriteLinkTaskPara(LinkHXSeverOk,NetStatusPara,RESET);
 	//					WriteLinkTaskPara(ActionLoginHX,ActionTypePara,SET);	
-	//					Trace(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.\r\n");
+	//					DEBUG(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.");
 	//				}
 	//				else
 	//				{
@@ -1161,7 +1161,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//							WCM_IPCloseLink(SYS_CHANNEL);
 	//						WriteLinkTaskPara(LinkHXSeverOk,NetStatusPara,RESET);
 	//						WriteLinkTaskPara(ActionLoginHX,ActionTypePara,SET);	
-	//						Trace(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.\r\n");
+	//						DEBUG(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.");
 	//						}				
 	//					}
 	//				}
@@ -1172,8 +1172,8 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//			if(!SScrn_GetResult(pSchedulScrnHandle->TelNum,sizeof(pSchedulScrnHandle->TelNum),&pSchedulScrnHandle->len,SET_LOCAL_TEL_CMD,0))
 	//			{
 	//				pSchedulScrnHandle->TelNum[pSchedulScrnHandle->len]='\0';
-	//				Trace(PrintDebug,"SchedulScrn_Task:\r\n");
-	//				Trace(PrintDebug,"Set local tel %s\r\n",pSchedulScrnHandle->TelNum);
+	//				DEBUG(PrintDebug,"SchedulScrn_Task:");
+	//				DEBUG(PrintDebug,"Set local tel %s",pSchedulScrnHandle->TelNum);
 	//				
 	//				ReadLbsCfgPara(eLclTEL,pSchedulScrnHandle->DataBuf2,&pSchedulScrnHandle->U8Temp);
 	//				if((pSchedulScrnHandle->U8Temp==pSchedulScrnHandle->len)&&(memcmp(pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->TelNum,pSchedulScrnHandle->len)==0))
@@ -1195,7 +1195,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//					WCM_IPCloseLink(SYS_CHANNEL);
 	//				WriteLinkTaskPara(LinkHXSeverOk,NetStatusPara,RESET);
 	//				WriteLinkTaskPara(ActionLoginHX,ActionTypePara,SET);	
-	//				Trace(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.\r\n");
+	//				DEBUG(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.");
 	//				}
 	//			}
 	//		break;
@@ -1218,7 +1218,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//						pSchedulScrnHandle->U8Temp=NoneAction;
 	//						WriteTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
 	//					}
-	//					Trace(PrintInfo,"SchedulScrn_Task: Dial %s\r\n",pSchedulScrnHandle->TelNum);
+	//					DEBUG(PrintInfo,"SchedulScrn_Task: Dial %s",pSchedulScrnHandle->TelNum);
 	//				}
 	//			}
 	//			else //作为第三方电话打出或电话监听过程，禁止电话打出
@@ -1230,7 +1230,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//			ReadTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
 	//			pSchedulScrnHandle->U8Temp=DevHangUp;
 	//			WriteTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
-	//			Trace(PrintInfo,"SchedulScrn_Task: hang up!\r\n");
+	//			DEBUG(PrintInfo,"SchedulScrn_Task: hang up!");
 	//		break;
 	//		case CALL_HANGON_CMD:
 	//			ReadTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
@@ -1238,25 +1238,25 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//			{
 	//				pSchedulScrnHandle->U8Temp=HandOn;
 	//				WriteTelPara(&pSchedulScrnHandle->U8Temp,eCallAction);
-	//				Trace(PrintInfo,"SchedulScrn_Task: Pick up the phone\r\n");
+	//				DEBUG(PrintInfo,"SchedulScrn_Task: Pick up the phone");
 	//			}
 	//		break;
 	//		case CALL_SPKSWITCH_CMD:
 	//			WriteTelPara(0,eHandFree);
-	//			Trace(PrintInfo,"SchedulScrn_Task: Set handfree-switch!\r\n");
+	//			DEBUG(PrintInfo,"SchedulScrn_Task: Set handfree-switch!");
 	//		break;
 	//		case ACK_CMD:
 	//			OSSemPost(SchedulAckSem);			
 	//		break;
 	//		case SET_SPK_CMD:
-	//			Trace(PrintInfo,"SchedulScrn_Task: Set SPK ");
+	//			DEBUG(PrintInfo,"SchedulScrn_Task: Set SPK ");
 	//			if(!SScrn_GetResult(&pSchedulScrnHandle->U8Temp,1,&pSchedulScrnHandle->len,SET_SPK_CMD,0))
 	//			{
 	//				WCM_SetSPKValue(pSchedulScrnHandle->U8Temp);
 	//			}
 	//		break;
 	//		case SET_MIC_CMD:
-	//			Trace(PrintInfo,"SchedulScrn_Task: Set MIC!\r\n");
+	//			DEBUG(PrintInfo,"SchedulScrn_Task: Set MIC!");
 	//			if(!SScrn_GetResult(&pSchedulScrnHandle->U8Temp,1,&pSchedulScrnHandle->len,SET_MIC_CMD,0))
 	//			{
 	//			#ifndef EVDO_USE
@@ -1269,7 +1269,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//			SScrn_Result_Send(0);
 	//			pSchedulScrnHandle->U8Temp=app_SScrndriverSign(pSchedulScrnHandle->DataBuf2,sizeof(pSchedulScrnHandle->DataBuf2));
 	//			if(pSchedulScrnHandle->U8Temp!=ActionOK)
-	//				Trace(PrintDebug,"SchedulScrn_Task: Driver log error!\r\n");
+	//				DEBUG(PrintDebug,"SchedulScrn_Task: Driver log error!");
 	//		break;
 	//	#endif
 	//		case SET_TCP_CMD:
@@ -1278,9 +1278,9 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//				if(!SScrn_GetResult((u8 *)&pSchedulScrnHandle->U16Temp,2,&pSchedulScrnHandle->len2,SET_TCP_CMD,PORT_ENUM))
 	//			{
 	//				pSchedulScrnHandle->DataBuf[pSchedulScrnHandle->len]='\0';
-	//				Trace(PrintDebug,"SchedulScrn_Task:set IP and udp port\r\n");
-	//				Trace(PrintDebug,"IP  :%s\r\n",pSchedulScrnHandle->DataBuf);
-	//				Trace(PrintDebug,"PORT:%d\r\n",pSchedulScrnHandle->U16Temp);
+	//				DEBUG(PrintDebug,"SchedulScrn_Task:set IP and udp port");
+	//				DEBUG(PrintDebug,"IP  :%s",pSchedulScrnHandle->DataBuf);
+	//				DEBUG(PrintDebug,"PORT:%d",pSchedulScrnHandle->U16Temp);
 	//
 	//				ReadLbsCfgPara(eIP,pSchedulScrnHandle->DataBuf2,&pSchedulScrnHandle->U8Temp);
 	//				if((pSchedulScrnHandle->U8Temp!=pSchedulScrnHandle->len) ||0!=(memcmp(pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->DataBuf,pSchedulScrnHandle->len)))
@@ -1293,7 +1293,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//						WCM_IPCloseLink(SYS_CHANNEL);
 	//					WriteLinkTaskPara(LinkHXSeverOk,NetStatusPara,RESET);
 	//					WriteLinkTaskPara(ActionLoginHX,ActionTypePara,SET);	
-	//					Trace(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.\r\n");
+	//					DEBUG(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.");
 	//				}
 	//				else
 	//				{
@@ -1310,7 +1310,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//							WCM_IPCloseLink(SYS_CHANNEL);
 	//						WriteLinkTaskPara(LinkHXSeverOk,NetStatusPara,RESET);
 	//						WriteLinkTaskPara(ActionLoginHX,ActionTypePara,SET);	
-	//						Trace(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.\r\n");
+	//						DEBUG(PrintInfo,"SchedulScrn_Task:ReLogin Moniter server.");
 	//						}				
 	//					}
 	//				}
@@ -1318,7 +1318,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//		break;
 	//		case SCCRN_TIME_OUT:
 	//		case SCCRN_ERROR_RETURN:
-	//			//Trace(PrintInfo,"SScreen Rcvtask:No data\r\n");
+	//			//DEBUG(PrintInfo,"SScreen Rcvtask:No data");
 	//		break;
 	//		case STATION_DOWNLOAD_START_CMD: //站点下载启动
 	//			Clr_LineInfoInFlash();
@@ -1332,10 +1332,10 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//				if(0==LineInfo_save2flash(Pstr->ROAD_NUM,Pstr->STA_DIRECTION,Pstr->STA_TOTAL_NUM,Pstr->ROAD_VER,Pstr->STA_DATALEN,Pstr->STA_DATA))
 	//				{
 	//					SScrn_CmdResult_Send(STATION_DOWNLOAD_RSP_CMD,Normal_Ack,0);
-	//					Trace(PrintInfo,"SchedulScrn_Task:Line information was downloaded successfully.\r\n");
+	//					DEBUG(PrintInfo,"SchedulScrn_Task:Line information was downloaded successfully.");
 	//				}else  //缓存区满
 	//				{	SScrn_CmdResult_Send(STATION_DOWNLOAD_RSP_CMD,Normal_Ack,1);
-	//					Trace(PrintInfo,"SchedulScrn_Task:can't download Line information !!!!!\r\n");
+	//					DEBUG(PrintInfo,"SchedulScrn_Task:can't download Line information !!!!!");
 	//				}
 	//			}
 	//			else
@@ -1344,7 +1344,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//	}
 	////	#endif
 	//		case UPDATA_REQ_CMD: //收到串口升级请求，下发当前版本信息
-	//			Trace(PrintInfo,"Requry for version upgrading by com.\r\n");
+	//			DEBUG(PrintInfo,"Requry for version upgrading by com.");
 	//			Flash_Read_Buffer(&pSchedulScrnHandle->U8Temp,1,DEV_HWVER_ADDR);
 	//			Flash_Read_Buffer(pSchedulScrnHandle->DataBuf2,pSchedulScrnHandle->U8Temp,DEV_HWVER_ADDR+1);
 	//			memcpy(&pSchedulScrnHandle->DataBuf2[pSchedulScrnHandle->U8Temp],SOFTWARE_VER,9);
@@ -1357,7 +1357,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//			{
 	//			if(0==SScrn_GetResult((u8 *)&ComUpdata.AllSize,sizeof(ComUpdata.AllSize),&pSchedulScrnHandle->len,UPDATA_PARA_CMD,DATA_SIZE_ENUM))
 	//				{
-	//				Trace(PrintInfo,"收到串口升级版本信息\r\n");
+	//				DEBUG(PrintInfo,"收到串口升级版本信息");
 	//				ComUpdata.CurPacket=0;
 	//				ComUpdata.Packetsize=250;//定长
 	//				gComUpflag=1;
@@ -1382,7 +1382,7 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 	//		break;
 	//		default:
 	//			OSTimeDly(5);
-	//		//	Trace(PrintInfo,"SScreen Rcvtask:unknown command type 0x%2x\r\n",pSchedulScrnHandle->Cmdtype);
+	//		//	DEBUG(PrintInfo,"SScreen Rcvtask:unknown command type 0x%2x",pSchedulScrnHandle->Cmdtype);
 	//		break;	
 	//		}
 	}
@@ -1472,7 +1472,7 @@ static void app_SScrnSendtaskExecut(Stk_SchedulSend_Handle *pSScrnSendHandle)
 				if(ReadAlarmPara(StaAlarm0,ALARM_DISPLAY_ERR)==SET)
 				{
 					WriteAlarmPara(RESET,StaAlarm0,ALARM_DISPLAY_ERR);
-					Trace(PrintInfo,"Cancel Schedul screen alarm!\r\n");
+					DEBUG(PrintInfo,"Cancel Schedul screen alarm!");
 				#if PROTCL_JT808
 					DevReq2ServPackag_build(REPORT_LOCATION); //告警产生一包位置汇报
 				#endif
@@ -1480,14 +1480,14 @@ static void app_SScrnSendtaskExecut(Stk_SchedulSend_Handle *pSScrnSendHandle)
 			}
 			else if(ScrnHtbeatCnt++>10) //10*(TxTim_Cnts=10)s不回,故障
 			{	ScrnHtbeatCnt=0;
-				Trace(PrintInfo,"SScrnSendtask:Screen N990 error!\r\n");		
+				DEBUG(PrintInfo,"SScrnSendtask:Screen N990 error!");		
 				if(ReadAlarmPara(StaAlarm0,ALARM_DISPLAY_ERR)==RESET)
 				{
 				#ifdef PROTCL_JT808
 					AlarmHandle(ALARM_DISPLAY_ERR,pSScrnSendHandle->DataBuf,StaAlarm0);
 				#elif defined PROTCL_HX54
 					WriteAlarmPara(SET,StaAlarm0,ALARM_DISPLAY_ERR);
-					Trace(PrintError,"Alarm:Schedul screen error!\r\n");
+					DEBUG(PrintError,"Alarm:Schedul screen error!");
 				#endif
 				}
 			}
@@ -1536,7 +1536,7 @@ static void app_SScrnSendtaskExecut(Stk_SchedulSend_Handle *pSScrnSendHandle)
 		#ifdef PROTCL_HX54
 		if(gGruptelFlag==1) //下载集团号码
 		{
-			Trace(PrintInfo,"Schedul-screen send task:Download group-tel.\r\n");
+			DEBUG(PrintInfo,"Schedul-screen send task:Download group-tel.");
 			SScrn_GroupNum_Clr(); //先清除再下载所有号码
 			pSScrnSendHandle->U16Temp=0;
 			memcpy(pSScrnSendHandle->Name,"集团",4);
@@ -1555,7 +1555,7 @@ static void app_SScrnSendtaskExecut(Stk_SchedulSend_Handle *pSScrnSendHandle)
 			if(ActionOK==SScrn_GroupNum_Clr())
 			{
 				gGruptelFlag=0;
-				Trace(PrintInfo,"Schedul-screen send task:Clear group-tel.\r\n");
+				DEBUG(PrintInfo,"Schedul-screen send task:Clear group-tel.");
 			}
 		}
 		#endif
@@ -1564,18 +1564,18 @@ static void app_SScrnSendtaskExecut(Stk_SchedulSend_Handle *pSScrnSendHandle)
 		//串口升级
 		if(gComUpflag==1)
 		{
-			Trace(PrintInfo,"串口升级开始\r\n");
-			Trace(PrintInfo,"串口升级包大小 %luB\r\n",ComUpdata.AllSize);
-			Trace(PrintInfo,"串口升级总包数 %lu\r\n",ComUpdata.AllPacket);
+			DEBUG(PrintInfo,"串口升级开始");
+			DEBUG(PrintInfo,"串口升级包大小 %luB",ComUpdata.AllSize);
+			DEBUG(PrintInfo,"串口升级总包数 %lu",ComUpdata.AllPacket);
 			ReadLinkTaskPara(&pSScrnSendHandle->U16Temp,ActionTypePara);
-			Trace(PrintInfo,"等待关闭在线升级.\r\n");
+			DEBUG(PrintInfo,"等待关闭在线升级.");
 			do
 			{
 				OSTimeDly(5000);
 				ReadLinkTaskPara(&pSScrnSendHandle->U16Temp,ActionTypePara);							
 				ReadLinkTaskPara(&U16Temp2,NetStatusPara);
 			}while((pSScrnSendHandle->U16Temp)&ActionUpdateTL ||(U16Temp2&LinkTLSeverOk));
-			Trace(PrintInfo,"在线升级已关闭.\r\n");
+			DEBUG(PrintInfo,"在线升级已关闭.");
 			
 			ComUpdata.CurPacket=0;
 			while(ComUpdata.CurPacket<ComUpdata.AllPacket)
@@ -1588,7 +1588,7 @@ static void app_SScrnSendtaskExecut(Stk_SchedulSend_Handle *pSScrnSendHandle)
 						OSSemPend(UpdataRcvSem,100,&pSScrnSendHandle->U8Temp);
 						if(pSScrnSendHandle->U8Temp==OS_ERR_NONE)
 						{
-							Trace(PrintDebug,"串口升级请求包号 %lu\r\n",ComUpdata.CurPacket);
+							DEBUG(PrintDebug,"串口升级请求包号 %lu",ComUpdata.CurPacket);
 							ComUpdata.CurPacket++;
 							break;
 						}
@@ -1612,7 +1612,7 @@ static void app_SScrnSendtaskExecut(Stk_SchedulSend_Handle *pSScrnSendHandle)
 				Flash_Write_Buffer((u8 *)&t,4,OLD_CODE_STORE_ADDR,Write_Mode);
 				pSScrnSendHandle->U8Temp=0;
 				Flash_Write_Buffer(&pSScrnSendHandle->U8Temp,1,UPDATE_FLAG_ADDR,Write_Mode);//写版本更新标志
-				Trace(PrintInfo,"串口升级结束，设备重启。。。\r\n");
+				DEBUG(PrintInfo,"串口升级结束，设备重启。。。");
 				WriteLinkTaskPara(ActionResetLbs,ActionTypePara,SET);
 			}
 			gComUpflag=0;
