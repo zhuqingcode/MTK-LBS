@@ -55,4 +55,12 @@ typedef struct
 	u32 id;
 	in_out_kind in_out;
 }area_alarm_addition_struct;
+
+typedef struct
+{
+	oa_uint8 buf[64];
+	oa_uint8 len;
+}alarm_struct;
+
+
 #endif
