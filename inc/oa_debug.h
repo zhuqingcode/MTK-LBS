@@ -30,7 +30,6 @@
 #define DEBUG_U 1
 #define DEBUG_N 2
 
-
 #define DEBUG_LEVEL DEBUG_U
 
 #if (DEBUG_K == DEBUG_LEVEL)
