@@ -270,6 +270,7 @@ void oa_app_gps(void)
 						overspeed_var.kind = no_spec;
 						handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 						handle_alarm_sms(ALARM_OVER_SPEED);
+						os_times = 0;
 					}
 				}
 				
@@ -291,6 +292,7 @@ void oa_app_gps(void)
 						handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
 						handle_alarm_sms(ALARM_OVERTIME_PARKING);
 						DEBUG("overtime park");
+						park_times = 0;
 					}
 				}
 			}
@@ -361,25 +363,18 @@ void oa_app_gps(void)
 						if (ret == OA_TRUE)	driver_time = 0;
 					}
 				}
-				#if 0
-				if (driver_time * GPS_RUN_SECONDS > 600){
-					if (relax_time * GPS_RUN_SECONDS > 0
-						&& relax_time * GPS_RUN_SECONDS < dev_now_params.min_rest_time){//60:just for concerning driver has have a relax before.
-						if (ReadAlarmPara(StaAlarm0, ALARM_DRIVE_TIRED) == RESET){
-							WriteAlarmPara(SET, StaAlarm0, ALARM_DRIVE_TIRED); //set this kind of alarm
-						}
-					}
-					else if (relax_time * GPS_RUN_SECONDS > dev_now_params.min_rest_time){
-						if (ReadAlarmPara(StaAlarm0, ALARM_DRIVE_TIRED) == SET){
-							WriteAlarmPara(RESET, StaAlarm0, ALARM_DRIVE_TIRED); //cancel this kind of alarm
-						}
-					}
-				}
-				#endif
+				
 				relax_time = 0;
 			}
 			else if (gps_info.Speed == 0){
 				relax_time++;
+				if (relax_time * GPS_RUN_SECONDS > dev_now_params.min_rest_time){
+					if (ReadAlarmPara(StaAlarm0, ALARM_DRIVE_TIRED) == SET){
+						WriteAlarmPara(RESET, StaAlarm0, ALARM_DRIVE_TIRED); //cancel this kind of alarm
+						relax_time = 0;
+					}
+				}
+				
 				driver_time = 0;
 			}
 			//---------------------------------------------------------------------
