@@ -2606,13 +2606,13 @@ u8 JT808_ServReq_handle(u16 ServReqMsgid,u8 *msgbody,u16 msgbodylen/*,u8 *sendbu
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
 		break;
 		case SET_SQUARE_AREA:
-			set_rect_area(msgbody,msgbodylen);
-			status=0;
+			status = set_rect_area(msgbody,msgbodylen);
 			Write_ProtclHandl(eRsp2ServSeq,&status,1);
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
 		break;
 		case DEL_SQUARE_AREA:
-			status = del_area_message(msgbody,msgbodylen,Rectangle_Area);
+			del_area_message(msgbody,msgbodylen,Rectangle_Area);
+			status = 0;
 			Write_ProtclHandl(eRsp2ServSeq,&status,1);
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
 		break;
