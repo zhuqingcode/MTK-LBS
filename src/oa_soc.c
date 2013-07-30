@@ -402,7 +402,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 	//debuf info
 	{
 		u16 i;
-		DEBUG_N("receive len:%d data:", len);
+		DEBUG("receive len:%d data:", len);
 		for(i=0; i<len; i++){
 			debug_no_n("%02x ", data[i]);
 		}

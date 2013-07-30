@@ -470,7 +470,7 @@ oa_bool write_circle_area_data(u8 *buf, u16 *read_len, u8 option)
 			*read_len = 18;
 		}
 	}
-	OA_DEBUG_USER("区域ID:%d 中心点纬度:%f 中心点经度:%f 半径:%d\n", circle_area_var.area_id, (float)circle_area_var.center_point_lat/1000000, 
+	OA_DEBUG_USER("区域ID:%d 中心点纬度:%f 中心点经度:%f 半径:%d", circle_area_var.area_id, (float)circle_area_var.center_point_lat/1000000, 
 						(float)circle_area_var.center_point_lon/1000000, 
 						circle_area_var.radius);
 	//-----------------------------------------------
@@ -566,9 +566,9 @@ oa_bool write_rect_area_data(u8 *buf, u16 *read_len, u8 option)
 			*read_len = 22;
 		}
 	}
-	OA_DEBUG_USER("区域ID:%d", rect_area_var.area_id);
+	DEBUG("区域ID:%d", rect_area_var.area_id);
 	OA_DEBUG_USER("左上点:纬度:%f 经度:%f", (float)rect_area_var.left_up_lat/1000000, (float)rect_area_var.left_up_lon/1000000);
-	OA_DEBUG_USER("右下点:纬度:%f 经度:%f\n", (float)rect_area_var.right_down_lat/1000000, (float)rect_area_var.right_down_lon/1000000);
+	OA_DEBUG_USER("右下点:纬度:%f 经度:%f", (float)rect_area_var.right_down_lat/1000000, (float)rect_area_var.right_down_lon/1000000);
 	//-----------------------------------------------
 	rect_area_var.is_valid = valid;
 	ret = r_w_rect_area_data_file(&rect_area_var, file_write, 0/*has no effect*/, option);
@@ -705,7 +705,7 @@ oa_bool write_poly_area_data(u8 *buf, u16 *read_len, u8 option)
 		}
 	}
 	for(i=0; i<poly_area_var.total_point; i++){
-		OA_DEBUG_USER("第%d 个顶点:纬度:%f 经度:%f\n", i+1, (float)poly_area_var.vertax[i].vertax_lat/1000000, 
+		OA_DEBUG_USER("第%d 个顶点:纬度:%f 经度:%f", i+1, (float)poly_area_var.vertax[i].vertax_lat/1000000, 
 															(float)poly_area_var.vertax[i].vertax_lon/1000000);
 	}
 	//-----------------------------------------------
@@ -983,7 +983,10 @@ void circle_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur
 					}
 					else{//if it is not cycle
 						res = CompareTime(circle_area_var.start_time, circle_area_var.stop_time, time, 0);
-						if (!res) del_area_data(circle_area_var.area_id, Circular_Area, one_area);
+						if (!res){
+							DEBUG("delete one circle area");
+							del_area_data(circle_area_var.area_id, Circular_Area, one_area);
+						}
 						else if (res == 2) res = 0;
 					}
 					if (0 == res) continue;
@@ -1077,7 +1080,10 @@ void rect_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur,
 					}
 					else{//if it is not cycle
 						res = CompareTime(rect_area_var.start_time, rect_area_var.stop_time, time, 0);
-						if (!res) del_area_data(rect_area_var.area_id, Rectangle_Area, one_area);
+						if (!res){
+							DEBUG("delete one rect area");
+							del_area_data(rect_area_var.area_id, Rectangle_Area, one_area);
+						}
 						else if (res == 2) res = 0;
 					}
 					
@@ -1168,7 +1174,10 @@ void poly_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur,
 					}
 					else{//if it is not cycle
 						res = CompareTime(poly_area_var.start_time, poly_area_var.stop_time, time, 0);
-						if (!res) del_area_data(poly_area_var.area_id, Poly_Area, one_area);
+						if (!res){
+							DEBUG("delete one poly area");
+							del_area_data(poly_area_var.area_id, Poly_Area, one_area);
+						}
 						else if (res == 2) res = 0;
 					}
 					if (0 == res) continue;

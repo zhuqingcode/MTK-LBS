@@ -95,5 +95,5 @@ void print_rtc_time(void)
 {
 	u8 time[6] = {0x0};
 	get_rtc_time(time);
-	DEBUG_N("Time: %x %x %x %x:%x:%x ",time[0],time[1],time[2],time[3],time[4],time[5]);
+	DEBUG("Time: %x %x %x %x:%x:%x ",time[0],time[1],time[2],time[3],time[4],time[5]);
 }
