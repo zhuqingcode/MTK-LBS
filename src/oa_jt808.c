@@ -2886,7 +2886,19 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 					return RspPackgerr;
 				}break;
 			}
-
+			//reg timeout
+			{	
+				u16 temp_seq = 0;
+				u16 temp_seq2 = 0;
+				char_to_short(&rsp.SeqId[0], &temp_seq);
+				char_to_short(&sProtclHandl.DevSeqId[0], &temp_seq2);
+				if (timeout_var.timeout_en == OA_TRUE && temp_seq == temp_seq2-1){
+					DEBUG("disable timeout");
+					timeout_var.do_timeout = OA_FALSE;
+					timeout_var.timeout_en = OA_FALSE;
+				}
+			}
+			
 //			Write_ProtclHandl(eRsp2DevReq, (u8 *)&rsp, sizeof(LBS_PlatComRsp));	
 #if 0	
 			if (rsp.Rslt == 0){//0 means register ok
@@ -5033,7 +5045,8 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 			
 			ret = escape_copy_to_send(pbuf, U16Temp);
 			if (ret > 0){
-				if (ReqMsgId == REPORT_LOCATION){
+				if (ReqMsgId == REPORT_LOCATION || ReqMsgId == REGISTERS 
+				|| ReqMsgId == LOGIN || ReqMsgId == UNREGISTERS){
 					Write_ProtclHandl(eDevMsgid, (u8 *)&ReqMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
 					timeout_var.timeout_en = OA_TRUE;
 					timeout_var.do_timeout = OA_FALSE;
