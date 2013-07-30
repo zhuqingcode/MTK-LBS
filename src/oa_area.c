@@ -934,6 +934,7 @@ u8 del_area_data(u32 area_id, Area_Type_enum area_type, del_option_enum del_opti
 		}break;
 	}
 	//do not find = delete ok
+	DEBUG("不存在此ID的区域");
 	oa_fclose(handle);
 	return 0;
 
@@ -982,7 +983,10 @@ void circle_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur
 					}
 					else{//if it is not cycle
 						res = CompareTime(circle_area_var.start_time, circle_area_var.stop_time, time, 0);
-						if (!res) del_area_data(circle_area_var.area_id, Circular_Area, one_area);
+						if (!res){
+							DEBUG("delete one circle area");
+							del_area_data(circle_area_var.area_id, Circular_Area, one_area);
+						}
 						else if (res == 2) res = 0;
 					}
 					if (0 == res) continue;
@@ -1076,7 +1080,10 @@ void rect_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur,
 					}
 					else{//if it is not cycle
 						res = CompareTime(rect_area_var.start_time, rect_area_var.stop_time, time, 0);
-						if (!res) del_area_data(rect_area_var.area_id, Rectangle_Area, one_area);
+						if (!res){
+							DEBUG("delete one rect area");
+							del_area_data(rect_area_var.area_id, Rectangle_Area, one_area);
+						}
 						else if (res == 2) res = 0;
 					}
 					
@@ -1167,7 +1174,10 @@ void poly_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur,
 					}
 					else{//if it is not cycle
 						res = CompareTime(poly_area_var.start_time, poly_area_var.stop_time, time, 0);
-						if (!res) del_area_data(poly_area_var.area_id, Poly_Area, one_area);
+						if (!res){
+							DEBUG("delete one poly area");
+							del_area_data(poly_area_var.area_id, Poly_Area, one_area);
+						}
 						else if (res == 2) res = 0;
 					}
 					if (0 == res) continue;

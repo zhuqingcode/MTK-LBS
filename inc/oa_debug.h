@@ -34,11 +34,11 @@
 
 #if (DEBUG_K == DEBUG_LEVEL)
 #define DEBUG(format,...) debug_no_n("("__FILE__" %s %d):"format"\r\n", __func__, __LINE__, ##__VA_ARGS__)
-#define DEBUG_N(format,...) debug_no_n(""format"\r\n", ##__VA_ARGS__)
+#define DEBUG_N(format,...) debug_no_n(""format"", ##__VA_ARGS__)
 #define DEBUG_F(format,...) OA_DEBUG_USER("("__FILE__" %s %d):"format"", __func__, __LINE__, ##__VA_ARGS__)
 #elif (DEBUG_U == DEBUG_LEVEL)
 #define DEBUG(format,...) debug_no_n(""format"\r\n", ##__VA_ARGS__)
-#define DEBUG_N(format,...) debug_no_n(""format"\r\n", ##__VA_ARGS__)
+#define DEBUG_N(format,...) debug_no_n(""format"", ##__VA_ARGS__)
 #define DEBUG_F(format,...) OA_DEBUG_USER(""format"", ##__VA_ARGS__)
 #elif (DEBUG_N == DEBUG_LEVEL)
 #define DEBUG(format,...)
