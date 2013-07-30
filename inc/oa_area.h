@@ -36,7 +36,7 @@
 #define CIRCLE_AREA_DATA L"circle_area_data"
 #define RECT_AREA_DATA L"rect_area_data"
 #define POLY_AREA_DATA L"poly_area_data"
-#define OA_AREA_DETECT_TIME 5000//5s
+#define OA_AREA_DETECT_TIME 1000//5s
 #define OA_AREA_DETECT_1TIME 20000//5s
 #define OA_AREA_RUN_SECOND (OA_AREA_DETECT_TIME/1000)
 #define OA_AREA_ALARM_PERIOD 300//60s
