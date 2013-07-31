@@ -37,7 +37,7 @@
 #define CHECK_GPS_ERR	(50)	//判断gps模块异常的时间
 #define UPDATE_DISTANC  0.3	//行驶里程大于0.3km时做一次里程统计
 const float EPSINON = 0.00001;
-os_struct overspeed_var = {{no_spec}, {0}};
+os_struct overspeed_var = {{no_os}, {0}};
 extern DEVICE_PARAMS dev_now_params;
 extern DEV_PLAT_PARAS dev_running;
 /*********************************************************
@@ -284,6 +284,7 @@ void oa_app_gps(void)
 			}
 			else if (gps_info.Speed <= speed){
 				os_times = 0;
+				overspeed_var.kind = no_os;
 				if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET){
 					DEBUG("cancel over speed");
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
