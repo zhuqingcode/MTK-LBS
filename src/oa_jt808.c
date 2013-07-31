@@ -2267,6 +2267,10 @@ static u8 set_round_area(u8 *pbuf, u16 buflen)
 			option = 1;//
 		}
 		pbuf+=read_len;
+		if (ret == 1){
+			DEBUG("已成功处理前%d个区域", i);
+			return 1;
+		}
 	}
 	return ret;
 }
@@ -2336,6 +2340,10 @@ static u8 set_rect_area(u8 *pbuf, u16 buflen)
 			option = 1;//
 		}
 		pbuf+=read_len;
+		if (ret == 1){
+			DEBUG("已成功处理前%d个区域", i);
+			return 1;
+		}
 	}
 	return ret;
 }
@@ -2406,6 +2414,10 @@ static u8 set_poly_area(u8 *pbuf, u16 buflen)
 			option = 1;//
 		}
 		pbuf+=read_len;
+		if (ret == 1){
+			DEBUG("已成功处理前%d个区域", i);
+			return 1;
+		}
 	}
 	return ret;
 }
