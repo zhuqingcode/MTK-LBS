@@ -45,6 +45,7 @@
 extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
 extern timeout_struct timeout_var;
+extern timeout_data_struct timeout_data;
 extern os_struct overspeed_var;
 extern area_alarm_addition_struct area_alarm_addition_var;
 dev_control_type control_type = none;
@@ -5049,7 +5050,9 @@ u16 DevReq2ServPackag_build(u16 ReqMsgId) //即时上传数据
 				|| ReqMsgId == LOGIN || ReqMsgId == UNREGISTERS){
 					Write_ProtclHandl(eDevMsgid, (u8 *)&ReqMsgId, 2);//终端发送消息ID by zhuqing @2013/6/26
 					timeout_var.timeout_en = OA_TRUE;
-					timeout_var.do_timeout = OA_FALSE;
+					oa_memset(&timeout_data, 0x0, sizeof(timeout_data));
+					oa_memcpy(timeout_data.data_buf, pbuf, U16Temp);
+					timeout_data.data_len = U16Temp;
 				}
 				return ret;
 			}
