@@ -4116,12 +4116,13 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 #endif
 	//-----------
 	*pbuf++=0x11;//超速报警附加信息
-	*pbuf++=0x01;
 	if (overspeed_var.kind == no_spec){
+		*pbuf++=0x01;//len
 		*pbuf++=0x00;
 		*pbuflen += 3;
 	}
 	else{
+		*pbuf++=0x05;//len
 		*pbuf++=overspeed_var.kind;
 		int_to_char(pbuf, overspeed_var.id);
 		pbuf+=4;
@@ -4131,7 +4132,7 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 	//-----------
 	*pbuf=0x12;//进出区域或路线
 	pbuf++;
-	*pbuf=0x06;
+	*pbuf=0x06;//len
 	pbuf++;
 	if (area_alarm_addition_var.area_kind == no_spec) oa_memset(pbuf,0x0,6);
 	else{
