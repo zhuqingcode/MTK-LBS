@@ -122,7 +122,7 @@ oa_bool mile_stat_set_value(u32 value)
 *Return:        void
 *Others:         
 *********************************************************/
-oa_bool mile_stat_add(FP32 p_mile)
+oa_bool mile_stat_add(u32 miles)
 {
 	oa_int32 handle, ret;
 	oa_uint32 dummy_read, dummy_write;
@@ -157,7 +157,7 @@ oa_bool mile_stat_add(FP32 p_mile)
 		return OA_FALSE;
 	}
 	//DEBUG("give to func total_mileage:%f", p_mile);
-	mileage.total_mileage += (u32)(p_mile * 10.0);//floor//cut off dot part
+	mileage.total_mileage += miles;//floor//cut off dot part
 	oa_fseek(handle, 0, OA_FILE_BEGIN);//<do not forget!!!>
 	//just for debug
 	//DEBUG("total_mileage:%d", __FILE__,  __func__, __LINE__, mileage.total_mileage);

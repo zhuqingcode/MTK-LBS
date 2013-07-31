@@ -106,6 +106,7 @@ void oa_app_gps(void)
 	static u8 infoprintCnt = 0;
 	static FP32 IntvlDistanc = 0.0;
 	float dis_cal = 0;
+	u32 dis_temp = 0;
 	STRUCT_RMC gps_info;
 	u32 speed;
 	static u32 os_times;
@@ -341,11 +342,12 @@ void oa_app_gps(void)
 			GPS_IntvlDistanc(&gps_info, &dis_cal);
 			IntvlDistanc += dis_cal;
 			OA_DEBUG_USER("miles:%f", IntvlDistanc);
-			DEBUG("(u32)IntvlDistanc * 10:%d", (u32)(IntvlDistanc * 10));
+			dis_temp = (u32)(IntvlDistanc * 10);
+			DEBUG("(u32)(IntvlDistanc * 10):%d", dis_temp);
 			if (IntvlDistanc >= UPDATE_DISTANC){
 				//GpsDistancCacul(&IntvlDistanc);//changed to statement below
 				DEBUG("statistics miles");
-				ret = mile_stat_add(IntvlDistanc);
+				ret = mile_stat_add(dis_temp);
 				if (OA_TRUE == ret){
 					IntvlDistanc -= UPDATE_DISTANC;//IntvlDistanc = 0.0;
 				}
