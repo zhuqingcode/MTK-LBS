@@ -24,6 +24,7 @@
 *   zhuqing.
 *
 ****************************************************************************/
+
 #include "oa_alarm.h"
 #include "oa_jt808.h"
 #include "oa_dev_params.h"
@@ -33,7 +34,7 @@
 #include "oa_sms.h"
 #include "oa_app.h"
 #include "oa_lbs2mtk.h"
-
+#include "oa_soc.h"
 oa_uint8 emergency_uni[] = {0x7D,0x27,0x60,0x25,0x62,0xA5,0x8B,0x66};
 oa_uint8 overspeed_uni[] = {0x8D,0x85,0x90,0x1F,0x62,0xA5,0x8B,0x66};
 oa_uint8 tired_drive_uni[] = {0x75,0xB2,0x52,0xB3,0x9A,0x7E,0x9A,0x76};
@@ -63,6 +64,7 @@ extern oa_bool sms_enable;
 extern timeout_struct timeout_var;
 extern scrn_struct s_s;
 extern void oa_screen_demo(void *param);
+extern oa_soc_context g_soc_context;
 /*********************************************************
 *Function:     handle_alarm_status()
 *Description:  handle alarm status
@@ -97,7 +99,8 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 			}
 			
 			
-			if (dev_running.plat_status == OFFLINE /*|| timeout_var.do_timeout == OA_TRUE*/){
+			if (dev_running.plat_status == OFFLINE /*|| timeout_var.do_timeout == OA_TRUE*/
+				|| g_soc_context.is_blocksend == OA_TRUE){
 				ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
 				if (ret)	return OA_TRUE;
 				else return OA_FALSE;
@@ -124,7 +127,8 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 	}
 	else{//just send
 
-		if (dev_running.plat_status == OFFLINE /*|| timeout_var.do_timeout == OA_TRUE*/){
+		if (dev_running.plat_status == OFFLINE /*|| timeout_var.do_timeout == OA_TRUE*/
+			|| g_soc_context.is_blocksend == OA_TRUE){
 			ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
 			if (ret)	return OA_TRUE;
 			else return OA_FALSE;
