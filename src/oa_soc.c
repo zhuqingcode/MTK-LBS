@@ -39,7 +39,6 @@ extern action_kind plat_paraset;
 extern dev_control_type control_type;
 extern upgrade_paras up_paras;
 extern timeout_struct timeout_var;
-extern soc_bak_context back_con;
 extern oa_bool try_unlock;
 //-------------------------------------
 /*debug*/
@@ -301,12 +300,6 @@ oa_int16 oa_soc_send_req(void)
 			if (timeout_var.timeout_en == OA_TRUE){
 				DEBUG("enable timeout");
 				timeout_var.timeout_times = 0;
-				if (timeout_var.do_timeout == OA_FALSE){//don't do duplicate copy
-					oa_memset(&back_con, 0x0, sizeof(soc_bak_context));
-					oa_memcpy(back_con.data, g_soc_context.gprs_tx_pending_data, len);//backup data
-					back_con.len = len;
-				}
-				
 			}
 			
 			//if send success,dummy read to delete

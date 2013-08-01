@@ -56,7 +56,7 @@ DEV_PLAT_PARAS dev_running =
 	OA_TRUE,
 };
 timeout_struct timeout_var = {OA_FALSE, OA_FALSE, 0};
-soc_bak_context back_con = {0x0};
+timeout_data_struct timeout_data;
 oa_bool try_unlock = OA_FALSE;
 extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
@@ -321,7 +321,7 @@ void oa_app_plat_data(void *param)
 	{
 		//do something when acc is on
 		hbeat_counter++;
-		
+		//if device is doing timeout, do not send heartbeat
 		if (dev_running.plat_status == ONLINE && timeout_var.do_timeout == OA_FALSE){
 			if (hbeat_counter * PLAT_DATA_SECOND >= dev_now_params.heartbeat_interval){
 				build_ret = DevReq2ServPackag_build(HEART_BEAT);//build heartbeats packets & fill buffer with it
@@ -361,7 +361,8 @@ void oa_app_timeout(void *param)
 	oa_uint32 time;
 	oa_uint16 real_len;
 	oa_uint16 soc_ret;
-
+	u16 ret;
+	
 	if (dev_running.plat_status == OFFLINE){
 		offline_times++;
 		if (offline_times * TIMEOUT_SECOND > RESTART_THRESHOLD){
@@ -382,16 +383,16 @@ void oa_app_timeout(void *param)
 		Tn = dev_now_params.tcp_ack_timeout;
 		first_run = OA_FALSE;
 	}
-	
+	//timeout_var.timeout_en is OA_TRUE;
 	timeout_var.timeout_times++;
 	time = timeout_var.timeout_times * TIMEOUT_SECOND;
 	if (time > Tn){
 		//do a retransmission
-		real_len = oa_write_buffer_force_noinit(g_soc_context.gprs_tx, back_con.data, back_con.len);
-		if (real_len == back_con.len){
+		ret = escape_copy_to_send(timeout_data.data_buf, timeout_data.data_len);
+		if (ret > 0){
 			timeout_var.do_timeout = OA_TRUE;
 			soc_ret = oa_soc_send_req();//exist duplicate copy???
-			if (soc_ret == real_len){//retrans ok
+			if (soc_ret == ret){//retrans ok
 				DEBUG("%d x timeout retransmission ok", retrans_times);
 				retrans_times++;
 				if (retrans_times > dev_now_params.tcp_retrans_times){

@@ -98,8 +98,8 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 				WriteAlarmPara(RESET, part, alarm_bit);
 			}
 			
-			
-			if (dev_running.plat_status == OFFLINE /*|| timeout_var.do_timeout == OA_TRUE*/
+
+			if (dev_running.plat_status == OFFLINE || timeout_var.do_timeout == OA_TRUE
 				|| g_soc_context.is_blocksend == OA_TRUE){
 				ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
 				if (ret)	return OA_TRUE;
@@ -127,7 +127,7 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 	}
 	else{//just send
 
-		if (dev_running.plat_status == OFFLINE /*|| timeout_var.do_timeout == OA_TRUE*/
+		if (dev_running.plat_status == OFFLINE || timeout_var.do_timeout == OA_TRUE
 			|| g_soc_context.is_blocksend == OA_TRUE){
 			ret = DevReq2ServPackag_build_blind(REPORT_LOCATION);
 			if (ret)	return OA_TRUE;
