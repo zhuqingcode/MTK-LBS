@@ -91,8 +91,8 @@ oa_uart_enum          g_oa_tst_port    = OA_UART_NULL;      //Define the Catcher
 void oa_app_plat_link(void *para)
 {	
 	static oa_bool task_runed = OA_TRUE;
-	oa_uint16 build_ret;
-	oa_uint16 soc_ret;
+	oa_int16 build_ret;
+	oa_int16 soc_ret;
 	
 	if (OA_TRUE == task_runed){
 		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
@@ -237,8 +237,8 @@ void oa_app_plat_data(void *param)
 	static oa_bool task_runed = OA_TRUE;
 	static oa_uint32 acc_counter = 0;
 	static oa_uint32 hbeat_counter = 0;
-	oa_uint16 build_ret;
-	oa_uint16 soc_ret;
+	oa_int16 build_ret;
+	oa_int16 soc_ret;
 	static oa_bool send_before_close = OA_TRUE;
 	if (OA_TRUE == task_runed){
 		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
@@ -359,8 +359,8 @@ void oa_app_timeout(void *param)
 	static oa_uint16 retrans_times = 0;
 	static oa_uint16 offline_times;
 	oa_uint32 time;
-	oa_uint16 real_len;
-	oa_uint16 soc_ret;
+	oa_int16 real_len;
+	oa_int16 soc_ret;
 	u16 ret;
 	
 	if (dev_running.plat_status == OFFLINE){
