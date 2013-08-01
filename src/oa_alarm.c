@@ -76,8 +76,8 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 
 	u32 alarm_flag;
 	oa_bool ret;
-	oa_uint16 build_ret;
-	oa_uint16 soc_ret;
+	oa_int16 build_ret;
+	oa_int16 soc_ret;
 	
 	if (part >= StatusNum){
 		DEBUG("params err!");
@@ -109,8 +109,9 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 			build_ret = DevReq2ServPackag_build(REPORT_LOCATION);//upload instantly<!!!>
 			if (build_ret > 0){
 				soc_ret = oa_soc_send_req();//check datas in buffer & send, concern it send ok.
-				if (soc_ret != build_ret){
-					DEBUG("send data is not equal!");
+				if (soc_ret == 0){
+					DEBUG("send data err!");
+					//DevReq2ServPackag_build_blind(REPORT_LOCATION);
 					return OA_FALSE;
 				}
 				else{
@@ -137,8 +138,9 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 		build_ret = DevReq2ServPackag_build(REPORT_LOCATION);
 		if (build_ret > 0){
 			soc_ret = oa_soc_send_req();//check datas in buffer & send, concern it send ok.
-			if (soc_ret != build_ret){
-				DEBUG("send data is not equal!");
+			if (soc_ret == 0){
+				DEBUG("send data err!");
+				//DevReq2ServPackag_build_blind(REPORT_LOCATION);
 				return OA_FALSE;
 			}
 			else{

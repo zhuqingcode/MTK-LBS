@@ -334,7 +334,7 @@ oa_int16 oa_soc_send_req(void)
 		{
 			//ERROR!.
 			DEBUG("%s:sock_id=%d send fail ret=%d!",__func__,g_soc_context.socket_id,ret);
-			//oa_soc_close_req();//commend by zq
+			oa_evshed_start(OA_EVSHED_ID_1, oa_soc_can_resend, NULL, OA_GPRS_WAITING_RESEND);
 			return 0;
 		}
 	}
@@ -348,6 +348,7 @@ oa_int16 oa_soc_send_req(void)
 void oa_soc_can_resend(void){
 	DEBUG("%s called", __func__);
 	g_soc_context.is_blocksend = OA_FALSE;
+	oa_soc_send_req();
 }
 void oa_soc_can_reconnect_again(void* param)
 {

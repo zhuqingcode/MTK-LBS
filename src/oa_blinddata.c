@@ -648,9 +648,9 @@ oa_bool oa_app_blinddata(void)
 {
 	oa_bool ret;
 	u8 blind_buf[DATA_MAX_LEN] = {0};
-	u16 data_len;
-	u16 ret_len;
-	u16 send_len;
+	oa_int16 data_len;
+	oa_int16 ret_len;
+	oa_int16 send_len;
 	static oa_bool task_runed = OA_TRUE;
 	//static u16 ReqMsgId = REPORT_LOCATION;
 	if (OA_TRUE == task_runed){
