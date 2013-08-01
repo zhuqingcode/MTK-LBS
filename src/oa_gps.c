@@ -362,6 +362,7 @@ void oa_app_gps(void)
 					&& alarm_status_flag == OA_FALSE){
 					print_rtc_time();
 					DEBUG("@@@send one location packet!maybe blind data");
+					//no additional infomation
 					overspeed_var.kind = no_os;
 					area_alarm_addition_var.area_kind = no_spec;
 					handle_alarm_status(0, 0, 0, OA_FALSE);//just send

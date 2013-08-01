@@ -32,7 +32,8 @@
 #include "oa_gps.h"
 #include "oa_jt808.h"
 #include "oa_alarm.h"
-
+#include "oa_dev_params.h"
+extern DEVICE_PARAMS dev_now_params;
 extern os_struct overspeed_var;
 area_alarm_addition_struct area_alarm_addition_var = {{no_spec},{0},{0}};
  /*********************************************************
@@ -1272,7 +1273,14 @@ void oa_app_area(void *para)
 	GetPosinf((u8 *)&lat, GPSLat, 5);
 	GetPosinf((u8 *)&speed, GPSSpeed, 0);
 	get_rtc_time(time);
-	
+	//overspeed
+	if (speed <= dev_now_params.max_speed){
+		overspeed_var.kind = no_os;
+		if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET){
+			DEBUG("cancel over speed");
+			WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
+		}
+	}
 	oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
 	//------------------circle area inside/outside judge------------------
 	circle_area_inout_judge(lat, lon, time, cur_status_circle, area_id, speed, &os_flag_circle, os_time_circle);
@@ -1305,11 +1313,13 @@ void oa_app_area(void *para)
 				DEBUG("区域内超速,区域id:%d", area_id[i]);
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 				handle_alarm_sms(ALARM_OVER_SPEED);
+				os_cal_circle[i] = 0;
 			}
 		}
 		else if (cur_status_circle[i] == area_outside || ~(os_flag_circle & (1<<i))){
 			os_cal_circle[i] = 0;
 		}
+		else if (cur_status_circle[i] == area_err) os_cal_circle[i] = 0;
 	}
 	oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
 	oa_memset(area_id, 0x0, sizeof(area_id));
@@ -1344,11 +1354,13 @@ void oa_app_area(void *para)
 				DEBUG("区域内超速,区域id:%d", area_id[i]);
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 				handle_alarm_sms(ALARM_OVER_SPEED);
+				os_cal_rect[i] = 0;
 			}
 		}
 		else if (cur_status_rect[i] == area_outside || ~(os_flag_rect & (1<<i))){
 			os_cal_rect[i] = 0;
 		}
+		else if (cur_status_rect[i] == area_err) os_cal_rect[i] = 0;
 	}
 	oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
 	oa_memset(area_id, 0x0, sizeof(area_id));
@@ -1383,11 +1395,13 @@ void oa_app_area(void *para)
 				DEBUG("区域内超速,区域id:%d", area_id[i]);
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 				handle_alarm_sms(ALARM_OVER_SPEED);
+				os_cal_poly[i] = 0;
 			}
 		}
 		else if (cur_status_poly[i] == area_outside || ~(os_flag_poly & (1<<i))){
 			os_cal_poly[i] = 0;
 		}
+		else if (cur_status_poly[i] == area_err) os_cal_poly[i] = 0;
 	}
 
 again:
