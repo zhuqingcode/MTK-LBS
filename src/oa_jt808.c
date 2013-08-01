@@ -2867,7 +2867,21 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 			//debug info
 			DEBUG("register ack:0x%04x", REGISTERS_rsp);
 			DEBUG("rsp result:0x%x", rsp.Rslt);
-			Write_ProtclHandl(eRsp2DevReq, (u8 *)&rsp, sizeof(LBS_PlatComRsp));	
+			Write_ProtclHandl(eRsp2DevReq, (u8 *)&rsp, sizeof(LBS_PlatComRsp));
+			//reg timeout
+			{	
+				u16 temp_seq = 0;
+				u16 temp_seq2 = 0;
+				char_to_short(&rsp.SeqId[0], &temp_seq);
+				char_to_short(&sProtclHandl.DevSeqId[0], &temp_seq2);
+				DEBUG("seq:%02x  seq2:%02x", temp_seq, temp_seq2);
+				if (timeout_var.timeout_en == OA_TRUE && temp_seq == temp_seq2-1){
+					DEBUG("disable timeout");
+					timeout_var.do_timeout = OA_FALSE;
+					timeout_var.timeout_en = OA_FALSE;
+				}
+			}
+			
 			switch (rsp.Rslt){
 				case RspOK:{
 					pbuf++;
@@ -2899,18 +2913,7 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 					return RspPackgerr;
 				}break;
 			}
-			//reg timeout
-			{	
-				u16 temp_seq = 0;
-				u16 temp_seq2 = 0;
-				char_to_short(&rsp.SeqId[0], &temp_seq);
-				char_to_short(&sProtclHandl.DevSeqId[0], &temp_seq2);
-				if (timeout_var.timeout_en == OA_TRUE && temp_seq == temp_seq2-1){
-					DEBUG("disable timeout");
-					timeout_var.do_timeout = OA_FALSE;
-					timeout_var.timeout_en = OA_FALSE;
-				}
-			}
+			
 			
 //			Write_ProtclHandl(eRsp2DevReq, (u8 *)&rsp, sizeof(LBS_PlatComRsp));	
 #if 0	
