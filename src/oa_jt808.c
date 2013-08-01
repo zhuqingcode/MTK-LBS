@@ -4115,33 +4115,34 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 	*pbuflen +=4;
 #endif
 	//-----------
-	*pbuf++=0x11;//超速报警附加信息
-	if (overspeed_var.kind == no_spec){
-		*pbuf++=0x01;//len
-		*pbuf++=0x00;
-		*pbuflen += 3;
+	if (overspeed_var.kind != no_os){
+		*pbuf++=0x11;//超速报警附加信息
+		if (overspeed_var.kind == no_spec){
+			*pbuf++=0x01;//len
+			*pbuf++=0x00;
+			*pbuflen += 3;
+		}
+		else{
+			*pbuf++=0x05;//len
+			*pbuf++=overspeed_var.kind;
+			int_to_char(pbuf, overspeed_var.id);
+			pbuf+=4;
+			*pbuflen += 7;
+		}
 	}
-	else{
-		*pbuf++=0x05;//len
-		*pbuf++=overspeed_var.kind;
-		int_to_char(pbuf, overspeed_var.id);
-		pbuf+=4;
-		*pbuflen += 7;
-	}
-	
 	//-----------
-	*pbuf=0x12;//进出区域或路线
-	pbuf++;
-	*pbuf=0x06;//len
-	pbuf++;
-	if (area_alarm_addition_var.area_kind == no_spec) oa_memset(pbuf,0x0,6);
-	else{
+	if (area_alarm_addition_var.area_kind != no_spec){
+		*pbuf=0x12;//进出区域或路线
+		pbuf++;
+		*pbuf=0x06;//len
+		pbuf++;
 		*pbuf++ = area_alarm_addition_var.area_kind;
 		int_to_char(pbuf, area_alarm_addition_var.id);
 		pbuf+=4;
 		*pbuf++ = area_alarm_addition_var.in_out;
+		*pbuflen += 8;
 	}
-	*pbuflen += 8;
+	
 /*	*pbuf=0x13;//进出区域或路线
 	pbuf++;
 	*pbuf=0x07;
