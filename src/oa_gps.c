@@ -38,6 +38,7 @@
 #define UPDATE_DISTANC  0.3	//行驶里程大于0.3km时做一次里程统计
 const float EPSINON = 0.00001;
 os_struct overspeed_var = {{no_os}, {0}};
+extern area_alarm_addition_struct area_alarm_addition_var;
 extern DEVICE_PARAMS dev_now_params;
 extern DEV_PLAT_PARAS dev_running;
 /*********************************************************
@@ -361,6 +362,8 @@ void oa_app_gps(void)
 					&& alarm_status_flag == OA_FALSE){
 					print_rtc_time();
 					DEBUG("@@@send one location packet!maybe blind data");
+					overspeed_var.kind = no_os;
+					area_alarm_addition_var.area_kind = no_spec;
 					handle_alarm_status(0, 0, 0, OA_FALSE);//just send
 					upload_times = 0;
 				}
