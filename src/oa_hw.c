@@ -29,6 +29,7 @@
 #include "oa_hw.h"
 #include "oa_jt808.h"
 #include "oa_debug.h"
+#include "oa_alarm.h"
 //#define OA_GPIO_EINT_01 27
 oa_bool sos_handle_polarity_0 = OA_TRUE;
 /*do not modify it*/
@@ -37,6 +38,8 @@ oa_uint8 eint_gpio_map_tb[]={66, 28, 5, 11, 27, 29, 33, 34, 51, 60, 74, 25};
 oa_uint8 g_first_pullup_flag = OA_TRUE;
 
 oa_uint8 acc_status = ACC_ON;
+extern os_struct overspeed_var;
+extern area_alarm_addition_struct area_alarm_addition_var;
 /*********************************************************
 *Function:     oa_tst_eint_hisr()
 *Description:  callback function for gpio     
@@ -143,6 +146,8 @@ void acc_status_detect(void *param)
 		if (ret){
 			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == SET){
 				WriteAlarmPara(RESET, StaSector1, STA_ACC_ON);
+				overspeed_var.kind = no_os;
+				area_alarm_addition_var.area_kind = no_spec;
 				handle_alarm_status(StaSector1, STA_ACC_ON, RESET, OA_TRUE);
 				DEBUG("ACC status changed:off");
 			}
@@ -169,6 +174,8 @@ void acc_status_detect(void *param)
 		if (ret){
 			if (ugent_last == OA_TRUE){
 				//if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == RESET){
+					overspeed_var.kind = no_os;
+					area_alarm_addition_var.area_kind = no_spec;
 					handle_alarm_status(StaAlarm0, ALARM_EMERGENCY_k, SET, OA_TRUE);
 					handle_alarm_sms(ALARM_EMERGENCY_k);
 					DEBUG("key alarm");
