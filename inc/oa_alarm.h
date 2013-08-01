@@ -35,6 +35,7 @@ typedef enum
 	os_rect,
 	os_poly,
 	line_sec,
+	no_os = 0xff,
 }os_kind;
 
 typedef struct

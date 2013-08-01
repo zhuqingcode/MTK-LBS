@@ -50,7 +50,7 @@ extern oa_bool try_unlock;
 * wait a period of time (for example, 5sec) to detach network,and then re-connect
 */
 #define OA_GPRS_WAITING_RELEASING 2000//10000 /*mSec*/
-#define OA_GPRS_WAITING_RESEND 10000
+#define OA_GPRS_WAITING_RESEND 2000
 //Gprs heartbeat time, for keep gprs connecting, default 60s, if not use heartbeat, set OA_GPRS_HEARTBEAT_TIME = 0
 #define OA_GPRS_HEARTBEAT_TIME 60
 
@@ -347,7 +347,7 @@ oa_int16 oa_soc_send_req(void)
 	}
 	else
 	{
-		//DEBUG(" no data in send buffer");
+		DEBUG("no data in send buffer");
 		return -1;
 	}
 }
