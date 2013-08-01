@@ -144,7 +144,7 @@ void oa_app_plat_link(void *para)
 				}
 				else{
 					soc_ret = oa_soc_send_req();
-					if (build_ret == soc_ret && has_reg()){//send ok & has authen code
+					if (build_ret == soc_ret/* && has_reg()*/){//send ok & has authen code
 						dev_running.plat_switch = OA_FALSE;
 					}
 				}
@@ -193,7 +193,7 @@ void oa_app_plat_link(void *para)
 	else{//detect is online/offline
 		if (dev_running.plat_check_value == OA_TRUE){
 			if (oa_sim_network_is_valid()){
-				oa_soc_state_check();//check & connect
+				if (!use_is_lock()) oa_soc_state_check();//check & connect
 			}
 			else{
 				DEBUG("sim network is invalue!");
@@ -357,20 +357,14 @@ void oa_app_timeout(void *param)
 	static oa_bool first_run = OA_TRUE;
 	static oa_uint32 Tn;
 	static oa_uint16 retrans_times = 0;
-	static oa_uint16 offline_times;
 	oa_uint32 time;
 	oa_int16 real_len;
 	oa_int16 soc_ret;
 	u16 ret;
 	
-	if (dev_running.plat_status == OFFLINE){
-		offline_times++;
-		if (offline_times * TIMEOUT_SECOND > RESTART_THRESHOLD){
-			do_reset();
-		}
+	if (g_soc_context.state != OA_SOC_STATE_ONLINE){
 		goto redo;
 	}
-	else if (dev_running.plat_status == ONLINE) offline_times = 0;
 	
 	if (timeout_var.timeout_en == OA_FALSE){
 		timeout_var.timeout_times = 0;
@@ -542,6 +536,8 @@ void oa_app_main(void)
 		//try to unlock with using default device parameters
 		try_unlock = OA_TRUE;
 		oa_timer_start(OA_APP_SCHEDULER_ID, oa_app_plat_link, NULL, OA_APP_PLAT_LINK_1ST);
+		//timeout timer
+		oa_timer_start(OA_TIMER_ID_11, oa_app_timeout, NULL, OA_APP_TIMEOUT_1ST);
 		//need to send restart sms?
 		need_send_sms_after_reset();
 		first_run = OA_FALSE;
@@ -571,8 +567,6 @@ void oa_app_main(void)
 		oa_timer_start(OA_TIMER_ID_8, App_TaskSScrnSendManage, NULL, SCHD_SCRN_1TIME);
 		//area judge task
 		oa_timer_start(OA_TIMER_ID_9, oa_app_area, NULL, OA_AREA_DETECT_1TIME);
-		//timeout timer
-		oa_timer_start(OA_TIMER_ID_11, oa_app_timeout, NULL, OA_APP_TIMEOUT_1ST);
 	}
 	else if (OA_TRUE == dev_is_locked)  //device is lock
 	{

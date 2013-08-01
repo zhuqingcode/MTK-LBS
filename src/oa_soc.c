@@ -40,6 +40,7 @@ extern dev_control_type control_type;
 extern upgrade_paras up_paras;
 extern timeout_struct timeout_var;
 extern oa_bool try_unlock;
+extern DEV_PLAT_PARAS dev_running;
 //-------------------------------------
 /*debug*/
 #define GPRS_DEBUG OA_DEBUG_USER
@@ -50,6 +51,8 @@ extern oa_bool try_unlock;
 */
 #define OA_GPRS_WAITING_RELEASING 2000//10000 /*mSec*/
 #define OA_GPRS_WAITING_RESEND 2000
+#define REUNLOCK_WAITING_RELEASING 10000
+#define RESOC_WAITING_RELEASING 3000
 //Gprs heartbeat time, for keep gprs connecting, default 60s, if not use heartbeat, set OA_GPRS_HEARTBEAT_TIME = 0
 #define OA_GPRS_HEARTBEAT_TIME 60
 
@@ -145,6 +148,15 @@ void oa_soc_set_apn_cb(oa_bool result)
       g_soc_context.can_connect = OA_TRUE;
 }
 
+void try_reunlock(void){
+	DEBUG("%s called", __func__);
+	g_soc_context.can_connect = OA_TRUE;
+	g_soc_context.state = OA_SOC_STATE_OFFLINE;
+	dev_running.plat_switch = OA_TRUE;
+}
+void try_reclose_soc(void){
+	dev_running.plat_switch = OA_TRUE;
+}
 //Looped check the socket connect state. if offline and can connect, do connect request
 void oa_soc_state_check(void)
 {
@@ -158,7 +170,21 @@ void oa_soc_state_check(void)
 		}
 		return;	
 	}
-	
+
+	if (use_is_lock() && g_soc_context.state == OA_SOC_STATE_CONNECT){
+		DEBUG("close soc, try to connect again");
+		if (!oa_soc_close(g_soc_context.socket_id)){
+			g_soc_context.socket_id = -1;
+			oa_evshed_start(OA_EVSHED_ID_2, try_reunlock, NULL, REUNLOCK_WAITING_RELEASING);
+			return;
+		}
+		else{
+			DEBUG("close soc err!");
+			oa_evshed_start(OA_EVSHED_ID_2, try_reclose_soc, NULL, RESOC_WAITING_RELEASING);
+			return;
+		}
+	}
+		
 	if (g_soc_context.state == OA_SOC_STATE_OFFLINE && g_soc_context.can_connect){
 		//------------zhuqing add code----------------
 		g_soc_context.can_connect = OA_FALSE;

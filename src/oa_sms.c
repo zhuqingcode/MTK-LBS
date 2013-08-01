@@ -2058,6 +2058,7 @@ void oa_app_sms(void)
 		if (try_unlock_inside == OA_TRUE){
 			DEBUG("try unlock");
 			try_unlock = OA_TRUE;
+			dev_running.plat_switch = OA_TRUE;
 		}
 	}
 	else DEBUG("too many sms");

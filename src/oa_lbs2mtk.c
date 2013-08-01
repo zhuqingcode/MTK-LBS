@@ -147,6 +147,7 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 		if (try_unlock_inside == OA_TRUE){
 			DEBUG("try unlock");
 			try_unlock = OA_TRUE;
+			dev_running.plat_switch = OA_TRUE;
 		}
 		
 		if (ms_ack == OA_TRUE){
