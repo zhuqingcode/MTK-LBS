@@ -28,10 +28,12 @@
 #define __OA_APP_H__
 #include "oa_type.h"
 #include "oa_soc.h"
+#include "oa_blinddata.h"
+
 typedef struct{
-	oa_uint8 data[OA_APP_GPRS_SENDING_SIZE];
-	oa_uint16 len;
-}soc_bak_context;
+	u8 data_buf[DATA_MAX_LEN];//98
+	u16 data_len;// 2
+}timeout_data_struct;
 
 typedef struct{
 	oa_bool timeout_en;
