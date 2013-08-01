@@ -662,7 +662,7 @@ oa_bool oa_app_blinddata(void)
 	if (ret == OA_FALSE){
 		goto redoit;
 	}
-
+	//if device is doing timeout, do not send blind data
 	if (dev_running.plat_status == ONLINE && timeout_var.do_timeout == OA_FALSE){
 		//ret = read_blinddata(blind_buf, &data_len);
 		ret = read_blinddata_from_1file(blind_buf, &data_len);
