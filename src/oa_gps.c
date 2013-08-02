@@ -269,7 +269,7 @@ void oa_app_gps(void)
 			
 			if (gps_info.Speed > speed){//handle this alarm & upload instantly
 				os_times++;
-				if (os_times > dev_now_params.speed_duration){
+				if (os_times * GPS_RUN_SECONDS > dev_now_params.speed_duration){
 					
 					if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == RESET){
 						overspeed_var.kind = no_spec;
