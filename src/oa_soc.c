@@ -94,9 +94,11 @@ void oa_soc_init_fast(void)
 #endif
 	
 	oa_free_buffer_noinit(g_soc_context.gprs_tx);//zhuqing add here for freeing memory
+	//clear RAM
+	oa_sram_noinit_reset();
 	/*using noinitial buffer*/
 	g_soc_context.gprs_tx = oa_create_ring_buffer_noinit(NULL, OA_GPRS_BUFFER_NOINIT_SIZE);
-
+	
 	//fill socket connect server address 
 	oa_soc_fill_addr_struct();
 	//register socket network notify event callback function 
@@ -353,15 +355,17 @@ oa_int16 oa_soc_send_req(void)
 			g_soc_context.is_blocksend = OA_TRUE;
 			DEBUG("%s:sock_id=%d send block waiting!",__func__,g_soc_context.socket_id);
 			//wait for sending result , care event OA_SOC_WRITE in callback function oa_soc_notify_ind
-			oa_evshed_start(OA_EVSHED_ID_1, oa_soc_can_resend, NULL, OA_GPRS_WAITING_RESEND);
-			return 0;
+			//oa_evshed_start(OA_EVSHED_ID_1, oa_soc_can_resend, NULL, OA_GPRS_WAITING_RESEND);
+			return SOC_BLOCK;
 		}
 		else
 		{
 			//ERROR!.
 			DEBUG("%s:sock_id=%d send fail ret=%d!",__func__,g_soc_context.socket_id,ret);
-			oa_evshed_start(OA_EVSHED_ID_1, oa_soc_can_resend, NULL, OA_GPRS_WAITING_RESEND);
-			return 0;
+			//oa_evshed_start(OA_EVSHED_ID_1, oa_soc_can_resend, NULL, OA_GPRS_WAITING_RESEND);
+			//clear RAM
+			oa_sram_noinit_reset();
+			return SOC_SEND_ERR;
 		}
 	}
 	else
