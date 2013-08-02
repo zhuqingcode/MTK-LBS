@@ -94,9 +94,11 @@ void oa_soc_init_fast(void)
 #endif
 	
 	oa_free_buffer_noinit(g_soc_context.gprs_tx);//zhuqing add here for freeing memory
+	//clear RAM
+	oa_sram_noinit_reset();
 	/*using noinitial buffer*/
 	g_soc_context.gprs_tx = oa_create_ring_buffer_noinit(NULL, OA_GPRS_BUFFER_NOINIT_SIZE);
-
+	
 	//fill socket connect server address 
 	oa_soc_fill_addr_struct();
 	//register socket network notify event callback function 
