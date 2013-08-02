@@ -223,6 +223,7 @@ void oa_app_gps(void)
 							handle_alarm_sms(ALARM_DRIVE_OVERTIME);
 							alarm_status_flag = OA_TRUE;
 						}
+						else day_drive = 0;
 					}
 				}
 				else{
@@ -269,8 +270,7 @@ void oa_app_gps(void)
 			
 			if (gps_info.Speed > speed){//handle this alarm & upload instantly
 				os_times++;
-				if (os_times > dev_now_params.speed_duration){
-					
+				if (os_times * GPS_RUN_SECONDS > dev_now_params.speed_duration){
 					if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == RESET){
 						overspeed_var.kind = no_spec;
 						DEBUG("over speed");
@@ -279,6 +279,7 @@ void oa_app_gps(void)
 						os_times = 0;
 						alarm_status_flag = OA_TRUE;
 					}
+					else os_times = 0;
 				}
 				
 				
@@ -303,6 +304,7 @@ void oa_app_gps(void)
 						park_times = 0;
 						alarm_status_flag = OA_TRUE;
 					}
+					else park_times = 0;
 				}
 			}
 			else if (gps_info.Speed > 0){
@@ -323,6 +325,7 @@ void oa_app_gps(void)
 						driver_time = 0;
 						alarm_status_flag = OA_TRUE;
 					}
+					else driver_time = 0;
 				}
 				
 				relax_time = 0;
@@ -334,6 +337,7 @@ void oa_app_gps(void)
 						WriteAlarmPara(RESET, StaAlarm0, ALARM_DRIVE_TIRED); //cancel this kind of alarm
 						relax_time = 0;
 					}
+					else relax_time = 0;
 				}
 				
 				driver_time = 0;
