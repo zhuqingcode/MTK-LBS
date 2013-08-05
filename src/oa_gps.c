@@ -347,12 +347,12 @@ void oa_app_gps(void)
 			//IntvlDistanc += GPS_IntvlDistanc(&gps_info, &dis_cal); //km
 			GPS_IntvlDistanc(&gps_info, &dis_cal);
 			IntvlDistanc += dis_cal;
-			OA_DEBUG_USER("miles:%f", IntvlDistanc);
+			//OA_DEBUG_USER("miles:%f", IntvlDistanc);
 			dis_temp = (u32)(IntvlDistanc * 10);
-			DEBUG("(u32)(IntvlDistanc * 10):%d", dis_temp);
+			//DEBUG("(u32)(IntvlDistanc * 10):%d", dis_temp);
 			if (IntvlDistanc >= UPDATE_DISTANC){
 				//GpsDistancCacul(&IntvlDistanc);//changed to statement below
-				DEBUG("statistics miles");
+				//DEBUG("statistics miles");
 				ret = mile_stat_add(dis_temp);
 				if (OA_TRUE == ret){
 					IntvlDistanc -= UPDATE_DISTANC;//IntvlDistanc = 0.0;
