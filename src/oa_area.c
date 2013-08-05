@@ -1239,9 +1239,9 @@ void oa_app_area(void *para)
 	u16 speed;
 	u8 time[6];
 	u8 i;
-	area_status_enum cur_status_circle[MAX_AREA_SUM] = 0;
-	area_status_enum cur_status_rect[MAX_AREA_SUM] = 0;
-	area_status_enum cur_status_poly[MAX_AREA_SUM] = 0;
+	area_status_enum cur_status_circle[MAX_AREA_SUM] = {0x0};
+	area_status_enum cur_status_rect[MAX_AREA_SUM] = {0x0};
+	area_status_enum cur_status_poly[MAX_AREA_SUM] = {0x0};
 	static area_status_enum last_status_circle[MAX_AREA_SUM] = {0x0};
 	static area_status_enum last_status_rect[MAX_AREA_SUM] = {0x0};
 	static area_status_enum last_status_poly[MAX_AREA_SUM] = {0x0};
