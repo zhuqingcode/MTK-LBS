@@ -33,6 +33,7 @@
 #include <stdlib.h>
 extern DEV_PLAT_PARAS dev_running;
 extern timeout_struct timeout_var;
+extern oa_soc_context g_soc_context;
 u16 total_write;
 u16 total_read;
 oa_bool has_blinddata_dir(void);
@@ -663,7 +664,8 @@ oa_bool oa_app_blinddata(void)
 		goto redoit;
 	}
 	//if device is doing timeout, do not send blind data
-	if (dev_running.plat_status == ONLINE && timeout_var.do_timeout == OA_FALSE){
+	if (dev_running.plat_status == ONLINE && timeout_var.do_timeout == OA_FALSE 
+		&& g_soc_context.is_blocksend == OA_FALSE){
 		//ret = read_blinddata(blind_buf, &data_len);
 		ret = read_blinddata_from_1file(blind_buf, &data_len);
 		if (ret == OA_FALSE){
