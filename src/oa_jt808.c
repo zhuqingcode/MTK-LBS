@@ -2248,7 +2248,7 @@ static u8 set_round_area(u8 *pbuf, u16 buflen)
 	}
 	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
-	if (area_num > MAX_AREA_SUM && option == 0){
+	if (area_num > MAX_AREA_SUM){
 		if (option == 0){
 			DEBUG("area num is too large, only update 24st");
 			area_num = 24;
@@ -2321,7 +2321,7 @@ static u8 set_rect_area(u8 *pbuf, u16 buflen)
 	}
 	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
-	if (area_num > MAX_AREA_SUM && option == 0){
+	if (area_num > MAX_AREA_SUM){
 		if (option == 0){
 			DEBUG("area num is too large, only update 24st");
 			area_num = 24;
@@ -2395,7 +2395,7 @@ static u8 set_poly_area(u8 *pbuf, u16 buflen)
 	}
 	
 	DEBUG("区域数目:%d buflen:%d", area_num, buflen);
-	if (area_num > MAX_AREA_SUM && option == 0){
+	if (area_num > MAX_AREA_SUM){
 		if (option == 0){
 			DEBUG("area num is too large, only update 24st");
 			area_num = 24;
