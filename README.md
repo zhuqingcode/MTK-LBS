@@ -1,5 +1,5 @@
 MTK-LBS
 =======
 
-It is similar with the project MTK-LBS-DLL but for 2MB flash!
+This project is a private one.You can refer to it's some source code if you don't consider it as rubbish.
 This is a development & release edition!
