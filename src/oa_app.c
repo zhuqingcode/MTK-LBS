@@ -512,7 +512,7 @@ void oa_sms_demo(void *param){
 void oa_app_main(void)
 {
 	static oa_bool first_run = OA_TRUE;
-	oa_bool dev_is_locked;
+	oa_bool dev_is_locked, ret;
 	
 	if (OA_TRUE == first_run)
 	{
@@ -521,6 +521,8 @@ void oa_app_main(void)
 		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		//device params initial
 		dev_params_init();
+		//initial devid
+		restore_devid();
 		//just print key params
 		print_key_dev_params();
 		//fill soc with device params

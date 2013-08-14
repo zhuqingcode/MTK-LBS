@@ -64,7 +64,7 @@ DEVICE_PARAMS dev_def_params =
 	{"root"},						//b_apn_password
 	{"112.4.133.86"},				//b_server_ip
 	{"talentvideo.com.cn"},			//b_server_dn
-	10000,						//server_tcp_port
+	11119,						//server_tcp_port
 	9994,						//server_udp_port
 	//9992,						//hx:just for test
 	//......
@@ -100,12 +100,12 @@ DEVICE_PARAMS dev_def_params =
 	0,							//vehicle_odometer
 	32,							//vehicle_province_id
 	100,							//vehicle_city_id
-	{"NJ001"},					//vehicle_license : carID
+	{"00000"},					//vehicle_license : carID
 	2,							//plate_color
 	//user definition
 	{"70555"},					//man id
 	{"T100G"},					//term model
-	{"3000015"},					//term id
+	{"0000000"},					//term id
 	{"13888888888"},				//LclTEL
 	{"114.221.34.95"},				//ftp ip
 	21,							//port
@@ -577,6 +577,88 @@ oa_bool dev_params_save(void)
 		return OA_FALSE;
 	}
 	oa_fclose(handle);    
+	return OA_TRUE;
+}
+/*********************************************************
+*Function:      backup_devid()
+*Description:   save dev_now_params to 'DEV_PARAMS_FILE'
+*Return:         oa_bool
+*Others:         
+*********************************************************/
+oa_bool backup_devid(oa_uint8 *p_id)
+{
+	oa_int32 handle, ret;
+	oa_uint32 dummy_read, dummy_write;
+	dev_id_struct dev_id_var;
+	
+	handle = oa_fopen(DEVID_FILE);
+	if (handle < 0)
+	{
+		/* create new file for setting. */
+		handle = oa_fcreate(DEVID_FILE);
+		/* hope never return here. */
+		if (handle < 0)
+		{
+			DEBUG("Create dev id file failed!");
+			return OA_FALSE;
+		}
+
+		oa_memset(&dev_id_var, 0x0, sizeof(dev_id_var));
+		oa_strcpy(dev_id_var.dev_id, DEVID_INI);
+		
+		ret = oa_fwrite(handle, &dev_id_var, sizeof(dev_id_var), &dummy_write);
+		if ((ret < 0) || (dummy_write != sizeof(dev_id_var)))
+		{
+			DEBUG("Init dev id file failed!");
+			return OA_FALSE;
+		}
+
+		DEBUG("Create dev id file ok!");    
+
+		
+	}
+	oa_fseek(handle, 0, OA_FILE_BEGIN);
+	oa_memset(&dev_id_var, 0x0, sizeof(dev_id_var));
+	oa_strcpy(dev_id_var.dev_id, p_id);
+	//write 
+	ret = oa_fwrite(handle, &dev_id_var, sizeof(dev_id_var), &dummy_write);
+	if ((ret < 0) || (dummy_write != sizeof(dev_id_var)))
+	{
+		DEBUG("write dev id file failed!");
+		oa_fclose(handle);
+		return OA_FALSE;
+	}
+
+	oa_fclose(handle);
+	return OA_TRUE;
+}
+/*********************************************************
+*Function:      restore_devid()
+*Description:   save dev_now_params to 'DEV_PARAMS_FILE'
+*Return:         oa_bool
+*Others:         
+*********************************************************/
+oa_bool restore_devid(void)
+{
+	oa_int32 handle, ret;
+	oa_uint32 dummy_read, dummy_write;
+	dev_id_struct dev_id_var;
+	
+	handle = oa_fopen(DEVID_FILE);
+	if (handle < 0) {
+		return OA_FALSE;
+	}
+	oa_fseek(handle, 0, OA_FILE_BEGIN);
+	oa_memset(&dev_id_var, 0x0, sizeof(dev_id_var));
+	//read 
+	ret = oa_fread(handle, &dev_id_var, sizeof(dev_id_var), &dummy_read);
+	if ((ret < 0) || (dummy_read != sizeof(dev_id_var))) {
+		oa_fclose(handle);
+		return OA_FALSE;
+	}
+
+	oa_strcpy(dev_now_params.term_id, dev_id_var.dev_id);
+	oa_fclose(handle);
 	return OA_TRUE;
 }
 /*********************************************************

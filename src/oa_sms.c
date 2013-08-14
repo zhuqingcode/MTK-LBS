@@ -1911,12 +1911,13 @@ void handle_keyword4ms(e_keyword key_kind,
 						PRINT_SAMEPARA;
 						p_set->act_kind = no_act;
 						break;
-					}
-					else{//not equal
-						oa_memset(dev_now_params.term_id, 0x0, sizeof(dev_now_params.term_id));
-						oa_memcpy(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN);
-						p_set->act_kind = rereg;
-					}
+				}
+				else{//not equal
+					oa_memset(dev_now_params.term_id, 0x0, sizeof(dev_now_params.term_id));
+					oa_memcpy(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN);
+					p_set->act_kind = rereg;
+					backup_devid(dev_now_params.term_id);
+				}
 			}
 		}break;
 		case e_none:{
