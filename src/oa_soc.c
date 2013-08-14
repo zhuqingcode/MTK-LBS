@@ -603,7 +603,7 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 
 	//if other application's socket id, ignore it.
 	if(soc_notify->socket_id != g_soc_context.socket_id){
-		DEBUG("%s:sock_id=%d unknow, event_type=%d!",__FILE__, __func__,soc_notify->socket_id,soc_notify->event_type);    
+		DEBUG("%s:sock_id=%d unknow, event_type=%d!",__func__,soc_notify->socket_id,soc_notify->event_type);    
 		return;
 	}
     
@@ -613,14 +613,14 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 			if (soc_notify->result == OA_TRUE){
 				  g_soc_context.is_blocksend = OA_FALSE;
 				 //resend the data ,else will lost data
-				  DEBUG("%s:sock_id=%d resend!",__FILE__, __func__,soc_notify->socket_id);
+				  DEBUG("%s:sock_id=%d resend!",__func__,soc_notify->socket_id);
 				  //oa_soc_send_req( );//comment by zq
 				  //-----------customer code-----------
 				  oa_soc_send_req();
 				  //---------------end----------------
 			}
 			else{
-				 DEBUG("%s:sock_id=%d send fail err=%d!",__FILE__, __func__,soc_notify->socket_id,soc_notify->error_cause);
+				 DEBUG("%s:sock_id=%d send fail err=%d!",__func__,soc_notify->socket_id,soc_notify->error_cause);
 				 oa_soc_close_req( );
 			}     
 		   
