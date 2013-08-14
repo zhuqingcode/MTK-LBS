@@ -41,7 +41,8 @@
 #define TERM_TEL_NUM_MAX_LEN 12
 #define FTP_MAX_LEN 32
 #define DEV_PARAMS_FILE L"dev_paras.ini"
-
+#define DEVID_FILE L"dev_id.ini"
+#define DEVID_INI "0000000"
 typedef struct
 {
 	oa_uint32 heartbeat_interval;									//终端心跳发送间隔，单位为秒（s）
@@ -128,6 +129,11 @@ typedef struct
 	oa_uint8 ftppwd[FTP_MAX_LEN];
 	oa_uint8 ftp_prog_name[FTP_MAX_LEN];
 }DEVICE_PARAMS;
+
+typedef struct
+{
+	oa_uint8 dev_id[TERM_ID_MAX_LEN+1];
+}dev_id_struct;
 
 extern oa_bool factory_set(void);
 extern oa_bool dev_params_init(void);
