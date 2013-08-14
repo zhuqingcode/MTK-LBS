@@ -364,7 +364,7 @@ oa_int16 oa_soc_send_req(void)
 			DEBUG("%s:sock_id=%d send fail ret=%d!",__func__,g_soc_context.socket_id,ret);
 			//oa_evshed_start(OA_EVSHED_ID_1, oa_soc_can_resend, NULL, OA_GPRS_WAITING_RESEND);
 			//clear RAM
-			oa_sram_noinit_reset();
+			//oa_sram_noinit_reset();
 			return SOC_SEND_ERR;
 		}
 	}
