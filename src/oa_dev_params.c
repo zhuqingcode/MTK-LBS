@@ -47,16 +47,16 @@ extern oa_soc_set_parameter soc_cs;
 DEVICE_PARAMS dev_def_params =
 {
 	60,							//heartbeat_interval
-	30,							//tcp_ack_timeout
+	20,							//tcp_ack_timeout
 	3,							//tcp_retrans_times
-	30,							//udp_ack_timeout
+	20,							//udp_ack_timeout
 	3,							//udp_retrans_times
-	30,							//sms_ack_timeout
+	20,							//sms_ack_timeout
 	3,							//sms_retrans_times
 	{"cmnet"},					//m_apn_name
 	{"root"},						//m_apn_username
 	{"root"},						//m_apn_password
-	{"112.4.133.86"},				//m_server_ip
+	{"61.155.107.41"},				//m_server_ip
 	//{"202.102.108.23"},			//hx:just for test
 	{"talentvideo.com.cn"},			//m_server_dn
 	{"cmnet"},					//b_apn_name
@@ -64,8 +64,8 @@ DEVICE_PARAMS dev_def_params =
 	{"root"},						//b_apn_password
 	{"112.4.133.86"},				//b_server_ip
 	{"talentvideo.com.cn"},			//b_server_dn
-	11119,						//server_tcp_port
-	9994,						//server_udp_port
+	11114,						//server_tcp_port
+	11115,						//server_udp_port
 	//9992,						//hx:just for test
 	//......
 	0,							//report_strategy
@@ -73,7 +73,7 @@ DEVICE_PARAMS dev_def_params =
 	60,							//unlogin_reporttime
 	//......
 	300,							//sleep_reporttime
-	30,							//urgent_reporttime
+	10,							//urgent_reporttime
 	30,							//default_reporttime
 	//......
 	200,							//default_reportdistance
@@ -82,31 +82,31 @@ DEVICE_PARAMS dev_def_params =
 	10,							//urgent_reportdistance
 	15,							//corner_reportangle
 	10,
-	{"13888888888"},				//moniter platform num
-	{"13888888888"},				//reset_num
-	{"13888888888"},				//restore_factory_settings_num
-	{"13888888888"},
-	{"13888888888"},				//terminal_sms_num
+	{"00000000000"},				//moniter platform num
+	{"00000000000"},				//reset_num
+	{"00000000000"},				//restore_factory_settings_num
+	{"00000000000"},
+	{"00000000000"},				//terminal_sms_num
 	//......
 	0x00000000,					//alarm_mask
 	0,							//alarm_send_sms_mask
 	120,							//max_speed
 	10,							//speed_duration
-	120,							//continuous_drive_time_threshold
+	14400,							//continuous_drive_time_threshold
 	57600,						//day_add_drive_time_threshold
 	1200,						//min_rest_time
-	60000,						//max_park_time
+	1800,						//max_park_time
 	//......
 	0,							//vehicle_odometer
 	32,							//vehicle_province_id
 	100,							//vehicle_city_id
-	{"00000"},					//vehicle_license : carID
+	{"0000000"},					//vehicle_license : carID
 	2,							//plate_color
 	//user definition
 	{"70555"},					//man id
 	{"T100G"},					//term model
 	{"0000000"},					//term id
-	{"13888888888"},				//LclTEL
+	{"00000000000"},				//LclTEL
 	{"114.221.34.95"},				//ftp ip
 	21,							//port
 	{"talent"},					//user name
@@ -387,7 +387,7 @@ oa_bool del_some_files(void)
 			return OA_FALSE;
 		}
 	}
-
+#if 0
 	handle = oa_fopen(USE_LOCK_FILE);
 	if (handle >= 0){//exist
 		oa_fclose(handle);
@@ -398,7 +398,7 @@ oa_bool del_some_files(void)
 			return OA_FALSE;
 		}
 	}
-
+#endif
 	handle = oa_fopen(AUTHEN_FILE);
 	if (handle >= 0){
 		oa_fclose(handle);

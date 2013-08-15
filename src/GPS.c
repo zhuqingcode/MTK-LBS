@@ -1825,7 +1825,7 @@ u8 GetPosinf(u8 *Str,u8 Filed,u8 Mode)
 			}
 			else
 			{
-				oa_memcpy(Str,&Pos_Inf.Speed,/*sizeof(float)*/sizeof(u16));
+				oa_memcpy(Str,(u8 *)&Pos_Inf.Speed,/*sizeof(float)*/sizeof(u16));
 				Result=/*sizeof(float)*/sizeof(u16);	
 			}
 		break;	
