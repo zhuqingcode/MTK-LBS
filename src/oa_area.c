@@ -1273,14 +1273,7 @@ void oa_app_area(void *para)
 	GetPosinf((u8 *)&lat, GPSLat, 5);
 	GetPosinf((u8 *)&speed, GPSSpeed, 0);
 	get_rtc_time(time);
-	//overspeed
-	if (speed <= dev_now_params.max_speed){
-		overspeed_var.kind = no_os;
-		if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET){
-			DEBUG("cancel over speed");
-			WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
-		}
-	}
+	
 	oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
 	//------------------circle area inside/outside judge------------------
 	circle_area_inout_judge(lat, lon, time, cur_status_circle, area_id, speed, &os_flag_circle, os_time_circle);
