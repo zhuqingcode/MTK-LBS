@@ -365,6 +365,10 @@ oa_int16 oa_soc_send_req(void)
 			//oa_evshed_start(OA_EVSHED_ID_1, oa_soc_can_resend, NULL, OA_GPRS_WAITING_RESEND);
 			//clear RAM
 			//oa_sram_noinit_reset();
+			len = oa_read_buffer_noinit(g_soc_context.gprs_tx, 
+			    							g_soc_context.gprs_tx_pending_data,
+			    							g_soc_context.gprs_tx_pending_size);
+			g_soc_context.gprs_tx_pending_size = 0;
 			return SOC_SEND_ERR;
 		}
 	}
