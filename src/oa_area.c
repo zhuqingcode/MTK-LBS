@@ -1233,6 +1233,8 @@ void poly_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur,
 void oa_app_area(void *para)
 {
 	static oa_bool task_runed = OA_FALSE;
+	static oa_bool start_area = OA_FALSE;
+	static oa_uint8 b_t = 0;
 	oa_bool ret;
 	u32 lon;
 	u32 lat;
@@ -1255,7 +1257,7 @@ void oa_app_area(void *para)
 	static u8 os_cal_rect[MAX_AREA_SUM] = {0x0};
 	static u8 os_cal_poly[MAX_AREA_SUM] = {0x0};
 	u32 area_id[MAX_AREA_SUM] = {0x0};
-
+	STRUCT_RMC gps_info;
 
 	if (OA_FALSE == task_runed){
 		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
@@ -1268,19 +1270,23 @@ void oa_app_area(void *para)
 #endif
 	//gps check
 	if (GPS_GetFixStatus()) goto again;
+	else if (start_area == OA_FALSE) {
+		b_t++;
+		if (b_t * OA_AREA_RUN_SECOND > 5) {
+			start_area = OA_TRUE;
+		}
+	}
+
+	if (start_area == OA_FALSE) goto again;
 	//extract datas
 	GetPosinf((u8 *)&lon, GPSLon, 5);
 	GetPosinf((u8 *)&lat, GPSLat, 5);
-	GetPosinf((u8 *)&speed, GPSSpeed, 0);
+	oa_memset(&gps_info, 0x0, sizeof(gps_info));
+	GPS_GetPosition(&gps_info);//copy gps data into 'gps_info'
+	//GetPosinf((u8 *)&speed, GPSSpeed, 0);
+	speed = gps_info.Speed;
 	get_rtc_time(time);
-	//overspeed
-	if (speed <= dev_now_params.max_speed){
-		overspeed_var.kind = no_os;
-		if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET){
-			DEBUG("cancel over speed");
-			WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
-		}
-	}
+	
 	oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
 	//------------------circle area inside/outside judge------------------
 	circle_area_inout_judge(lat, lon, time, cur_status_circle, area_id, speed, &os_flag_circle, os_time_circle);

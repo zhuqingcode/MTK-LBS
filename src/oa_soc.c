@@ -364,7 +364,11 @@ oa_int16 oa_soc_send_req(void)
 			DEBUG("%s:sock_id=%d send fail ret=%d!",__func__,g_soc_context.socket_id,ret);
 			//oa_evshed_start(OA_EVSHED_ID_1, oa_soc_can_resend, NULL, OA_GPRS_WAITING_RESEND);
 			//clear RAM
-			oa_sram_noinit_reset();
+			//oa_sram_noinit_reset();
+			len = oa_read_buffer_noinit(g_soc_context.gprs_tx, 
+			    							g_soc_context.gprs_tx_pending_data,
+			    							g_soc_context.gprs_tx_pending_size);
+			g_soc_context.gprs_tx_pending_size = 0;
 			return SOC_SEND_ERR;
 		}
 	}
@@ -603,7 +607,7 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 
 	//if other application's socket id, ignore it.
 	if(soc_notify->socket_id != g_soc_context.socket_id){
-		DEBUG("%s:sock_id=%d unknow, event_type=%d!",__FILE__, __func__,soc_notify->socket_id,soc_notify->event_type);    
+		DEBUG("%s:sock_id=%d unknow, event_type=%d!",__func__,soc_notify->socket_id,soc_notify->event_type);    
 		return;
 	}
     
@@ -613,14 +617,14 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 			if (soc_notify->result == OA_TRUE){
 				  g_soc_context.is_blocksend = OA_FALSE;
 				 //resend the data ,else will lost data
-				  DEBUG("%s:sock_id=%d resend!",__FILE__, __func__,soc_notify->socket_id);
+				  DEBUG("%s:sock_id=%d resend!",__func__,soc_notify->socket_id);
 				  //oa_soc_send_req( );//comment by zq
 				  //-----------customer code-----------
 				  oa_soc_send_req();
 				  //---------------end----------------
 			}
 			else{
-				 DEBUG("%s:sock_id=%d send fail err=%d!",__FILE__, __func__,soc_notify->socket_id,soc_notify->error_cause);
+				 DEBUG("%s:sock_id=%d send fail err=%d!",__func__,soc_notify->socket_id,soc_notify->error_cause);
 				 oa_soc_close_req( );
 			}     
 		   
