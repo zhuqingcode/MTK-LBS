@@ -28,7 +28,7 @@
 #define __OA_SW_H__
 
 
-#define OA_SW_VERSION_NO "V 00.00.00.00.05"
+#define OA_SW_VERSION_NO "V 00.00.00.00.06"
 
 
 
