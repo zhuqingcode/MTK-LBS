@@ -46,7 +46,7 @@
 #define IN0_GPIO 17
 #define IN1_GPIO 12
 #define OUT_GPIO 11
-
+#define SCRN_POWER 5
 #define GPIO_INPUT 0
 #define GPIO_OUTPUT 1
 #define GPIO_MODE 0
