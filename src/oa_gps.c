@@ -286,8 +286,8 @@ void oa_app_gps(void)
 			}
 			else if (gps_info.Speed <= speed){
 				os_times = 0;
-				overspeed_var.kind = no_os;
-				if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET){
+				if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET &&
+					overspeed_var.kind == no_spec) {
 					DEBUG("cancel over speed");
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 				}
