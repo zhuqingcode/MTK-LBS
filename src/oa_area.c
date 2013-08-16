@@ -1308,6 +1308,7 @@ void oa_app_area(void *para)
 			handle_alarm_sms(ALARM_ENTER_AREA);
 		}
 	}
+	//oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
 	oa_memcpy(last_status_circle, cur_status_circle, sizeof(last_status_circle));
 	//area overspeed judge
 	for (i = 0;i < MAX_AREA_SUM; i++){
@@ -1327,7 +1328,7 @@ void oa_app_area(void *para)
 		}
 		else if (cur_status_circle[i] == area_err) os_cal_circle[i] = 0;
 	}
-	oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
+	
 	oa_memset(area_id, 0x0, sizeof(area_id));
 	//------------------rect area inside/outside judge------------------
 	rect_area_inout_judge(lat, lon, time, cur_status_rect, area_id, speed, &os_flag_rect, os_time_rect);
@@ -1349,6 +1350,7 @@ void oa_app_area(void *para)
 			handle_alarm_sms(ALARM_ENTER_AREA);
 		}
 	}
+	//oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
 	oa_memcpy(last_status_rect, cur_status_rect, sizeof(last_status_rect));
 	//area overspeed judge
 	for (i = 0;i < MAX_AREA_SUM; i++){
@@ -1368,7 +1370,7 @@ void oa_app_area(void *para)
 		}
 		else if (cur_status_rect[i] == area_err) os_cal_rect[i] = 0;
 	}
-	oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
+	
 	oa_memset(area_id, 0x0, sizeof(area_id));
 	//------------------poly area inside/outside judge------------------
 	poly_area_inout_judge(lat, lon, time, cur_status_poly, area_id, speed, &os_flag_poly, os_time_poly);
@@ -1390,6 +1392,7 @@ void oa_app_area(void *para)
 			handle_alarm_sms(ALARM_ENTER_AREA);
 		}
 	}
+	//oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
 	oa_memcpy(last_status_poly, cur_status_poly, sizeof(last_status_poly));
 	//area overspeed judge
 	for (i = 0;i < MAX_AREA_SUM; i++){
@@ -1409,7 +1412,7 @@ void oa_app_area(void *para)
 		}
 		else if (cur_status_poly[i] == area_err) os_cal_poly[i] = 0;
 	}
-
+	
 again:
 	oa_timer_start(OA_TIMER_ID_9, oa_app_area, NULL, OA_AREA_DETECT_TIME);
 }
