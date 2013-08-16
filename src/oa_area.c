@@ -1272,7 +1272,7 @@ void oa_app_area(void *para)
 	if (GPS_GetFixStatus()) goto again;
 	else if (start_area == OA_FALSE) {
 		b_t++;
-		if (b_t * OA_AREA_RUN_SECOND > 5) {
+		if (b_t * OA_AREA_RUN_SECOND > 15) {
 			start_area = OA_TRUE;
 		}
 	}
