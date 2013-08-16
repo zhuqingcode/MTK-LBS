@@ -479,6 +479,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 						dev_running.plat_status = ONLINE;//鉴权后表示与平台连接上
 						dev_running.doing_what = do_none;//means authen ok
 						dev_running.authen_err_time = 0;
+						DEBUG("Congratulations to you,device login successfully!");
 						//unlock
 						if (use_is_lock()){
 							use_unlock();

@@ -4133,6 +4133,8 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 			pbuf+=4;
 			*pbuflen += 7;
 		}
+
+		overspeed_var.kind = no_os;//clear
 	}
 	//-----------
 	if (area_alarm_addition_var.area_kind != no_spec){
@@ -4145,6 +4147,8 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 		pbuf+=4;
 		*pbuf++ = area_alarm_addition_var.in_out;
 		*pbuflen += 8;
+
+		oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));//clear
 	}
 	
 /*	*pbuf=0x13;//进出区域或路线
