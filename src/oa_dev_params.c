@@ -387,7 +387,7 @@ oa_bool del_some_files(void)
 			return OA_FALSE;
 		}
 	}
-#if 0
+
 	handle = oa_fopen(USE_LOCK_FILE);
 	if (handle >= 0){//exist
 		oa_fclose(handle);
@@ -398,7 +398,7 @@ oa_bool del_some_files(void)
 			return OA_FALSE;
 		}
 	}
-#endif
+
 	handle = oa_fopen(AUTHEN_FILE);
 	if (handle >= 0){
 		oa_fclose(handle);
