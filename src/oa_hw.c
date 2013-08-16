@@ -125,6 +125,9 @@ void oa_gpio_set(void)
 	//OUT
 	oa_gpio_mode_setup(OUT_GPIO, GPIO_MODE);
 	oa_gpio_init(GPIO_OUTPUT, OUT_GPIO);
+	//SCRN POWER
+	oa_gpio_mode_setup(SCRN_POWER, GPIO_MODE);
+	oa_gpio_init(GPIO_OUTPUT, SCRN_POWER);
 	
 }
 /*********************************************************
