@@ -50,7 +50,7 @@
 #define GPIO_INPUT 0
 #define GPIO_OUTPUT 1
 #define GPIO_MODE 0
-
+#define POWER_HIGH 15
 #define ACC_ON 1
 #define ACC_OFF 0
 #define OA_ACC_RUN 2000
