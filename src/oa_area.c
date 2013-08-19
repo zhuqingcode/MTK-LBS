@@ -36,6 +36,7 @@
 extern DEVICE_PARAMS dev_now_params;
 extern os_struct overspeed_var;
 area_alarm_addition_struct area_alarm_addition_var = {{no_spec},{0},{0}};
+os_kind os_in_where = no_os;
  /*********************************************************
 *Function:     has_areadata_dir_n_c()
 *Description:  if system desn't have area data directory,create it 
@@ -1321,6 +1322,7 @@ void oa_app_area(void *para)
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 				handle_alarm_sms(ALARM_OVER_SPEED);
 				os_cal_circle[i] = 0;
+				os_in_where = os_circle;
 			}
 		}
 		else if (cur_status_circle[i] == area_outside || ~(os_flag_circle & (1<<i))){
@@ -1363,6 +1365,7 @@ void oa_app_area(void *para)
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 				handle_alarm_sms(ALARM_OVER_SPEED);
 				os_cal_rect[i] = 0;
+				os_in_where = os_rect;
 			}
 		}
 		else if (cur_status_rect[i] == area_outside || ~(os_flag_rect & (1<<i))){
@@ -1405,6 +1408,7 @@ void oa_app_area(void *para)
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 				handle_alarm_sms(ALARM_OVER_SPEED);
 				os_cal_poly[i] = 0;
+				os_in_where = os_poly;
 			}
 		}
 		else if (cur_status_poly[i] == area_outside || ~(os_flag_poly & (1<<i))){
