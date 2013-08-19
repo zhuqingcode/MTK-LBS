@@ -128,7 +128,10 @@ void oa_gpio_set(void)
 	//SCRN POWER
 	oa_gpio_mode_setup(SCRN_POWER, GPIO_MODE);
 	oa_gpio_init(GPIO_OUTPUT, SCRN_POWER);
-	
+	//power high
+	oa_gpio_mode_setup(POWER_HIGH, GPIO_MODE);
+	oa_gpio_init(GPIO_OUTPUT, POWER_HIGH);
+	oa_gpio_write(1, POWER_HIGH);
 }
 /*********************************************************
 *Function:     acc_status_detect()
