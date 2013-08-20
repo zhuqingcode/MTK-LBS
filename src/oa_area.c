@@ -36,6 +36,7 @@
 extern DEVICE_PARAMS dev_now_params;
 extern os_struct overspeed_var;
 area_alarm_addition_struct area_alarm_addition_var = {{no_spec},{0},{0}};
+os_kind os_in_where = no_os;
  /*********************************************************
 *Function:     has_areadata_dir_n_c()
 *Description:  if system desn't have area data directory,create it 
@@ -1314,13 +1315,15 @@ void oa_app_area(void *para)
 	for (i = 0;i < MAX_AREA_SUM; i++){
 		if (cur_status_circle[i] == area_inside && (os_flag_circle & (1<<i))){
 			os_cal_circle[i]++;
-			if (os_cal_circle[i] * OA_AREA_RUN_SECOND > os_time_circle[i]){
+			if (os_cal_circle[i] * OA_AREA_RUN_SECOND > os_time_circle[i]
+				&& ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == RESET) {
 				overspeed_var.kind = os_circle;
 				overspeed_var.id = area_id[i];
 				DEBUG("区域内超速,区域id:%d", area_id[i]);
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 				handle_alarm_sms(ALARM_OVER_SPEED);
 				os_cal_circle[i] = 0;
+				os_in_where = os_circle;
 			}
 		}
 		else if (cur_status_circle[i] == area_outside || ~(os_flag_circle & (1<<i))){
@@ -1356,13 +1359,15 @@ void oa_app_area(void *para)
 	for (i = 0;i < MAX_AREA_SUM; i++){
 		if (cur_status_rect[i] == area_inside && (os_flag_rect & (1<<i))){
 			os_cal_rect[i]++;
-			if (os_cal_rect[i] * OA_AREA_RUN_SECOND > os_time_rect[i]){
+			if (os_cal_rect[i] * OA_AREA_RUN_SECOND > os_time_rect[i]
+				&& ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == RESET) {
 				overspeed_var.kind = os_rect;
 				overspeed_var.id = area_id[i];
 				DEBUG("区域内超速,区域id:%d", area_id[i]);
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 				handle_alarm_sms(ALARM_OVER_SPEED);
 				os_cal_rect[i] = 0;
+				os_in_where = os_rect;
 			}
 		}
 		else if (cur_status_rect[i] == area_outside || ~(os_flag_rect & (1<<i))){
@@ -1398,13 +1403,15 @@ void oa_app_area(void *para)
 	for (i = 0;i < MAX_AREA_SUM; i++){
 		if (cur_status_poly[i] == area_inside && (os_flag_poly & (1<<i))){
 			os_cal_poly[i]++;
-			if (os_cal_poly[i] * OA_AREA_RUN_SECOND > os_time_poly[i]){
+			if (os_cal_poly[i] * OA_AREA_RUN_SECOND > os_time_poly[i]
+				&& ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == RESET) {
 				overspeed_var.kind = os_poly;
 				overspeed_var.id = area_id[i];
 				DEBUG("区域内超速,区域id:%d", area_id[i]);
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 				handle_alarm_sms(ALARM_OVER_SPEED);
 				os_cal_poly[i] = 0;
+				os_in_where = os_poly;
 			}
 		}
 		else if (cur_status_poly[i] == area_outside || ~(os_flag_poly & (1<<i))){
