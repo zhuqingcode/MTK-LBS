@@ -36,7 +36,6 @@
 extern DEVICE_PARAMS dev_now_params;
 extern os_struct overspeed_var;
 area_alarm_addition_struct area_alarm_addition_var = {{no_spec},{0},{0}};
-os_kind os_in_where = no_os;
  /*********************************************************
 *Function:     has_areadata_dir_n_c()
 *Description:  if system desn't have area data directory,create it 
@@ -1251,6 +1250,9 @@ void oa_app_area(void *para)
 	u32 os_flag_circle = 0;
 	u32 os_flag_rect = 0;
 	u32 os_flag_poly = 0;
+	static u32 os_circle = 0;
+	static u32 os_rect = 0;
+	static u32 os_poly = 0;
 	u8 os_time_circle[MAX_AREA_SUM] = {0x0};
 	u8 os_time_rect[MAX_AREA_SUM] = {0x0};
 	u8 os_time_poly[MAX_AREA_SUM] = {0x0};
@@ -1322,14 +1324,19 @@ void oa_app_area(void *para)
 				DEBUG("区域内超速,区域id:%d", area_id[i]);
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 				handle_alarm_sms(ALARM_OVER_SPEED);
+				os_circle |= (1<<i);
 				os_cal_circle[i] = 0;
-				os_in_where = os_circle;
 			}
 		}
-		else if (cur_status_circle[i] == area_outside || ~(os_flag_circle & (1<<i))){
+		else if (cur_status_circle[i] == area_err || 
+					cur_status_circle[i] == area_outside || 
+					~(os_flag_circle & (1<<i))){
 			os_cal_circle[i] = 0;
+			if ((os_circle & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+				WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
+				os_circle &= ~(1<<i);
+			}
 		}
-		else if (cur_status_circle[i] == area_err) os_cal_circle[i] = 0;
 	}
 	
 	oa_memset(area_id, 0x0, sizeof(area_id));
@@ -1367,13 +1374,17 @@ void oa_app_area(void *para)
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 				handle_alarm_sms(ALARM_OVER_SPEED);
 				os_cal_rect[i] = 0;
-				os_in_where = os_rect;
 			}
 		}
-		else if (cur_status_rect[i] == area_outside || ~(os_flag_rect & (1<<i))){
+		else if (cur_status_rect[i] == area_err || 
+					cur_status_rect[i] == area_outside || 
+					~(os_flag_rect & (1<<i))){
 			os_cal_rect[i] = 0;
+			if ((os_rect & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+				WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
+				os_rect &= ~(1<<i);
+			}
 		}
-		else if (cur_status_rect[i] == area_err) os_cal_rect[i] = 0;
 	}
 	
 	oa_memset(area_id, 0x0, sizeof(area_id));
@@ -1411,13 +1422,17 @@ void oa_app_area(void *para)
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 				handle_alarm_sms(ALARM_OVER_SPEED);
 				os_cal_poly[i] = 0;
-				os_in_where = os_poly;
 			}
 		}
-		else if (cur_status_poly[i] == area_outside || ~(os_flag_poly & (1<<i))){
+		else if (cur_status_poly[i] == area_err || 
+					cur_status_poly[i] == area_outside || 
+					~(os_flag_poly & (1<<i))){
 			os_cal_poly[i] = 0;
+			if ((os_poly & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+				WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
+				os_poly &= ~(1<<i);
+			}
 		}
-		else if (cur_status_poly[i] == area_err) os_cal_poly[i] = 0;
 	}
 	
 again:
