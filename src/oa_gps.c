@@ -41,7 +41,6 @@ os_struct overspeed_var = {{no_os}, {0}};
 extern area_alarm_addition_struct area_alarm_addition_var;
 extern DEVICE_PARAMS dev_now_params;
 extern DEV_PLAT_PARAS dev_running;
-extern os_kind os_in_where;
 /*********************************************************
 *Function:      ISGpsAntOK()
 *Description:   检测天线状态，并触发或取消天线故障报警。
@@ -124,7 +123,7 @@ void oa_app_gps(void)
 	oa_uint16 soc_ret;
 	u32 flag;
 	oa_bool alarm_status_flag = OA_FALSE;
-
+	static oa_bool overspeed_no_area;
 #if 0	
 	if (dev_running.plat_status == OFFLINE){//concern connect to platform first
 		goto redo;
@@ -275,11 +274,12 @@ void oa_app_gps(void)
 				if (os_times * GPS_RUN_SECONDS > dev_now_params.speed_duration){
 					if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == RESET){
 						overspeed_var.kind = no_spec;
+						overspeed_no_area = OA_TRUE;
 						DEBUG("over speed");
 						handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 						handle_alarm_sms(ALARM_OVER_SPEED);
 						os_times = 0;
-						os_in_where = no_spec;
+						alarm_status_flag = OA_TRUE;
 					}
 					else os_times = 0;
 				}
@@ -289,7 +289,8 @@ void oa_app_gps(void)
 			else if (gps_info.Speed <= speed){
 				os_times = 0;
 				if (ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET &&
-					os_in_where == no_spec) {
+					overspeed_no_area) {
+					overspeed_no_area = OA_FALSE;
 					DEBUG("cancel over speed");
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 				}
