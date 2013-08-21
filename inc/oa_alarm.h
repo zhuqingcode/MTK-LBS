@@ -48,6 +48,7 @@ typedef enum
 {
 	out2in,
 	in2out,
+	inout_no,
 }in_out_kind;
 
 typedef struct
