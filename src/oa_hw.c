@@ -183,7 +183,7 @@ void acc_status_detect(void *param)
 					overspeed_var.kind = no_os;
 					area_alarm_addition_var.area_kind = no_spec;
 					handle_alarm_status(StaAlarm0, ALARM_EMERGENCY_k, SET, OA_TRUE);
-					handle_alarm_sms(ALARM_EMERGENCY_k, OA_TRUE);
+					handle_alarm_sms(ALARM_EMERGENCY_k, 1, inout_no, 0);
 					DEBUG("key alarm");
 				//}
 			}

@@ -1309,10 +1309,8 @@ void oa_app_area(void *para)
 				handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
 			}
 
-			if (area_pro[i].alarm_inside_to_driver) {
-				handle_alarm_sms(ALARM_ENTER_AREA, OA_TRUE);
-			}
-			
+			handle_alarm_sms(ALARM_ENTER_AREA, area_pro[i].alarm_inside_to_driver, out2in, area_id[i]);
+		
 		}
 		else if (cur_status_circle[i] == area_outside && last_status_circle[i] == area_inside){
 			DEBUG("出区域,区域id:%d", area_id[i]);
@@ -1323,10 +1321,7 @@ void oa_app_area(void *para)
 				handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
 			}
 
-			if (area_pro[i].alarm_outside_to_driver) {
-				handle_alarm_sms(ALARM_ENTER_AREA, OA_TRUE);
-			}
-			
+			handle_alarm_sms(ALARM_ENTER_AREA, area_pro[i].alarm_outside_to_driver, in2out, area_id[i]);
 		}
 	}
 	//oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
@@ -1341,7 +1336,7 @@ void oa_app_area(void *para)
 				overspeed_var.id = area_id[i];
 				DEBUG("区域内超速,区域id:%d", area_id[i]);
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
-				handle_alarm_sms(ALARM_OVER_SPEED, OA_TRUE);
+				handle_alarm_sms(ALARM_OVER_SPEED, 1, inout_no, 0);
 				os_circle |= (1<<i);
 				os_cal_circle[i] = 0;
 			}
@@ -1372,10 +1367,7 @@ void oa_app_area(void *para)
 				handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
 			}
 
-			if (area_pro[i].alarm_inside_to_driver) {
-				handle_alarm_sms(ALARM_ENTER_AREA, OA_TRUE);
-			}
-			
+			handle_alarm_sms(ALARM_ENTER_AREA, area_pro[i].alarm_inside_to_driver, out2in, area_id[i]);
 		}
 		else if (cur_status_rect[i] == area_outside && last_status_rect[i] == area_inside){
 			DEBUG("出区域,区域id:%d", area_id[i]);
@@ -1387,10 +1379,7 @@ void oa_app_area(void *para)
 				handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
 			}
 
-			if (area_pro[i].alarm_outside_to_driver) {
-				handle_alarm_sms(ALARM_ENTER_AREA, OA_TRUE);
-			}
-			
+			handle_alarm_sms(ALARM_ENTER_AREA, area_pro[i].alarm_outside_to_driver, in2out, area_id[i]);
 		}
 	}
 	//oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
@@ -1405,7 +1394,7 @@ void oa_app_area(void *para)
 				overspeed_var.id = area_id[i];
 				DEBUG("区域内超速,区域id:%d", area_id[i]);
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
-				handle_alarm_sms(ALARM_OVER_SPEED, OA_TRUE);
+				handle_alarm_sms(ALARM_OVER_SPEED, 1, inout_no, 0);
 				os_cal_rect[i] = 0;
 			}
 		}
@@ -1435,10 +1424,7 @@ void oa_app_area(void *para)
 				handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
 			}
 
-			if (area_pro[i].alarm_inside_to_driver) {
-				handle_alarm_sms(ALARM_ENTER_AREA, OA_TRUE);
-			}
-			
+			handle_alarm_sms(ALARM_ENTER_AREA, area_pro[i].alarm_inside_to_driver, out2in, area_id[i]);
 		}
 		else if (cur_status_poly[i] == area_outside && last_status_poly[i] == area_inside){
 			DEBUG("出区域,区域id:%d", area_id[i]);
@@ -1450,10 +1436,7 @@ void oa_app_area(void *para)
 				handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
 			}
 			
-			if (area_pro[i].alarm_outside_to_driver) {
-				handle_alarm_sms(ALARM_ENTER_AREA, OA_TRUE);
-			}
-			
+			handle_alarm_sms(ALARM_ENTER_AREA, area_pro[i].alarm_outside_to_driver, in2out, area_id[i]);
 		}
 	}
 	//oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
@@ -1468,7 +1451,7 @@ void oa_app_area(void *para)
 				overspeed_var.id = area_id[i];
 				DEBUG("区域内超速,区域id:%d", area_id[i]);
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
-				handle_alarm_sms(ALARM_OVER_SPEED, OA_TRUE);
+				handle_alarm_sms(ALARM_OVER_SPEED, 1, inout_no, 0);
 				os_cal_poly[i] = 0;
 			}
 		}

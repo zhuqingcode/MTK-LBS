@@ -169,7 +169,7 @@ void oa_app_gps(void)
 		else{//handle this alarm
 			DEBUG("gps model err");
 			if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == RESET){
-				handle_alarm_sms(ALARM_GNSS_ERR, OA_TRUE);
+				handle_alarm_sms(ALARM_GNSS_ERR, 1, inout_no, 0);
 				handle_alarm_status(StaAlarm0, ALARM_GNSS_ERR, SET,OA_TRUE);
 			}
 			//if (OA_TRUE == ret)	ModelCnt = 0;
@@ -221,7 +221,7 @@ void oa_app_gps(void)
 						if (ReadAlarmPara(StaAlarm0, ALARM_DRIVE_OVERTIME) == RESET){
 							DEBUG("day overtime drive");
 							handle_alarm_status(StaAlarm0, ALARM_DRIVE_OVERTIME, SET, OA_TRUE);
-							handle_alarm_sms(ALARM_DRIVE_OVERTIME);
+							handle_alarm_sms(ALARM_DRIVE_OVERTIME, 1, inout_no, 0);
 							alarm_status_flag = OA_TRUE;
 						}
 						else day_drive = 0;
@@ -277,7 +277,7 @@ void oa_app_gps(void)
 						overspeed_no_area = OA_TRUE;
 						DEBUG("over speed");
 						handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
-						handle_alarm_sms(ALARM_OVER_SPEED);
+						handle_alarm_sms(ALARM_OVER_SPEED, 1, inout_no, 0);
 						os_times = 0;
 						alarm_status_flag = OA_TRUE;
 					}
@@ -303,7 +303,7 @@ void oa_app_gps(void)
 					if (ReadAlarmPara(StaAlarm0, ALARM_OVERTIME_PARKING) == RESET){
 						DEBUG("overtime park");
 						handle_alarm_status(StaAlarm0, ALARM_OVERTIME_PARKING, SET, OA_TRUE);
-						handle_alarm_sms(ALARM_OVERTIME_PARKING);
+						handle_alarm_sms(ALARM_OVERTIME_PARKING, 1, inout_no, 0);
 						park_times = 0;
 						alarm_status_flag = OA_TRUE;
 					}
@@ -324,7 +324,7 @@ void oa_app_gps(void)
 					if (ReadAlarmPara(StaAlarm0, ALARM_DRIVE_TIRED) == RESET){
 						DEBUG("fatigue driving!");
 						handle_alarm_status(StaAlarm0, ALARM_DRIVE_TIRED, SET, OA_TRUE);
-						handle_alarm_sms(ALARM_DRIVE_TIRED);
+						handle_alarm_sms(ALARM_DRIVE_TIRED, 1, inout_no, 0);
 						driver_time = 0;
 						alarm_status_flag = OA_TRUE;
 					}
