@@ -949,7 +949,7 @@ fail:	oa_fclose(handle);
 *Others:         
 *********************************************************/
 void circle_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur, 
-								u32 *p_id, u16 speed, u32 *os_bit, u8 *os_time)
+								u32 *p_id, u16 speed, u32 *os_bit, u8 *os_time, Area_Para_struct *p_pro)
 {
 	oa_bool ret;
 	u8 i, i_o, res;
@@ -969,6 +969,7 @@ void circle_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur
 				circle_area_desc.lon = circle_area_var.center_point_lon;
 				circle_area_desc.rad = circle_area_var.radius;
 				p_id[i] = circle_area_var.area_id;
+				oa_memcpy(p_pro + i, &circle_area_var.area_para, sizeof(circle_area_var.area_para));
 				//DEBUG("read lat:%d lon:%d rad:%d id:%d", circle_area_desc.lat, circle_area_desc.lon, circle_area_desc.rad, circle_area_var.area_id);
 				//compare
 				if (1 == circle_area_var.area_para.depend_time){
@@ -1043,7 +1044,7 @@ void circle_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur
 *Others:         
 *********************************************************/
 void rect_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur, 
-									u32 *p_id, u16 speed, u32 *os_bit, u8 *os_time)
+									u32 *p_id, u16 speed, u32 *os_bit, u8 *os_time, Area_Para_struct *p_pro)
 {
 	oa_bool ret;
 	u8 i, i_o, res;
@@ -1068,6 +1069,7 @@ void rect_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur,
 				rect_area_desc.area_point[3].Lat = rect_area_var.right_down_lat;
 				rect_area_desc.area_point[3].Lon = rect_area_var.left_up_lon;
 				p_id[i] = rect_area_var.area_id;
+				oa_memcpy(p_pro + i, &rect_area_var.area_para, sizeof(rect_area_var.area_para));
 				//compare	
 				if (1 == rect_area_var.area_para.depend_time){
 					//rtc is ok?
@@ -1139,7 +1141,7 @@ void rect_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur,
 *Others:         
 *********************************************************/
 void poly_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur, 
-									u32 *p_id, u16 speed, u32 *os_bit, u8 *os_time)
+									u32 *p_id, u16 speed, u32 *os_bit, u8 *os_time, Area_Para_struct *p_pro)
 {
 	oa_bool ret;
 	u8 i, i_o, res;
@@ -1161,6 +1163,7 @@ void poly_area_inout_judge(u32 lat, u32 lon, u8 *time, area_status_enum *p_cur,
 					poly_area_desc.area_point[loop].Lon = poly_area_var.vertax[loop].vertax_lon;
 				}
 				p_id[i] = poly_area_var.area_id;
+				oa_memcpy(p_pro + i, &poly_area_var.area_para, sizeof(poly_area_var.area_para));
 				//compare
 				if (1 == poly_area_var.area_para.depend_time){
 					//rtc is ok?
@@ -1260,6 +1263,7 @@ void oa_app_area(void *para)
 	static u8 os_cal_rect[MAX_AREA_SUM] = {0x0};
 	static u8 os_cal_poly[MAX_AREA_SUM] = {0x0};
 	u32 area_id[MAX_AREA_SUM] = {0x0};
+	Area_Para_struct area_pro[MAX_AREA_SUM];
 	STRUCT_RMC gps_info;
 
 	if (OA_FALSE == task_runed){
@@ -1291,24 +1295,38 @@ void oa_app_area(void *para)
 	get_rtc_time(time);
 	
 	oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
+	oa_memset(area_pro, 0x0, sizeof(area_pro));
 	//------------------circle area inside/outside judge------------------
-	circle_area_inout_judge(lat, lon, time, cur_status_circle, area_id, speed, &os_flag_circle, os_time_circle);
+	circle_area_inout_judge(lat, lon, time, cur_status_circle, area_id, speed, &os_flag_circle, os_time_circle, area_pro);
 	for (i = 0;i < MAX_AREA_SUM; i++){
 		if (cur_status_circle[i] == area_inside && last_status_circle[i] == area_outside){
 			DEBUG("进区域,区域id:%d", area_id[i]);
-			area_alarm_addition_var.area_kind = os_circle;
-			area_alarm_addition_var.id = area_id[i];
-			area_alarm_addition_var.in_out = out2in;
-			handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
-			handle_alarm_sms(ALARM_ENTER_AREA);
+
+			if (area_pro[i].alarm_inside_to_plat) {
+				area_alarm_addition_var.area_kind = os_circle;
+				area_alarm_addition_var.id = area_id[i];
+				area_alarm_addition_var.in_out = out2in;
+				handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
+			}
+
+			if (area_pro[i].alarm_inside_to_driver) {
+				handle_alarm_sms(ALARM_ENTER_AREA);
+			}
+			
 		}
 		else if (cur_status_circle[i] == area_outside && last_status_circle[i] == area_inside){
 			DEBUG("出区域,区域id:%d", area_id[i]);
-			area_alarm_addition_var.area_kind = os_circle;
-			area_alarm_addition_var.id = area_id[i];
-			area_alarm_addition_var.in_out = in2out;
-			handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
-			handle_alarm_sms(ALARM_ENTER_AREA);
+			if (area_pro[i].alarm_outside_to_plat) {
+				area_alarm_addition_var.area_kind = os_circle;
+				area_alarm_addition_var.id = area_id[i];
+				area_alarm_addition_var.in_out = in2out;
+				handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
+			}
+
+			if (area_pro[i].alarm_outside_to_driver) {
+				handle_alarm_sms(ALARM_ENTER_AREA);
+			}
+			
 		}
 	}
 	//oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
@@ -1340,24 +1358,39 @@ void oa_app_area(void *para)
 	}
 	
 	oa_memset(area_id, 0x0, sizeof(area_id));
+	oa_memset(area_pro, 0x0, sizeof(area_pro));
 	//------------------rect area inside/outside judge------------------
-	rect_area_inout_judge(lat, lon, time, cur_status_rect, area_id, speed, &os_flag_rect, os_time_rect);
+	rect_area_inout_judge(lat, lon, time, cur_status_rect, area_id, speed, &os_flag_rect, os_time_rect, area_pro);
 	for (i = 0;i < MAX_AREA_SUM; i++){
 		if (cur_status_rect[i] == area_inside && last_status_rect[i] == area_outside){
 			DEBUG("进区域,区域id:%d", area_id[i]);
-			area_alarm_addition_var.area_kind = os_rect;
-			area_alarm_addition_var.id = area_id[i];
-			area_alarm_addition_var.in_out = out2in;
-			handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
-			handle_alarm_sms(ALARM_ENTER_AREA);
+
+			if (area_pro[i].alarm_inside_to_plat) {
+				area_alarm_addition_var.area_kind = os_rect;
+				area_alarm_addition_var.id = area_id[i];
+				area_alarm_addition_var.in_out = out2in;
+				handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
+			}
+
+			if (area_pro[i].alarm_inside_to_driver) {
+				handle_alarm_sms(ALARM_ENTER_AREA);
+			}
+			
 		}
 		else if (cur_status_rect[i] == area_outside && last_status_rect[i] == area_inside){
 			DEBUG("出区域,区域id:%d", area_id[i]);
-			area_alarm_addition_var.area_kind = os_rect;
-			area_alarm_addition_var.id = area_id[i];
-			area_alarm_addition_var.in_out = in2out;
-			handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
-			handle_alarm_sms(ALARM_ENTER_AREA);
+
+			if (area_pro[i].alarm_outside_to_plat) {
+				area_alarm_addition_var.area_kind = os_rect;
+				area_alarm_addition_var.id = area_id[i];
+				area_alarm_addition_var.in_out = in2out;
+				handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
+			}
+
+			if (area_pro[i].alarm_outside_to_driver) {
+				handle_alarm_sms(ALARM_ENTER_AREA);
+			}
+			
 		}
 	}
 	//oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
@@ -1388,24 +1421,39 @@ void oa_app_area(void *para)
 	}
 	
 	oa_memset(area_id, 0x0, sizeof(area_id));
+	oa_memset(area_pro, 0x0, sizeof(area_pro));
 	//------------------poly area inside/outside judge------------------
-	poly_area_inout_judge(lat, lon, time, cur_status_poly, area_id, speed, &os_flag_poly, os_time_poly);
+	poly_area_inout_judge(lat, lon, time, cur_status_poly, area_id, speed, &os_flag_poly, os_time_poly, area_pro);
 	for (i = 0;i < MAX_AREA_SUM; i++){
 		if (cur_status_poly[i] == area_inside && last_status_poly[i] == area_outside){
 			DEBUG("进区域,区域id:%d", area_id[i]);
-			area_alarm_addition_var.area_kind = os_poly;
-			area_alarm_addition_var.id = area_id[i];
-			area_alarm_addition_var.in_out = out2in;
-			handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
-			handle_alarm_sms(ALARM_ENTER_AREA);
+
+			if (area_pro[i].alarm_inside_to_plat) {
+				area_alarm_addition_var.area_kind = os_poly;
+				area_alarm_addition_var.id = area_id[i];
+				area_alarm_addition_var.in_out = out2in;
+				handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
+			}
+
+			if (area_pro[i].alarm_inside_to_driver) {
+				handle_alarm_sms(ALARM_ENTER_AREA);
+			}
+			
 		}
 		else if (cur_status_poly[i] == area_outside && last_status_poly[i] == area_inside){
 			DEBUG("出区域,区域id:%d", area_id[i]);
-			area_alarm_addition_var.area_kind = os_poly;
-			area_alarm_addition_var.id = area_id[i];
-			area_alarm_addition_var.in_out = in2out;
-			handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
-			handle_alarm_sms(ALARM_ENTER_AREA);
+
+			if (area_pro[i].alarm_outside_to_plat) {
+				area_alarm_addition_var.area_kind = os_poly;
+				area_alarm_addition_var.id = area_id[i];
+				area_alarm_addition_var.in_out = in2out;
+				handle_alarm_status(StaAlarm0, ALARM_ENTER_AREA, SET, OA_TRUE);
+			}
+			
+			if (area_pro[i].alarm_outside_to_driver) {
+				handle_alarm_sms(ALARM_ENTER_AREA);
+			}
+			
 		}
 	}
 	//oa_memset(&area_alarm_addition_var, 0x0, sizeof(area_alarm_addition_var));
