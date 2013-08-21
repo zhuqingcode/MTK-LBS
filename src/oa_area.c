@@ -1310,7 +1310,7 @@ void oa_app_area(void *para)
 			}
 
 			if (area_pro[i].alarm_inside_to_driver) {
-				handle_alarm_sms(ALARM_ENTER_AREA);
+				handle_alarm_sms(ALARM_ENTER_AREA, OA_TRUE);
 			}
 			
 		}
@@ -1324,7 +1324,7 @@ void oa_app_area(void *para)
 			}
 
 			if (area_pro[i].alarm_outside_to_driver) {
-				handle_alarm_sms(ALARM_ENTER_AREA);
+				handle_alarm_sms(ALARM_ENTER_AREA, OA_TRUE);
 			}
 			
 		}
@@ -1341,7 +1341,7 @@ void oa_app_area(void *para)
 				overspeed_var.id = area_id[i];
 				DEBUG("区域内超速,区域id:%d", area_id[i]);
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
-				handle_alarm_sms(ALARM_OVER_SPEED);
+				handle_alarm_sms(ALARM_OVER_SPEED, OA_TRUE);
 				os_circle |= (1<<i);
 				os_cal_circle[i] = 0;
 			}
@@ -1373,7 +1373,7 @@ void oa_app_area(void *para)
 			}
 
 			if (area_pro[i].alarm_inside_to_driver) {
-				handle_alarm_sms(ALARM_ENTER_AREA);
+				handle_alarm_sms(ALARM_ENTER_AREA, OA_TRUE);
 			}
 			
 		}
@@ -1388,7 +1388,7 @@ void oa_app_area(void *para)
 			}
 
 			if (area_pro[i].alarm_outside_to_driver) {
-				handle_alarm_sms(ALARM_ENTER_AREA);
+				handle_alarm_sms(ALARM_ENTER_AREA, OA_TRUE);
 			}
 			
 		}
@@ -1405,7 +1405,7 @@ void oa_app_area(void *para)
 				overspeed_var.id = area_id[i];
 				DEBUG("区域内超速,区域id:%d", area_id[i]);
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
-				handle_alarm_sms(ALARM_OVER_SPEED);
+				handle_alarm_sms(ALARM_OVER_SPEED, OA_TRUE);
 				os_cal_rect[i] = 0;
 			}
 		}
@@ -1436,7 +1436,7 @@ void oa_app_area(void *para)
 			}
 
 			if (area_pro[i].alarm_inside_to_driver) {
-				handle_alarm_sms(ALARM_ENTER_AREA);
+				handle_alarm_sms(ALARM_ENTER_AREA, OA_TRUE);
 			}
 			
 		}
@@ -1451,7 +1451,7 @@ void oa_app_area(void *para)
 			}
 			
 			if (area_pro[i].alarm_outside_to_driver) {
-				handle_alarm_sms(ALARM_ENTER_AREA);
+				handle_alarm_sms(ALARM_ENTER_AREA, OA_TRUE);
 			}
 			
 		}
@@ -1468,7 +1468,7 @@ void oa_app_area(void *para)
 				overspeed_var.id = area_id[i];
 				DEBUG("区域内超速,区域id:%d", area_id[i]);
 				handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
-				handle_alarm_sms(ALARM_OVER_SPEED);
+				handle_alarm_sms(ALARM_OVER_SPEED, OA_TRUE);
 				os_cal_poly[i] = 0;
 			}
 		}

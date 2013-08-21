@@ -159,7 +159,7 @@ oa_bool handle_alarm_status(STA_ALARM part, u32 alarm_bit, flag_status status, o
 *Return:		
 *Others:         
 *********************************************************/
-void handle_alarm_sms(u32 alarm_bit)
+void handle_alarm_sms(u32 alarm_bit, oa_bool alarm_2_driver)
 {
 	u32 alarm_flag;
 	alarm_struct uni;
@@ -245,9 +245,12 @@ void handle_alarm_sms(u32 alarm_bit)
 		DEBUG("send sms");
 		oa_sms_test_ucs2(uni.buf, dev_now_params.terminal_sms_num, uni.len);
 	}
+
+	if (alarm_2_driver) {
+		oa_memset(&s_s, 0x0, sizeof(s_s));
+		s_s.buflen = gbk.len;
+		oa_memcpy(s_s.sendbuf, gbk.buf, s_s.buflen);
+		oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
+	}
 	
-	oa_memset(&s_s, 0x0, sizeof(s_s));
-	s_s.buflen = gbk.len;
-	oa_memcpy(s_s.sendbuf, gbk.buf, s_s.buflen);
-	oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
 }

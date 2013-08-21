@@ -169,7 +169,7 @@ void oa_app_gps(void)
 		else{//handle this alarm
 			DEBUG("gps model err");
 			if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == RESET){
-				handle_alarm_sms(ALARM_GNSS_ERR);
+				handle_alarm_sms(ALARM_GNSS_ERR, OA_TRUE);
 				handle_alarm_status(StaAlarm0, ALARM_GNSS_ERR, SET,OA_TRUE);
 			}
 			//if (OA_TRUE == ret)	ModelCnt = 0;
