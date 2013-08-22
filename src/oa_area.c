@@ -33,8 +33,10 @@
 #include "oa_jt808.h"
 #include "oa_alarm.h"
 #include "oa_dev_params.h"
+#include "oa_hw.h"
 extern DEVICE_PARAMS dev_now_params;
 extern os_struct overspeed_var;
+extern oa_uint8 acc_status;
 area_alarm_addition_struct area_alarm_addition_var = {{no_spec},{0},{0}};
  /*********************************************************
 *Function:     has_areadata_dir_n_c()
@@ -1239,8 +1241,8 @@ void oa_app_area(void *para)
 	static oa_bool start_area = OA_FALSE;
 	static oa_uint8 b_t = 0;
 	oa_bool ret;
-	u32 lon;
-	u32 lat;
+	u32 lon;static u32 old_lon;
+	u32 lat;static u32 old_lat;
 	u16 speed;
 	u8 time[6];
 	u8 i;
@@ -1286,10 +1288,21 @@ void oa_app_area(void *para)
 
 	if (start_area == OA_FALSE) goto again;
 	//extract datas
-	GetPosinf((u8 *)&lon, GPSLon, 5);
-	GetPosinf((u8 *)&lat, GPSLat, 5);
+	//get gps data
 	oa_memset(&gps_info, 0x0, sizeof(gps_info));
 	GPS_GetPosition(&gps_info);//copy gps data into 'gps_info'
+	if (acc_status == ACC_ON) {
+		//get lon & lat
+		GetPosinf((u8 *)&lon, GPSLon, 5);
+		GetPosinf((u8 *)&lat, GPSLat, 5);
+		//copy old lon & lat
+		old_lat = lat;
+		old_lon = lon;
+	} else if (acc_status == ACC_OFF && !gps_info.Speed) {
+		lat = old_lat;
+		lon = old_lon;
+	}
+	
 	//GetPosinf((u8 *)&speed, GPSSpeed, 0);
 	speed = gps_info.Speed;
 	get_rtc_time(time);
