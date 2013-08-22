@@ -341,9 +341,8 @@ void oa_app_gps(void)
 						relax_time = 0;
 					}
 					else relax_time = 0;
+					driver_time = 0;
 				}
-				
-				driver_time = 0;
 			}
 			//---------------------------------------------------------------------
 			//--------------------------mileage statistis-----------------------------
