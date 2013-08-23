@@ -32,6 +32,7 @@
 #include "oa_platform.h"
 #include "oa_debug.h"
 #include "oa_alarm.h"
+#include "oa_hw.h"
 #define PROTCL_JT808
 //#define GPS_INTVL 50	//50ticks gps任务运行间隔
 #define CHECK_GPS_ERR	(50)	//判断gps模块异常的时间
@@ -41,6 +42,7 @@ os_struct overspeed_var = {{no_os}, {0}};
 extern area_alarm_addition_struct area_alarm_addition_var;
 extern DEVICE_PARAMS dev_now_params;
 extern DEV_PLAT_PARAS dev_running;
+extern oa_uint8 acc_status;
 /*********************************************************
 *Function:      ISGpsAntOK()
 *Description:   检测天线状态，并触发或取消天线故障报警。
@@ -108,6 +110,7 @@ void oa_app_gps(void)
 	static FP32 IntvlDistanc = 0.0;
 	float dis_cal = 0;
 	u32 dis_temp = 0;
+	static STRUCT_RMC old_gps_info;
 	STRUCT_RMC gps_info;
 	u32 speed;
 	static u32 os_times;
@@ -183,8 +186,18 @@ void oa_app_gps(void)
 		//clear it
 		if (ModelCnt > 0) ModelCnt = 0;
 		if (result & NMEA_RMC_OK){//gps data handle
+				
 			oa_memset(&gps_info, 0x0, sizeof(gps_info));
 			GPS_GetPosition(&gps_info);//copy gps data into 'gps_info'
+			if (acc_status == ACC_ON) {
+				//copy old gps data
+				oa_memcpy(&old_gps_info, &gps_info, sizeof(gps_info));
+			} else if (acc_status == ACC_OFF && gps_info.Speed == 0) {
+				oa_memcpy(&gps_info.Latitude[0], &old_gps_info.Latitude[0], sizeof(old_gps_info.Latitude));
+				oa_memcpy(&gps_info.Longitude[0], &old_gps_info.Longitude[0], sizeof(old_gps_info.Longitude));
+			}
+			
+			
 			//just for printing
 			if (infoprintCnt++ >= 15){
 				DEBUG("Time: %x %x %x %x:%x:%x ",gps_info.Time[0],gps_info.Time[1],gps_info.Time[2],gps_info.Time[3],gps_info.Time[4],gps_info.Time[5]);
@@ -341,9 +354,8 @@ void oa_app_gps(void)
 						relax_time = 0;
 					}
 					else relax_time = 0;
+					driver_time = 0;
 				}
-				
-				driver_time = 0;
 			}
 			//---------------------------------------------------------------------
 			//--------------------------mileage statistis-----------------------------

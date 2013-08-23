@@ -33,8 +33,10 @@
 #include "oa_jt808.h"
 #include "oa_alarm.h"
 #include "oa_dev_params.h"
+#include "oa_hw.h"
 extern DEVICE_PARAMS dev_now_params;
 extern os_struct overspeed_var;
+extern oa_uint8 acc_status;
 area_alarm_addition_struct area_alarm_addition_var = {{no_spec},{0},{0}};
  /*********************************************************
 *Function:     has_areadata_dir_n_c()
@@ -1239,8 +1241,8 @@ void oa_app_area(void *para)
 	static oa_bool start_area = OA_FALSE;
 	static oa_uint8 b_t = 0;
 	oa_bool ret;
-	u32 lon;
-	u32 lat;
+	u32 lon;static u32 old_lon;
+	u32 lat;static u32 old_lat;
 	u16 speed;
 	u8 time[6];
 	u8 i;
@@ -1253,9 +1255,9 @@ void oa_app_area(void *para)
 	u32 os_flag_circle = 0;
 	u32 os_flag_rect = 0;
 	u32 os_flag_poly = 0;
-	static u32 os_circle = 0;
-	static u32 os_rect = 0;
-	static u32 os_poly = 0;
+	static u32 os_circle_var = 0;
+	static u32 os_rect_var = 0;
+	static u32 os_poly_var = 0;
 	u8 os_time_circle[MAX_AREA_SUM] = {0x0};
 	u8 os_time_rect[MAX_AREA_SUM] = {0x0};
 	u8 os_time_poly[MAX_AREA_SUM] = {0x0};
@@ -1286,10 +1288,21 @@ void oa_app_area(void *para)
 
 	if (start_area == OA_FALSE) goto again;
 	//extract datas
-	GetPosinf((u8 *)&lon, GPSLon, 5);
-	GetPosinf((u8 *)&lat, GPSLat, 5);
+	//get gps data
 	oa_memset(&gps_info, 0x0, sizeof(gps_info));
 	GPS_GetPosition(&gps_info);//copy gps data into 'gps_info'
+	if (acc_status == ACC_ON) {
+		//get lon & lat
+		GetPosinf((u8 *)&lon, GPSLon, 5);
+		GetPosinf((u8 *)&lat, GPSLat, 5);
+		//copy old lon & lat
+		old_lat = lat;
+		old_lon = lon;
+	} else if (acc_status == ACC_OFF && !gps_info.Speed) {
+		lat = old_lat;
+		lon = old_lon;
+	}
+	
 	//GetPosinf((u8 *)&speed, GPSSpeed, 0);
 	speed = gps_info.Speed;
 	get_rtc_time(time);
@@ -1342,7 +1355,7 @@ void oa_app_area(void *para)
 						DEBUG("区域内超速,区域id:%d", area_id[i]);
 						handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 						handle_alarm_sms(ALARM_OVER_SPEED, 1, inout_no, 0);
-						os_circle |= (1<<i);
+						os_circle_var |= (1<<i);
 					}
 					
 					os_cal_circle[i] = 0;
@@ -1350,26 +1363,26 @@ void oa_app_area(void *para)
 			} else {
 			
 				os_cal_circle[i] = 0;
-				if ((os_circle & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+				if ((os_circle_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
-					os_circle &= ~(1<<i);
+					os_circle_var &= ~(1<<i);
 				}
 			}
 		}
 		else if (cur_status_circle[i] == area_err) {
 			os_cal_circle[i] = 0;
-			if ((os_circle & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+			if ((os_circle_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
 				WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
-				os_circle &= ~(1<<i);
+				os_circle_var &= ~(1<<i);
 			}
 		} 
 		else if (cur_status_circle[i] == area_outside) {
 			os_cal_circle[i] = 0;
-			if ((os_circle & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+			if ((os_circle_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
 				if (speed <= dev_now_params.max_speed) {
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 				}
-				os_circle &= ~(1<<i);
+				os_circle_var &= ~(1<<i);
 			}
 			
 		}
@@ -1420,34 +1433,34 @@ void oa_app_area(void *para)
 						DEBUG("区域内超速,区域id:%d", area_id[i]);
 						handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 						handle_alarm_sms(ALARM_OVER_SPEED, 1, inout_no, 0);
-						os_rect |= (1<<i);
+						os_rect_var |= (1<<i);
 					}
 					
 					os_cal_rect[i] = 0;
 				}
 			} else {
 				os_cal_rect[i] = 0;
-				if ((os_rect & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+				if ((os_rect_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
-					os_rect &= ~(1<<i);
+					os_rect_var &= ~(1<<i);
 				}
 			}
 			
 		}
 		else if (cur_status_rect[i] == area_err){
 			os_cal_rect[i] = 0;
-			if ((os_rect & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+			if ((os_rect_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
 				WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
-				os_rect &= ~(1<<i);
+				os_rect_var &= ~(1<<i);
 			}
 		}
 		else if (cur_status_rect[i] == area_outside){
 			os_cal_rect[i] = 0;
-			if ((os_rect & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+			if ((os_rect_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
 				if (speed <= dev_now_params.max_speed) {
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 				}
-				os_rect &= ~(1<<i);
+				os_rect_var &= ~(1<<i);
 			}
 		}
 	}
@@ -1497,34 +1510,34 @@ void oa_app_area(void *para)
 						DEBUG("区域内超速,区域id:%d", area_id[i]);
 						handle_alarm_status(StaAlarm0, ALARM_OVER_SPEED, SET, OA_TRUE);
 						handle_alarm_sms(ALARM_OVER_SPEED, 1, inout_no, 0);
-						os_poly |= (1<<i);
+						os_poly_var |= (1<<i);
 					}
 					
 					os_cal_poly[i] = 0;
 				}
 			} else {
 				os_cal_poly[i] = 0;
-				if ((os_poly & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+				if ((os_poly_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
-					os_poly &= ~(1<<i);
+					os_poly_var &= ~(1<<i);
 				}
 			}
 			
 		}
 		else if (cur_status_poly[i] == area_err) {
 			os_cal_poly[i] = 0;
-			if ((os_poly & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+			if ((os_poly_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
 				WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
-				os_poly &= ~(1<<i);
+				os_poly_var &= ~(1<<i);
 			}
 		}
 		else if (cur_status_poly[i] == area_outside) {
 			os_cal_poly[i] = 0;
-			if ((os_poly & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+			if ((os_poly_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
 				if (speed <= dev_now_params.max_speed) {
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 				}
-				os_poly &= ~(1<<i);
+				os_poly_var &= ~(1<<i);
 			}
 		}
 	}
