@@ -77,6 +77,15 @@ void oa_tst_eint_hisr(void)
 	oa_eint_set_polarity(OA_CUR_TEST_EINT_NO, sos_handle_polarity_0);
 }
 /*********************************************************
+*Function:     get_adc_value()
+*Description:  get_adc_value
+*Return:		void
+*Others:         
+*********************************************************/
+void adc_value_cb(oa_int32 volt_result, oa_double adc_result){
+	OA_DEBUG_USER("volt_result:%d adc_result:%f", volt_result, adc_result);
+}
+/*********************************************************
 *Function:     oa_gpio_set()
 *Description:  gpio settings     
 *Return:		void
@@ -133,6 +142,8 @@ void oa_gpio_set(void)
 	oa_gpio_mode_setup(POWER_HIGH, GPIO_MODE);
 	oa_gpio_init(GPIO_OUTPUT, POWER_HIGH);
 	oa_gpio_write(1, POWER_HIGH);
+	//adc init:if you want shut down ADC,just call 'oa_adc_get_data(4, 0, NULL);'
+	oa_adc_get_data(4, 0, adc_value_cb);
 }
 /*********************************************************
 *Function:     acc_status_detect()
