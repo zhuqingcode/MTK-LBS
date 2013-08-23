@@ -128,6 +128,7 @@ void oa_gpio_set(void)
 	//SCRN POWER
 	oa_gpio_mode_setup(SCRN_POWER, GPIO_MODE);
 	oa_gpio_init(GPIO_OUTPUT, SCRN_POWER);
+	oa_gpio_write(0, SCRN_POWER);
 	//power high
 	oa_gpio_mode_setup(POWER_HIGH, GPIO_MODE);
 	oa_gpio_init(GPIO_OUTPUT, POWER_HIGH);
@@ -158,6 +159,8 @@ void acc_status_detect(void *param)
 				DEBUG("ACC status changed:off");
 			}
 			acc_status = ACC_OFF;
+			//power off screen
+			oa_gpio_write(0, SCRN_POWER);
 		}	
 	}
 	else{//acc is on
@@ -170,6 +173,8 @@ void acc_status_detect(void *param)
 				DEBUG("ACC status changed:on");
 			}
 			acc_status = ACC_ON;
+			//power on screen
+			oa_gpio_write(1, SCRN_POWER);
 		}
 	}
 	//ugent alarm detect
