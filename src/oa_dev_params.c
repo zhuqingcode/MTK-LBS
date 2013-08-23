@@ -107,7 +107,7 @@ DEVICE_PARAMS dev_def_params =
 	{"T100G"},					//term model
 	{"0000000"},					//term id
 	{"00000000000"},				//LclTEL
-	{"114.221.34.95"},				//ftp ip
+	{"61.155.107.41"},				//ftp ip
 	21,							//port
 	{"talent"},					//user name
 	{"talent"},					//pwd
