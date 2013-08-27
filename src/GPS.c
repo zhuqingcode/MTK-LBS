@@ -19,8 +19,10 @@
 #include "oa_gps.h"
 #include "oa_api.h"
 #include "oa_debug.h"
+#include "oa_hw.h"
 #include <math.h>
 extern gps_data_struct gps_data;
+extern oa_uint8 acc_status;
 #define CheckParam1(param1) ((param1) == NULL)
 #define CheckParam2(param1,param2) (((param1) == NULL)||((param2) == NULL))
 #define CheckParam3(param1,param2,param3) (((param1) == NULL)||((param2)== NULL)||((param3) == NULL))
@@ -677,7 +679,13 @@ u32 GPS_DataAnaly(void)
 										GPSHandle.GPS_INF.Speed=0;
 										GPSHandle.GPS_INF.COG=0;	
 									}
-									UpdatePos(&(GPSHandle.GPS_INF),ALLUPDATE);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
+									if (acc_status == ACC_ON) {
+										UpdatePos(&(GPSHandle.GPS_INF),ALLUPDATE);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
+									} else if (acc_status == ACC_OFF) {
+										UpdatePos(&(GPSHandle.GPS_INF),ACCOFFUPDATE);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
+									}
+									
+										
 							/*	}
 								else	//ACC off
 								{
