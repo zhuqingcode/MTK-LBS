@@ -179,6 +179,38 @@ oa_uint8 fx_gbk[] = {0xb7,0xbd,0xcf,0xf2,':'};//"·½Ïò:"
 oa_uint8 mk_gbk[] = {0xc4,0xa3,0xbf,0xe9,':'};//"Ä£¿é:"
 oa_uint8 tx_gbk[] = {0xcc,0xec,0xcf,0xdf,':'};//"ÌìÏß:"
 
+const u8 carID_uni2Gbk[31][4]={{0x4E,0xAC,0xBE,0xA9}, //¾©1	 Ç°2bÎªuniÂë£¬ºó2BÎªgbkÂë
+							{0x6D,0x25,0xBD,0xF2}, //½ò	 2
+							{0x6C,0xAA,0xBB,0xA6},//»¦	 3
+							{0x6E,0x1D,0xD3,0xE5},//Óå	 4
+							{0x51,0x80,0xBC,0xBD},//¼½	 5
+							{0x8C,0x6B,0xD4,0xA5},//Ô¥	 6
+							{0x4E,0x91,0xD4,0xC6},//ÔÆ	 7
+							{0x8F,0xBD,0xC1,0xC9},//ÁÉ	 8
+							{0x9E,0xD1,0xBA,0xDA},//ºÚ	 9
+							{0x6E,0x58,0xCF,0xE6},//Ïæ	 10
+							{0x76,0x96,0xCD,0xEE},//Íî	 11
+							{0x95,0xFD,0xC3,0xF6},//Ãö	 12
+							{0x9C,0x81,0xC2,0xB3},//Â³	 13
+							{0x65,0xB0,0xD0,0xC2},//ÐÂ	 14
+							{0x82,0xCF,0xCB,0xD5},//ËÕ	 15
+							{0x6D,0x59,0xD5,0xE3},//Õã	 16
+							{0x8D,0x63,0xB8,0xD3},//¸Ó	 17
+							{0x91,0x02,0xB6,0xF5},//¶õ	 18
+							{0x68,0x42,0xB9,0xF0},//¹ð	 19
+							{0x75,0x18,0xB8,0xCA},//¸Ê	 20
+							{0x66,0x4B,0xBD,0xFA},//½ú	 21
+							{0x84,0x99,0xC3,0xC9},//ÃÉ	 22
+							{0x96,0x55,0xC9,0xC2},//ÉÂ	 23
+							{0x54,0x09,0xBC,0xAA},//¼ª	 24
+							{0x8D,0x35,0xB9,0xF3},//¹ó	 25
+							{0x7C,0xA4,0xD4,0xC1},//ÔÁ	 26
+							{0x97,0x52,0xC7,0xE0},//Çà	 27
+							{0x85,0xCF,0xB2,0xD8},//²Ø	 28
+							{0x5D,0xDD,0xB4,0xA8},//´¨	 29
+							{0x5B,0x81,0xC4,0xFE},//Äþ	 30
+							{0x74,0x3C,0xC7,0xED} //Çí	 31
+							};
 /*********************************************************
 *Function:      status_extract()
 *Description:  search key word in message
@@ -685,7 +717,7 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 				}
 			}break;
 			case e_carID:{
-				if ((oa_strlen(temp) < VEHICLE_LICENCE_MAX_LEN) && digit_alpha_check(temp, oa_strlen(temp))){
+				if ((oa_strlen(temp) < VEHICLE_LICENCE_MAX_LEN)/* && digit_alpha_check(temp, oa_strlen(temp))*/){
 					oa_memcpy(p_set->context.con_ch, temp, oa_strlen(temp));
 				}
 				else{
@@ -827,10 +859,12 @@ e_keyword look4keywords4ms(oa_char *p_sms, u16 sms_len, keyword_context *p_set, 
 *Return:        void
 *Others:         
 *********************************************************/
-void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart which)
+void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart which, keyword_context *p_set)
 {
-	u8 ret_len;
-	char temp[16] = {0x0};
+	u8 ret_len, len0;
+	oa_bool special_carid = OA_FALSE;
+	char temp[64] = {0x0};
+	char temp2[64] = {0x0};
 	char enquire_temp[256] = {0x0};
 	
 	switch(key_kind){
@@ -965,9 +999,35 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 			sprintf(enquire_temp, "cityID:%d;", dev_now_params.vehicle_city_id);
 		}break;
 		case e_carID:{
-			oa_strcat(enquire_temp, "carID:");
-			oa_strcat(enquire_temp, dev_now_params.vehicle_license);
-			oa_strcat(enquire_temp, ";");
+			u8 i;
+			u8 tmp[3] = {0x0};
+			
+			
+			
+			for (i = 0; i < 31; i++) {
+				if (!oa_memcmp(dev_now_params.vehicle_license, &carID_uni2Gbk[i][2], 2)) {
+					oa_memcpy(tmp, &carID_uni2Gbk[i][0], 2);
+					special_carid = OA_TRUE;
+					p_set->s_k = sms_special;
+					break;
+				}
+			}
+
+			if (special_carid == OA_TRUE) {
+				oa_strcat(temp, "carID:");
+				ret_len = asc2uc(enquire_temp, temp, oa_strlen(temp));
+				oa_memcpy(enquire_temp + ret_len, tmp, 2);ret_len += 2;
+				oa_memcpy(temp2, &dev_now_params.vehicle_license[2], oa_strlen(dev_now_params.vehicle_license) - 2);
+				oa_memset(temp, 0x0, sizeof(temp));
+				len0 = asc2uc(temp, temp2, oa_strlen(temp2));
+				oa_memcpy(enquire_temp + ret_len, temp, len0);ret_len += len0;
+				asc2uc(enquire_temp + ret_len, ";", 1);ret_len += 2;
+			} else {
+				oa_strcat(enquire_temp, "carID:");
+				oa_strcat(enquire_temp, dev_now_params.vehicle_license);
+				oa_strcat(enquire_temp, ";");
+			}
+			
 		}break;
 		case e_carcolor:{
 			sprintf(enquire_temp, "carcolor:%d;", dev_now_params.plate_color);
@@ -1046,7 +1106,7 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 			oa_strcat(enquire_temp, "not support!");
 		}break;
 	}
-	if (key_kind == e_STATUS || key_kind == e_GPS){
+	if (key_kind == e_STATUS || key_kind == e_GPS || special_carid){
 		oa_memcpy(buf, enquire_temp, ret_len);
 		*len = ret_len;
 	}
@@ -1941,7 +2001,7 @@ void oa_app_sms(void)
 	//do about sms
 	e_keyword key_ret = e_none;
 	keyword_context set = {0x0};
-	oa_uint8 e_i, i = 0;
+	oa_uint8 e_i, i = 0, j = 0;
 	oa_uint8 sn = 0;
 	oa_char *p = NULL;
 	oa_char prefix[MAX_SMS_NUM][64] = {{0x0}, {0x0}, {0x0}, {0x0}, {0x0}};
@@ -1955,51 +2015,86 @@ void oa_app_sms(void)
 
 	//len = message.len;
 	oa_memcpy(data, message.data, message.len);
-	p = strtok(data, ";");
-	if (NULL == p){
-		DEBUG("format err");
-		return;
-	}
-	while(NULL != p){
-		if (i <= MAX_SMS_NUM){
-			oa_strcpy(prefix[i], p);
-			i++;
-			p = strtok(NULL, ";");
+	if (message.dcs == OA_SMSAL_DEFAULT_DCS) {
+		p = strtok(data, ";");
+		if (NULL == p){
+			DEBUG("format err");
+			return;
 		}
-		else break;
-	}
-
-	if (prefix[i-1][0] == 'A' || prefix[i-1][0] == 'a' && prefix[i-1][1] == 0x0){
-		sn = i -1;
-		ms_ack = OA_TRUE;
-	}
-	else if (prefix[i-1][0] == 'N' || prefix[i-1][0] == 'n' && prefix[i-1][1] == 0x0){
-		sn = i -1;
-		ms_ack = OA_FALSE;
-	}
-	else{
-		sn = i;
-		ms_ack = OA_FALSE;
-	}
-	//add ";"
-	for (i = 0;i < sn; i++){
-		prefix[i][oa_strlen(prefix[i])] = ';';
-		DEBUG("%s", prefix[i]);
-	}
-#if 0	
-	if (sn == 1){
-		DEBUG("1 x sms");
-		//do not support multiple sms
-		for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
-			key_ret = lookfor_keywords_loop(NULL, len, &set, e_i, sms);
-			if (e_none == key_ret){
-				continue;
+		while(NULL != p){
+			if (i <= MAX_SMS_NUM){
+				oa_strcpy(prefix[i], p);
+				i++;
+				p = strtok(NULL, ";");
 			}
-			handle_keyword(NULL, NULL, NULL, key_ret, &set, sms);
-			oa_memset(&set, 0x0, sizeof(set));
+			else break;
+		}
+
+		if (prefix[i-1][0] == 'A' || prefix[i-1][0] == 'a' && prefix[i-1][1] == 0x0){
+			sn = i -1;
+			ms_ack = OA_TRUE;
+		}
+		else if (prefix[i-1][0] == 'N' || prefix[i-1][0] == 'n' && prefix[i-1][1] == 0x0){
+			sn = i -1;
+			ms_ack = OA_FALSE;
+		}
+		else{
+			sn = i;
+			ms_ack = OA_FALSE;
+		}
+		//add ";"
+		for (i = 0;i < sn; i++){
+			prefix[i][oa_strlen(prefix[i])] = ';';
+			DEBUG("%s", prefix[i]);
 		}
 	}
-#endif
+	else if (message.dcs == OA_SMSAL_UCS2_DCS) {//only for carID
+		u8 tmp[64] = {0x0};
+		u8 carid_prefix[3] = {0x0};
+		
+		sn = 1;
+		if (data[message.len - 1] == 'A' || 
+			data[message.len - 1] == 'a' && 
+			data[message.len - 3] == ';') {
+			ms_ack = OA_TRUE;
+		} else if (data[message.len - 1] == 'N' || 
+			data[message.len - 1] == 'n' || 
+			data[message.len - 1] == ';') {
+			ms_ack = OA_FALSE;
+		}
+		//extract carid prefix
+		carid_prefix[0] = data[12];
+		carid_prefix[1] = data[13];
+		//compare
+		for (i = 0; i < 31; i++) {
+			if (!oa_memcmp(carid_prefix, carID_uni2Gbk[i], 2)) {
+				oa_memcpy(carid_prefix, &carID_uni2Gbk[i][2], 2);
+				break;
+			}
+		}
+
+		if (i == 31) {
+			DEBUG("privince err!");
+			return;
+		}
+		
+		for (i = 15, j = 0; i < message.len; i+=2) {
+			if (data[i] == ';') break;
+			if (data[i] != ';') {
+				tmp[j] = data[i];
+				j++;
+			}
+		}
+
+		oa_strcat(prefix[0], "carID:");
+		oa_strcat(prefix[0], carid_prefix);
+		oa_strcat(prefix[0], tmp);
+		oa_strcat(prefix[0], ";");
+
+		for (i = 0; i < oa_strlen(prefix[0]); i++) DEBUG("%02x", prefix[0][i]);
+	}
+	
+
 	if (sn <= MAX_SMS_NUM){
 		DEBUG("%d x sms", sn);
 		for (i = 0; i < sn; i++){
@@ -2011,7 +2106,7 @@ void oa_app_sms(void)
 				
 				handle_keyword4ms(key_ret, &set);
 				if (ms_ack == OA_TRUE){
-					handle_common4ms(key_ret, buf, &len, sms);
+					handle_common4ms(key_ret, buf, &len, sms, &set);
 					DEBUG("\nbuf:%s len:%d", buf, len);
 					if (len == 0) return;//do not ack
 					if (set.s_k == sms_special){
