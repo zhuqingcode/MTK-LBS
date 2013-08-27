@@ -202,9 +202,9 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 	else if(dcs == OA_SMSAL_UCS2_DCS){
 		/*handle unicode sms text.*/
 		/*chinese sms*/
-	#if 0
 		oa_uint16 i;
 		oa_uint8 temp;
+		oa_uint8 carid[6] = {0x0};
 		len*=2;
 		if (NULL != data && len <= SMS_DATA_MAX_LEN){
 			for(i=0; i<len-1; i+=2){//exchange high byte & low byte
@@ -213,9 +213,18 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 				data[i+1] = temp;
 			}
 		}
-	#endif
-		Trace("unicode not support!");
-		return OA_TRUE; //do not handle & delete it
+		//extract adcii carid
+		for (i = 0; i < 5; i++) {
+			carid[i] = data[2 * i + 1];
+		}
+
+		if (!oa_strcmp(carid, "carID")) {
+			
+		} else {
+			Trace("unicode not support!");
+			return OA_TRUE; //do not handle & delete it
+		}
+		
 	}
 	else{
 		/*handle 8-bit sms text.*/
@@ -237,8 +246,13 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 		
 
 		if (len <= SMS_DATA_MAX_LEN){//check len
+			oa_uint8 i = 0;
 			oa_memcpy(message.data, data, len);
 			message.len = len;
+			/*
+			for ( ; i< len; i++) {
+				DEBUG("%02x", message.data[i]);
+			}*/
 		}
 		else{
 			DEBUG("ERR : len > SMS_DATA_MAX_LEN");
