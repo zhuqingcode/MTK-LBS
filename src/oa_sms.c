@@ -1002,16 +1002,17 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 			u8 i;
 			u8 tmp[3] = {0x0};
 			
-			
-			
-			for (i = 0; i < 31; i++) {
-				if (!oa_memcmp(dev_now_params.vehicle_license, &carID_uni2Gbk[i][2], 2)) {
-					oa_memcpy(tmp, &carID_uni2Gbk[i][0], 2);
-					special_carid = OA_TRUE;
-					p_set->s_k = sms_special;
-					break;
+			if (sms == which) {
+				for (i = 0; i < 31; i++) {
+					if (!oa_memcmp(dev_now_params.vehicle_license, &carID_uni2Gbk[i][2], 2)) {
+						oa_memcpy(tmp, &carID_uni2Gbk[i][0], 2);
+						special_carid = OA_TRUE;
+						p_set->s_k = sms_special;
+						break;
+					}
 				}
 			}
+			
 
 			if (special_carid == OA_TRUE) {
 				oa_strcat(temp, "carID:");
