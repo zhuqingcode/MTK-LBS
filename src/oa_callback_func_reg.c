@@ -251,7 +251,12 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 
 		if (len <= SMS_DATA_MAX_LEN){//check len
 			oa_uint8 i = 0;
-			oa_memcpy(message.data, data_temp, len);
+			if (dcs == OA_SMSAL_UCS2_DCS) {
+				oa_memcpy(message.data, data_temp, len);
+			} else if (dcs == OA_SMSAL_DEFAULT_DCS) {
+				oa_memcpy(message.data, data, len);
+			}
+			
 			message.len = len;
 			/*
 			for ( ; i< len; i++) {

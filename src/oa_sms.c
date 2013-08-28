@@ -2107,11 +2107,16 @@ void oa_app_sms(void)
 					if (len == 0) return;//do not ack
 					if (set.s_k == sms_special){
 						t_s = sms_special;
-						oa_memcpy(sendbuf, buf, len);
+						oa_memcpy(&sendbuf[pos], buf, len);
+						pos += len;
 					}
 					else if (set.s_k == sms_normal){
+						u8 temp_buf[128] = {0x0};
+						u8 len_uni;
 						t_s = sms_normal;
-						oa_strcat(sendbuf, buf);
+						len_uni = asc2uc(temp_buf, buf, len);
+						oa_memcpy(&sendbuf[pos], temp_buf, len_uni);
+						pos += len_uni;
 					}
 					oa_memset(buf, 0x0, sizeof(buf));
 				}
@@ -2123,8 +2128,8 @@ void oa_app_sms(void)
 		if (ms_ack == OA_TRUE){
 			oa_uint8 n;
 			oa_char temp[256] = {0x0};
-			if (sms_special == t_s){
-				n = len/140;
+			//if (sms_special == t_s){
+				n = pos/140;
 				if (n > 1){
 					DEBUG("sms content is too long");
 					return;
@@ -2133,17 +2138,17 @@ void oa_app_sms(void)
 					oa_memcpy(temp, sendbuf, 140);
 					sendsms4ms(temp, 140, sms_special);
 					oa_memset(temp, 0x0, 256);
-					if (len - 140 > 0){
-						oa_memcpy(temp, &sendbuf[140], len -140);
+					if (pos - 140 > 0){
+						oa_memcpy(temp, &sendbuf[140], pos -140);
 						sendsms4ms(temp, len -140, sms_special);
 					}
 				}
 				else if (n == 0){
-					oa_memcpy(temp, sendbuf, len);
-					sendsms4ms(temp, len, sms_special);
+					oa_memcpy(temp, sendbuf, pos);
+					sendsms4ms(temp, pos, sms_special);
 				}
-			}
-			else if(sms_normal == t_s) sendsms4ms(sendbuf, oa_strlen(sendbuf), sms_normal);
+			//}
+			//else if(sms_normal == t_s) sendsms4ms(sendbuf, oa_strlen(sendbuf), sms_normal);
 		}
 
 		
