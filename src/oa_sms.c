@@ -357,10 +357,12 @@ void gps_extract(oa_char *enquire_temp, u8 *p_len, sms_or_uart which){
 	if (sms == which){
 		//gps×´Ì¬
 		oa_memcpy(tmp, gps, sizeof(gps));pos += sizeof(gps);
-		oa_memcpy(&tmp[pos], ydw, 6);pos += 6;
-		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		
 
 		if (GPS_FIXED == Pos_Inf.Fix_Status){
+			
+		oa_memcpy(&tmp[pos], ydw, 6);pos += 6;
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
 		//Ê±¼ä
 		oa_memcpy(&tmp[pos], sj, sizeof(sj));pos += sizeof(sj);
 		t.nYear = ((Pos_Inf.Time[0]>>4)&0x0F)*10+ (Pos_Inf.Time[0]&0x0F);
