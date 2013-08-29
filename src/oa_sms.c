@@ -357,10 +357,12 @@ void gps_extract(oa_char *enquire_temp, u8 *p_len, sms_or_uart which){
 	if (sms == which){
 		//gps×´Ì¬
 		oa_memcpy(tmp, gps, sizeof(gps));pos += sizeof(gps);
-		oa_memcpy(&tmp[pos], ydw, 6);pos += 6;
-		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+		
 
 		if (GPS_FIXED == Pos_Inf.Fix_Status){
+			
+		oa_memcpy(&tmp[pos], ydw, 6);pos += 6;
+		oa_memcpy(&tmp[pos], fh, 2);pos += 2;
 		//Ê±¼ä
 		oa_memcpy(&tmp[pos], sj, sizeof(sj));pos += sizeof(sj);
 		t.nYear = ((Pos_Inf.Time[0]>>4)&0x0F)*10+ (Pos_Inf.Time[0]&0x0F);
@@ -1131,6 +1133,7 @@ void sendsms4ms(u8 *buf, u16 len, sms_kind s_k){
 	if (s_k == sms_normal)	oa_sms_test_dfalp(buf, message.deliver_num);
 	else if(s_k == sms_special) oa_sms_test_ucs2(buf, message.deliver_num, len);
 }
+
 /*********************************************************
 *Function:      dev_action_handle()
 *Description:  maybe device need do something
@@ -2012,16 +2015,55 @@ void oa_app_sms(void)
 	oa_uint8 len;
 	oa_bool ms_ack;
 	oa_bool try_unlock_inside = OA_FALSE;
-	sms_kind t_s = sms_normal;
 
 	//len = message.len;
 	oa_memcpy(data, message.data, message.len);
-	if (message.dcs == OA_SMSAL_DEFAULT_DCS) {
+	//debug 
+	//DEBUG("len:%d", message.len);
+	for (i = 0; i < message.len; i++) {
+		DEBUG("%02x", data[i]);
+	}
+	
+	if (message.dcs == OA_SMSAL_UCS2_DCS) {
+		u8 *p = NULL;
+		u8 carid_prefix[3] = {0x0};
+
+		p = oa_strstr(data, "carID:");
+		if (p != NULL) {
+			//extract carid prefix
+			carid_prefix[0] = p[6];
+			carid_prefix[1] = p[7];
+		} else {
+			DEBUG("format err!");
+			return;
+		}
+
+		//compare
+		for (i = 0; i < 31; i++) {
+			if (!oa_memcmp(carid_prefix, carID_uni2Gbk[i], 2)) {
+				oa_memcpy(carid_prefix, &carID_uni2Gbk[i][2], 2);
+				break;
+			}
+		}
+
+		if (i == 31) {
+			DEBUG("privince err!");
+			return;
+		}
+		//replace unicode with gbk
+		p[6] = carid_prefix[0];
+		p[7] = carid_prefix[1];
+		
+	}
+	//if (message.dcs == OA_SMSAL_DEFAULT_DCS) {
 		p = strtok(data, ";");
 		if (NULL == p){
 			DEBUG("format err");
 			return;
 		}
+		
+		i = 0;
+		
 		while(NULL != p){
 			if (i <= MAX_SMS_NUM){
 				oa_strcpy(prefix[i], p);
@@ -2048,55 +2090,10 @@ void oa_app_sms(void)
 			prefix[i][oa_strlen(prefix[i])] = ';';
 			DEBUG("%s", prefix[i]);
 		}
-	}
-	else if (message.dcs == OA_SMSAL_UCS2_DCS) {//only for carID
-		u8 tmp[64] = {0x0};
-		u8 carid_prefix[3] = {0x0};
-		
-		sn = 1;
-		if (data[message.len - 1] == 'A' || 
-			data[message.len - 1] == 'a' && 
-			data[message.len - 3] == ';') {
-			ms_ack = OA_TRUE;
-		} else if (data[message.len - 1] == 'N' || 
-			data[message.len - 1] == 'n' || 
-			data[message.len - 1] == ';') {
-			ms_ack = OA_FALSE;
-		}
-		//extract carid prefix
-		carid_prefix[0] = data[12];
-		carid_prefix[1] = data[13];
-		//compare
-		for (i = 0; i < 31; i++) {
-			if (!oa_memcmp(carid_prefix, carID_uni2Gbk[i], 2)) {
-				oa_memcpy(carid_prefix, &carID_uni2Gbk[i][2], 2);
-				break;
-			}
-		}
-
-		if (i == 31) {
-			DEBUG("privince err!");
-			return;
-		}
-		
-		for (i = 15, j = 0; i < message.len; i+=2) {
-			if (data[i] == ';') break;
-			if (data[i] != ';') {
-				tmp[j] = data[i];
-				j++;
-			}
-		}
-
-		oa_strcat(prefix[0], "carID:");
-		oa_strcat(prefix[0], carid_prefix);
-		oa_strcat(prefix[0], tmp);
-		oa_strcat(prefix[0], ";");
-
-		for (i = 0; i < oa_strlen(prefix[0]); i++) DEBUG("%02x", prefix[0][i]);
-	}
-	
+	//}
 
 	if (sn <= MAX_SMS_NUM){
+		u8 pos = 0;
 		DEBUG("%d x sms", sn);
 		for (i = 0; i < sn; i++){
 			for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
@@ -2108,15 +2105,18 @@ void oa_app_sms(void)
 				handle_keyword4ms(key_ret, &set);
 				if (ms_ack == OA_TRUE){
 					handle_common4ms(key_ret, buf, &len, sms, &set);
-					DEBUG("\nbuf:%s len:%d", buf, len);
+					DEBUG("buf:%s len:%d", buf, len);
 					if (len == 0) return;//do not ack
 					if (set.s_k == sms_special){
-						t_s = sms_special;
-						oa_memcpy(sendbuf, buf, len);
+						oa_memcpy(&sendbuf[pos], buf, len);
+						pos += len;
 					}
 					else if (set.s_k == sms_normal){
-						t_s = sms_normal;
-						oa_strcat(sendbuf, buf);
+						u8 temp_buf[128] = {0x0};
+						u8 len_uni;
+						len_uni = asc2uc(temp_buf, buf, len);
+						oa_memcpy(&sendbuf[pos], temp_buf, len_uni);
+						pos += len_uni;
 					}
 					oa_memset(buf, 0x0, sizeof(buf));
 				}
@@ -2126,29 +2126,29 @@ void oa_app_sms(void)
 			}
 		}
 		if (ms_ack == OA_TRUE){
-			oa_uint8 n;
-			oa_char temp[256] = {0x0};
-			if (sms_special == t_s){
-				n = len/140;
-				if (n > 1){
-					DEBUG("sms content is too long");
-					return;
-				}
-				else if (n == 1){//only for 'STATUS;' & 'GPS'
-					oa_memcpy(temp, sendbuf, 140);
+			oa_uint8 n, len;
+			oa_uint8 temp[140];
+			
+			n = pos/140;
+			if (n > 0) {//multiple sms
+				for (i = 0; i < n; i++) {
+					oa_memset(temp, 0x0, sizeof(temp));
+					oa_memcpy(temp, &sendbuf[i * 140], 140);
 					sendsms4ms(temp, 140, sms_special);
-					oa_memset(temp, 0x0, 256);
-					if (len - 140 > 0){
-						oa_memcpy(temp, &sendbuf[140], len -140);
-						sendsms4ms(temp, len -140, sms_special);
-					}
 				}
-				else if (n == 0){
-					oa_memcpy(temp, sendbuf, len);
+
+				len = pos - 140 * i;
+				if (len > 0) {
+					oa_memset(temp, 0x0, sizeof(temp));
+					oa_memcpy(temp, &sendbuf[i * 140], len);
 					sendsms4ms(temp, len, sms_special);
 				}
+			} else {
+				oa_memset(temp, 0x0, sizeof(temp));
+				oa_memcpy(temp, sendbuf, pos);
+				sendsms4ms(temp, pos, sms_special);
 			}
-			else if(sms_normal == t_s) sendsms4ms(sendbuf, oa_strlen(sendbuf), sms_normal);
+			
 		}
 
 		
