@@ -1131,6 +1131,7 @@ void sendsms4ms(u8 *buf, u16 len, sms_kind s_k){
 	if (s_k == sms_normal)	oa_sms_test_dfalp(buf, message.deliver_num);
 	else if(s_k == sms_special) oa_sms_test_ucs2(buf, message.deliver_num, len);
 }
+
 /*********************************************************
 *Function:      dev_action_handle()
 *Description:  maybe device need do something
@@ -2012,12 +2013,11 @@ void oa_app_sms(void)
 	oa_uint8 len;
 	oa_bool ms_ack;
 	oa_bool try_unlock_inside = OA_FALSE;
-	sms_kind t_s = sms_normal;
 
 	//len = message.len;
 	oa_memcpy(data, message.data, message.len);
 	//debug 
-	DEBUG("len:%d", message.len);
+	//DEBUG("len:%d", message.len);
 	for (i = 0; i < message.len; i++) {
 		DEBUG("%02x", data[i]);
 	}
@@ -2106,14 +2106,12 @@ void oa_app_sms(void)
 					DEBUG("buf:%s len:%d", buf, len);
 					if (len == 0) return;//do not ack
 					if (set.s_k == sms_special){
-						t_s = sms_special;
 						oa_memcpy(&sendbuf[pos], buf, len);
 						pos += len;
 					}
 					else if (set.s_k == sms_normal){
 						u8 temp_buf[128] = {0x0};
 						u8 len_uni;
-						t_s = sms_normal;
 						len_uni = asc2uc(temp_buf, buf, len);
 						oa_memcpy(&sendbuf[pos], temp_buf, len_uni);
 						pos += len_uni;
@@ -2126,29 +2124,29 @@ void oa_app_sms(void)
 			}
 		}
 		if (ms_ack == OA_TRUE){
-			oa_uint8 n;
-			oa_char temp[256] = {0x0};
-			//if (sms_special == t_s){
-				n = pos/140;
-				if (n > 1){
-					DEBUG("sms content is too long");
-					return;
-				}
-				else if (n == 1){//only for 'STATUS;' & 'GPS'
-					oa_memcpy(temp, sendbuf, 140);
+			oa_uint8 n, len;
+			oa_uint8 temp[140];
+			
+			n = pos/140;
+			if (n > 0) {//multiple sms
+				for (i = 0; i < n; i++) {
+					oa_memset(temp, 0x0, sizeof(temp));
+					oa_memcpy(temp, &sendbuf[i * 140], 140);
 					sendsms4ms(temp, 140, sms_special);
-					oa_memset(temp, 0x0, 256);
-					if (pos - 140 > 0){
-						oa_memcpy(temp, &sendbuf[140], pos -140);
-						sendsms4ms(temp, len -140, sms_special);
-					}
 				}
-				else if (n == 0){
-					oa_memcpy(temp, sendbuf, pos);
-					sendsms4ms(temp, pos, sms_special);
+
+				len = pos - 140 * i;
+				if (len > 0) {
+					oa_memset(temp, 0x0, sizeof(temp));
+					oa_memcpy(temp, &sendbuf[i * 140], len);
+					sendsms4ms(temp, len, sms_special);
 				}
-			//}
-			//else if(sms_normal == t_s) sendsms4ms(sendbuf, oa_strlen(sendbuf), sms_normal);
+			} else {
+				oa_memset(temp, 0x0, sizeof(temp));
+				oa_memcpy(temp, sendbuf, pos);
+				sendsms4ms(temp, pos, sms_special);
+			}
+			
 		}
 
 		
