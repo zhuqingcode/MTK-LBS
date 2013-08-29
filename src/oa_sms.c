@@ -434,7 +434,11 @@ void gps_extract(oa_char *enquire_temp, u8 *p_len, sms_or_uart which){
 			//未定位
 			oa_memcpy(&tmp[pos], wdw, sizeof(wdw));pos += sizeof(wdw);
 			oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+
 			//模块
+			oa_memcpy(&tmp[pos], mk, sizeof(mk));pos += sizeof(mk);
+			
+			//正常/不正常
 			if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ERR) == SET){
 				oa_memcpy(&tmp[pos], bzc, sizeof(bzc));pos += sizeof(bzc);
 			}
@@ -442,6 +446,9 @@ void gps_extract(oa_char *enquire_temp, u8 *p_len, sms_or_uart which){
 				oa_memcpy(&tmp[pos], zc, sizeof(zc));pos += sizeof(zc);
 			}
 			oa_memcpy(&tmp[pos], fh, 2);pos += 2;
+			//天线
+			oa_memcpy(&tmp[pos], tx, sizeof(tx));pos += sizeof(tx);
+			
 			if (ReadAlarmPara(StaAlarm0, ALARM_GNSS_ANTENNA) == SET){
 				oa_memcpy(&tmp[pos], dk, sizeof(dk));pos += sizeof(dk);
 			}
