@@ -2026,7 +2026,7 @@ void oa_app_sms(void)
 	//len = message.len;
 	oa_memcpy(data, message.data, message.len);
 	//debug 
-	//DEBUG("len:%d", message.len);
+	DEBUG("len:%d", message.len);
 	for (i = 0; i < message.len; i++) {
 		DEBUG("%02x", data[i]);
 	}
