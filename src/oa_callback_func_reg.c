@@ -179,7 +179,7 @@ void oa_app_power_shutdown(void* param)
 ******************************************************************/
 oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_uint8 * data, oa_uint16 len, oa_smsal_dcs_enum dcs)
 {
-
+	oa_uint8 data_temp[256] = {0x0};
 #ifdef DBG_SMS
 	DEBUG("SMS received:deliver_num=%s,timestamp=%d-%d-%d-%d:%d:%d,dcs=%d,len=%d,data=%s",\
 	deliver_num,*(timestamp+0),*(timestamp+1),*(timestamp+2),*(timestamp+3),*(timestamp+4),*(timestamp+5),dcs,len,data);
@@ -202,20 +202,33 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 	else if(dcs == OA_SMSAL_UCS2_DCS){
 		/*handle unicode sms text.*/
 		/*chinese sms*/
-	#if 0
-		oa_uint16 i;
-		oa_uint8 temp;
+		oa_uint16 i, j;
+		oa_uint8 temp;		
+		//exchange high byte & low byte
 		len*=2;
 		if (NULL != data && len <= SMS_DATA_MAX_LEN){
-			for(i=0; i<len-1; i+=2){//exchange high byte & low byte
+			for(i=0; i<len-1; i+=2){
 				temp = data[i];
 				data[i] = data[i+1];
 				data[i+1] = temp;
 			}
 		}
-	#endif
-		Trace("unicode not support!");
-		return OA_TRUE; //do not handle & delete it
+		//discard '0x0' in unicode sms
+		temp = 0;
+		for (i = 0, j = 0; i < len; i++) {
+			if (data[i] == 0x0) {
+				temp++;
+			} else {
+				data_temp[j++] = data[i];
+			}
+		}
+		len -= temp;
+		
+		if (!oa_strstr(data_temp, "carID")) {
+			Trace("unicode not support!");
+			return OA_TRUE; //do not handle & delete it
+		}
+		
 	}
 	else{
 		/*handle 8-bit sms text.*/
@@ -237,8 +250,18 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
 		
 
 		if (len <= SMS_DATA_MAX_LEN){//check len
-			oa_memcpy(message.data, data, len);
+			oa_uint8 i = 0;
+			if (dcs == OA_SMSAL_UCS2_DCS) {
+				oa_memcpy(message.data, data_temp, len);
+			} else if (dcs == OA_SMSAL_DEFAULT_DCS) {
+				oa_memcpy(message.data, data, len);
+			}
+			
 			message.len = len;
+			/*
+			for ( ; i< len; i++) {
+				DEBUG("%02x", message.data[i]);
+			}*/
 		}
 		else{
 			DEBUG("ERR : len > SMS_DATA_MAX_LEN");
