@@ -2025,12 +2025,13 @@ void oa_app_sms(void)
 
 	//len = message.len;
 	oa_memcpy(data, message.data, message.len);
-	//debug 
+	//debug
+	/*
 	DEBUG("len:%d", message.len);
 	for (i = 0; i < message.len; i++) {
 		DEBUG("%02x", data[i]);
 	}
-	
+	*/
 	if (message.dcs == OA_SMSAL_UCS2_DCS) {
 		u8 *p = NULL;
 		u8 carid_prefix[3] = {0x0};
