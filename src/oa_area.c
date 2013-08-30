@@ -1351,6 +1351,7 @@ void oa_app_area(void *para)
 			
 				os_cal_circle[i] = 0;
 				if ((os_circle_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+					DEBUG("取消区域内超速,区域id:%d", area_id[i]);
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 					os_circle_var &= ~(1<<i);
 				}
@@ -1367,6 +1368,7 @@ void oa_app_area(void *para)
 			os_cal_circle[i] = 0;
 			if ((os_circle_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
 				if (speed <= dev_now_params.max_speed) {
+					DEBUG("取消区域内超速,区域id:%d", area_id[i]);
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 				}
 				os_circle_var &= ~(1<<i);
@@ -1428,6 +1430,7 @@ void oa_app_area(void *para)
 			} else {
 				os_cal_rect[i] = 0;
 				if ((os_rect_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+					DEBUG("取消区域内超速,区域id:%d", area_id[i]);
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 					os_rect_var &= ~(1<<i);
 				}
@@ -1445,6 +1448,7 @@ void oa_app_area(void *para)
 			os_cal_rect[i] = 0;
 			if ((os_rect_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
 				if (speed <= dev_now_params.max_speed) {
+					DEBUG("取消区域内超速,区域id:%d", area_id[i]);
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 				}
 				os_rect_var &= ~(1<<i);
@@ -1505,6 +1509,7 @@ void oa_app_area(void *para)
 			} else {
 				os_cal_poly[i] = 0;
 				if ((os_poly_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+					DEBUG("取消区域内超速,区域id:%d", area_id[i]);
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 					os_poly_var &= ~(1<<i);
 				}
@@ -1521,6 +1526,7 @@ void oa_app_area(void *para)
 		else if (cur_status_poly[i] == area_outside) {
 			os_cal_poly[i] = 0;
 			if ((os_poly_var & (1<<i)) && ReadAlarmPara(StaAlarm0, ALARM_OVER_SPEED) == SET) {
+				DEBUG("取消区域内超速,区域id:%d", area_id[i]);
 				if (speed <= dev_now_params.max_speed) {
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OVER_SPEED);//cancel this alarm
 				}
