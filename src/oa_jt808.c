@@ -2874,9 +2874,9 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 				u16 temp_seq2 = 0;
 				char_to_short(&rsp.SeqId[0], &temp_seq);
 				char_to_short(&sProtclHandl.DevSeqId[0], &temp_seq2);
-				DEBUG("seq:%02x  seq2:%02x", temp_seq, temp_seq2);
+				//DEBUG("seq:%02x  seq2:%02x", temp_seq, temp_seq2);
 				if (timeout_var.timeout_en == OA_TRUE && temp_seq == temp_seq2-1){
-					DEBUG("disable timeout");
+					//DEBUG("disable timeout");
 					timeout_var.do_timeout = OA_FALSE;
 					timeout_var.timeout_en = OA_FALSE;
 				}
@@ -2986,9 +2986,9 @@ u8 JT808_recv_analysis(u8 *data,u16 datalen/*,u8 *sendbuf,u16 sendbuflen*/)
 				char_to_short(&rsp.MsgId[0], &temp_msgid);
 				char_to_short(&sProtclHandl.DevSeqId[0], &temp_seq2);
 				Read_ProtclHandl(eDevMsgid, (u8 *)&temp_msgid2, &temp_len);
-				DEBUG("seq:%02x msgid:%04x seq2:%02x msgid2:%04x", temp_seq, temp_msgid, temp_seq2, temp_msgid2);
+				//DEBUG("seq:%02x msgid:%04x seq2:%02x msgid2:%04x", temp_seq, temp_msgid, temp_seq2, temp_msgid2);
 				if (timeout_var.timeout_en == OA_TRUE && temp_seq == temp_seq2-1 && temp_msgid == temp_msgid2){
-					DEBUG("disable timeout");
+					//DEBUG("disable timeout");
 					timeout_var.do_timeout = OA_FALSE;
 					timeout_var.timeout_en = OA_FALSE;
 				}
@@ -4091,7 +4091,7 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 				alarmflag = 0;
 			}
 			alarmflag = temp.total_mileage;
-			DEBUG("read miles:%d", alarmflag);
+			//DEBUG("read miles:%d", alarmflag);
 			ret = oa_fclose(handle);
 			if (ret < 0){
 				DEBUG("close file err!");
