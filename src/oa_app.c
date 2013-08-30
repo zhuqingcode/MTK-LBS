@@ -93,7 +93,7 @@ void oa_app_plat_link(void *para)
 	static oa_bool task_runed = OA_TRUE;
 	oa_int16 build_ret;
 	oa_int16 soc_ret;
-	
+	oa_bool ret;
 	if (OA_TRUE == task_runed){
 		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		task_runed = OA_FALSE;
@@ -106,7 +106,14 @@ void oa_app_plat_link(void *para)
 			case PLAT_SOC_INIT:{
 				if (oa_sim_network_is_valid()){
 					DEBUG("GSM network init finished!");
-					if (use_is_lock()) do_socset_b4_unlock();
+					if (use_is_lock()) {
+						ret = oa_soc_close_req();
+						if (ret) {
+							do_socset_b4_unlock();
+						} else {
+							oa_module_restart(NULL);
+						}
+					}
 					/*soc init*/
 					oa_soc_init();//soc paras & callback register
 					oa_soc_state_check();//check & connect
@@ -191,9 +198,14 @@ void oa_app_plat_link(void *para)
 		}
 	}
 	else{//detect is online/offline
-		if (dev_running.plat_check_value == OA_TRUE){
+		static oa_uint8 ck_time;
+		ck_time++;
+		if (dev_running.plat_check_value == OA_TRUE && 
+			ck_time >= 10) {
+			ck_time = 0;
 			if (oa_sim_network_is_valid()){
-				if (!use_is_lock()) oa_soc_state_check();//check & connect
+				oa_soc_state_check();//check & connect
+				ck_time = 0;
 			}
 			else{
 				DEBUG("sim network is invalue!");

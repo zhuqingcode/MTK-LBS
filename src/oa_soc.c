@@ -150,15 +150,7 @@ void oa_soc_set_apn_cb(oa_bool result)
       g_soc_context.can_connect = OA_TRUE;
 }
 
-void try_reunlock(void){
-	DEBUG("%s called", __func__);
-	g_soc_context.can_connect = OA_TRUE;
-	g_soc_context.state = OA_SOC_STATE_OFFLINE;
-	dev_running.plat_switch = OA_TRUE;
-}
-void try_reclose_soc(void){
-	dev_running.plat_switch = OA_TRUE;
-}
+
 //Looped check the socket connect state. if offline and can connect, do connect request
 void oa_soc_state_check(void)
 {
@@ -172,21 +164,24 @@ void oa_soc_state_check(void)
 		}
 		return;	
 	}
-
-	if (use_is_lock() && g_soc_context.state == OA_SOC_STATE_CONNECT){
-		DEBUG("close soc, try to connect again");
-		if (!oa_soc_close(g_soc_context.socket_id)){
-			g_soc_context.socket_id = -1;
-			oa_evshed_start(OA_EVSHED_ID_2, try_reunlock, NULL, REUNLOCK_WAITING_RELEASING);
-			return;
-		}
-		else{
-			DEBUG("close soc err!");
-			oa_evshed_start(OA_EVSHED_ID_2, try_reclose_soc, NULL, RESOC_WAITING_RELEASING);
-			return;
+#if 0
+	if (use_is_lock()) {
+		if (g_soc_context.state == OA_SOC_STATE_CONNECT || 
+			 g_soc_context.state == OA_SOC_STATE_ONLINE) {
+			DEBUG("close soc, try to connect again");
+			if (!oa_soc_close(g_soc_context.socket_id)) {
+				g_soc_context.socket_id = -1;
+				oa_evshed_start(OA_EVSHED_ID_2, try_reunlock, NULL, REUNLOCK_WAITING_RELEASING);
+				return;
+			}
+			else{
+				DEBUG("close soc err!");
+				oa_evshed_start(OA_EVSHED_ID_2, try_reclose_soc, NULL, RESOC_WAITING_RELEASING);
+				return;
+			}
 		}
 	}
-		
+#endif
 	if (g_soc_context.state == OA_SOC_STATE_OFFLINE && g_soc_context.can_connect){
 		//------------zhuqing add code----------------
 		g_soc_context.can_connect = OA_FALSE;
@@ -196,7 +191,7 @@ void oa_soc_state_check(void)
 	}
 	else{
 		g_soc_context.recon_counter = 0;
-		//DEBUG(" not ready for connect or doing connecting");
+		//DEBUG(" not ready for connect");
 	}
 #if 0
 	if(++check_counter>10 && g_soc_context.state == OA_SOC_STATE_ONLINE)

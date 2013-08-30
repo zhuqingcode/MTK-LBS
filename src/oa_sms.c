@@ -2164,6 +2164,7 @@ void oa_app_sms(void)
 			DEBUG("try unlock");
 			try_unlock = OA_TRUE;
 			dev_running.plat_switch = OA_TRUE;
+			dev_running.next_step = PLAT_SOC_INIT;
 		}
 	}
 	else DEBUG("too many sms");

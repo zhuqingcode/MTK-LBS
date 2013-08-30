@@ -83,7 +83,7 @@ void oa_tst_eint_hisr(void)
 *Others:         
 *********************************************************/
 void adc_value_cb(oa_int32 volt_result, oa_double adc_result){
-	OA_DEBUG_USER("volt_result:%d adc_result:%f", volt_result, adc_result);
+	//OA_DEBUG_USER("volt_result:%d adc_result:%f", volt_result, adc_result);
 }
 /*********************************************************
 *Function:     oa_gpio_set()
