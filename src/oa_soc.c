@@ -150,15 +150,7 @@ void oa_soc_set_apn_cb(oa_bool result)
       g_soc_context.can_connect = OA_TRUE;
 }
 
-void try_reunlock(void){
-	DEBUG("%s called", __func__);
-	g_soc_context.can_connect = OA_TRUE;
-	g_soc_context.state = OA_SOC_STATE_OFFLINE;
-	dev_running.plat_switch = OA_TRUE;
-}
-void try_reclose_soc(void){
-	dev_running.plat_switch = OA_TRUE;
-}
+
 //Looped check the socket connect state. if offline and can connect, do connect request
 void oa_soc_state_check(void)
 {
@@ -199,7 +191,7 @@ void oa_soc_state_check(void)
 	}
 	else{
 		g_soc_context.recon_counter = 0;
-		DEBUG(" not ready for connect");
+		//DEBUG(" not ready for connect");
 	}
 #if 0
 	if(++check_counter>10 && g_soc_context.state == OA_SOC_STATE_ONLINE)
