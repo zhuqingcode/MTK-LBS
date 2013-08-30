@@ -2101,7 +2101,7 @@ void oa_app_sms(void)
 	//}
 
 	if (sn <= MAX_SMS_NUM){
-		u8 pos = 0;
+		u16 pos = 0;
 		DEBUG("%d x sms", sn);
 		for (i = 0; i < sn; i++){
 			for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
