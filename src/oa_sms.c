@@ -2169,9 +2169,9 @@ void oa_app_sms(void)
 			DEBUG("try unlock");
 			try_unlock |= TRY_UNLOCK_BIT;
 			dev_running.plat_switch = OA_TRUE;
-			dev_running.next_step = PLAT_SOC_INIT;
 			if (try_unlock_inside & NEED_RECONN_BIT) {
 				try_unlock |= NEED_RECONN_BIT;
+				dev_running.next_step = PLAT_SOC_INIT;
 			}
 		}
 	}
