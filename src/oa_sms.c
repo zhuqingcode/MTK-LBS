@@ -1254,7 +1254,7 @@ void dev_action_handle(keyword_context *p_set, sms_or_uart which)
 	}
 #endif	
 
-	p_set->act_kind = no_act;
+	//p_set->act_kind = no_act;
 }
 /*********************************************************
 *Function:      handle_keyword4ms()
@@ -2132,7 +2132,7 @@ void oa_app_sms(void)
 				if (set.kind == 0x1 && use_is_lock()) {
 					try_unlock_inside |= TRY_UNLOCK_BIT;
 					if (set.act_kind == reconn) {
-						try_unlock_inside |= TRY_UNLOCK_BIT;
+						try_unlock_inside |= NEED_RECONN_BIT;
 					}
 				}
 				oa_memset(&set, 0x0, sizeof(set));
