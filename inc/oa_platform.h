@@ -42,6 +42,9 @@
 #define OA_APP_TIMEOUT_1ST 20000
 #define TIMEOUT_SECOND (OA_APP_TIMEOUT/1000)
 #define RESTART_THRESHOLD (25 * 60)
+
+#define TRY_UNLOCK_BIT (1U<<0)
+#define NEED_RECONN_BIT (1U<<1)
 typedef struct
 {
 	oa_uint8 authen_code_len;

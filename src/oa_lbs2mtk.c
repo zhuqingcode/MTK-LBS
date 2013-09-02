@@ -44,7 +44,7 @@ extern STRUCT_RMC Pos_Inf;
 extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 KEYWORDS_SIZE;
 extern oa_char *p_keyword[];
-extern oa_bool try_unlock;
+extern u32 try_unlock;
 scrn_struct s_s;
 /*********************************************************
 *Function:     oa_sms_demo()
@@ -146,8 +146,9 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 
 		if (try_unlock_inside == OA_TRUE){
 			DEBUG("try unlock");
-			try_unlock = OA_TRUE;
+			try_unlock |= TRY_UNLOCK_BIT;
 			dev_running.plat_switch = OA_TRUE;
+			dev_running.next_step = PLAT_SOC_INIT;
 		}
 		
 		if (ms_ack == OA_TRUE){

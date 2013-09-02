@@ -39,7 +39,7 @@ extern action_kind plat_paraset;
 extern dev_control_type control_type;
 extern upgrade_paras up_paras;
 extern timeout_struct timeout_var;
-extern oa_bool try_unlock;
+extern u32 try_unlock;
 extern DEV_PLAT_PARAS dev_running;
 //-------------------------------------
 /*debug*/
@@ -453,7 +453,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 						}
 					}
 					else{
-						try_unlock = OA_FALSE;
+						try_unlock = 0;
 						dev_running.plat_switch = OA_TRUE;
 					}
 				}break;
@@ -478,7 +478,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 						//unlock
 						if (use_is_lock()){
 							use_unlock();
-							try_unlock = OA_FALSE;
+							try_unlock = 0;
 							DEBUG("Congratulations to you,device is unlocked!");
 						}
 					}
@@ -505,7 +505,7 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 					if (dev_running.doing_what == authen && dev_running.plat_status == OFFLINE){
 						dev_running.plat_switch = OA_TRUE;//if authen err, do it again
 						if (use_is_lock()){//locked
-							try_unlock = OA_FALSE;
+							try_unlock = 0;
 						}
 						dev_running.authen_err_time++;
 						if (dev_running.authen_err_time >= AUTHEN_ERR_MAX_TIMES){
@@ -684,7 +684,7 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 				DEBUG("%s:sock_id=%d connect fail err=%d!",__func__,soc_notify->socket_id,soc_notify->error_cause);
 				oa_soc_close_req();
 				if (use_is_lock()){
-					try_unlock = OA_FALSE;
+					try_unlock = 0;
 					dev_running.plat_switch = OA_TRUE;
 					dev_running.next_step = PLAT_SOC_INIT;
 				}
@@ -707,7 +707,7 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 					dev_running.next_step = PLAT_SOC_INIT;
 				}
 				else{
-					try_unlock = OA_FALSE;
+					try_unlock = 0;
 				}
 				
 			}
