@@ -44,7 +44,7 @@ extern STRUCT_RMC Pos_Inf;
 extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 KEYWORDS_SIZE;
 extern oa_char *p_keyword[];
-extern oa_bool try_unlock;
+extern u32 try_unlock;
 scrn_struct s_s;
 /*********************************************************
 *Function:     oa_sms_demo()
@@ -77,7 +77,7 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 	oa_char buf[256] = {0x0};
 	oa_uint8 len;
 	oa_bool ms_ack;
-	oa_bool try_unlock_inside = OA_FALSE;
+	u32 try_unlock_inside = 0;
 	sms_kind t_s = sms_normal;
 	
 	DEBUG("sms:%s len:%d", p_sms, sms_len);
@@ -139,15 +139,24 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 					oa_memset(buf, 0x0, sizeof(buf));
 				}
 				dev_action_handle(&set, scrn);
-				if (set.kind == 0x1 && use_is_lock()) try_unlock_inside = OA_TRUE;
+				if (set.kind == 0x1 && use_is_lock()){
+					try_unlock_inside |= TRY_UNLOCK_BIT;
+					if (set.act_kind == reconn) {
+						try_unlock_inside |= NEED_RECONN_BIT;
+					}
+				}
 				oa_memset(&set, 0x0, sizeof(set));
 			}
 		}
 
-		if (try_unlock_inside == OA_TRUE){
+		if (try_unlock_inside & TRY_UNLOCK_BIT) {
 			DEBUG("try unlock");
-			try_unlock = OA_TRUE;
+			try_unlock |= TRY_UNLOCK_BIT;
 			dev_running.plat_switch = OA_TRUE;
+			if (try_unlock_inside & NEED_RECONN_BIT) {
+				try_unlock |= NEED_RECONN_BIT;
+				dev_running.next_step = PLAT_SOC_INIT;
+			}
 		}
 		
 		if (ms_ack == OA_TRUE){
