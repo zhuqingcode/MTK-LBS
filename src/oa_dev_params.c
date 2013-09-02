@@ -56,7 +56,7 @@ DEVICE_PARAMS dev_def_params =
 	{"cmnet"},					//m_apn_name
 	{"root"},						//m_apn_username
 	{"root"},						//m_apn_password
-	{"61.155.107.41"},				//m_server_ip
+	{"112.4.133.86"},				//m_server_ip
 	//{"202.102.108.23"},			//hx:just for test
 	{"talentvideo.com.cn"},			//m_server_dn
 	{"cmnet"},					//b_apn_name
@@ -64,7 +64,7 @@ DEVICE_PARAMS dev_def_params =
 	{"root"},						//b_apn_password
 	{"112.4.133.86"},				//b_server_ip
 	{"talentvideo.com.cn"},			//b_server_dn
-	11114,						//server_tcp_port
+	11119,						//server_tcp_port
 	11115,						//server_udp_port
 	//9992,						//hx:just for test
 	//......
