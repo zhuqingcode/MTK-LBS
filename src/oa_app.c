@@ -57,7 +57,7 @@ DEV_PLAT_PARAS dev_running =
 };
 timeout_struct timeout_var = {OA_FALSE, OA_FALSE, 0};
 timeout_data_struct timeout_data;
-oa_bool try_unlock = OA_FALSE;
+u32 try_unlock = 0;
 extern DEVICE_PARAMS dev_now_params;
 extern oa_soc_context g_soc_context;
 extern oa_bool scrn_send;
@@ -99,14 +99,14 @@ void oa_app_plat_link(void *para)
 		task_runed = OA_FALSE;
 	}
 
-	if (use_is_lock() && try_unlock == OA_FALSE) goto again;
+	if (use_is_lock() && !(try_unlock & TRY_UNLOCK_BIT)) goto again;
 	//避免重复进行某一步操作
 	if (OA_TRUE == dev_running.plat_switch){
 		switch (dev_running.next_step){
 			case PLAT_SOC_INIT:{
 				if (oa_sim_network_is_valid()){
 					DEBUG("GSM network init finished!");
-					if (use_is_lock()) {
+					if (use_is_lock() && (try_unlock & NEED_RECONN_BIT)) {
 						ret = oa_soc_close_req();
 						if (ret) {
 							do_socset_b4_unlock();
@@ -549,7 +549,7 @@ void oa_app_main(void)
 		oa_app_init();
 		//platform link task
 		//try to unlock with using default device parameters
-		try_unlock = OA_TRUE;
+		try_unlock |= TRY_UNLOCK_BIT;
 		oa_timer_start(OA_APP_SCHEDULER_ID, oa_app_plat_link, NULL, OA_APP_PLAT_LINK_1ST);
 		//timeout timer
 		oa_timer_start(OA_TIMER_ID_11, oa_app_timeout, NULL, OA_APP_TIMEOUT_1ST);
@@ -585,7 +585,7 @@ void oa_app_main(void)
 	}
 	else if (OA_TRUE == dev_is_locked)  //device is lock
 	{
-		if (!try_unlock) DEBUG("device is locked!Please activate it.");
+		if (!(try_unlock & TRY_UNLOCK_BIT)) DEBUG("device is locked!Please activate it.");
 		//app main restart
 		oa_timer_start(OA_TIMER_ID_3, oa_app_main, NULL, OA_MAIN_SCHEDULER_PERIOD);
 	}

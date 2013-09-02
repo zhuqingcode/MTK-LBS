@@ -51,7 +51,7 @@ extern oa_uint8 acc_status;
 extern STRUCT_RMC Pos_Inf;
 extern DEV_PLAT_PARAS dev_running;
 extern oa_soc_context g_soc_context;
-extern oa_bool try_unlock;
+extern u32 try_unlock;
 oa_char *p_keyword[] = {
  HB,
  RSP_TCP,
@@ -1254,7 +1254,7 @@ void dev_action_handle(keyword_context *p_set, sms_or_uart which)
 	}
 #endif	
 
-	p_set->act_kind = no_act;
+	//p_set->act_kind = no_act;
 }
 /*********************************************************
 *Function:      handle_keyword4ms()
@@ -2021,7 +2021,7 @@ void oa_app_sms(void)
 	oa_char buf[256] = {0x0};
 	oa_uint8 len;
 	oa_bool ms_ack;
-	oa_bool try_unlock_inside = OA_FALSE;
+	u32 try_unlock_inside = 0;
 
 	//len = message.len;
 	oa_memcpy(data, message.data, message.len);
@@ -2129,7 +2129,12 @@ void oa_app_sms(void)
 					oa_memset(buf, 0x0, sizeof(buf));
 				}
 				dev_action_handle(&set, sms);
-				if (set.kind == 0x1 && use_is_lock()) try_unlock_inside = OA_TRUE;
+				if (set.kind == 0x1 && use_is_lock()) {
+					try_unlock_inside |= TRY_UNLOCK_BIT;
+					if (set.act_kind == reconn) {
+						try_unlock_inside |= NEED_RECONN_BIT;
+					}
+				}
 				oa_memset(&set, 0x0, sizeof(set));
 			}
 		}
@@ -2160,11 +2165,14 @@ void oa_app_sms(void)
 		}
 
 		
-		if (try_unlock_inside == OA_TRUE){
+		if (try_unlock_inside & TRY_UNLOCK_BIT) {
 			DEBUG("try unlock");
-			try_unlock = OA_TRUE;
+			try_unlock |= TRY_UNLOCK_BIT;
 			dev_running.plat_switch = OA_TRUE;
-			dev_running.next_step = PLAT_SOC_INIT;
+			if (try_unlock_inside & NEED_RECONN_BIT) {
+				try_unlock |= NEED_RECONN_BIT;
+				dev_running.next_step = PLAT_SOC_INIT;
+			}
 		}
 	}
 	else DEBUG("too many sms");
