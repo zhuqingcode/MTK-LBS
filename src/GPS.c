@@ -19,6 +19,7 @@
 #include "oa_gps.h"
 #include "oa_api.h"
 #include "oa_debug.h"
+#include "oa_hw.h"
 #include <math.h>
 extern gps_data_struct gps_data;
 extern oa_uint8 acc_status;
