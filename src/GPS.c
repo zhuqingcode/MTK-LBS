@@ -682,7 +682,13 @@ u32 GPS_DataAnaly(void)
 										GPSHandle.GPS_INF.Speed=0;
 										GPSHandle.GPS_INF.COG=0;	
 									}
-									UpdatePos(&(GPSHandle.GPS_INF),ALLUPDATE);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
+									
+									if (acc_status == ACC_OFF && 
+										Pos_Inf.Fix_Status == GPS_FIXED) {
+										UpdatePos(&(GPSHandle.GPS_INF),ACCOFFUPDATE);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
+									} else {
+										UpdatePos(&(GPSHandle.GPS_INF),ALLUPDATE);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
+									}
 							/*	}
 								else	//ACC off
 								{
