@@ -21,6 +21,7 @@
 #include "oa_debug.h"
 #include <math.h>
 extern gps_data_struct gps_data;
+extern oa_uint8 acc_status;
 #define CheckParam1(param1) ((param1) == NULL)
 #define CheckParam2(param1,param2) (((param1) == NULL)||((param2) == NULL))
 #define CheckParam3(param1,param2,param3) (((param1) == NULL)||((param2)== NULL)||((param3) == NULL))
