@@ -91,6 +91,7 @@ oa_uart_enum          g_oa_tst_port    = OA_UART_NULL;      //Define the Catcher
 void oa_app_plat_link(void *para)
 {	
 	static oa_bool task_runed = OA_TRUE;
+	static oa_uint8 ck_time;
 	oa_int16 build_ret;
 	oa_int16 soc_ret;
 	oa_bool ret;
@@ -108,6 +109,7 @@ void oa_app_plat_link(void *para)
 					DEBUG("GSM network init finished!");
 					if (use_is_lock() && (try_unlock & NEED_RECONN_BIT)) {
 						ret = oa_soc_close_req();
+						ck_time = 0;
 						if (ret) {
 							do_socset_b4_unlock();
 						} else {
@@ -198,7 +200,7 @@ void oa_app_plat_link(void *para)
 		}
 	}
 	else{//detect is online/offline
-		static oa_uint8 ck_time;
+		
 		ck_time++;
 		if (dev_running.plat_check_value == OA_TRUE && 
 			ck_time >= 10) {
