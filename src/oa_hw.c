@@ -38,8 +38,6 @@ oa_uint8 eint_gpio_map_tb[]={66, 28, 5, 11, 27, 29, 33, 34, 51, 60, 74, 25};
 oa_uint8 g_first_pullup_flag = OA_TRUE;
 
 oa_uint8 acc_status = ACC_ON;
-extern os_struct overspeed_var;
-extern area_alarm_addition_struct area_alarm_addition_var;
 /*********************************************************
 *Function:     oa_tst_eint_hisr()
 *Description:  callback function for gpio     
@@ -155,7 +153,6 @@ void acc_status_detect(void *param)
 {
 	//detect acc status on/off
 	oa_uint8 ret;
-	static oa_bool ugent_last = OA_FALSE;
 	
 	ret = oa_gpio_read(ACC_GPIO);
 	if (ret){//acc is off
@@ -164,8 +161,6 @@ void acc_status_detect(void *param)
 		if (ret){
 			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == SET){
 				WriteAlarmPara(RESET, StaSector1, STA_ACC_ON);
-				overspeed_var.kind = no_os;
-				area_alarm_addition_var.area_kind = no_spec;
 				handle_alarm_status(StaSector1, STA_ACC_ON, RESET, OA_TRUE);
 				DEBUG("ACC status changed:off");
 			}
@@ -194,27 +189,11 @@ void acc_status_detect(void *param)
 		//key shake
 		ret = oa_gpio_read(KEY_GPIO);
 		if (ret){
-			if (ugent_last == OA_TRUE){
-				//if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == RESET){
-					overspeed_var.kind = no_os;
-					area_alarm_addition_var.area_kind = no_spec;
+				if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == RESET){
 					handle_alarm_status(StaAlarm0, ALARM_EMERGENCY_k, SET, OA_TRUE);
 					handle_alarm_sms(ALARM_EMERGENCY_k, 1, inout_no, 0);
 					DEBUG("key alarm");
-				//}
-			}
-			ugent_last = OA_TRUE;
-		}
-	}
-	else{
-		//key shake
-		ret = oa_gpio_read(KEY_GPIO);
-		if (!ret){
-			//if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == SET){
-			//	WriteAlarmPara(RESET, StaAlarm0, ALARM_EMERGENCY_k);
-			//	DEBUG("cancel key alarm");
-			//}
-			ugent_last = OA_FALSE;
+				}
 		}
 	}
 redoit:
