@@ -4052,11 +4052,16 @@ u8 report_location_msgbody1(u8 *Buf, u16 *pbuflen)
 	pbuf+=2;
 	*pbuflen += 2;
 	memset(pbuf,0x00,6);
-	//zq modified here
-//	if(GpsInfor.Time[0]==0&&GpsInfor.Time[1]==0&&GpsInfor.Time[2]==0&&GpsInfor.Time[3]==0&&GpsInfor.Time[4]==0&&GpsInfor.Time[5]==0)
-//		app_GetRtcTime(pbuf);
-//	else
-		memcpy(pbuf,GpsInfor.Time,6);
+	//time handle when gps doesn't locate
+	if (GpsInfor.Time[0] == 0 && GpsInfor.Time[1] == 0 && 
+		GpsInfor.Time[2] == 0 && GpsInfor.Time[3] == 0 && 
+		GpsInfor.Time[4] == 0 && GpsInfor.Time[5] == 0) {
+		u8 time[6] = {0x0};
+		get_rtc_time(time);
+		memcpy(pbuf, time, 6);
+	} else {
+		memcpy(pbuf, GpsInfor.Time, 6);
+	}
 	pbuf+=6;
 	*pbuflen += 6;
 	return 0;
