@@ -485,7 +485,7 @@ void oa_app_init(void)
 	//GPIO init
 	oa_gpio_set();
 	DEBUG("Hardware Init End");
-	DEBUG(OA_HW_VERSION_NO);
+	//DEBUG(OA_HW_VERSION_NO);
 	return;
 }
 /*********************************************************

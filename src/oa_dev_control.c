@@ -385,5 +385,5 @@ void ftp_update(upgrade_paras *p)
 	//oa_strcat(para, ",openatdll.dll,0");
 	DEBUG("update param:%s", para);
 	ret = oa_start_ftp_upgrade(para);
-	if (ret) DEBUG("start to update");
+	if (ret) DEBUG("start to update!I will restart if update successfully!!!");
 }
