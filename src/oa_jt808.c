@@ -1898,7 +1898,7 @@ static u8 ServReq_DevControl(u8 *pmsgbody, u16 msgbodylen)
 			DEBUG("wireless_updata");
 			//extract paras
 			DEBUG("param:%s", pmsgbody);
-			oa_memset(&up_paras, 0x0, sizeof(up_paras));
+			memset(&up_paras, 0x0, sizeof(up_paras));
 			p_p = pmsgbody;
 			for(i = 0;i < 11;i++){
 				p = oa_strstr(p_p, ";");
