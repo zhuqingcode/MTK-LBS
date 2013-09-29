@@ -102,7 +102,7 @@ void oa_app_uart2_recv( void * param, oa_uint32 len)
 	//oa_write_buffer_force_noinit(g_soc_context.gprs_tx, pBuf, len);
 	//handle gps data
 	//......
-	//DEBUG("(%s:%s:%d):len=%d", __FILE__, __func__, __LINE__, len);
+	//DEBUG("recv gps data, len=%d", len);
 	//DEBUG("%s\n", (oa_char *)pBuf);
 	if (len >= OA_UART_BUFFER_SIZE)
 	{
@@ -119,7 +119,7 @@ void oa_app_uart2_recv( void * param, oa_uint32 len)
 		oa_memcpy(gps_data.buffer, pBuf, len);
 		gps_data.data_len = len;
 		gps_data.has_new_data = OA_TRUE;
-		//DEBUG("%s", gps_data.buffer);
+		//DEBUG("%s", pBuf);
 		//oa_app_gps();
 	}
 #if 0
