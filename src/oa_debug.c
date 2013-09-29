@@ -28,12 +28,12 @@
 #include <stdarg.h>
 #include "oa_type.h"
 #include "oa_api.h"
-#define OA_DEBUG_BUF_MAXLEN 256
+#define OA_DEBUG_BUF_MAXLEN 512
 
 void debug_no_n(oa_char *fmt, ...)
 {
-	oa_char tmp_buffer[256] = {0};
-	u8 cnt;
+	oa_char tmp_buffer[OA_DEBUG_BUF_MAXLEN] = {0};
+	u16 cnt;
 	va_list list;
 	va_start(list, fmt);
 	cnt = _vsnprintf(tmp_buffer, OA_DEBUG_BUF_MAXLEN, fmt, list);
