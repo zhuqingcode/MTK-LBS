@@ -95,7 +95,7 @@ DEVICE_PARAMS dev_def_params =
 	14400,							//continuous_drive_time_threshold
 	57600,						//day_add_drive_time_threshold
 	1200,						//min_rest_time
-	1800,						//max_park_time
+	57600,						//max_park_time
 	//......
 	0,							//vehicle_odometer
 	32,							//vehicle_province_id
