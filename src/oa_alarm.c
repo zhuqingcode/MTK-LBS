@@ -279,14 +279,14 @@ void handle_alarm_sms(u32 alarm_bit, oa_uint8 alarm_2_driver, in_out_kind kind, 
 			u8 temp2[64] = {0x0};
 			u16 len;
 			if ((alarm_flag & alarm_bit) && sms_enable) {
-				if (kind == in2out) {
+				if (kind == out2in) {
 					oa_memcpy(uni.buf, enter_area_uni, sizeof(enter_area_uni));
 					uni.len = sizeof(enter_area_uni);
 					sprintf(temp, " id:%d", area_id);
 					len = asc2uc(temp2, temp, oa_strlen(temp));
 					oa_memcpy(&uni.buf[uni.len], temp2, len);
 					uni.len += len;
-				} else if (kind == out2in) {
+				} else if (kind == in2out) {
 					oa_memcpy(uni.buf, out_area_uni, sizeof(out_area_uni));
 					uni.len = sizeof(out_area_uni);
 					sprintf(temp, " id:%d", area_id);
@@ -300,14 +300,14 @@ void handle_alarm_sms(u32 alarm_bit, oa_uint8 alarm_2_driver, in_out_kind kind, 
 			if (alarm_2_driver) {
 				oa_memset(temp, 0x0, sizeof(temp));
 				oa_memset(temp2, 0x0, sizeof(temp2));
-				if (kind == in2out) {
+				if (kind == out2in) {
 					oa_memcpy(gbk.buf, enter_area_gbk, sizeof(enter_area_gbk));
 					gbk.len = sizeof(enter_area_gbk);
 					sprintf(temp, " id:%d", area_id);
 					len = oa_strlen(temp);
 					oa_memcpy(&gbk.buf[gbk.len], temp, len);
 					gbk.len += len;
-				} else if (kind == out2in) {
+				} else if (kind == in2out) {
 					oa_memcpy(gbk.buf, out_area_gbk, sizeof(out_area_gbk));
 					gbk.len = sizeof(out_area_gbk);
 					sprintf(temp, " id:%d", area_id);
