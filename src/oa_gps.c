@@ -183,7 +183,7 @@ void oa_app_gps(void)
 		//clear it
 		if (ModelCnt > 0) ModelCnt = 0;
 		if (result & NMEA_RMC_OK){//gps data handle
-			oa_memset(&gps_info, 0x0, sizeof(gps_info));
+			
 			GPS_GetPosition(&gps_info);//copy gps data into 'gps_info'
 			//just for printing
 			if (infoprintCnt++ >= 15){
@@ -406,6 +406,7 @@ void oa_app_gps(void)
 			//设置未定位标志
 			if (ReadAlarmPara(StaSector1,STA_GPS_FIXED) == SET)
 				//WriteAlarmPara(RESET,StaSector1,STA_GPS_FIXED);
+				GPS_SW_Init();
 				handle_alarm_status(StaSector1, STA_GPS_FIXED, RESET, OA_TRUE);
 		}
 		if (result &UBX_CFG_RST_OK){
