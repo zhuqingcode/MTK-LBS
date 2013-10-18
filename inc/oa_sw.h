@@ -29,7 +29,7 @@
 
 
 
-#define OA_SW_VERSION_NO "v1.0.0"
+#define OA_SW_VERSION_NO "v1.0.1"
 
 
 
