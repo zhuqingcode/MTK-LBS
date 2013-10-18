@@ -406,6 +406,7 @@ void oa_app_gps(void)
 			//设置未定位标志
 			if (ReadAlarmPara(StaSector1,STA_GPS_FIXED) == SET)
 				//WriteAlarmPara(RESET,StaSector1,STA_GPS_FIXED);
+				GPS_SW_Init();
 				handle_alarm_status(StaSector1, STA_GPS_FIXED, RESET, OA_TRUE);
 		}
 		if (result &UBX_CFG_RST_OK){
