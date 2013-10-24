@@ -33,7 +33,7 @@
 //#define EINT				//”≤º˛÷–∂œ
 //#define TONE_PLAY               //“Ù∆µ≤•∑≈
 
-#define OA_HW_VERSION_NO  "V 00.00.00"
+#define OA_HW_VERSION_NO  "v1.2"
 
 #define EDGE_SENSITIVE OA_TRUE
 #define LEVEL_SENSITIVE OA_FALSE
