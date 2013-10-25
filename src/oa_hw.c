@@ -172,7 +172,7 @@ void acc_status_detect(void *param)
 	else{//acc is on
 		//key shake
 		ret = oa_gpio_read(ACC_GPIO);
-		if (!ret){
+		if (ret){
 			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == RESET){
 				WriteAlarmPara(SET, StaSector1, STA_ACC_ON);
 				handle_alarm_status(StaSector1, STA_ACC_ON, SET, OA_TRUE);
