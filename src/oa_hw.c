@@ -153,7 +153,7 @@ void acc_status_detect(void *param)
 {
 	//detect acc status on/off
 	oa_uint8 ret;
-	
+	static oa_uint8 key_cal = 0;
 	ret = oa_gpio_read(ACC_GPIO);
 	if (!ret){//acc is off
 		//key shake
@@ -189,11 +189,16 @@ void acc_status_detect(void *param)
 		//key shake
 		ret = oa_gpio_read(KEY_GPIO);
 		if (!ret){
-				if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == RESET){
-					handle_alarm_status(StaAlarm0, ALARM_EMERGENCY_k, SET, OA_TRUE);
-					handle_alarm_sms(ALARM_EMERGENCY_k, 1, inout_no, 0);
-					DEBUG("key alarm");
+				key_cal++;
+				if (key_cal > 2) {
+					if (ReadAlarmPara(StaAlarm0, ALARM_EMERGENCY_k) == RESET){
+						handle_alarm_status(StaAlarm0, ALARM_EMERGENCY_k, SET, OA_TRUE);
+						handle_alarm_sms(ALARM_EMERGENCY_k, 1, inout_no, 0);
+						DEBUG("key alarm");
+					}
+					key_cal = 0;
 				}
+				
 		}
 	}
 redoit:

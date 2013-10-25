@@ -53,7 +53,7 @@
 #define POWER_HIGH 15
 #define ACC_ON 1
 #define ACC_OFF 0
-#define OA_ACC_RUN 2000
+#define OA_ACC_RUN 1000
 #define OA_ACC_RUN_1ST 20000
 
 #if 0
