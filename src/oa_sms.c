@@ -1163,12 +1163,12 @@ void dev_action_handle(keyword_context *p_set, sms_or_uart which)
 		case reconn:{
 			ret = dev_params_save();
 			if (ret == OA_TRUE)	print_key_dev_params();
-			if (!use_is_lock()) do_soc_reconn();
+			//if (!use_is_lock()) do_soc_reconn();
 		}break;
 		case rereg:{
 			ret = dev_params_save();
 			if (ret == OA_TRUE)	print_key_dev_params();
-			if (!use_is_lock()) do_rereg();
+			//if (!use_is_lock()) do_rereg();
 		}break;
 		case update:{
 			ftp_update(NULL);
@@ -1433,13 +1433,21 @@ void handle_keyword4ms(e_keyword key_kind,
 					else{//not equal
 						oa_memset(dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
 						oa_memcpy(dev_now_params.term_tel_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = rereg;
+						if (dev_running.plat_status == ONLINE) {
+							p_set->act_kind = rereg;
+						} else {
+							p_set->act_kind = para_save;
+						}
 					}
 				}
 				else{
 					oa_memset(dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
 					oa_memcpy(dev_now_params.term_tel_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					p_set->act_kind = rereg;
+					if (dev_running.plat_status == ONLINE) {
+						p_set->act_kind = rereg;
+					} else {
+						p_set->act_kind = para_save;
+					}
 				}
 			}
 		}break;
@@ -1779,7 +1787,12 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.vehicle_province_id = (u16)p_set->context.con_int;
-					p_set->act_kind = rereg;
+					if (dev_running.plat_status == ONLINE) {
+						p_set->act_kind = rereg;
+					} else {
+						p_set->act_kind = para_save;
+					}
+					
 				}
 			}
 		}break;
@@ -1792,7 +1805,11 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.vehicle_city_id = (u16)p_set->context.con_int;
-					p_set->act_kind = rereg;
+					if (dev_running.plat_status == ONLINE) {
+						p_set->act_kind = rereg;
+					} else {
+						p_set->act_kind = para_save;
+					}
 				}
 			}
 		}break;
@@ -1808,13 +1825,21 @@ void handle_keyword4ms(e_keyword key_kind,
 					else{//not equal
 						oa_memset(dev_now_params.vehicle_license, 0x0, sizeof(dev_now_params.vehicle_license));
 						oa_memcpy(dev_now_params.vehicle_license, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = rereg;
+						if (dev_running.plat_status == ONLINE) {
+							p_set->act_kind = rereg;
+						} else {
+							p_set->act_kind = para_save;
+						}
 					}
 				}
 				else{//not equal
 						oa_memset(dev_now_params.vehicle_license, 0x0, sizeof(dev_now_params.vehicle_license));
 						oa_memcpy(dev_now_params.vehicle_license, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						p_set->act_kind = rereg;
+						if (dev_running.plat_status == ONLINE) {
+							p_set->act_kind = rereg;
+						} else {
+							p_set->act_kind = para_save;
+						}
 				}
 				
 			}
@@ -1828,7 +1853,11 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.plate_color = (u8)p_set->context.con_int;
-					p_set->act_kind = rereg;
+					if (dev_running.plat_status == ONLINE) {
+						p_set->act_kind = rereg;
+					} else {
+						p_set->act_kind = para_save;
+					}
 				}
 			}
 		}break;
@@ -1986,7 +2015,11 @@ void handle_keyword4ms(e_keyword key_kind,
 				else{//not equal
 					oa_memset(dev_now_params.term_id, 0x0, sizeof(dev_now_params.term_id));
 					oa_memcpy(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN);
-					p_set->act_kind = rereg;
+					if (dev_running.plat_status == ONLINE) {
+						p_set->act_kind = rereg;
+					} else {
+						p_set->act_kind = para_save;
+					}
 					backup_devid(dev_now_params.term_id);
 				}
 			}
@@ -2129,10 +2162,14 @@ void oa_app_sms(void)
 					oa_memset(buf, 0x0, sizeof(buf));
 				}
 				dev_action_handle(&set, sms);
-				if (set.kind == 0x1 && use_is_lock()) {
+				if (set.kind == 0x1 && (set.act_kind == para_save || 
+														set.act_kind == reconn || 
+														set.act_kind == rereg)) {
 					try_unlock_inside |= TRY_UNLOCK_BIT;
 					if (set.act_kind == reconn) {
 						try_unlock_inside |= NEED_RECONN_BIT;
+					} else if (set.act_kind == rereg) {
+						try_unlock_inside |= NEED_REREG_BIT;
 					}
 				}
 				oa_memset(&set, 0x0, sizeof(set));
@@ -2166,12 +2203,21 @@ void oa_app_sms(void)
 
 		
 		if (try_unlock_inside & TRY_UNLOCK_BIT) {
-			DEBUG("try unlock");
-			try_unlock |= TRY_UNLOCK_BIT;
-			dev_running.plat_switch = OA_TRUE;
+			//unlock it
+			if (use_is_lock()) {
+				use_unlock();
+			}
+
+			if (dev_running.plat_status == OFFLINE) {
+				dev_running.plat_switch = OA_TRUE;
+			}
+			
 			if (try_unlock_inside & NEED_RECONN_BIT) {
 				try_unlock |= NEED_RECONN_BIT;
+				dev_running.plat_switch = OA_TRUE;
 				dev_running.next_step = PLAT_SOC_INIT;
+			} else if (try_unlock_inside & NEED_REREG_BIT) {
+				do_rereg();
 			}
 		}
 	}

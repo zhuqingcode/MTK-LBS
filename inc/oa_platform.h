@@ -45,6 +45,7 @@
 
 #define TRY_UNLOCK_BIT (1U<<0)
 #define NEED_RECONN_BIT (1U<<1)
+#define NEED_REREG_BIT (1U<<2)
 typedef struct
 {
 	oa_uint8 authen_code_len;

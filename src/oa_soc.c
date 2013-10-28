@@ -446,16 +446,16 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 				case RspMsgerr:
 				case RspUnsurport:
 				case RspAlarmCheck:{
-					if (!use_is_lock()){//unlocked
+					//if (!use_is_lock()){//unlocked
 						if (dev_running.plat_status == OFFLINE){
 							dev_running.plat_switch = OA_TRUE;
 							dev_running.next_step = PLAT_DEV_REG;
 						}
-					}
-					else{
-						try_unlock = 0;
-						dev_running.plat_switch = OA_TRUE;
-					}
+					//}
+					//else{
+					//	try_unlock = 0;
+					//	dev_running.plat_switch = OA_TRUE;
+					//}
 				}break;
 				case RspPackgerr:{
 					dev_running.plat_switch = OA_TRUE;
@@ -476,11 +476,11 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 						dev_running.authen_err_time = 0;
 						DEBUG("Congratulations to you,device login successfully!");
 						//unlock
-						if (use_is_lock()){
-							use_unlock();
-							try_unlock = 0;
-							DEBUG("Congratulations to you,device is unlocked!");
-						}
+						//if (use_is_lock()){
+						//	use_unlock();
+						//	try_unlock = 0;
+						//	DEBUG("Congratulations to you,device is unlocked!");
+						//}
 					}
 					//case unreg
 					else if (dev_running.doing_what == unreg && dev_running.plat_status == ONLINE){
@@ -504,9 +504,9 @@ void oa_soc_gprs_recv(oa_uint8* data, oa_uint16 len)
 					DEBUG("plat common ack fail : %d", sProtclHandl.PlatComrsp.Rslt);
 					if (dev_running.doing_what == authen && dev_running.plat_status == OFFLINE){
 						dev_running.plat_switch = OA_TRUE;//if authen err, do it again
-						if (use_is_lock()){//locked
-							try_unlock = 0;
-						}
+						//if (use_is_lock()){//locked
+						//	try_unlock = 0;
+						//}
 						dev_running.authen_err_time++;
 						if (dev_running.authen_err_time >= AUTHEN_ERR_MAX_TIMES){
 							oa_bool tmp;
@@ -662,7 +662,7 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 				g_soc_context.state = OA_SOC_STATE_ONLINE;
 				//oa_soc_send_req( );
 				if (OFFLINE == dev_running.plat_status){//判断当前有没有和平台连接上
-					if (!use_is_lock()){//unlocked
+					//if (!use_is_lock()){//unlocked
 						ret = has_reg();//判断有没有注册过，如果已经注册就鉴权；没有注册才去注册
 						if (OA_FALSE == ret){
 							dev_running.plat_switch = OA_TRUE;
@@ -672,22 +672,22 @@ void oa_soc_notify_ind_user_callback(void *inMsg)
 							dev_running.plat_switch = OA_TRUE;
 							dev_running.next_step = PLAT_DEV_LOGIN;
 						}
-					}
-					else{//locked means has not reged
-						dev_running.plat_switch = OA_TRUE;
-						dev_running.next_step = PLAT_DEV_REG;
-					}
+					//}
+					//else{//locked means has not reged
+					//	dev_running.plat_switch = OA_TRUE;
+					//	dev_running.next_step = PLAT_DEV_REG;
+					//}
 					
 				}
 			}
 			else{
 				DEBUG("%s:sock_id=%d connect fail err=%d!",__func__,soc_notify->socket_id,soc_notify->error_cause);
 				oa_soc_close_req();
-				if (use_is_lock()){
-					try_unlock = 0;
+				//if (use_is_lock()){
+				//	try_unlock = 0;
 					dev_running.plat_switch = OA_TRUE;
 					dev_running.next_step = PLAT_SOC_INIT;
-				}
+				//}
 			}
 			break;
 		}       
