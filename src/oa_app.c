@@ -64,6 +64,7 @@ extern oa_bool scrn_send;
 extern scrn_struct s_s;
 extern void App_TaskSScrnSendManage(void *Para);
 extern void oa_app_area(void *para);
+extern void oa_app_online_offline(void);
 /*--------END: Customer code----------*/
 oa_char OA_VERSION_NO[]="v4.0.0ep";
 /*****************************************************************
@@ -564,8 +565,8 @@ void oa_app_main(void)
 	
 	if (OA_FALSE == dev_is_locked) //device is unlock
 	{
-		//watchdog task
-//		oa_timer_start(OA_TIMER_ID_1, oa_app_wdt, NULL, OA_WDT_SCHEDULER_PERIOD);
+		//online/offline check task
+		oa_timer_start(OA_TIMER_ID_1, oa_app_online_offline, NULL, OA_WDT_SCHEDULER_PERIOD);
 		//acc status detect
 		oa_timer_start(OA_TIMER_ID_6, acc_status_detect, NULL, OA_ACC_RUN_1ST);
 		//platform link task
