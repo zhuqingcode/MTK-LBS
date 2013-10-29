@@ -160,9 +160,9 @@ void oa_app_gps(void)
 	}
 #endif
 	//gps data analysis:mileage statistics, speed alarm, driver fatigue,cog and so on.
-	//result = GPS_DataAnaly();//update gps datas
+	result = GPS_DataAnaly();//update gps datas
 	//result |= NMEA_RMC_UNFIXED;
-	DEBUG("result:0x%X", result);
+	//DEBUG("result:0x%X", result);
 	if (result & GPS_NO_DATA){//analysis gps data failed for 30s, module status must be changed to broken 
 		if (ModelCnt * GPS_RUN_SECONDS < CHECK_GPS_ERR){
 			ModelCnt++;							
