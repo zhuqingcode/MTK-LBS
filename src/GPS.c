@@ -498,6 +498,61 @@ u32 GPS_DataAnaly(void)
 						GPSHandle.CHK_A^=GPSHandle.Data;
 						if(GPSHandle.Data==',')
 						{
+							if(GPSHandle.CntTemp!=0)
+							{
+								if(GPSHandle.CntTemp>7)
+								{
+									GPSHandle.CntTemp = 7;
+								}
+								GPSHandle.GPS_INF.Speed = ((GPSHandle.Speed_Temp*1852)/1000/(powme(10,(GPSHandle.CntTemp-GPSHandle.dot-1))+0.0));
+								if(GPSHandle.GPS_INF.Speed < 0)
+								{
+									GPSHandle.GPS_INF.Speed = 0;
+								}
+								if(GPSHandle.GPS_INF.Speed > 180)
+								{
+									GPSHandle.GPS_INF.Speed = 180;
+								}
+								//DEBUG("convert speed:%d", GPSHandle.GPS_INF.Speed);
+								//GPSHandle.GPS_INF.Speed=(u16)GPSHandle.GPS_INF.Speed_f;//(GPSHandle.Speed_Temp*1852)/1000/( pow(10,GPSHandle.dot));//(float)
+							}
+							else
+							{
+								GPSHandle.GPS_INF.Speed=/*GPSHandle.GPS_INF.Speed_f=*/0;
+							}
+							GPSHandle.CntTemp=0;
+							GPSHandle.GPS_INF.COG=0;
+							GPSHandle.dot=0;
+							GPSHandle.Step++;	
+						}
+						else if(GPSHandle.CntTemp<7)
+						{
+							if(GPSHandle.Data=='.')
+							{
+								GPSHandle.dot=GPSHandle.CntTemp;//记住小数点位置
+							}
+							else
+							{
+								GPSHandle.Speed_Temp=GPSHandle.Speed_Temp*10+GPSHandle.Data-'0';	
+							}
+							GPSHandle.CntTemp++;	
+						}
+						else if(GPSHandle.CntTemp>15)
+						{
+							GPSHandle.Step=0;	
+						}
+						else
+						{
+							GPSHandle.CntTemp++;
+						}
+					}
+					break;
+#if 0
+					case 16://速度
+					{
+						GPSHandle.CHK_A^=GPSHandle.Data;
+						if(GPSHandle.Data==',')
+						{
 							GPSHandle.CntTemp=0;
 							GPSHandle.GPS_INF.COG=0;
 							GPSHandle.dot=0;
@@ -534,6 +589,7 @@ u32 GPS_DataAnaly(void)
 						}
 					}
 					break;
+#endif
 					case 17:	 //方位 COG
 					{
 						GPSHandle.CHK_A^=GPSHandle.Data;						
