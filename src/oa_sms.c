@@ -1433,7 +1433,7 @@ void handle_keyword4ms(e_keyword key_kind,
 					else{//not equal
 						oa_memset(dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
 						oa_memcpy(dev_now_params.term_tel_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						if (dev_running.plat_status == ONLINE) {
+						if (has_reg()) {
 							p_set->act_kind = rereg;
 						} else {
 							p_set->act_kind = para_save;
@@ -1443,7 +1443,7 @@ void handle_keyword4ms(e_keyword key_kind,
 				else{
 					oa_memset(dev_now_params.term_tel_num, 0x0, sizeof(dev_now_params.term_tel_num));
 					oa_memcpy(dev_now_params.term_tel_num, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-					if (dev_running.plat_status == ONLINE) {
+					if (has_reg()) {
 						p_set->act_kind = rereg;
 					} else {
 						p_set->act_kind = para_save;
@@ -1787,7 +1787,7 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.vehicle_province_id = (u16)p_set->context.con_int;
-					if (dev_running.plat_status == ONLINE) {
+					if (has_reg()) {
 						p_set->act_kind = rereg;
 					} else {
 						p_set->act_kind = para_save;
@@ -1805,7 +1805,7 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.vehicle_city_id = (u16)p_set->context.con_int;
-					if (dev_running.plat_status == ONLINE) {
+					if (has_reg()) {
 						p_set->act_kind = rereg;
 					} else {
 						p_set->act_kind = para_save;
@@ -1825,7 +1825,7 @@ void handle_keyword4ms(e_keyword key_kind,
 					else{//not equal
 						oa_memset(dev_now_params.vehicle_license, 0x0, sizeof(dev_now_params.vehicle_license));
 						oa_memcpy(dev_now_params.vehicle_license, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						if (dev_running.plat_status == ONLINE) {
+						if (has_reg()) {
 							p_set->act_kind = rereg;
 						} else {
 							p_set->act_kind = para_save;
@@ -1835,7 +1835,7 @@ void handle_keyword4ms(e_keyword key_kind,
 				else{//not equal
 						oa_memset(dev_now_params.vehicle_license, 0x0, sizeof(dev_now_params.vehicle_license));
 						oa_memcpy(dev_now_params.vehicle_license, p_set->context.con_ch, oa_strlen(p_set->context.con_ch));
-						if (dev_running.plat_status == ONLINE) {
+						if (has_reg()) {
 							p_set->act_kind = rereg;
 						} else {
 							p_set->act_kind = para_save;
@@ -1853,7 +1853,7 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 				else{
 					dev_now_params.plate_color = (u8)p_set->context.con_int;
-					if (dev_running.plat_status == ONLINE) {
+					if (has_reg()) {
 						p_set->act_kind = rereg;
 					} else {
 						p_set->act_kind = para_save;
@@ -2015,7 +2015,7 @@ void handle_keyword4ms(e_keyword key_kind,
 				else{//not equal
 					oa_memset(dev_now_params.term_id, 0x0, sizeof(dev_now_params.term_id));
 					oa_memcpy(dev_now_params.term_id, p_set->context.con_ch, DEVID_LEN);
-					if (dev_running.plat_status == ONLINE) {
+					if (has_reg()) {
 						p_set->act_kind = rereg;
 					} else {
 						p_set->act_kind = para_save;
