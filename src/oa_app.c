@@ -64,6 +64,7 @@ extern oa_bool scrn_send;
 extern scrn_struct s_s;
 extern void App_TaskSScrnSendManage(void *Para);
 extern void oa_app_area(void *para);
+extern void oa_app_online_offline(void);
 /*--------END: Customer code----------*/
 oa_char OA_VERSION_NO[]="v4.0.0ep";
 /*****************************************************************
@@ -100,14 +101,14 @@ void oa_app_plat_link(void *para)
 		task_runed = OA_FALSE;
 	}
 
-	if (use_is_lock() && !(try_unlock & TRY_UNLOCK_BIT)) goto again;
+	if (use_is_lock()) goto again;
 	//避免重复进行某一步操作
 	if (OA_TRUE == dev_running.plat_switch){
 		switch (dev_running.next_step){
 			case PLAT_SOC_INIT:{
 				if (oa_sim_network_is_valid()){
 					DEBUG("GSM network init finished!");
-					if (use_is_lock() && (try_unlock & NEED_RECONN_BIT)) {
+					if (try_unlock & NEED_RECONN_BIT) {
 						ret = oa_soc_close_req();
 						ck_time = 0;
 						if (ret) {
@@ -117,13 +118,13 @@ void oa_app_plat_link(void *para)
 						}
 					}
 					/*soc init*/
-					oa_soc_init();//soc paras & callback register
+					oa_soc_init();//soc paras
 					oa_soc_state_check();//check & connect
 					dev_running.plat_switch = OA_FALSE;
 					
 				}
 				else{
-					DEBUG("sim network is invalue!");
+					DEBUG("sim network is invalid!");
 					break;
 				}
 				break;
@@ -132,12 +133,12 @@ void oa_app_plat_link(void *para)
 				if (oa_sim_network_is_valid()){
 					//DEBUG("GSM network init finished!");
 					/*soc init*/
-					//oa_soc_init();//soc paras & callback register
+					//oa_soc_init();//soc paras
 					oa_soc_state_check();//check & connect
 					dev_running.plat_switch = OA_FALSE;
 				}
 				else{
-					DEBUG("sim network is invalue!");
+					DEBUG("sim network is invalid!");
 					break;
 				}
 				break;
@@ -210,7 +211,7 @@ void oa_app_plat_link(void *para)
 				ck_time = 0;
 			}
 			else{
-				DEBUG("sim network is invalue!");
+				DEBUG("sim network is invalid!");
 			}
 		}
 	}
@@ -552,8 +553,6 @@ void oa_app_main(void)
 		//application initial, mainly about socket
 		oa_app_init();
 		//platform link task
-		//try to unlock with using default device parameters
-		try_unlock |= TRY_UNLOCK_BIT;
 		oa_timer_start(OA_APP_SCHEDULER_ID, oa_app_plat_link, NULL, OA_APP_PLAT_LINK_1ST);
 		//timeout timer
 		oa_timer_start(OA_TIMER_ID_11, oa_app_timeout, NULL, OA_APP_TIMEOUT_1ST);
@@ -568,8 +567,8 @@ void oa_app_main(void)
 	
 	if (OA_FALSE == dev_is_locked) //device is unlock
 	{
-		//watchdog task
-//		oa_timer_start(OA_TIMER_ID_1, oa_app_wdt, NULL, OA_WDT_SCHEDULER_PERIOD);
+		//online/offline check task
+		oa_timer_start(OA_TIMER_ID_1, oa_app_online_offline, NULL, OA_WDT_SCHEDULER_PERIOD);
 		//acc status detect
 		oa_timer_start(OA_TIMER_ID_6, acc_status_detect, NULL, OA_ACC_RUN_1ST);
 		//platform link task
@@ -589,7 +588,7 @@ void oa_app_main(void)
 	}
 	else if (OA_TRUE == dev_is_locked)  //device is lock
 	{
-		if (!(try_unlock & TRY_UNLOCK_BIT)) DEBUG("device is locked!Please activate it.");
+		if (use_is_lock()) DEBUG("device is locked!Please activate it.");
 		//app main restart
 		oa_timer_start(OA_TIMER_ID_3, oa_app_main, NULL, OA_MAIN_SCHEDULER_PERIOD);
 	}

@@ -139,10 +139,14 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 					oa_memset(buf, 0x0, sizeof(buf));
 				}
 				dev_action_handle(&set, scrn);
-				if (set.kind == 0x1 && use_is_lock()){
+				if (set.kind == 0x1 && (set.act_kind == para_save || 
+														set.act_kind == reconn || 
+														set.act_kind == rereg)) {
 					try_unlock_inside |= TRY_UNLOCK_BIT;
 					if (set.act_kind == reconn) {
 						try_unlock_inside |= NEED_RECONN_BIT;
+					} else if (set.act_kind == rereg) {
+						try_unlock_inside |= NEED_REREG_BIT;
 					}
 				}
 				oa_memset(&set, 0x0, sizeof(set));
@@ -150,12 +154,21 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 		}
 
 		if (try_unlock_inside & TRY_UNLOCK_BIT) {
-			DEBUG("try unlock");
-			try_unlock |= TRY_UNLOCK_BIT;
-			dev_running.plat_switch = OA_TRUE;
+			//unlock it
+			if (use_is_lock()) {
+				use_unlock();
+			}
+
+			if (dev_running.plat_status == OFFLINE) {
+				dev_running.plat_switch = OA_TRUE;
+			}
+			
 			if (try_unlock_inside & NEED_RECONN_BIT) {
 				try_unlock |= NEED_RECONN_BIT;
+				dev_running.plat_switch = OA_TRUE;
 				dev_running.next_step = PLAT_SOC_INIT;
+			} else if (try_unlock_inside & NEED_REREG_BIT) {
+				do_rereg();
 			}
 		}
 		

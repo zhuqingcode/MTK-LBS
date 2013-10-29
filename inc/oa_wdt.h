@@ -28,6 +28,7 @@
 #define __OA_WDT_H__
 
 #define OA_WDT_SCHEDULER_PERIOD 5000 //ms
-extern  void oa_app_wdt(void);
+#define OA_WDT_SCHEDULER_SECONDS (OA_WDT_SCHEDULER_PERIOD/1000)
+#define OFFLINE_RESTART_SHRESHOLD 25 * 60
 #endif
 
