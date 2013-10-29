@@ -154,33 +154,45 @@ void acc_status_detect(void *param)
 	//detect acc status on/off
 	oa_uint8 ret;
 	static oa_uint8 key_cal = 0;
+	static oa_uint8 acc_on_cal = 0;
+	static oa_uint8 acc_off_cal = 0;
 	ret = oa_gpio_read(ACC_GPIO);
 	if (!ret){//acc is off
 		//key shake
 		ret = oa_gpio_read(ACC_GPIO);
 		if (!ret){
-			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == SET){
-				WriteAlarmPara(RESET, StaSector1, STA_ACC_ON);
-				handle_alarm_status(StaSector1, STA_ACC_ON, RESET, OA_TRUE);
-				DEBUG("ACC status changed:off");
+			acc_off_cal++;
+			if (acc_off_cal > 2) {
+				if (ReadAlarmPara(StaSector1, STA_ACC_ON) == SET){
+					WriteAlarmPara(RESET, StaSector1, STA_ACC_ON);
+					handle_alarm_status(StaSector1, STA_ACC_ON, RESET, OA_TRUE);
+					DEBUG("ACC status changed:off");
+				}
+				acc_off_cal = 0;
+				acc_on_cal = 0;
+				acc_status = ACC_OFF;
+				//power off screen
+				oa_gpio_write(0, SCRN_POWER);
 			}
-			acc_status = ACC_OFF;
-			//power off screen
-			oa_gpio_write(0, SCRN_POWER);
 		}	
 	}
 	else{//acc is on
 		//key shake
 		ret = oa_gpio_read(ACC_GPIO);
 		if (ret){
-			if (ReadAlarmPara(StaSector1, STA_ACC_ON) == RESET){
-				WriteAlarmPara(SET, StaSector1, STA_ACC_ON);
-				handle_alarm_status(StaSector1, STA_ACC_ON, SET, OA_TRUE);
-				DEBUG("ACC status changed:on");
+			acc_on_cal++;
+			if (acc_on_cal > 2) {
+				if (ReadAlarmPara(StaSector1, STA_ACC_ON) == RESET){
+					WriteAlarmPara(SET, StaSector1, STA_ACC_ON);
+					handle_alarm_status(StaSector1, STA_ACC_ON, SET, OA_TRUE);
+					DEBUG("ACC status changed:on");
+				}
+				acc_on_cal = 0;
+				acc_off_cal = 0;
+				acc_status = ACC_ON;
+				//power on screen
+				oa_gpio_write(1, SCRN_POWER);
 			}
-			acc_status = ACC_ON;
-			//power on screen
-			oa_gpio_write(1, SCRN_POWER);
 		}
 	}
 	//ugent alarm detect
