@@ -4053,9 +4053,7 @@ u8 report_location_msgbody1(u8 *Buf, u16 *pbuflen)
 	*pbuflen += 2;
 	memset(pbuf,0x00,6);
 	//time handle when gps doesn't locate
-	if (GpsInfor.Time[0] == 0 && GpsInfor.Time[1] == 0 && 
-		GpsInfor.Time[2] == 0 && GpsInfor.Time[3] == 0 && 
-		GpsInfor.Time[4] == 0 && GpsInfor.Time[5] == 0) {
+	if (GpsInfor.Fix_Status == GPS_UNFIXED) {
 		u8 time[6] = {0x0};
 		get_rtc_time(time);
 		memcpy(pbuf, time, 6);

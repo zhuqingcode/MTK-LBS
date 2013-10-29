@@ -1959,6 +1959,14 @@ u8 GetPosinf(u8 *Str,u8 Filed,u8 Mode)
 *Others:         
 *********************************************************/
 #ifdef UBLOX
+u8 GPS_clear_data(void)
+{
+	oa_strncpy(Pos_Inf.Latitude,"00000000",sizeof(Pos_Inf.Latitude));
+	oa_strncpy(Pos_Inf.Longitude,"000000000",sizeof(Pos_Inf.Longitude));
+	Pos_Inf.East_Indicator='E';
+	Pos_Inf.North_Indicator='N';
+	return 0;
+}
 u8 GPS_SW_Init(void)
 {
 	u32 i;

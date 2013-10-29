@@ -160,8 +160,9 @@ void oa_app_gps(void)
 	}
 #endif
 	//gps data analysis:mileage statistics, speed alarm, driver fatigue,cog and so on.
-	result = GPS_DataAnaly();//update gps datas
-	//DEBUG("result:0x%X", result);
+	//result = GPS_DataAnaly();//update gps datas
+	//result |= NMEA_RMC_UNFIXED;
+	DEBUG("result:0x%X", result);
 	if (result & GPS_NO_DATA){//analysis gps data failed for 30s, module status must be changed to broken 
 		if (ModelCnt * GPS_RUN_SECONDS < CHECK_GPS_ERR){
 			ModelCnt++;							
@@ -401,13 +402,17 @@ void oa_app_gps(void)
 			//--------------------------------------------------------------------
 			
 		}
-		else if (result & NMEA_RMC_UNFIXED){
+		else if (result & NMEA_RMC_UNFIXED) {
 			DEBUG("GPS locate err");
-			//设置未定位标志
-			if (ReadAlarmPara(StaSector1,STA_GPS_FIXED) == SET)
-				//WriteAlarmPara(RESET,StaSector1,STA_GPS_FIXED);
-				GPS_SW_Init();
-				handle_alarm_status(StaSector1, STA_GPS_FIXED, RESET, OA_TRUE);
+			if (upload_times * GPS_RUN_SECONDS >= dev_now_params.default_reporttime) {
+				upload_times = 0;
+				//设置未定位标志
+				//if (ReadAlarmPara(StaSector1,STA_GPS_FIXED) == SET) {
+					//WriteAlarmPara(RESET,StaSector1,STA_GPS_FIXED);
+					GPS_SW_Init();
+					handle_alarm_status(StaSector1, STA_GPS_FIXED, RESET, OA_TRUE);
+				//}
+			}
 		}
 		if (result &UBX_CFG_RST_OK){
 			DEBUG("UBX_CFG_RST_OK!");
