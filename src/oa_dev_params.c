@@ -547,6 +547,8 @@ oa_bool dev_params_init(void)
 	//need delete the file and reset here..
 	oa_fclose(handle);
 	oa_fdelete(DEV_PARAMS_FILE);
+	//if you delete DEV_PARAMS_FILE, must delete this
+	oa_fdelete(OA_SOC_SETTING_FILE);
 	DEBUG("dev params init err!");    
 	return OA_FALSE;
 }
