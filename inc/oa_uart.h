@@ -32,6 +32,8 @@
 #define USE_UART2			//串口二
 #define USE_UART3			//串口三
 #define SCHE_SCRN
+#define UART_SCREEN 0x2
+#define UART_FUEL_SENSOR 14
 typedef enum
 {
 	sms = 0x0,

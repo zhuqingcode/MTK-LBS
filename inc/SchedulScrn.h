@@ -157,7 +157,7 @@
 
 /*学生刷卡短信模板下发指令*/
 #define SCR_SMS_DOWNLOAD_CMD	0x55
-
+#define START_HW_TEST 0x58
 
 //主机→ 调度屏命令字
 #define UP_STATUS_CMD	0XA0	//状态上报指令码

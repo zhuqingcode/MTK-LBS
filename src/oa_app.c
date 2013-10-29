@@ -536,6 +536,10 @@ void oa_app_main(void)
 		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		//device params initial
 		dev_params_init();
+		//reset uart3
+		if (dev_now_params.para1[7] == UART_FUEL_SENSOR) {
+			 oa_uart_reset(OA_UART3, 9600);
+		}
 		//initial devid
 		restore_devid();
 		//just print key params

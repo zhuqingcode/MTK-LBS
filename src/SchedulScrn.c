@@ -18,6 +18,8 @@
 #include "oa_type.h"
 #include "oa_api.h"
 #include "oa_debug.h"
+#include "oa_uart.h"
+//#ifdef SCHE_SCRN
 /*#include "Hardware.h"*/
 /*****************************************/
 extern uart_struct uart_contain;
@@ -52,7 +54,7 @@ static u8 Ack_Package(u8 *Str,u8 mode,u8 Cmd,u8 Result);//简单数据包组包
 static u8 Protocol_Check(const u8 *PStr,const u16 PStr_Length);//校验计算
 static u8 Protocol_Check_2para(const u8 *PStr1,const u16 PStr_Length1,const u8 *PStr2,const u16 PStr_Length2);//校验计算  两段数据
 oa_bool SchedulScrn_SendStr(u8 *Str,u16 Len);//串口发送函数	
-static u8 Host_Send_Packag(u8 Cmd, u8 *Value,const u8 ValuLen);//打包发送
+u8 Host_Send_Packag(u8 Cmd, u8 *Value,const u8 ValuLen);//打包发送
 u8 SScrn_UpResult(u8 *Str,u8 Cmd);
 static u8 SScrn_Ack_Send(void); /*发送数据接收应答*/
 #if 0
@@ -1131,6 +1133,7 @@ u8 SScrn_DataAnaly(void)
 			case UPDATA_DATA_CMD:
 			case STATION_DOWNLOAD_CMD:
 			case SCR_SMS_DOWNLOAD_CMD:
+			case START_HW_TEST:
 				SScrn_Ack_Send();/*应答*/
 				SScrn_UpResult(pStr,Cmd);//copy data to 'SScrn_Result'
 				SScrn_Result.CMD_TYPE=Cmd;
@@ -1201,6 +1204,7 @@ u8 SScrn_GetResult(u8 *Buf,u8 BufSize,u8 *ReadSize,u8 Cmd,u8 SubField)
 	switch(Cmd)
 	{
 		case CENTER_SMS_CMD:
+		case START_HW_TEST:
 			datalen=SScrn_Result.result.SMS_Data.SMSLen;//strlen(SScrn_Result.result.SMS_Data.SMSDat);
 			if(datalen>BufSize)
 			{
@@ -1461,6 +1465,7 @@ static u8 SScrn_UpResult(u8 *Str,u8 Cmd)
 	switch(Cmd)
 	{
 		case CENTER_SMS_CMD:
+		case START_HW_TEST:
 			datalen=*pStr++-2;
 			Mem_Copy(SScrn_Result.result.SMS_Data.SMSDat,pStr,datalen);  //将中心短信信息保存
 			SScrn_Result.result.SMS_Data.SMSLen=datalen;
@@ -2626,3 +2631,5 @@ u8 SScrn_StationData_Rsq(void)
 }
 
 #endif
+
+//#endif

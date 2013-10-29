@@ -10,12 +10,16 @@
 #include "oa_lbs2mtk.h"
 #include "oa_debug.h"
 #include "oa_dev_params.h"
+#include "oa_uart.h"
+#include "oa_hw_test.h"
+//#ifdef SCHE_SCRN
 extern STRUCT_RMC Pos_Inf;
 extern oa_uint8 acc_status;
 extern DEVICE_PARAMS dev_now_params;
 extern STRUCT_SScrn_Result SScrn_Result;
 extern scrn_struct s_s;
 extern void oa_screen_demo(void *param);
+extern void oa_hardware_test(void *param);
 #if 0
 #ifdef EVDO_USE
 extern u32 SYS_CHANNEL;  //EVDO分配给监控平台的socket号
@@ -497,6 +501,23 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 				}
 			}
 		break;
+
+		case START_HW_TEST: {
+			SScrn_SMSResult_Send(0);//ack to sched_scrn
+			SScrn_GetResult(pSchedulScrnHandle->DataBuf, 
+							sizeof(pSchedulScrnHandle->DataBuf), 
+							&pSchedulScrnHandle->len, 
+							START_HW_TEST,0);//copy data
+			if (pSchedulScrnHandle->len == 1) {
+				if (pSchedulScrnHandle->DataBuf[0] == 0x01) {//start hardware test
+					DEBUG("start hardware test!");
+					oa_timer_start(OA_TIMER_ID_13, oa_hardware_test, NULL, HW_TEST_TIME);
+				} else if (pSchedulScrnHandle->DataBuf[0] == 0x0) {//end hardware test
+					DEBUG("end hardware test!");
+					oa_timer_stop(OA_TIMER_ID_13);
+				}
+			}
+		} break;
 		#if 0
 		case UNICODE_SMS_CMD:
 			SScrn_SMSResult_Send(0);
@@ -1637,3 +1658,5 @@ void SchedulScrn_Factoryset()
 
 }
 #endif
+//#endif
+
