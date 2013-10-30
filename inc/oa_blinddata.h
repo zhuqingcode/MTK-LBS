@@ -31,7 +31,7 @@
 #define MANAGE_FILE L"c:\\blinddata.dir\\manage_file.ini"
 #define DATA_MAX_LEN 98 //198data+2len of data
 #define MAXLEN_1BLINDDATA (DATA_MAX_LEN+2)
-#define OA_APP_BLINDDATA_1TIME 20000
+#define OA_APP_BLINDDATA_1TIME 60000
 #define OA_APP_BLINDDATA 250//1000
 #define BLINDDATA_DIRNAME L"blinddata.dir"
 #define BLINDDATA_DIR_CONF L"blinddata_dir_conf.ini"

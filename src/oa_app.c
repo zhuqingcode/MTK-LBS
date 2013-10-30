@@ -538,6 +538,10 @@ void oa_app_main(void)
 		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
 		//device params initial
 		dev_params_init();
+		//reset uart3
+		if (dev_now_params.para1[7] == UART_FUEL_SENSOR) {
+			 oa_uart_reset(OA_UART3, 9600);
+		}
 		//initial devid
 		restore_devid();
 		//just print key params
@@ -582,7 +586,9 @@ void oa_app_main(void)
 		//blinddata task
 		oa_timer_start(OA_TIMER_ID_7, oa_app_blinddata, NULL, OA_APP_BLINDDATA_1TIME);
 		//schedule screen task, send mainly ,transplant from lbs@wjn
-		oa_timer_start(OA_TIMER_ID_8, App_TaskSScrnSendManage, NULL, SCHD_SCRN_1TIME);
+		if (dev_now_params.para1[7] == UART_SCREEN) {
+			oa_timer_start(OA_TIMER_ID_8, App_TaskSScrnSendManage, NULL, SCHD_SCRN_1TIME);
+		}
 		//area judge task
 		oa_timer_start(OA_TIMER_ID_9, oa_app_area, NULL, OA_AREA_DETECT_1TIME);
 	}

@@ -106,6 +106,13 @@ void  int_to_char (u8 *p_arg, u32 data)
     p_arg[2] = (data >>8)&0xff;
     p_arg[3] = data &0xff;
 }
+void  int_to_char_Little_Endian (u8 *p_arg, u32 data)
+{
+    p_arg[3] = (data >>24)&0xff;
+    p_arg[2] = (data >>16)&0xff;
+    p_arg[1] = (data >>8)&0xff;
+    p_arg[0] = data &0xff;
+}
 void  short_to_char (u8 *p_arg, u16 data)
 {
     p_arg[0] = (data >>8)&0xff;

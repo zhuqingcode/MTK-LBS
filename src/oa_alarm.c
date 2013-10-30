@@ -35,6 +35,7 @@
 #include "oa_app.h"
 #include "oa_lbs2mtk.h"
 #include "oa_soc.h"
+#include "oa_uart.h"
 oa_uint8 emergency_uni[] = {0x7D,0x27,0x60,0x25,0x62,0xA5,0x8B,0x66};
 oa_uint8 overspeed_uni[] = {0x8D,0x85,0x90,0x1F,0x62,0xA5,0x8B,0x66};
 oa_uint8 tired_drive_uni[] = {0x75,0xB2,0x52,0xB3,0x9A,0x7E,0x9A,0x76};
@@ -175,7 +176,9 @@ void handle_alarm_sms(u32 alarm_bit, oa_uint8 alarm_2_driver, in_out_kind kind, 
 		return;
 	}
 	alarm_flag = dev_now_params.alarm_send_sms_mask;
-	
+	if (dev_now_params.para1[7] == UART_FUEL_SENSOR) {
+		alarm_2_driver = 0;
+	}
 	switch (alarm_bit){
 		case ALARM_EMERGENCY_k:{
 			if ((alarm_flag & alarm_bit) && sms_enable) {

@@ -38,6 +38,7 @@ oa_uint8 eint_gpio_map_tb[]={66, 28, 5, 11, 27, 29, 33, 34, 51, 60, 74, 25};
 oa_uint8 g_first_pullup_flag = OA_TRUE;
 
 oa_uint8 acc_status = ACC_OFF;
+u32 adc_value = 0;
 /*********************************************************
 *Function:     oa_tst_eint_hisr()
 *Description:  callback function for gpio     
@@ -82,6 +83,7 @@ void oa_tst_eint_hisr(void)
 *********************************************************/
 void adc_value_cb(oa_int32 volt_result, oa_double adc_result){
 	//OA_DEBUG_USER("volt_result:%d adc_result:%f", volt_result, adc_result);
+	adc_value = volt_result;
 }
 /*********************************************************
 *Function:     oa_gpio_set()

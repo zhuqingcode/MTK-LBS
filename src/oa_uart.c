@@ -32,6 +32,7 @@
 #include "oa_debug.h"
 
 extern oa_uint8 KEYWORDS_SIZE;
+extern DEVICE_PARAMS dev_now_params;
 /*****************************************************************/
 /*-----------------For uart port configure----------------------------*/
 /*****************************************************************/  
@@ -147,11 +148,11 @@ void oa_app_uart3_recv( void * param, oa_uint32 len)
 		oa_memset(uart_contain.buf, 0x0, UART3_MAX_SIZE);
 		oa_memcpy(uart_contain.buf, pBuf, len);
 		uart_contain.len = len;
-		#ifdef SCHE_SCRN
-		App_TaskSScrnRcvManage(NULL);//schedule screen
-		#else
-		oa_app_uart();
-		#endif
+		if (dev_now_params.para1[7] == UART_SCREEN) {
+			App_TaskSScrnRcvManage(NULL);//schedule screen
+		} else if (dev_now_params.para1[7] == UART_FUEL_SENSOR) {
+			oa_app_uart();
+		}
 	}
 }
 
@@ -204,7 +205,62 @@ oa_bool oa_uart_init(oa_uart_enum port)
 		return OA_FALSE;
 	}
 }
-
+/*********************************************************
+*Function:      oa_uart_init()
+*Description:  initial uarts  
+*Return:        oa_bool
+*Others:         
+*********************************************************/
+oa_bool oa_uart_reset(oa_uart_enum port, oa_uart_baudrate baud)
+{
+	if (OA_UART1 == port)
+	{
+		if (oa_uart_open(OA_UART1, &g_uart_port_setting))
+		{
+        		oa_uart_register_callback(OA_UART1, oa_app_uart1_recv);
+			return OA_TRUE;
+		}
+		else
+		{
+			return OA_FALSE;
+		}
+	}
+	else if (OA_UART2 == port)
+	{
+		if (oa_uart_open(OA_UART2, &g_uart2_port_setting))
+		{
+        		oa_uart_register_callback(OA_UART2, oa_app_uart2_recv);
+			return OA_TRUE;
+		}
+		else
+		{
+			return OA_FALSE;
+		}
+	}
+	else if (OA_UART3 == port)
+	{	
+		if (oa_uart_close(OA_UART3)) {
+			DEBUG("close uart ok!");
+		}
+		
+		g_uart3_port_setting.baud = baud;
+	
+		if (oa_uart_open(OA_UART3, &g_uart3_port_setting))
+		{
+        	//oa_uart_register_callback(OA_UART3, oa_app_uart3_recv);
+			DEBUG("reset uart ok!");
+			return OA_TRUE;
+		}
+		else
+		{
+			return OA_FALSE;
+		}
+	}
+	else
+	{
+		return OA_FALSE;
+	}
+}
 /*********************************************************
 *Function:      oa_app_uart()
 *Description:  handle uart's feedback
@@ -213,24 +269,15 @@ oa_bool oa_uart_init(oa_uart_enum port)
 *********************************************************/
 void oa_app_uart(void)
 {
-#if 0
-	//analysis the uart data
-	//do about sms
-	e_keyword key_ret = e_none;
-	keyword_context set = {0x0};
-	oa_uint8 e_i;
 	
-	//do not support multiple sms
-	//Trace("(%s:%s:%d):KEYWORDS_SIZE:%d", __FILE__, __func__, __LINE__,KEYWORDS_SIZE);
-	for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
-		key_ret = lookfor_keywords_loop(NULL, 0, &set, e_i, uart);
-		if (e_none == key_ret){
-			//Trace("(%s:%s:%d): not support!", __FILE__, __func__, __LINE__);
-			continue;
+	{
+		u16 i;
+		DEBUG("sendlen:%d data:", uart_contain.len);
+		for (i=0; i<uart_contain.len; i++){
+			debug_no_n("%02x ", uart_contain.buf[i]);
 		}
-		handle_keyword(NULL, NULL, NULL, key_ret, &set, uart);
-		oa_memset(&set, 0x0, sizeof(set));
+		DEBUG();
+				
 	}
-	return;
-#endif
+
 }

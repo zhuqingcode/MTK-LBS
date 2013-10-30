@@ -128,6 +128,7 @@ typedef struct
 	oa_uint8 ftpusr[FTP_MAX_LEN];
 	oa_uint8 ftppwd[FTP_MAX_LEN];
 	oa_uint8 ftp_prog_name[FTP_MAX_LEN];
+	oa_uint8 para1[16];
 }DEVICE_PARAMS;
 
 typedef struct

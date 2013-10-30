@@ -38,7 +38,7 @@
 #include "oa_hw.h"
 #include "oa_sw.h"
 #include "oa_debug.h"
-
+#include "app_SScrntask.h"
 #include <stdio.h>
 #include <stdlib.h>
 extern char *strtok(char s[], const char *delim);
@@ -120,6 +120,7 @@ oa_char *p_keyword[] = {
  AUTHEN,
  RESTART,
  DEVID,
+ PARA1,
 };
 oa_uint8 KEYWORDS_SIZE = sizeof(p_keyword)/4;
 //unicode
@@ -783,6 +784,9 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 					return OA_FALSE;
 				}
 			}break;
+			case e_PARA1:{
+				oa_memcpy(p_set->context.con_ch, temp, oa_strlen(temp));
+			}break;
 			default:{
 				DEBUG(" e_kind:%d", e_kind);
 				DEBUG(" not support!");
@@ -1112,6 +1116,13 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 			oa_strcat(enquire_temp, dev_now_params.term_id);
 			oa_strcat(enquire_temp, ";");
 		}break;
+		case e_PARA1:{
+			u8 tmp[3] = {0x0};
+			oa_strcat(enquire_temp, "PARA1:7,");
+			oa_itoa(dev_now_params.para1[7], tmp, DEC);
+			oa_strcat(enquire_temp, tmp);
+			oa_strcat(enquire_temp, ";");
+		}break;
 		default:{
 			oa_strcat(enquire_temp, "not support!");
 		}break;
@@ -1214,6 +1225,19 @@ void dev_action_handle(keyword_context *p_set, sms_or_uart which)
 		case fac_set:{
 			set_reset_flag(which, "PARARST OK;");
 			do_factory_set();
+		}break;
+		case reset_uart:{
+			ret = dev_params_save();
+			if (ret == OA_TRUE)	print_key_dev_params();
+			if (dev_now_params.para1[7] == UART_SCREEN) {
+				DEBUG("uart switch to schedule screen");
+				oa_uart_reset(OA_UART3, 19200);
+				oa_timer_start(OA_TIMER_ID_8, App_TaskSScrnSendManage, NULL, SCHD_SCRN_1TIME);
+			} else if (dev_now_params.para1[7] == UART_FUEL_SENSOR) {
+				DEBUG("uart switch to fuel sensor");
+				oa_uart_reset(OA_UART3, 9600);
+				oa_timer_stop(OA_TIMER_ID_8);
+			}		
 		}break;
 		default:break;
 	}
@@ -2021,6 +2045,24 @@ void handle_keyword4ms(e_keyword key_kind,
 						p_set->act_kind = para_save;
 					}
 					backup_devid(dev_now_params.term_id);
+				}
+			}
+		}break;
+		case e_PARA1:{
+			if (p_set->kind == set){
+				if (p_set->context.con_ch[0] == '7' &&
+					p_set->context.con_ch[1] == ',' &&
+					p_set->context.con_ch[2] == '1' &&
+					p_set->context.con_ch[3] == '4' &&
+					dev_now_params.para1[7] == UART_SCREEN) {
+					dev_now_params.para1[7] = UART_FUEL_SENSOR;//fuel sensor
+					p_set->act_kind = reset_uart;
+				} else if (p_set->context.con_ch[0] == '7' &&
+					p_set->context.con_ch[1] == ',' &&
+					p_set->context.con_ch[2] == '2' &&
+					dev_now_params.para1[7] == UART_FUEL_SENSOR) {
+					dev_now_params.para1[7] = UART_SCREEN;//D5 screen
+					p_set->act_kind = reset_uart;
 				}
 			}
 		}break;
