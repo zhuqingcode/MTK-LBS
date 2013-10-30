@@ -30,13 +30,20 @@
 #include "oa_jt808.h"
 #include "oa_debug.h"
 #include "oa_alarm.h"
+#include "oa_zfz.h"
 //#define OA_GPIO_EINT_01 27
 oa_bool sos_handle_polarity_0 = OA_TRUE;
 /*do not modify it*/
 oa_uint8 eint_data_map_tb[]={1, 6, 5, 2, 1, 1, 4, 2, 2, 2, 2, 3};
 oa_uint8 eint_gpio_map_tb[]={66, 28, 5, 11, 27, 29, 33, 34, 51, 60, 74, 25};
 oa_uint8 g_first_pullup_flag = OA_TRUE;
-
+#ifdef USE_ZFZ_SENSOR
+//ZFZ-------------
+zfz_enum zfz_sensor_status = 0;
+u8 tz_times = 0;
+u8 zz_cal = 0;
+u8 fz_cal = 0;
+#endif
 oa_uint8 acc_status = ACC_OFF;
 /*********************************************************
 *Function:     oa_tst_eint_hisr()
@@ -83,6 +90,56 @@ void oa_tst_eint_hisr(void)
 void adc_value_cb(oa_int32 volt_result, oa_double adc_result){
 	//OA_DEBUG_USER("volt_result:%d adc_result:%f", volt_result, adc_result);
 }
+#ifdef USE_ZFZ_SENSOR
+/*********************************************************
+*Function:     oa_tst_eint_hisr()
+*Description:  callback function for gpio     
+*Return:		void
+*Others:         
+*********************************************************/
+void oa_eint_hisr0(void)
+{
+	oa_uint8 eint_level;
+
+	eint_level =oa_gpio_read(eint_gpio_map_tb[OA_CUR_TEST_EINT_NO1]);
+	if (eint_level == LEVEL_HIGH) {
+		zz_cal++;
+		//DEBUG("zz_cal:%d", zz_cal);
+	}
+
+	if (zz_cal > ZZ_SHRESHOLD_TIMES) {
+			//DEBUG("zz");
+			zfz_sensor_status = zz;
+			tz_times = 0;
+			zz_cal = 0;
+			fz_cal = 0;
+	}
+}
+/*********************************************************
+*Function:     oa_tst_eint_hisr()
+*Description:  callback function for gpio     
+*Return:		void
+*Others:         
+*********************************************************/
+void oa_eint_hisr1(void)
+{
+	oa_uint8 eint_level;
+	eint_level =oa_gpio_read(eint_gpio_map_tb[OA_CUR_TEST_EINT_NO]);
+	if(eint_level == LEVEL_HIGH) {
+		fz_cal++;
+		//DEBUG("fz_cal:%d", fz_cal);		
+	}
+
+	if (fz_cal > FZ_SHRESHOLD_TIMES) {
+			//DEBUG("fz");
+			zfz_sensor_status = fz;
+			tz_times = 0;
+			fz_cal = 0;
+			zz_cal = 0;
+	}
+	
+}
+#endif
 /*********************************************************
 *Function:     oa_gpio_set()
 *Description:  gpio settings     
@@ -115,6 +172,20 @@ void oa_gpio_set(void)
 	oa_eint_registration(OA_CUR_TEST_EINT_NO, OA_TRUE, sos_handle_polarity_0, oa_tst_eint_hisr, OA_TRUE);
 	oa_eint_set_sensitivity(OA_CUR_TEST_EINT_NO, LEVEL_SENSITIVE);
 	oa_eint_set_debounce(OA_CUR_TEST_EINT_NO, 80);
+#endif
+#ifdef USE_ZFZ_SENSOR
+	//GPIO66:EINT0;
+	oa_gpio_mode_setup(eint_gpio_map_tb[OA_CUR_TEST_EINT_NO], eint_data_map_tb[OA_CUR_TEST_EINT_NO]);
+	oa_gpio_init(0,eint_gpio_map_tb[OA_CUR_TEST_EINT_NO]);
+	oa_eint_registration(OA_CUR_TEST_EINT_NO, OA_FALSE, 0, oa_eint_hisr0, OA_TRUE);
+	oa_eint_set_sensitivity(OA_CUR_TEST_EINT_NO, EDGE_SENSITIVE);
+	oa_eint_set_debounce(OA_CUR_TEST_EINT_NO, 10);
+	//GPIO29:EINT5;
+	oa_gpio_mode_setup(eint_gpio_map_tb[OA_CUR_TEST_EINT_NO1], eint_data_map_tb[OA_CUR_TEST_EINT_NO1]);
+	oa_gpio_init(0,eint_gpio_map_tb[OA_CUR_TEST_EINT_NO1]);
+	oa_eint_registration(OA_CUR_TEST_EINT_NO1, OA_FALSE, 0, oa_eint_hisr1, OA_TRUE);
+	oa_eint_set_sensitivity(OA_CUR_TEST_EINT_NO1, EDGE_SENSITIVE);
+	oa_eint_set_debounce(OA_CUR_TEST_EINT_NO1, 10);
 #endif
 	//just for ACC & GPS ana detect
 	oa_gpio_mode_setup(ACC_GPIO, GPIO_MODE);     /*set gpio 15 as 0 mode(gpio modem)*/
@@ -213,6 +284,17 @@ void acc_status_detect(void *param)
 				
 		}
 	}
+
+#ifdef USE_ZFZ_SENSOR
+	//zfz sensor
+	tz_times++;
+	if (tz_times * OA_ACC_RUN_SECOND > TZ_SHRESHOLD_TIME) {
+		zfz_sensor_status = tz;
+		zz_cal = 0;
+		fz_cal = 0;
+		tz_times = 0;
+	}
+#endif
 redoit:
 	oa_timer_start(OA_TIMER_ID_6, acc_status_detect, NULL, OA_ACC_RUN);
 }

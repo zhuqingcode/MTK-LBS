@@ -40,6 +40,8 @@
 #include "oa_app.h"
 #include "oa_sms.h"
 #include "oa_alarm.h"
+#include "oa_hw.h"
+#include "oa_zfz.h"
 #define PRINT_SAMEPARA	DEBUG(" this parameter is same as the original, so I do nothing...")
 #define PORT_MAX 65535
 extern DEVICE_PARAMS dev_now_params;
@@ -48,6 +50,9 @@ extern timeout_struct timeout_var;
 extern timeout_data_struct timeout_data;
 extern os_struct overspeed_var;
 extern area_alarm_addition_struct area_alarm_addition_var;
+#ifdef USE_ZFZ_SENSOR
+extern zfz_enum zfz_sensor_status;
+#endif
 dev_control_type control_type = none;
 upgrade_paras up_paras;
 action_kind plat_paraset = 0x0;
@@ -4161,7 +4166,19 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 	memset(pbuf,0x0,7);
 	*pbuflen +=9;
 */
-
+#ifdef USE_ZFZ_SENSOR
+	//附加信息:正反转
+	*pbuf++=0xE0;
+	*pbuf++=0x04;
+	*pbuf++=0x00;
+	*pbuf++=0x00;
+	*pbuf++=0x00;
+	*pbuf++=0x03;
+	*pbuf++=0xE1;
+	*pbuf++=0x01;
+	*pbuf++=zfz_sensor_status;
+	*pbuflen += 9;
+#endif
 #if 0
 	ADD_LOCATION_INFO addInfo;
 //	READ(meliage,oil,meliage,locationtype11,area_line_id11,locationtype22,area_line_id22,direction);
