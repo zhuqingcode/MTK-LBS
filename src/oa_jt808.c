@@ -48,6 +48,7 @@ extern timeout_struct timeout_var;
 extern timeout_data_struct timeout_data;
 extern os_struct overspeed_var;
 extern area_alarm_addition_struct area_alarm_addition_var;
+extern STRUCT_RMC Pos_Inf;
 dev_control_type control_type = none;
 upgrade_paras up_paras;
 action_kind plat_paraset = 0x0;
@@ -4003,7 +4004,13 @@ u8 report_location_msgbody1(u8 *Buf, u16 *pbuflen)
 
 	if(Buf==NULL||pbuflen==NULL)
 		return 1;
-	GPS_GetPosition(&GpsInfor); //ȡgps
+	
+	if (Pos_Inf.Fix_Status == GPS_FIXED) {
+		GPS_GetPosition(&GpsInfor); //ȡgps
+	} else {
+		GPS_clear_data(&GpsInfor);
+	}
+	
 	ReadAllBitAlarmPara(StaAlarm0, &alarmflag);
 	int_to_char(pbuf, alarmflag);
 	pbuf+=4;

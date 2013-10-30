@@ -184,7 +184,6 @@ void oa_app_gps(void)
 		//clear it
 		if (ModelCnt > 0) ModelCnt = 0;
 		if (result & NMEA_RMC_OK){//gps data handle
-			
 			GPS_GetPosition(&gps_info);//copy gps data into 'gps_info'
 			//just for printing
 			if (infoprintCnt++ >= 15){
