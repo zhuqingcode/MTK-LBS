@@ -58,9 +58,9 @@ void oa_hardware_test(void *param) {
 	//check hardware status
 	//BYTE0---------------
 	//IN0
-	hw_status[0] |= oa_gpio_read(IN0_GPIO);
+	hw_status[0] |= !oa_gpio_read(IN0_GPIO);
 	//IN1
-	hw_status[0] |= oa_gpio_read(IN1_GPIO) << 1;
+	hw_status[0] |= (!oa_gpio_read(IN1_GPIO)) << 1;
 	//BYTE1---------------
 	//Power status
 	hw_status[1] |= 0x1<<7;
