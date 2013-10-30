@@ -269,24 +269,15 @@ oa_bool oa_uart_reset(oa_uart_enum port, oa_uart_baudrate baud)
 *********************************************************/
 void oa_app_uart(void)
 {
-#if 0
-	//analysis the uart data
-	//do about sms
-	e_keyword key_ret = e_none;
-	keyword_context set = {0x0};
-	oa_uint8 e_i;
 	
-	//do not support multiple sms
-	//Trace("(%s:%s:%d):KEYWORDS_SIZE:%d", __FILE__, __func__, __LINE__,KEYWORDS_SIZE);
-	for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
-		key_ret = lookfor_keywords_loop(NULL, 0, &set, e_i, uart);
-		if (e_none == key_ret){
-			//Trace("(%s:%s:%d): not support!", __FILE__, __func__, __LINE__);
-			continue;
+	{
+		u16 i;
+		DEBUG("sendlen:%d data:", uart_contain.len);
+		for (i=0; i<uart_contain.len; i++){
+			debug_no_n("%02x ", uart_contain.buf[i]);
 		}
-		handle_keyword(NULL, NULL, NULL, key_ret, &set, uart);
-		oa_memset(&set, 0x0, sizeof(set));
+		DEBUG();
+				
 	}
-	return;
-#endif
+
 }
