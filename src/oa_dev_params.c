@@ -88,7 +88,7 @@ DEVICE_PARAMS dev_def_params =
 	{"00000000000"},
 	{"00000000000"},				//terminal_sms_num
 	//......
-	0xffffffff,					//alarm_mask
+	0xFFFFFE0E,					//alarm_mask
 	0,							//alarm_send_sms_mask
 	120,							//max_speed
 	10,							//speed_duration
