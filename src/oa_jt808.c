@@ -4005,9 +4005,8 @@ u8 report_location_msgbody1(u8 *Buf, u16 *pbuflen)
 	if(Buf==NULL||pbuflen==NULL)
 		return 1;
 	
-	if (Pos_Inf.Fix_Status == GPS_FIXED) {
-		GPS_GetPosition(&GpsInfor); //ȡgps
-	} else {
+	GPS_GetPosition(&GpsInfor); //ȡgps
+	if (GpsInfor.Fix_Status == GPS_UNFIXED) {//if don't locate, clear data here!!!
 		GPS_clear_data(&GpsInfor);
 	}
 	
