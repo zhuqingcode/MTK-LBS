@@ -40,6 +40,7 @@
 #include "oa_app.h"
 #include "oa_sms.h"
 #include "oa_alarm.h"
+#include "oa_hw.h"
 #define PRINT_SAMEPARA	DEBUG(" this parameter is same as the original, so I do nothing...")
 #define PORT_MAX 65535
 extern DEVICE_PARAMS dev_now_params;
@@ -2151,7 +2152,9 @@ static u8 ServReq_Textinfo(u8 *pbuf, u16 buflen)
 				SScrn_SMS_Send('E',"000",3,Time,pbuf,buflen-1); //∂Ã–≈∏Ò Ω£ø£ø
 			}
 			#else
+			#ifdef USE_SCREEN
 				SScrn_CenterSMS_Send(pbuf,buflen-1);
+			#endif
 			#endif 
 		}
 	}

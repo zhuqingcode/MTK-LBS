@@ -30,7 +30,7 @@
 #include "oa_gps.h"
 #include "oa_sms.h"
 #include "oa_debug.h"
-
+#include "oa_fuel_sensor.h"
 extern oa_uint8 KEYWORDS_SIZE;
 extern DEVICE_PARAMS dev_now_params;
 /*****************************************************************/
@@ -269,7 +269,15 @@ oa_bool oa_uart_reset(oa_uart_enum port, oa_uart_baudrate baud)
 *********************************************************/
 void oa_app_uart(void)
 {
-	
+	u8 i;
+	u16 real_len;
+	u8 check = 0;
+	//para check
+	if (uart_contain.len == 0) {
+		DEBUG("data len err!");
+		return;
+	}
+	//debug
 	{
 		u16 i;
 		DEBUG("sendlen:%d data:", uart_contain.len);
@@ -280,4 +288,79 @@ void oa_app_uart(void)
 				
 	}
 
+	if (uart_contain.buf[0] == 0x7e && uart_contain.buf[uart_contain.len - 1]  == 0x7e) {
+		;
+	}	else {
+		DEBUG("data format err!");
+		return;
+	}
+	//analysis data
+	if (JT808_dataChg(0, &uart_contain.buf[1], uart_contain.len - 2, &real_len)) {
+		DEBUG("analysis data err!");
+		return;
+	}
+	//check data
+	for (i = 4; i < real_len; i++) {
+		check += uart_contain.buf[i];
+	}
+
+	if (check != uart_contain.buf[1]) {
+		DEBUG("check data err!");
+		return;
+	}
+
+	if (Manufacturer_No != uart_contain.buf[4] || Manufacturer_No != uart_contain.buf[5]) {
+		DEBUG("manufacturer No. err!");
+		return;
+	}
+
+	if (Peripheral_Type_No != uart_contain.buf[6]) {
+		DEBUG("peripheral type No. err!");
+		return;
+	}
+
+	if (Fuel_Cmd_Upload == uart_contain.buf[7]) {
+		u16 per;
+		u16 fuel;
+		u16 ad_val;
+		//status
+		if (Fuel_Not_Support != uart_contain.buf[8]) {
+			switch (uart_contain.buf[8]) {
+				case Fuel_Status_Normal: {
+
+				} break;
+				case Fuel_Status_Normal: {
+
+				} break;
+				case Fuel_Status_Normal: {
+
+				} break;
+				default:break;
+			}
+		}
+
+		//percent
+		char_to_short(&uart_contain.buf[9], &per)
+		if (Fuel_Not_Support2 != per) {
+
+		}
+
+		//fuel volume
+		char_to_short(&uart_contain.buf[11], &fuel)
+		if (Fuel_Not_Support2 != fuel) {
+
+		}
+
+		//ad value
+		char_to_short(&uart_contain.buf[13], &ad_val)
+		if (Fuel_Not_Support2 != ad_val) {
+
+		}
+	} else if (Fuel_Cmd_Para_Set == uart_contain.buf[7]) {
+
+	} else {
+		DEBUG("fuel cmd err!");
+		return;
+	}
+	
 }
