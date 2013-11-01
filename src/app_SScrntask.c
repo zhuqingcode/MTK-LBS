@@ -12,7 +12,7 @@
 #include "oa_dev_params.h"
 #include "oa_uart.h"
 #include "oa_hw_test.h"
-//#ifdef SCHE_SCRN
+
 extern STRUCT_RMC Pos_Inf;
 extern oa_uint8 acc_status;
 extern DEVICE_PARAMS dev_now_params;
@@ -1658,5 +1658,4 @@ void SchedulScrn_Factoryset()
 
 }
 #endif
-//#endif
 

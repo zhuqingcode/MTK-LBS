@@ -55,7 +55,7 @@
 #define ACC_OFF 0
 #define OA_ACC_RUN 2000
 #define OA_ACC_RUN_1ST 20000
-
+//#define USE_SCREEN
 #if 0
 official hw definition
 #define GPS_AADET 3//gpio3

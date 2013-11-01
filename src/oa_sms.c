@@ -1232,11 +1232,15 @@ void dev_action_handle(keyword_context *p_set, sms_or_uart which)
 			if (dev_now_params.para1[7] == UART_SCREEN) {
 				DEBUG("uart switch to schedule screen");
 				oa_uart_reset(OA_UART3, 19200);
+#ifdef USE_SCREEN
 				oa_timer_start(OA_TIMER_ID_8, App_TaskSScrnSendManage, NULL, SCHD_SCRN_1TIME);
+#endif
 			} else if (dev_now_params.para1[7] == UART_FUEL_SENSOR) {
 				DEBUG("uart switch to fuel sensor");
 				oa_uart_reset(OA_UART3, 9600);
+#ifdef USE_SCREEN
 				oa_timer_stop(OA_TIMER_ID_8);
+#endif
 			}		
 		}break;
 		default:break;

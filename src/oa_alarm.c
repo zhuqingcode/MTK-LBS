@@ -47,7 +47,7 @@ oa_uint8 overtime_park_uni[] = {0x8d,0x85,0x65,0xf6,0x50,0x5c,0x8f,0x66};
 oa_uint8 enter_area_uni[] = {0x8F,0xDB,0x53,0x3A,0x57,0xDF};
 oa_uint8 out_area_uni[] = {0x51,0xFA,0x53,0x3A,0x57,0xDF};
 oa_uint8 enter_derection_uni[] = {0x8F,0xDB,0x51,0xFA,0x8D,0xEF,0x7E,0xBF};
-
+#ifdef USE_SCREEN
 oa_uint8 emergency_gbk[] = {0xBD,0xf4,0xbc,0xb1,0xb1,0xA8,0xbe,0xaf};
 oa_uint8 overspeed_gbk[] = {0xb3,0xac,0xcb,0xd9,0xb1,0xA8,0xbe,0xaf};
 oa_uint8 tired_drive_gbk[] = {0xc6,0xa3,0xc0,0xcd,0xbc,0xdd,0xca,0xbb};
@@ -59,7 +59,7 @@ oa_uint8 overtime_park_gbk[] = {0xb3,0xac,0xca,0xb1,0xcd,0xa3,0xb3,0xb5};
 oa_uint8 enter_area_gbk[] = {0xbd,0xf8,0xc7,0xf8,0xd3,0xf2};
 oa_uint8 out_area_gbk[] = {0xb3,0xf6,0xc7,0xf8,0xd3,0xf2};
 oa_uint8 enter_derection_gbk[] = {0xbd,0xf8,0xb3,0xf6,0xc2,0xb7,0xcf,0xdf};
-
+#endif
 extern DEVICE_PARAMS dev_now_params;
 extern DEV_PLAT_PARAS dev_running;
 extern oa_uint8 acc_status;
@@ -185,36 +185,36 @@ void handle_alarm_sms(u32 alarm_bit, oa_uint8 alarm_2_driver, in_out_kind kind, 
 				oa_memcpy(uni.buf, emergency_uni, sizeof(emergency_uni));
 				uni.len = sizeof(emergency_uni);
 			}
-
+#ifdef USE_SCREEN
 			if (alarm_2_driver) {
 				oa_memcpy(gbk.buf, emergency_gbk, sizeof(emergency_gbk));
 				gbk.len = sizeof(emergency_gbk);
 			}
-			
+#endif	
 		}break;
 		case ALARM_OVER_SPEED:{
 			if ((alarm_flag & alarm_bit) && sms_enable) {
 				oa_memcpy(uni.buf, overspeed_uni, sizeof(overspeed_uni));
 				uni.len = sizeof(overspeed_uni);
 			}
-
+#ifdef USE_SCREEN
 			if (alarm_2_driver) {
 				oa_memcpy(gbk.buf, overspeed_gbk, sizeof(overspeed_gbk));
 				gbk.len = sizeof(overspeed_gbk);
 			}
-			
+#endif			
 		}break;
 		case ALARM_DRIVE_TIRED:{
 			if ((alarm_flag & alarm_bit) && sms_enable) {
 				oa_memcpy(uni.buf, tired_drive_uni, sizeof(tired_drive_uni));
 				uni.len = sizeof(tired_drive_uni);
 			}
-
+#ifdef USE_SCREEN
 			if (alarm_2_driver) {
 				oa_memcpy(gbk.buf, tired_drive_gbk, sizeof(tired_drive_gbk));
 				gbk.len = sizeof(tired_drive_gbk);
 			}
-			
+#endif			
 		}break;
 		case ALARM_GNSS_ERR:{
 			if ((alarm_flag & alarm_bit) && sms_enable){
@@ -222,60 +222,60 @@ void handle_alarm_sms(u32 alarm_bit, oa_uint8 alarm_2_driver, in_out_kind kind, 
 				uni.len = sizeof(gnss_err_uni);
 			}
 			
-
+#ifdef USE_SCREEN
 			if (alarm_2_driver) {
 				oa_memcpy(gbk.buf, gnss_err_gbk, sizeof(gnss_err_gbk));
 				gbk.len = sizeof(gnss_err_gbk);
 			}
-			
+#endif			
 		}break;
 		case ALARM_GNSS_ANTENNA:{
 			if ((alarm_flag & alarm_bit) && sms_enable) {
 				oa_memcpy(uni.buf, gnss_atenna_uni, sizeof(gnss_atenna_uni));
 				uni.len = sizeof(gnss_atenna_uni);
 			}
-			
+#ifdef USE_SCREEN			
 			if (alarm_2_driver) {
 				oa_memcpy(gbk.buf, gnss_atenna_gbk, sizeof(gnss_atenna_gbk));
 				gbk.len = sizeof(gnss_atenna_gbk);
 			}
-			
+#endif			
 		}break;
 		case ALARM_GNSS_SHORT_CIRCUIT:{
 			if ((alarm_flag & alarm_bit) && sms_enable) {
 				oa_memcpy(uni.buf, gnss_short_circuit_uni, sizeof(gnss_short_circuit_uni));
 				uni.len = sizeof(gnss_short_circuit_uni);
 			}
-			
+#ifdef USE_SCREEN			
 			if (alarm_2_driver) {
 				oa_memcpy(gbk.buf, gnss_short_circuit_gbk, sizeof(gnss_short_circuit_gbk));
 				gbk.len = sizeof(gnss_short_circuit_gbk);
 			}
-			
+#endif			
 		}break;
 		case ALARM_DRIVE_OVERTIME:{
 			if ((alarm_flag & alarm_bit) && sms_enable) {
 				oa_memcpy(uni.buf, drive_overtime_uni, sizeof(drive_overtime_uni));
 				uni.len = sizeof(drive_overtime_uni);
 			}
-			
+#ifdef USE_SCREEN			
 			if (alarm_2_driver) {
 				oa_memcpy(gbk.buf, drive_overtime_gbk, sizeof(drive_overtime_gbk));
 				gbk.len = sizeof(drive_overtime_gbk);
 			}
-			
+#endif			
 		}break;
 		case ALARM_OVERTIME_PARKING:{
 			if ((alarm_flag & alarm_bit) && sms_enable) {
 				oa_memcpy(uni.buf, overtime_park_uni, sizeof(overtime_park_uni));
 				uni.len = sizeof(overtime_park_uni);
 			}
-			
+#ifdef USE_SCREEN			
 			if (alarm_2_driver) {
 				oa_memcpy(gbk.buf, overtime_park_gbk, sizeof(overtime_park_gbk));
 				gbk.len = sizeof(overtime_park_gbk);
 			}
-			
+#endif			
 		}break;
 		case ALARM_ENTER_AREA:{
 			u8 temp[64] = {0x0};
@@ -299,7 +299,7 @@ void handle_alarm_sms(u32 alarm_bit, oa_uint8 alarm_2_driver, in_out_kind kind, 
 				}
 				
 			}
-			
+#ifdef USE_SCREEN			
 			if (alarm_2_driver) {
 				oa_memset(temp, 0x0, sizeof(temp));
 				oa_memset(temp2, 0x0, sizeof(temp2));
@@ -319,19 +319,19 @@ void handle_alarm_sms(u32 alarm_bit, oa_uint8 alarm_2_driver, in_out_kind kind, 
 					gbk.len += len;
 				}
 			}
-			
+#endif			
 		}break;
 		case ALARM_TOUCH_LINE_k:{
 			if ((alarm_flag & alarm_bit) && sms_enable) {
 				oa_memcpy(uni.buf, enter_derection_uni, sizeof(enter_derection_uni));
 				uni.len = sizeof(enter_derection_uni);
 			}
-			
+#ifdef USE_SCREEN			
 			if (alarm_2_driver) {
 				oa_memcpy(gbk.buf, enter_derection_gbk, sizeof(enter_derection_gbk));
 				gbk.len = sizeof(enter_derection_gbk);
 			}
-			
+#endif			
 		}break;
 		default:{
 			DEBUG("not sopport!");
@@ -343,12 +343,12 @@ void handle_alarm_sms(u32 alarm_bit, oa_uint8 alarm_2_driver, in_out_kind kind, 
 		DEBUG("send sms");
 		oa_sms_test_ucs2(uni.buf, dev_now_params.terminal_sms_num, uni.len);
 	}
-
+#ifdef USE_SCREEN
 	if (alarm_2_driver) {
 		oa_memset(&s_s, 0x0, sizeof(s_s));
 		s_s.buflen = gbk.len;
 		oa_memcpy(s_s.sendbuf, gbk.buf, s_s.buflen);
 		oa_timer_start(OA_TIMER_ID_12, oa_screen_demo, NULL, 3000);
 	}
-	
+#endif	
 }
