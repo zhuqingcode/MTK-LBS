@@ -30,9 +30,11 @@
 #include "oa_gps.h"
 #include "oa_sms.h"
 #include "oa_debug.h"
+#include "oa_jt808.h"
 #include "oa_fuel_sensor.h"
 extern oa_uint8 KEYWORDS_SIZE;
 extern DEVICE_PARAMS dev_now_params;
+extern fuel_sensor_struct fuel_sensor_var;
 /*****************************************************************/
 /*-----------------For uart port configure----------------------------*/
 /*****************************************************************/  
@@ -321,43 +323,57 @@ void oa_app_uart(void)
 
 	if (Fuel_Cmd_Upload == uart_contain.buf[7]) {
 		u16 per;
-		u16 fuel;
+		u16 vol;
 		u16 ad_val;
 		//status
 		if (Fuel_Not_Support != uart_contain.buf[8]) {
-			switch (uart_contain.buf[8]) {
-				case Fuel_Status_Normal: {
-
-				} break;
-				case Fuel_Status_Normal: {
-
-				} break;
-				case Fuel_Status_Normal: {
-
-				} break;
-				default:break;
+			if (Fuel_Status_Normal == uart_contain.buf[8] ||
+				 Fuel_Status_Sud_Down == uart_contain.buf[8] ||
+				 Fuel_Status_Sud_Up == uart_contain.buf[8]) {
+				fuel_sensor_var.fuel_status = uart_contain.buf[8];
+				if (Fuel_Status_Sud_Down == uart_contain.buf[8] ||
+					 Fuel_Status_Sud_Up == uart_contain.buf[8]) {
+					WriteAlarmPara(SET, StaAlarm0, ALARM_OIL_ERR);
+				} else {
+					WriteAlarmPara(RESET, StaAlarm0, ALARM_OIL_ERR);
+				}
+			} else {
+				fuel_sensor_var.fuel_status = Fuel_Status_Err;
+				DEBUG("fuel status err!");
+				return;
 			}
 		}
 
 		//percent
-		char_to_short(&uart_contain.buf[9], &per)
+		char_to_short(&uart_contain.buf[9], &per);
 		if (Fuel_Not_Support2 != per) {
-
+			fuel_sensor_var.fuel_percent = per;
 		}
 
 		//fuel volume
-		char_to_short(&uart_contain.buf[11], &fuel)
-		if (Fuel_Not_Support2 != fuel) {
-
+		char_to_short(&uart_contain.buf[11], &vol);
+		if (Fuel_Not_Support2 != vol) {
+			fuel_sensor_var.fuel_volume = vol;
 		}
 
 		//ad value
-		char_to_short(&uart_contain.buf[13], &ad_val)
+		char_to_short(&uart_contain.buf[13], &ad_val);
 		if (Fuel_Not_Support2 != ad_val) {
-
+			fuel_sensor_var.fuel_volume = ad_val;
 		}
-	} else if (Fuel_Cmd_Para_Set == uart_contain.buf[7]) {
-
+	} 
+	else if (Fuel_Cmd_Para_Set == uart_contain.buf[7]) {
+		if (Fuel_Para_Set_OK == uart_contain.buf[8]) {
+			DEBUG("fuel para set ok!");
+			oa_timer_stop(OA_TIMER_ID_14);
+		} else if (Fuel_Para_Set_ERR == uart_contain.buf[8]) {
+			DEBUG("fuel para set err! reset para in 5s!");
+			return;
+		} else {
+			DEBUG("fuel para set not known id! reset para in 5s!");
+			return;
+		}
+		
 	} else {
 		DEBUG("fuel cmd err!");
 		return;
