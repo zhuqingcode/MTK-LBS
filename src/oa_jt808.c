@@ -40,6 +40,8 @@
 #include "oa_app.h"
 #include "oa_sms.h"
 #include "oa_alarm.h"
+#include "oa_hw.h"
+#include "oa_fuel_sensor.h"
 #define PRINT_SAMEPARA	DEBUG(" this parameter is same as the original, so I do nothing...")
 #define PORT_MAX 65535
 extern DEVICE_PARAMS dev_now_params;
@@ -48,6 +50,7 @@ extern timeout_struct timeout_var;
 extern timeout_data_struct timeout_data;
 extern os_struct overspeed_var;
 extern area_alarm_addition_struct area_alarm_addition_var;
+extern fuel_sensor_struct fuel_sensor_var;
 dev_control_type control_type = none;
 upgrade_paras up_paras;
 action_kind plat_paraset = 0x0;
@@ -2151,7 +2154,9 @@ static u8 ServReq_Textinfo(u8 *pbuf, u16 buflen)
 				SScrn_SMS_Send('E',"000",3,Time,pbuf,buflen-1); //短信格式？？
 			}
 			#else
+			#ifdef USE_SCREEN
 				SScrn_CenterSMS_Send(pbuf,buflen-1);
+			#endif
 			#endif 
 		}
 	}
@@ -4121,6 +4126,16 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 	pbuf+=2;
 	*pbuflen +=4;
 #endif
+	//fuel sensor
+	if (dev_now_params.para1[7] == UART_FUEL_SENSOR) {
+		if (fuel_sensor_var.fuel_status != Fuel_Status_Err) {
+			*pbuf++=0x02;//油量
+			*pbuf++=0x02;
+			*pbuf++=(fuel_sensor_var.fuel_volume>>8) & 0xff;	//暂定
+			*pbuf++=fuel_sensor_var.fuel_volume & 0xff;
+			*pbuflen +=4;
+		}
+	}
 	//-----------
 	if (overspeed_var.kind != no_os){
 		*pbuf++=0x11;//超速报警附加信息

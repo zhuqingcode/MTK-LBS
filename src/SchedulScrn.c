@@ -19,7 +19,6 @@
 #include "oa_api.h"
 #include "oa_debug.h"
 #include "oa_uart.h"
-//#ifdef SCHE_SCRN
 /*#include "Hardware.h"*/
 /*****************************************/
 extern uart_struct uart_contain;
@@ -2631,5 +2630,3 @@ u8 SScrn_StationData_Rsq(void)
 }
 
 #endif
-
-//#endif

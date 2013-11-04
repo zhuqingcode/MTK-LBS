@@ -36,6 +36,7 @@
 #include "oa_lbs2mtk.h"
 #include "oa_jt808.h"
 #include "oa_debug.h"
+#include "oa_hw.h"
 extern char *strtok(char s[], const char *delim);
 extern DEVICE_PARAMS dev_now_params;
 extern USE_LOCK now_use_lock;
@@ -54,9 +55,11 @@ scrn_struct s_s;
 *********************************************************/
 void oa_screen_demo(void *param)
 {
+#ifdef USE_SCREEN
 	DEBUG("send sms 2 screen");
 	if (s_s.buflen > 0)	SScrn_CenterSMS_Send(s_s.sendbuf, s_s.buflen);
 	else DEBUG("len err!");
+#endif
 }
 /*********************************************************
 *Function:      sched_scrn_ana_4trans()
