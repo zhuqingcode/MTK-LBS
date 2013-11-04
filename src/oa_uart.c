@@ -282,7 +282,7 @@ void oa_app_uart(void)
 	//debug
 	{
 		u16 i;
-		DEBUG("sendlen:%d data:", uart_contain.len);
+		DEBUG("revlen:%d data:", uart_contain.len);
 		for (i=0; i<uart_contain.len; i++){
 			debug_no_n("%02x ", uart_contain.buf[i]);
 		}
@@ -301,11 +301,13 @@ void oa_app_uart(void)
 		DEBUG("analysis data err!");
 		return;
 	}
+	DEBUG("reallen:%d", real_len);
 	//check data
-	for (i = 4; i < real_len; i++) {
+	for (i = 4; i < real_len + 1; i++) {
 		check += uart_contain.buf[i];
 	}
 
+	DEBUG("check:%02x", check);
 	if (check != uart_contain.buf[1]) {
 		DEBUG("check data err!");
 		return;
@@ -363,18 +365,30 @@ void oa_app_uart(void)
 		}
 	} 
 	else if (Fuel_Cmd_Para_Set == uart_contain.buf[7]) {
-		if (Fuel_Para_Set_OK == uart_contain.buf[8]) {
-			DEBUG("fuel para set ok!");
-			oa_timer_stop(OA_TIMER_ID_14);
-		} else if (Fuel_Para_Set_ERR == uart_contain.buf[8]) {
-			DEBUG("fuel para set err! reset para in 5s!");
-			return;
-		} else {
-			DEBUG("fuel para set not known id! reset para in 5s!");
-			return;
+		for (i = 8; i < real_len; i+=2) {
+			if (Fuel_Per_Alarm_Shreshold == uart_contain.buf[i]) {
+				if (Fuel_Para_Set_OK == uart_contain.buf[i + 1]) {
+					DEBUG("Fuel_Per_Alarm_Shreshold set ok!");
+				}
+			} else if (Fuel_Vol_Alarm_Shreshold == uart_contain.buf[i]) {
+				if (Fuel_Para_Set_OK == uart_contain.buf[i + 1]) {
+					DEBUG("Fuel_Vol_Alarm_Shreshold set ok!");
+				}
+			}	else if (Fuel_Per == uart_contain.buf[i]) {
+				if (Fuel_Para_Set_OK == uart_contain.buf[i + 1]) {
+					DEBUG("Fuel_Per set ok!");
+				}
+			} else if (Fuel_Vol == uart_contain.buf[i]) {
+				if (Fuel_Para_Set_OK == uart_contain.buf[i + 1]) {
+					DEBUG("Fuel_Vol set ok!");
+					oa_timer_stop(OA_TIMER_ID_14);
+				}
+			} else {
+				
+			}
 		}
-		
-	} else {
+	} 
+	else {
 		DEBUG("fuel cmd err!");
 		return;
 	}
