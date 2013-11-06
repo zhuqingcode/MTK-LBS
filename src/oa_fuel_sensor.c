@@ -61,13 +61,17 @@ u8 fuel_build_part_packet(u8 *p_data) {
 	//D3
 	p_data[15] = 0xd3;
 	short_to_char(&p_data[16], 1200/*example*/);
-	p_data[18] = 0x7e;
+	//D4
+	p_data[18] = 0xd4;
+	short_to_char(&p_data[19], 120/*example*/);
+	p_data[21] = 0x7e;
+	
 	//add check
-	for (i = 4; i < 18; i++) {
+	for (i = 4; i < 21; i++) {
 		check += p_data[i];
 	}
 	p_data[1] = check;
-	return 19;
+	return 22;
 }
 /*********************************************************
 *Function:      oa_app_fuel()
