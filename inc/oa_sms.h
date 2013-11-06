@@ -107,6 +107,7 @@
 #define RESTART "RESTART"
 #define DEVID "DEVID"//7 λ
 #define PARA1 "PARA1"
+#define OIL_AMOUNT "oil_amount"
 
 #define COLON ':'
 #define SEMICOLON ';'
@@ -191,6 +192,7 @@ typedef enum
 	e_RESTART,
 	e_DEVID,
 	e_PARA1,
+	e_OIL_AMOUNT,
 	e_none = 0xff,
 }e_keyword;
 typedef enum

@@ -29,7 +29,7 @@
 #include "oa_debug.h"
 #include "oa_hw.h"
 #include "oa_fuel_sensor.h"
-fuel_sensor_struct fuel_sensor_var = {Fuel_Status_Err, 0x0, 0x0, 0x0};
+fuel_sensor_struct fuel_sensor_var = {Fuel_Status_Normal, 0x0, 0x0, 0x0};
 /*********************************************************
 *Function:      oa_app_fuel()
 *Description:  fuel parameters set

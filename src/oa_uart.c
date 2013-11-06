@@ -349,13 +349,16 @@ void oa_app_uart(void)
 		//percent
 		char_to_short(&uart_contain.buf[9], &per);
 		if (Fuel_Not_Support2 != per) {
+			DEBUG("analysis ok");
 			fuel_sensor_var.fuel_percent = per;
+			fuel_sensor_var.fuel_volume = (dev_now_params.def_oil * fuel_sensor_var.fuel_percent) / 10000;
+			DEBUG("fuel_volume:%d", fuel_sensor_var.fuel_volume);
 		}
 
 		//fuel volume
 		char_to_short(&uart_contain.buf[11], &vol);
 		if (Fuel_Not_Support2 != vol) {
-			fuel_sensor_var.fuel_volume = vol;
+			//fuel_sensor_var.fuel_volume = vol;
 		}
 
 		//ad value
