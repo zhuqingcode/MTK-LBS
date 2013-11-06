@@ -33,6 +33,8 @@
 #define USE_UART3			//´®¿ÚÈý
 #define UART_SCREEN 0x2
 #define UART_FUEL_SENSOR 14
+#define PROTOCOL_SCREEN_HEAD 0x24
+#define PROTOCOL_JT808_HEAD 0x7e
 typedef enum
 {
 	sms = 0x0,

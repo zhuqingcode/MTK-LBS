@@ -64,7 +64,7 @@ oa_uart_struct g_uart2_port_setting =
 
 oa_uart_struct g_uart3_port_setting = 
 {
-	19200,//9600,   /* baudrate */
+	9600,//9600,   /* baudrate */
 	oa_uart_len_8,              /* dataBits; */
 	oa_uart_sb_1,               /* stopBits; */
 	oa_uart_pa_none,            /* parity; */
@@ -150,9 +150,9 @@ void oa_app_uart3_recv( void * param, oa_uint32 len)
 		oa_memset(uart_contain.buf, 0x0, UART3_MAX_SIZE);
 		oa_memcpy(uart_contain.buf, pBuf, len);
 		uart_contain.len = len;
-		if (dev_now_params.para1[7] == UART_SCREEN) {
+		if (uart_contain.buf[0] == PROTOCOL_SCREEN_HEAD) {
 			App_TaskSScrnRcvManage(NULL);//schedule screen
-		} else if (dev_now_params.para1[7] == UART_FUEL_SENSOR) {
+		} else if (uart_contain.buf[0] == PROTOCOL_JT808_HEAD) {
 			oa_app_uart();
 		}
 	}
@@ -195,62 +195,6 @@ oa_bool oa_uart_init(oa_uart_enum port)
 		if (oa_uart_open(OA_UART3, &g_uart3_port_setting))// 115200
 		{
         		oa_uart_register_callback(OA_UART3, oa_app_uart3_recv);
-			return OA_TRUE;
-		}
-		else
-		{
-			return OA_FALSE;
-		}
-	}
-	else
-	{
-		return OA_FALSE;
-	}
-}
-/*********************************************************
-*Function:      oa_uart_init()
-*Description:  initial uarts  
-*Return:        oa_bool
-*Others:         
-*********************************************************/
-oa_bool oa_uart_reset(oa_uart_enum port, oa_uart_baudrate baud)
-{
-	if (OA_UART1 == port)
-	{
-		if (oa_uart_open(OA_UART1, &g_uart_port_setting))
-		{
-        		oa_uart_register_callback(OA_UART1, oa_app_uart1_recv);
-			return OA_TRUE;
-		}
-		else
-		{
-			return OA_FALSE;
-		}
-	}
-	else if (OA_UART2 == port)
-	{
-		if (oa_uart_open(OA_UART2, &g_uart2_port_setting))
-		{
-        		oa_uart_register_callback(OA_UART2, oa_app_uart2_recv);
-			return OA_TRUE;
-		}
-		else
-		{
-			return OA_FALSE;
-		}
-	}
-	else if (OA_UART3 == port)
-	{	
-		if (oa_uart_close(OA_UART3)) {
-			DEBUG("close uart ok!");
-		}
-		
-		g_uart3_port_setting.baud = baud;
-	
-		if (oa_uart_open(OA_UART3, &g_uart3_port_setting))
-		{
-        	//oa_uart_register_callback(OA_UART3, oa_app_uart3_recv);
-			DEBUG("reset uart ok!");
 			return OA_TRUE;
 		}
 		else

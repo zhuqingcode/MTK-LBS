@@ -4126,16 +4126,16 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 	pbuf+=2;
 	*pbuflen +=4;
 #endif
+#ifndef USE_SCREEN 
 	//fuel sensor
-	if (dev_now_params.para1[7] == UART_FUEL_SENSOR) {
-		if (fuel_sensor_var.fuel_status != Fuel_Status_Err) {
+	if (fuel_sensor_var.fuel_status != Fuel_Status_Err) {
 			*pbuf++=0x02;//油量
 			*pbuf++=0x02;
 			*pbuf++=(fuel_sensor_var.fuel_volume>>8) & 0xff;	//暂定
 			*pbuf++=fuel_sensor_var.fuel_volume & 0xff;
 			*pbuflen +=4;
-		}
 	}
+#endif
 	//-----------
 	if (overspeed_var.kind != no_os){
 		*pbuf++=0x11;//超速报警附加信息
