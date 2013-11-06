@@ -280,9 +280,9 @@ void oa_app_uart(void)
 				if (Fuel_Status_Sud_Down == uart_contain.buf[8] /*||
 					 Fuel_Status_Sud_Up == uart_contain.buf[8]*/) {
 					WriteAlarmPara(SET, StaAlarm0, ALARM_OIL_ERR);
-				} else {
+				}/* else {
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OIL_ERR);
-				}
+				}*/
 			} else {
 				fuel_sensor_var.fuel_status = Fuel_Status_Err;
 				DEBUG("fuel status err!");
