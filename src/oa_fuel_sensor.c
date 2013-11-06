@@ -43,6 +43,8 @@ u8 fuel_build_part_packet(u8 *p_data) {
 		return 0;
 	}
 	p_data[0] = 0x7e;
+	p_data[2] = VERSION;
+	p_data[3] = VERSION;
 	p_data[4] = Manufacturer_No;
 	p_data[5] = Manufacturer_No;
 	p_data[6] = Peripheral_Type_No;

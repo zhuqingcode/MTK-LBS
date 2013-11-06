@@ -29,6 +29,7 @@
 
 #include "oa_type.h"
 #include "oa_api.h"
+#define VERSION 0x01
 #define Manufacturer_No 0x53
 #define Peripheral_Type_No 0x04
 #define Fuel_Cmd_Upload 0xf0
