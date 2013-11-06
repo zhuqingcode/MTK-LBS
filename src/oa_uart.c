@@ -369,6 +369,7 @@ void oa_app_uart(void)
 			if (Fuel_Per_Alarm_Shreshold == uart_contain.buf[i]) {
 				if (Fuel_Para_Set_OK == uart_contain.buf[i + 1]) {
 					DEBUG("Fuel_Per_Alarm_Shreshold set ok!");
+					oa_timer_stop(OA_TIMER_ID_14);
 				}
 			} else if (Fuel_Vol_Alarm_Shreshold == uart_contain.buf[i]) {
 				if (Fuel_Para_Set_OK == uart_contain.buf[i + 1]) {
@@ -381,7 +382,7 @@ void oa_app_uart(void)
 			} else if (Fuel_Vol == uart_contain.buf[i]) {
 				if (Fuel_Para_Set_OK == uart_contain.buf[i + 1]) {
 					DEBUG("Fuel_Vol set ok!");
-					oa_timer_stop(OA_TIMER_ID_14);
+					
 				}
 			} else {
 				

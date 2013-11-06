@@ -50,7 +50,7 @@ typedef enum {
 #define Fuel_Para_Set_ERR 0x1
 #define Fuel_Vol 0xd3
 #define OA_APP_FUEL_1TIME 60000
-#define OA_APP_FUEL_SETTIME 5000
+#define OA_APP_FUEL_SETTIME 15000
 #define FUEL_PARA_DATA_LEN 128
 typedef struct {
 	Fuel_Status_enum fuel_status;
