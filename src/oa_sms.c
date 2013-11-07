@@ -1388,9 +1388,9 @@ void handle_keyword4ms(e_keyword key_kind,
 		case e_IP:{
 			if (p_set->kind == set){
 				u8 ip_len;
-				if (oa_strlen(dev_now_params.m_server_ip) == oa_strlen(p_set->context.con_ch)){//length is equal
-					ip_len = oa_strlen(dev_now_params.m_server_ip);
-					if (!oa_strncmp(dev_now_params.m_server_ip, p_set->context.con_ch, ip_len)){
+				if (oa_strlen(g_soc_context.soc_addr.addr) == oa_strlen(p_set->context.con_ch)){//length is equal
+					ip_len = oa_strlen(g_soc_context.soc_addr.addr);
+					if (!oa_strncmp(g_soc_context.soc_addr.addr, p_set->context.con_ch, ip_len)){
 						PRINT_SAMEPARA;
 						p_set->act_kind = no_act;
 						break;
@@ -1412,7 +1412,7 @@ void handle_keyword4ms(e_keyword key_kind,
 		}break;
 		case e_TCPPORT:{
 			if (p_set->kind == set)	{
-				if (dev_now_params.server_tcp_port == p_set->context.con_int){
+				if (g_soc_context.soc_addr.port == p_set->context.con_int){
 					PRINT_SAMEPARA;
 					p_set->act_kind = no_act;
 					break;
@@ -1427,7 +1427,7 @@ void handle_keyword4ms(e_keyword key_kind,
 		}break;
 		case e_UDPPORT:{
 			if (p_set->kind == set)	{
-				if (dev_now_params.server_udp_port == p_set->context.con_int){
+				if (g_soc_context.soc_addr.port == p_set->context.con_int){
 					PRINT_SAMEPARA;
 					p_set->act_kind = no_act;
 					break;
@@ -2240,6 +2240,7 @@ void oa_app_sms(void)
 				try_unlock |= NEED_RECONN_BIT;
 				dev_running.plat_switch = OA_TRUE;
 				dev_running.next_step = PLAT_SOC_INIT;
+				dev_running.plat_status = OFFLINE;
 			} else if (try_unlock_inside & NEED_REREG_BIT) {
 				do_rereg();
 			}

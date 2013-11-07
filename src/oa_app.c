@@ -544,6 +544,8 @@ void oa_app_main(void)
 		print_key_dev_params();
 		//fill soc with device params
 		params_to_soc_set();//change 'soc_cs' value
+		//delete soc file
+		oa_fdelete(OA_SOC_SETTING_FILE);
 		//callback function register
 		callback_func_reg();
 		//run sms backgrade

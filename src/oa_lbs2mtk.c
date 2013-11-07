@@ -170,6 +170,7 @@ u8 sched_scrn_ana_4trans(u8 *p_sms, u16 sms_len, u16 *p_act, u8 * p_fbk, u16 *p_
 				try_unlock |= NEED_RECONN_BIT;
 				dev_running.plat_switch = OA_TRUE;
 				dev_running.next_step = PLAT_SOC_INIT;
+				dev_running.plat_status = OFFLINE;
 			} else if (try_unlock_inside & NEED_REREG_BIT) {
 				do_rereg();
 			}
