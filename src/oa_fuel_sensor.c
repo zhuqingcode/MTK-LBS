@@ -29,7 +29,7 @@
 #include "oa_debug.h"
 #include "oa_hw.h"
 #include "oa_fuel_sensor.h"
-fuel_sensor_struct fuel_sensor_var = {Fuel_Status_Err, 0x0, 0x0, 0x0};
+fuel_sensor_struct fuel_sensor_var = {Fuel_Status_Normal, 0x0, 0x0, 0x0};
 /*********************************************************
 *Function:      oa_app_fuel()
 *Description:  fuel parameters set
@@ -43,6 +43,8 @@ u8 fuel_build_part_packet(u8 *p_data) {
 		return 0;
 	}
 	p_data[0] = 0x7e;
+	p_data[2] = VERSION;
+	p_data[3] = VERSION;
 	p_data[4] = Manufacturer_No;
 	p_data[5] = Manufacturer_No;
 	p_data[6] = Peripheral_Type_No;
@@ -59,13 +61,17 @@ u8 fuel_build_part_packet(u8 *p_data) {
 	//D3
 	p_data[15] = 0xd3;
 	short_to_char(&p_data[16], 1200/*example*/);
-	p_data[18] = 0x7e;
+	//D4
+	p_data[18] = 0xd4;
+	short_to_char(&p_data[19], 120/*example*/);
+	p_data[21] = 0x7e;
+	
 	//add check
-	for (i = 4; i < 18; i++) {
+	for (i = 4; i < 21; i++) {
 		check += p_data[i];
 	}
 	p_data[1] = check;
-	return 19;
+	return 22;
 }
 /*********************************************************
 *Function:      oa_app_fuel()

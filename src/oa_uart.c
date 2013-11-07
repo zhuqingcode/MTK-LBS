@@ -64,7 +64,7 @@ oa_uart_struct g_uart2_port_setting =
 
 oa_uart_struct g_uart3_port_setting = 
 {
-	19200,//9600,   /* baudrate */
+	9600,//9600,   /* baudrate */
 	oa_uart_len_8,              /* dataBits; */
 	oa_uart_sb_1,               /* stopBits; */
 	oa_uart_pa_none,            /* parity; */
@@ -150,9 +150,9 @@ void oa_app_uart3_recv( void * param, oa_uint32 len)
 		oa_memset(uart_contain.buf, 0x0, UART3_MAX_SIZE);
 		oa_memcpy(uart_contain.buf, pBuf, len);
 		uart_contain.len = len;
-		if (dev_now_params.para1[7] == UART_SCREEN) {
+		if (uart_contain.buf[0] == PROTOCOL_SCREEN_HEAD) {
 			App_TaskSScrnRcvManage(NULL);//schedule screen
-		} else if (dev_now_params.para1[7] == UART_FUEL_SENSOR) {
+		} else if (uart_contain.buf[0] == PROTOCOL_JT808_HEAD) {
 			oa_app_uart();
 		}
 	}
@@ -195,62 +195,6 @@ oa_bool oa_uart_init(oa_uart_enum port)
 		if (oa_uart_open(OA_UART3, &g_uart3_port_setting))// 115200
 		{
         		oa_uart_register_callback(OA_UART3, oa_app_uart3_recv);
-			return OA_TRUE;
-		}
-		else
-		{
-			return OA_FALSE;
-		}
-	}
-	else
-	{
-		return OA_FALSE;
-	}
-}
-/*********************************************************
-*Function:      oa_uart_init()
-*Description:  initial uarts  
-*Return:        oa_bool
-*Others:         
-*********************************************************/
-oa_bool oa_uart_reset(oa_uart_enum port, oa_uart_baudrate baud)
-{
-	if (OA_UART1 == port)
-	{
-		if (oa_uart_open(OA_UART1, &g_uart_port_setting))
-		{
-        		oa_uart_register_callback(OA_UART1, oa_app_uart1_recv);
-			return OA_TRUE;
-		}
-		else
-		{
-			return OA_FALSE;
-		}
-	}
-	else if (OA_UART2 == port)
-	{
-		if (oa_uart_open(OA_UART2, &g_uart2_port_setting))
-		{
-        		oa_uart_register_callback(OA_UART2, oa_app_uart2_recv);
-			return OA_TRUE;
-		}
-		else
-		{
-			return OA_FALSE;
-		}
-	}
-	else if (OA_UART3 == port)
-	{	
-		if (oa_uart_close(OA_UART3)) {
-			DEBUG("close uart ok!");
-		}
-		
-		g_uart3_port_setting.baud = baud;
-	
-		if (oa_uart_open(OA_UART3, &g_uart3_port_setting))
-		{
-        	//oa_uart_register_callback(OA_UART3, oa_app_uart3_recv);
-			DEBUG("reset uart ok!");
 			return OA_TRUE;
 		}
 		else
@@ -333,12 +277,12 @@ void oa_app_uart(void)
 				 Fuel_Status_Sud_Down == uart_contain.buf[8] ||
 				 Fuel_Status_Sud_Up == uart_contain.buf[8]) {
 				fuel_sensor_var.fuel_status = uart_contain.buf[8];
-				if (Fuel_Status_Sud_Down == uart_contain.buf[8] ||
-					 Fuel_Status_Sud_Up == uart_contain.buf[8]) {
+				if (Fuel_Status_Sud_Down == uart_contain.buf[8] /*||
+					 Fuel_Status_Sud_Up == uart_contain.buf[8]*/) {
 					WriteAlarmPara(SET, StaAlarm0, ALARM_OIL_ERR);
-				} else {
+				}/* else {
 					WriteAlarmPara(RESET, StaAlarm0, ALARM_OIL_ERR);
-				}
+				}*/
 			} else {
 				fuel_sensor_var.fuel_status = Fuel_Status_Err;
 				DEBUG("fuel status err!");
@@ -349,13 +293,16 @@ void oa_app_uart(void)
 		//percent
 		char_to_short(&uart_contain.buf[9], &per);
 		if (Fuel_Not_Support2 != per) {
+			DEBUG("analysis ok");
 			fuel_sensor_var.fuel_percent = per;
+			fuel_sensor_var.fuel_volume = (dev_now_params.def_oil * fuel_sensor_var.fuel_percent) / 10000;
+			DEBUG("fuel_volume:%d", fuel_sensor_var.fuel_volume);
 		}
 
 		//fuel volume
 		char_to_short(&uart_contain.buf[11], &vol);
 		if (Fuel_Not_Support2 != vol) {
-			fuel_sensor_var.fuel_volume = vol;
+			//fuel_sensor_var.fuel_volume = vol;
 		}
 
 		//ad value
@@ -369,6 +316,7 @@ void oa_app_uart(void)
 			if (Fuel_Per_Alarm_Shreshold == uart_contain.buf[i]) {
 				if (Fuel_Para_Set_OK == uart_contain.buf[i + 1]) {
 					DEBUG("Fuel_Per_Alarm_Shreshold set ok!");
+					oa_timer_stop(OA_TIMER_ID_14);
 				}
 			} else if (Fuel_Vol_Alarm_Shreshold == uart_contain.buf[i]) {
 				if (Fuel_Para_Set_OK == uart_contain.buf[i + 1]) {
@@ -381,7 +329,7 @@ void oa_app_uart(void)
 			} else if (Fuel_Vol == uart_contain.buf[i]) {
 				if (Fuel_Para_Set_OK == uart_contain.buf[i + 1]) {
 					DEBUG("Fuel_Vol set ok!");
-					oa_timer_stop(OA_TIMER_ID_14);
+					
 				}
 			} else {
 				

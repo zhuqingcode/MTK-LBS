@@ -29,6 +29,7 @@
 
 #include "oa_type.h"
 #include "oa_api.h"
+#define VERSION 0x01
 #define Manufacturer_No 0x53
 #define Peripheral_Type_No 0x04
 #define Fuel_Cmd_Upload 0xf0
@@ -49,7 +50,7 @@ typedef enum {
 #define Fuel_Para_Set_ERR 0x1
 #define Fuel_Vol 0xd3
 #define OA_APP_FUEL_1TIME 60000
-#define OA_APP_FUEL_SETTIME 5000
+#define OA_APP_FUEL_SETTIME 30000
 #define FUEL_PARA_DATA_LEN 128
 typedef struct {
 	Fuel_Status_enum fuel_status;
