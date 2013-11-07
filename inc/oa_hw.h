@@ -38,7 +38,7 @@
 #define EDGE_SENSITIVE OA_TRUE
 #define LEVEL_SENSITIVE OA_FALSE
 #define OA_CUR_TEST_EINT_NO 0/**/
-
+#define OA_CUR_TEST_EINT_NO1 2/**/
 //#define ACC_GPIO 19 //gpio19
 #define ACC_GPIO 4 //gpio4
 #define GPSANA_GPIO 3//gpio3
@@ -55,7 +55,10 @@
 #define ACC_OFF 0
 #define OA_ACC_RUN 1000
 #define OA_ACC_RUN_1ST 20000
-
+#define OA_ACC_RUN_SECOND (OA_ACC_RUN/1000)
+#define USE_ZFZ_SENSOR
+#define LEVEL_HIGH 1
+#define LEVEL_LOW 0
 #if 0
 official hw definition
 #define GPS_AADET 3//gpio3

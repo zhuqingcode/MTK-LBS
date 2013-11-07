@@ -536,6 +536,8 @@ void oa_app_main(void)
 		
 		//DEBUG(OA_SW_VERSION_NO);
 		DEBUG("(:(:(:(:(:(:(:(:task is %s running:):):):):):):):)", __func__);
+		//init interrupt
+		oa_interrupt_init();
 		//device params initial
 		dev_params_init();
 		//initial devid
