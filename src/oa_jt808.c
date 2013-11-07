@@ -862,7 +862,7 @@ if (UpdateMode == UpdateOnly){
 			if (len == 4){
 				oa_memcpy((u8 *)&tmp, pValue, len);
 				if (tmp <= PORT_MAX){
-					if (tmp == dev_now_params.server_udp_port){
+					if (tmp == g_soc_context.soc_addr.port){
 						PRINT_SAMEPARA;
 						break;
 					}
@@ -891,7 +891,7 @@ if (UpdateMode == UpdateOnly){
 			if (len == 4){
 				oa_memcpy((u8 *)&tmp, pValue, len);
 				if (tmp <= PORT_MAX){
-					if (tmp == dev_now_params.server_tcp_port){
+					if (tmp == g_soc_context.soc_addr.port){
 						PRINT_SAMEPARA;
 						break;
 					}
@@ -927,7 +927,7 @@ if (UpdateMode == UpdateOnly){
 			DEBUG("set ip");
 			if (len <=  SERVER_IP_MAX_LEN){
 				oa_memcpy(ip_tmp, pValue, len);
-				if (oa_strlen(dev_now_params.m_server_ip) == len){
+				if (oa_strlen(g_soc_context.soc_addr.addr) == len){
 					if (!oa_strncmp(dev_now_params.m_server_ip, ip_tmp, len)){
 						PRINT_SAMEPARA;
 						break;
