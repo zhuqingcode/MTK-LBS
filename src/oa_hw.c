@@ -104,7 +104,7 @@ void oa_eint_hisr0(void)
 	eint_level =oa_gpio_read(eint_gpio_map_tb[OA_CUR_TEST_EINT_NO1]);
 	if (eint_level == LEVEL_LOW) {
 		zz_cal++;
-		//DEBUG("zz_cal:%d", zz_cal);
+		DEBUG("zz_cal:%d", zz_cal);
 	}
 
 	if (zz_cal > ZZ_SHRESHOLD_TIMES) {
@@ -127,7 +127,7 @@ void oa_eint_hisr1(void)
 	eint_level = oa_gpio_read(eint_gpio_map_tb[OA_CUR_TEST_EINT_NO]);
 	if (eint_level == LEVEL_LOW) {
 		fz_cal++;
-		//DEBUG("fz_cal:%d", fz_cal);	
+		DEBUG("fz_cal:%d", fz_cal);	
 	}
 	
 	if (fz_cal > FZ_SHRESHOLD_TIMES) {
