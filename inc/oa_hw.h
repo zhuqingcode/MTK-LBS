@@ -59,6 +59,7 @@
 #define USE_ZFZ_SENSOR
 #define LEVEL_HIGH 1
 #define LEVEL_LOW 0
+//#define USE_SCREEN
 #if 0
 official hw definition
 #define GPS_AADET 3//gpio3

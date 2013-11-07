@@ -38,7 +38,7 @@
 #include "oa_hw.h"
 #include "oa_sw.h"
 #include "oa_debug.h"
-
+#include "app_SScrntask.h"
 #include <stdio.h>
 #include <stdlib.h>
 extern char *strtok(char s[], const char *delim);
@@ -120,6 +120,7 @@ oa_char *p_keyword[] = {
  AUTHEN,
  RESTART,
  DEVID,
+ OIL_AMOUNT,
 };
 oa_uint8 KEYWORDS_SIZE = sizeof(p_keyword)/4;
 //unicode
@@ -783,6 +784,16 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 					return OA_FALSE;
 				}
 			}break;
+			case e_OIL_AMOUNT:{
+				if (oa_is_digit_str(temp, oa_strlen(temp))){
+					u32 tmp = oa_atoi(temp);
+					p_set->context.con_int = tmp;
+				}
+				else{
+					DEBUG(" format err!");
+					return OA_FALSE;
+				}
+			}break;
 			default:{
 				DEBUG(" e_kind:%d", e_kind);
 				DEBUG(" not support!");
@@ -1112,6 +1123,13 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 			oa_strcat(enquire_temp, dev_now_params.term_id);
 			oa_strcat(enquire_temp, ";");
 		}break;
+		case e_OIL_AMOUNT: {
+			u8 tmp[8] = {0x0};
+			oa_strcat(enquire_temp, "oil_amount:");
+			oa_itoa(dev_now_params.def_oil, tmp, DEC);
+			oa_strcat(enquire_temp, tmp);
+			oa_strcat(enquire_temp, ";");
+		} break;
 		default:{
 			oa_strcat(enquire_temp, "not support!");
 		}break;
@@ -1370,9 +1388,9 @@ void handle_keyword4ms(e_keyword key_kind,
 		case e_IP:{
 			if (p_set->kind == set){
 				u8 ip_len;
-				if (oa_strlen(dev_now_params.m_server_ip) == oa_strlen(p_set->context.con_ch)){//length is equal
-					ip_len = oa_strlen(dev_now_params.m_server_ip);
-					if (!oa_strncmp(dev_now_params.m_server_ip, p_set->context.con_ch, ip_len)){
+				if (oa_strlen(g_soc_context.soc_addr.addr) == oa_strlen(p_set->context.con_ch)){//length is equal
+					ip_len = oa_strlen(g_soc_context.soc_addr.addr);
+					if (!oa_strncmp(g_soc_context.soc_addr.addr, p_set->context.con_ch, ip_len)){
 						PRINT_SAMEPARA;
 						p_set->act_kind = no_act;
 						break;
@@ -1394,7 +1412,7 @@ void handle_keyword4ms(e_keyword key_kind,
 		}break;
 		case e_TCPPORT:{
 			if (p_set->kind == set)	{
-				if (dev_now_params.server_tcp_port == p_set->context.con_int){
+				if (g_soc_context.soc_addr.port == p_set->context.con_int){
 					PRINT_SAMEPARA;
 					p_set->act_kind = no_act;
 					break;
@@ -1409,7 +1427,7 @@ void handle_keyword4ms(e_keyword key_kind,
 		}break;
 		case e_UDPPORT:{
 			if (p_set->kind == set)	{
-				if (dev_now_params.server_udp_port == p_set->context.con_int){
+				if (g_soc_context.soc_addr.port == p_set->context.con_int){
 					PRINT_SAMEPARA;
 					p_set->act_kind = no_act;
 					break;
@@ -2024,6 +2042,12 @@ void handle_keyword4ms(e_keyword key_kind,
 				}
 			}
 		}break;
+		case e_OIL_AMOUNT: {
+			if (p_set->kind == set) {
+				dev_now_params.def_oil = p_set->context.con_int;
+				p_set->act_kind = para_save;
+			}
+		} break;
 		case e_none:{
 			DEBUG(" not support!");
 		}break;
@@ -2216,6 +2240,7 @@ void oa_app_sms(void)
 				try_unlock |= NEED_RECONN_BIT;
 				dev_running.plat_switch = OA_TRUE;
 				dev_running.next_step = PLAT_SOC_INIT;
+				dev_running.plat_status = OFFLINE;
 			} else if (try_unlock_inside & NEED_REREG_BIT) {
 				do_rereg();
 			}

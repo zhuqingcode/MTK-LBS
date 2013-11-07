@@ -45,6 +45,7 @@ u8 zz_cal = 0;
 u8 fz_cal = 0;
 #endif
 oa_uint8 acc_status = ACC_OFF;
+u32 adc_value = 0;
 /*********************************************************
 *Function:     oa_tst_eint_hisr()
 *Description:  callback function for gpio     
@@ -89,6 +90,7 @@ void oa_tst_eint_hisr(void)
 *********************************************************/
 void adc_value_cb(oa_int32 volt_result, oa_double adc_result){
 	//OA_DEBUG_USER("volt_result:%d adc_result:%f", volt_result, adc_result);
+	adc_value = volt_result;
 }
 #ifdef USE_ZFZ_SENSOR
 /*********************************************************

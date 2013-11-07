@@ -31,7 +31,10 @@
 #define AT_PS                 	//AT命令口
 #define USE_UART2			//串口二
 #define USE_UART3			//串口三
-#define SCHE_SCRN
+#define UART_SCREEN 0x2
+#define UART_FUEL_SENSOR 14
+#define PROTOCOL_SCREEN_HEAD 0x24
+#define PROTOCOL_JT808_HEAD 0x7e
 typedef enum
 {
 	sms = 0x0,

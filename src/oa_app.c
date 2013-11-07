@@ -46,6 +46,7 @@
 #include "oa_debug.h"
 #include "oa_app.h"
 #include "SchedulScrn.h"
+#include "oa_fuel_sensor.h"
 DEV_PLAT_PARAS dev_running =
 {
 	PLAT_SOC_INIT,
@@ -65,6 +66,7 @@ extern scrn_struct s_s;
 extern void App_TaskSScrnSendManage(void *Para);
 extern void oa_app_area(void *para);
 extern void oa_app_online_offline(void);
+extern void oa_app_fuel(void);
 /*--------END: Customer code----------*/
 oa_char OA_VERSION_NO[]="v4.0.0ep";
 /*****************************************************************
@@ -546,6 +548,8 @@ void oa_app_main(void)
 		print_key_dev_params();
 		//fill soc with device params
 		params_to_soc_set();//change 'soc_cs' value
+		//delete soc file
+		oa_fdelete(OA_SOC_SETTING_FILE);
 		//callback function register
 		callback_func_reg();
 		//run sms backgrade
@@ -584,7 +588,9 @@ void oa_app_main(void)
 		//blinddata task
 		oa_timer_start(OA_TIMER_ID_7, oa_app_blinddata, NULL, OA_APP_BLINDDATA_1TIME);
 		//schedule screen task, send mainly ,transplant from lbs@wjn
-		oa_timer_start(OA_TIMER_ID_8, App_TaskSScrnSendManage, NULL, SCHD_SCRN_1TIME);
+#ifdef USE_SCREEN
+			oa_timer_start(OA_TIMER_ID_8, App_TaskSScrnSendManage, NULL, SCHD_SCRN_1TIME);
+#endif
 		//area judge task
 		oa_timer_start(OA_TIMER_ID_9, oa_app_area, NULL, OA_AREA_DETECT_1TIME);
 	}

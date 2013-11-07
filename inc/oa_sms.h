@@ -106,6 +106,7 @@
 #define AUTHEN "AUTHEN"
 #define RESTART "RESTART"
 #define DEVID "DEVID"//7 λ
+#define OIL_AMOUNT "oil_amount"
 
 #define COLON ':'
 #define SEMICOLON ';'
@@ -189,6 +190,7 @@ typedef enum
 	e_AUTHEN,
 	e_RESTART,
 	e_DEVID,
+	e_OIL_AMOUNT,
 	e_none = 0xff,
 }e_keyword;
 typedef enum
@@ -223,6 +225,7 @@ typedef enum
 	reset,
 	rereg,
 	fac_set,
+	reset_uart,
 	no_act = 0xf,
 }action_kind;
 

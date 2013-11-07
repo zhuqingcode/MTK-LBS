@@ -30,8 +30,11 @@
 #include "oa_gps.h"
 #include "oa_sms.h"
 #include "oa_debug.h"
-
+#include "oa_jt808.h"
+#include "oa_fuel_sensor.h"
 extern oa_uint8 KEYWORDS_SIZE;
+extern DEVICE_PARAMS dev_now_params;
+extern fuel_sensor_struct fuel_sensor_var;
 /*****************************************************************/
 /*-----------------For uart port configure----------------------------*/
 /*****************************************************************/  
@@ -61,7 +64,7 @@ oa_uart_struct g_uart2_port_setting =
 
 oa_uart_struct g_uart3_port_setting = 
 {
-	19200,//9600,   /* baudrate */
+	9600,//9600,   /* baudrate */
 	oa_uart_len_8,              /* dataBits; */
 	oa_uart_sb_1,               /* stopBits; */
 	oa_uart_pa_none,            /* parity; */
@@ -147,11 +150,11 @@ void oa_app_uart3_recv( void * param, oa_uint32 len)
 		oa_memset(uart_contain.buf, 0x0, UART3_MAX_SIZE);
 		oa_memcpy(uart_contain.buf, pBuf, len);
 		uart_contain.len = len;
-		#ifdef SCHE_SCRN
-		App_TaskSScrnRcvManage(NULL);//schedule screen
-		#else
-		oa_app_uart();
-		#endif
+		if (uart_contain.buf[0] == PROTOCOL_SCREEN_HEAD) {
+			App_TaskSScrnRcvManage(NULL);//schedule screen
+		} else if (uart_contain.buf[0] == PROTOCOL_JT808_HEAD) {
+			oa_app_uart();
+		}
 	}
 }
 
@@ -204,7 +207,6 @@ oa_bool oa_uart_init(oa_uart_enum port)
 		return OA_FALSE;
 	}
 }
-
 /*********************************************************
 *Function:      oa_app_uart()
 *Description:  handle uart's feedback
@@ -213,24 +215,130 @@ oa_bool oa_uart_init(oa_uart_enum port)
 *********************************************************/
 void oa_app_uart(void)
 {
-#if 0
-	//analysis the uart data
-	//do about sms
-	e_keyword key_ret = e_none;
-	keyword_context set = {0x0};
-	oa_uint8 e_i;
-	
-	//do not support multiple sms
-	//Trace("(%s:%s:%d):KEYWORDS_SIZE:%d", __FILE__, __func__, __LINE__,KEYWORDS_SIZE);
-	for (e_i = 0;e_i < KEYWORDS_SIZE;e_i++){
-		key_ret = lookfor_keywords_loop(NULL, 0, &set, e_i, uart);
-		if (e_none == key_ret){
-			//Trace("(%s:%s:%d): not support!", __FILE__, __func__, __LINE__);
-			continue;
-		}
-		handle_keyword(NULL, NULL, NULL, key_ret, &set, uart);
-		oa_memset(&set, 0x0, sizeof(set));
+	u8 i;
+	u16 real_len;
+	u8 check = 0;
+	//para check
+	if (uart_contain.len == 0) {
+		DEBUG("data len err!");
+		return;
 	}
-	return;
-#endif
+	//debug
+	{
+		u16 i;
+		DEBUG("revlen:%d data:", uart_contain.len);
+		for (i=0; i<uart_contain.len; i++){
+			debug_no_n("%02x ", uart_contain.buf[i]);
+		}
+		DEBUG();
+				
+	}
+
+	if (uart_contain.buf[0] == 0x7e && uart_contain.buf[uart_contain.len - 1]  == 0x7e) {
+		;
+	}	else {
+		DEBUG("data format err!");
+		return;
+	}
+	//analysis data
+	if (JT808_dataChg(0, &uart_contain.buf[1], uart_contain.len - 2, &real_len)) {
+		DEBUG("analysis data err!");
+		return;
+	}
+	DEBUG("reallen:%d", real_len);
+	//check data
+	for (i = 4; i < real_len + 1; i++) {
+		check += uart_contain.buf[i];
+	}
+
+	DEBUG("check:%02x", check);
+	if (check != uart_contain.buf[1]) {
+		DEBUG("check data err!");
+		return;
+	}
+
+	if (Manufacturer_No != uart_contain.buf[4] || Manufacturer_No != uart_contain.buf[5]) {
+		DEBUG("manufacturer No. err!");
+		return;
+	}
+
+	if (Peripheral_Type_No != uart_contain.buf[6]) {
+		DEBUG("peripheral type No. err!");
+		return;
+	}
+
+	if (Fuel_Cmd_Upload == uart_contain.buf[7]) {
+		u16 per;
+		u16 vol;
+		u16 ad_val;
+		//status
+		if (Fuel_Not_Support != uart_contain.buf[8]) {
+			if (Fuel_Status_Normal == uart_contain.buf[8] ||
+				 Fuel_Status_Sud_Down == uart_contain.buf[8] ||
+				 Fuel_Status_Sud_Up == uart_contain.buf[8]) {
+				fuel_sensor_var.fuel_status = uart_contain.buf[8];
+				if (Fuel_Status_Sud_Down == uart_contain.buf[8] /*||
+					 Fuel_Status_Sud_Up == uart_contain.buf[8]*/) {
+					WriteAlarmPara(SET, StaAlarm0, ALARM_OIL_ERR);
+				}/* else {
+					WriteAlarmPara(RESET, StaAlarm0, ALARM_OIL_ERR);
+				}*/
+			} else {
+				fuel_sensor_var.fuel_status = Fuel_Status_Err;
+				DEBUG("fuel status err!");
+				return;
+			}
+		}
+
+		//percent
+		char_to_short(&uart_contain.buf[9], &per);
+		if (Fuel_Not_Support2 != per) {
+			DEBUG("analysis ok");
+			fuel_sensor_var.fuel_percent = per;
+			fuel_sensor_var.fuel_volume = (dev_now_params.def_oil * fuel_sensor_var.fuel_percent) / 10000;
+			DEBUG("fuel_volume:%d", fuel_sensor_var.fuel_volume);
+		}
+
+		//fuel volume
+		char_to_short(&uart_contain.buf[11], &vol);
+		if (Fuel_Not_Support2 != vol) {
+			//fuel_sensor_var.fuel_volume = vol;
+		}
+
+		//ad value
+		char_to_short(&uart_contain.buf[13], &ad_val);
+		if (Fuel_Not_Support2 != ad_val) {
+			fuel_sensor_var.fuel_volume = ad_val;
+		}
+	} 
+	else if (Fuel_Cmd_Para_Set == uart_contain.buf[7]) {
+		for (i = 8; i < real_len; i+=2) {
+			if (Fuel_Per_Alarm_Shreshold == uart_contain.buf[i]) {
+				if (Fuel_Para_Set_OK == uart_contain.buf[i + 1]) {
+					DEBUG("Fuel_Per_Alarm_Shreshold set ok!");
+					oa_timer_stop(OA_TIMER_ID_14);
+				}
+			} else if (Fuel_Vol_Alarm_Shreshold == uart_contain.buf[i]) {
+				if (Fuel_Para_Set_OK == uart_contain.buf[i + 1]) {
+					DEBUG("Fuel_Vol_Alarm_Shreshold set ok!");
+				}
+			}	else if (Fuel_Per == uart_contain.buf[i]) {
+				if (Fuel_Para_Set_OK == uart_contain.buf[i + 1]) {
+					DEBUG("Fuel_Per set ok!");
+				}
+			} else if (Fuel_Vol == uart_contain.buf[i]) {
+				if (Fuel_Para_Set_OK == uart_contain.buf[i + 1]) {
+					DEBUG("Fuel_Vol set ok!");
+					
+				}
+			} else {
+				
+			}
+		}
+	} 
+	else {
+		DEBUG("fuel cmd err!");
+		return;
+	}
+	
 }

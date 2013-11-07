@@ -42,6 +42,7 @@
 #include "oa_alarm.h"
 #include "oa_hw.h"
 #include "oa_zfz.h"
+#include "oa_fuel_sensor.h"
 #define PRINT_SAMEPARA	DEBUG(" this parameter is same as the original, so I do nothing...")
 #define PORT_MAX 65535
 extern DEVICE_PARAMS dev_now_params;
@@ -53,6 +54,7 @@ extern area_alarm_addition_struct area_alarm_addition_var;
 #ifdef USE_ZFZ_SENSOR
 extern zfz_enum zfz_sensor_status;
 #endif
+extern fuel_sensor_struct fuel_sensor_var;
 dev_control_type control_type = none;
 upgrade_paras up_paras;
 action_kind plat_paraset = 0x0;
@@ -864,7 +866,7 @@ if (UpdateMode == UpdateOnly){
 			if (len == 4){
 				oa_memcpy((u8 *)&tmp, pValue, len);
 				if (tmp <= PORT_MAX){
-					if (tmp == dev_now_params.server_udp_port){
+					if (tmp == g_soc_context.soc_addr.port){
 						PRINT_SAMEPARA;
 						break;
 					}
@@ -893,7 +895,7 @@ if (UpdateMode == UpdateOnly){
 			if (len == 4){
 				oa_memcpy((u8 *)&tmp, pValue, len);
 				if (tmp <= PORT_MAX){
-					if (tmp == dev_now_params.server_tcp_port){
+					if (tmp == g_soc_context.soc_addr.port){
 						PRINT_SAMEPARA;
 						break;
 					}
@@ -929,7 +931,7 @@ if (UpdateMode == UpdateOnly){
 			DEBUG("set ip");
 			if (len <=  SERVER_IP_MAX_LEN){
 				oa_memcpy(ip_tmp, pValue, len);
-				if (oa_strlen(dev_now_params.m_server_ip) == len){
+				if (oa_strlen(g_soc_context.soc_addr.addr) == len){
 					if (!oa_strncmp(dev_now_params.m_server_ip, ip_tmp, len)){
 						PRINT_SAMEPARA;
 						break;
@@ -2156,7 +2158,9 @@ static u8 ServReq_Textinfo(u8 *pbuf, u16 buflen)
 				SScrn_SMS_Send('E',"000",3,Time,pbuf,buflen-1); //短信格式？？
 			}
 			#else
+			#ifdef USE_SCREEN
 				SScrn_CenterSMS_Send(pbuf,buflen-1);
+			#endif
 			#endif 
 		}
 	}
@@ -4125,6 +4129,16 @@ static u8 report_location_msgbody2(u8 *Buf, u16 *pbuflen)
 	memset(pbuf,0x00,2);
 	pbuf+=2;
 	*pbuflen +=4;
+#endif
+#ifndef USE_SCREEN 
+	//fuel sensor
+	if (fuel_sensor_var.fuel_status != Fuel_Status_Err) {
+			*pbuf++=0x02;//油量
+			*pbuf++=0x02;
+			*pbuf++=(fuel_sensor_var.fuel_volume>>8) & 0xff;	//暂定
+			*pbuf++=fuel_sensor_var.fuel_volume & 0xff;
+			*pbuflen +=4;
+	}
 #endif
 	//-----------
 	if (overspeed_var.kind != no_os){
