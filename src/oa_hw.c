@@ -171,6 +171,14 @@ void oa_interrupt_init(void){
 	oa_eint_set_debounce(OA_CUR_TEST_EINT_NO1, 10);
 }
 #endif
+void pull_down_acc(void) {
+	oa_gpio_mode_setup(ACC_GPIO, GPIO_MODE);     /*set gpio 15 as 0 mode(gpio modem)*/
+	oa_gpio_init(GPIO_INPUT, ACC_GPIO);
+	//pulldown ACC
+	DEBUG("pull down ACC");
+	oa_gpio_pull_setup(ACC_GPIO, 1);
+	oa_gpio_pull_selhigh(ACC_GPIO, 0);
+}
 /*********************************************************
 *Function:     oa_gpio_set()
 *Description:  gpio settings     
@@ -205,9 +213,9 @@ void oa_gpio_set(void)
 	oa_eint_set_debounce(OA_CUR_TEST_EINT_NO, 80);
 #endif
 	//just for ACC & GPS ana detect
-	oa_gpio_mode_setup(ACC_GPIO, GPIO_MODE);     /*set gpio 15 as 0 mode(gpio modem)*/
+	//oa_gpio_mode_setup(ACC_GPIO, GPIO_MODE);     /*set gpio 15 as 0 mode(gpio modem)*/
 	oa_gpio_mode_setup(GPSANA_GPIO, GPIO_MODE);
-	oa_gpio_init(GPIO_INPUT, ACC_GPIO);
+	//oa_gpio_init(GPIO_INPUT, ACC_GPIO);
 	oa_gpio_init(GPIO_INPUT, GPSANA_GPIO);
 	//key
 	oa_gpio_mode_setup(KEY_GPIO, GPIO_MODE);
