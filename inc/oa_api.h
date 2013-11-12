@@ -1776,9 +1776,9 @@ extern oa_bool oa_network_get_location_info(oa_nw_info_location_info_struct *loc
 
 /*query tcp send queue data len & check tcp state by socket_id.*/
 void * oa_query_tcpip_no_ack(void * p);
-void * oa_reserve_dummy1(void * p);
-void * oa_reserve_dummy2(void * p);
-void * oa_reserve_dummy3(void * p);
+void * oa_audio_play_file_ext(void * p);
+void * oa_set_audio_volume(void * p);
+void * oa_get_uem_power_on_mode(void * p);
 void * oa_reserve_dummy4(void * p);
 void * oa_reserve_dummy5(void * p);
 void * oa_reserve_dummy6(void * p);

@@ -35,6 +35,12 @@
 #define UART_FUEL_SENSOR 14
 #define PROTOCOL_SCREEN_HEAD 0x24
 #define PROTOCOL_JT808_HEAD 0x7e
+#define UART3_MAX_SIZE 256
+typedef struct
+{
+	oa_char buf[UART3_MAX_SIZE];
+	oa_uint8 len;
+}uart_struct;
 typedef enum
 {
 	sms = 0x0,

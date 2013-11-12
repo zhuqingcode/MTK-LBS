@@ -234,12 +234,7 @@ typedef enum
 }oa_key;
 
 #define OA_UART_BUFFER_SIZE 1024
-#define UART3_MAX_SIZE 256
-typedef struct
-{
-	oa_char buf[UART3_MAX_SIZE];
-	oa_uint8 len;
-}uart_struct;
+
 typedef oa_uint32 oa_uart_baudrate;
 
 typedef enum {
@@ -825,6 +820,18 @@ typedef enum {
     OA_AUDIO_DEVICE_MIC3,          /* Loud Spkear */  
 }oa_audio_input_path_enum;
 
+/* Define volume type.*/
+typedef enum {
+    OA_VOL_TYPE_CTN  = 0 ,   /* MMI can apply to associate volume; call tone attribute */
+    OA_VOL_TYPE_KEY      ,   /* MMI can apply to associate volume; keypad tone attribute */
+    OA_VOL_TYPE_MIC      ,   /* microphone attribute */
+    OA_VOL_TYPE_GMI      ,   /* MMI can apply to associate volume; melody, imelody, midi attribute */
+    OA_VOL_TYPE_SPH      ,   /* MMI can apply to associate volume; speech sound attribute */
+    OA_VOL_TYPE_SID	  ,   /* side tone attribute */
+    OA_VOL_TYPE_MEDIA    ,   /* MMI can apply to associate volume; As MP3, Wave,... attribute */
+    OA_MAX_VOL_TYPE           
+}oa_volume_type_enum;
+
 typedef enum
 {
     //OA_ALERT_NONE,
@@ -885,6 +892,7 @@ typedef enum
 
 //media play callback function, result refer OA_MDI_AUDIO_xxx
 typedef void (*oa_mdi_callback) (oa_int32 result);
+typedef void (*oa_mdi_ext_callback) (oa_int32 result,void* user_data);
 
 /*
  *	TTS player ERROR CODES
@@ -1492,5 +1500,19 @@ typedef struct
   oa_uint32 pTcpSendQueueDataLen;
   oa_uint8 pTcpState;
 }oa_query_tcpip_no_ack_t;
+
+typedef struct
+{
+    oa_wchar filename[255]; 
+    oa_mdi_play_style play_style;
+    oa_mdi_callback callback;
+    oa_mdi_ext_callback ext_callback;
+}oa_audio_play_file_ext_t;
+
+typedef struct
+{
+    oa_uint8 aud_type; //oa_volume_type_enum
+    oa_uint8 level;
+}oa_audio_volume_set_t;
 
 #endif /* __OA_TYPE_H__ */
