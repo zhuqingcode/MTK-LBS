@@ -747,6 +747,7 @@ void print_key_dev_params(void)
 	DEBUG("man id						:%s", dev_now_params.manufacturers_id);
 	DEBUG("term model					:%s", dev_now_params.term_model);
 	DEBUG("term id						:%s", dev_now_params.term_id);
+	DEBUG("oil_volume					:%d", dev_now_params.def_oil);
 	#if 0
 	DEBUG_N("car id						:%s", dev_now_params.vehicle_license);
 	DEBUG_N("plate_color					:%d", dev_now_params.plate_color);
