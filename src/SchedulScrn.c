@@ -2038,7 +2038,7 @@ u8 SScrn_SMSResult_Send(u8 result)
 	}
 	else
 	{
-		return(Ack_Package(buf,Operate_Ack,SMS_SEND_OK_CMD,0));	
+		return(Ack_Package(buf,Operate_Ack,RETURN_CMD,0));	
 	}
 
 }
