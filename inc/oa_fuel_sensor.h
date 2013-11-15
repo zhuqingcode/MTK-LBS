@@ -36,6 +36,9 @@
 #define Fuel_Cmd_Para_Set 0xf1
 #define Fuel_Not_Support 0xff
 #define Fuel_Not_Support2 0xffff
+#define Fuel_Check_Shreshold_Time (5 * 60)//5min
+#define Fuel_Data_Upload_Time (15)//15s
+#define Fuel_Change_Shreshold (800)//8%
 typedef enum {
 	Fuel_Status_Normal = 0x0,
 	Fuel_Status_Sud_Down,

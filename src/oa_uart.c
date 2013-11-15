@@ -27,6 +27,7 @@
 #include "oa_type.h"
 #include "oa_api.h"
 #include "oa_uart.h"
+#include "oa_hw.h"
 #include "oa_gps.h"
 #include "oa_sms.h"
 #include "oa_debug.h"
@@ -35,6 +36,8 @@
 extern oa_uint8 KEYWORDS_SIZE;
 extern DEVICE_PARAMS dev_now_params;
 extern fuel_sensor_struct fuel_sensor_var;
+extern oa_uint8 acc_status;
+extern STRUCT_RMC Pos_Inf;
 /*****************************************************************/
 /*-----------------For uart port configure----------------------------*/
 /*****************************************************************/  
@@ -218,6 +221,9 @@ void oa_app_uart(void)
 	u8 i;
 	u16 real_len;
 	u8 check = 0;
+	static u16 fuel_per_last = 0;
+	static u16 times = 0;
+	static oa_bool fuel_record = OA_FALSE;
 	//para check
 	if (uart_contain.len == 0) {
 		DEBUG("data len err!");
@@ -271,6 +277,7 @@ void oa_app_uart(void)
 		u16 per;
 		u16 vol;
 		u16 ad_val;
+#if 0
 		//status
 		if (Fuel_Not_Support != uart_contain.buf[8]) {
 			if (Fuel_Status_Normal == uart_contain.buf[8] ||
@@ -291,12 +298,35 @@ void oa_app_uart(void)
 				return;
 			}
 		}
-
+#endif
 		//percent
 		char_to_short(&uart_contain.buf[9], &per);
 		if (Fuel_Not_Support2 != per) {
 			DEBUG("analysis ok");
 			fuel_sensor_var.fuel_percent = per;
+			//steal fuel
+			if (Pos_Inf.Speed == 0 || acc_status == ACC_OFF) {
+				//record it
+				if (fuel_record == OA_FALSE) {
+					fuel_record = OA_TRUE;
+					fuel_per_last = per;
+				}
+				//5min
+				times++;
+				if (times * Fuel_Data_Upload_Time > Fuel_Check_Shreshold_Time) {
+					times = 0;
+					if (fuel_per_last - fuel_sensor_var.fuel_percent > Fuel_Change_Shreshold) {
+						DEBUG("ALARM_OIL_ERR!");
+						handle_alarm_status(StaAlarm0, ALARM_OIL_ERR, SET, OA_TRUE);
+						WriteAlarmPara(RESET, StaAlarm0, ALARM_OIL_ERR);
+					}
+				}
+			} else if (Pos_Inf.Speed > 0) {
+				fuel_record = OA_FALSE;
+				fuel_per_last = 0;
+				times = 0;
+			}
+			
 			fuel_sensor_var.fuel_volume = (u16)((dev_now_params.def_oil * fuel_sensor_var.fuel_percent) * 10.0/*1/10L*/  / 10000.0);
 			DEBUG("fuel_volume:%d", fuel_sensor_var.fuel_volume);
 		}
