@@ -31,6 +31,7 @@
 #include "oa_debug.h"
 #include "oa_alarm.h"
 #include "oa_zfz.h"
+#include "oa_gps.h"
 //#define OA_GPIO_EINT_01 27
 oa_bool sos_handle_polarity_0 = OA_TRUE;
 /*do not modify it*/
@@ -46,6 +47,7 @@ u8 fz_cal = 0;
 #endif
 oa_uint8 acc_status = ACC_OFF;
 u32 adc_value = 0;
+extern STRUCT_RMC Pos_Inf;
 /*********************************************************
 *Function:     oa_tst_eint_hisr()
 *Description:  callback function for gpio     
@@ -308,7 +310,9 @@ void acc_status_detect(void *param)
 	//zfz sensor
 	tz_times++;
 	if (tz_times * OA_ACC_RUN_SECOND > TZ_SHRESHOLD_TIME) {
-		zfz_sensor_status = tz;
+		if (acc_status == ACC_OFF) {
+			zfz_sensor_status = tz;
+		}
 		zz_cal = 0;
 		fz_cal = 0;
 		tz_times = 0;
