@@ -36,8 +36,8 @@ typedef enum {
 }zfz_enum;
 
 #define TZ_SHRESHOLD_TIME (60 * 1)
-#define ZZ_SHRESHOLD_TIMES 1
-#define FZ_SHRESHOLD_TIMES 1
+#define ZZ_SHRESHOLD_TIMES 0
+#define FZ_SHRESHOLD_TIMES 0
 
 #endif
 
