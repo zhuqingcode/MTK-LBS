@@ -229,7 +229,7 @@ enum _MSG_ID_e
 	CALLCAR_ORDER_CONFIRM =	0x8B01,		//订单确认，即抢单成功
 	ORDER_DONE		=	0x0B07,			//订单完成
 	CALLCAR_ORDER_DEL	=	0x8B09,		//订单取消
-
+	CUTOFF_OIL_POWER = 0x8c05,      //断油断电
 	APTS_OPERATELINE_SET=	0x8C00,		//设置运营线路
 	APTS_LINE_QUERY	=	0x8C01,			//设备中所有线路号查询
 	APTS_LINE_QUERY_rsp	=	0x0C01,		//线路号查询应答
@@ -254,7 +254,7 @@ enum _MSG_ID_e
 || DEL_POLYGON_AREA==Servmsg|| SET_LINE==Servmsg|| DEL_LINE==Servmsg|| GET_DRIVE_DATA==Servmsg \
 || DOWNLOAD_DRIVE_DATA==Servmsg|| REPORT_MEDIA_DATA_rsp==Servmsg|| TAKE_PHOTO==Servmsg|| SMEDIA_DATA_CHECK==Servmsg \
 || REPORT_SMEDIA==Servmsg|| START_RECORD==Servmsg|| DOWNLOAD_DATA==Servmsg|| RSA_PLAT==Servmsg ||CALLCAR_ORDER==Servmsg \
-||CALLCAR_ORDER_CONFIRM==Servmsg ||CALLCAR_ORDER_DEL==Servmsg ||APTS_OPERATELINE_SET==Servmsg ||APTS_LINE_QUERY==Servmsg)
+||CALLCAR_ORDER_CONFIRM==Servmsg ||CALLCAR_ORDER_DEL==Servmsg ||APTS_OPERATELINE_SET==Servmsg ||APTS_LINE_QUERY==Servmsg || CUTOFF_OIL_POWER)
 /*----------------------消息体结构----------------------*/
 //消息体属性
 typedef struct _MSG_HEAD_bodyattr_s
@@ -1191,4 +1191,7 @@ typedef struct
 	oa_uint8 pw[SERVER_IP_MAX_LEN];
 	oa_uint8 fw[SERVER_IP_MAX_LEN];
 }upgrade_paras;
+
+#define CUTOFF_OIL_POWER_TRUE 0
+#define CUTOFF_OIL_POWER_FALSE 1
  #endif

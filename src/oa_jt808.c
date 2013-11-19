@@ -2211,6 +2211,37 @@ u8 handle_aritifial_ack_alarm(u8 *pbuf, u16 buflen)
 	return 1;
 }
 /*********************************************************
+*Function:      handle_aritifial_ack_alarm()
+*Description:  handle artifial ack alarm
+*Return:        void
+*Others:         
+*********************************************************/
+u8 cutoff_oil_power(u8 *pbuf, u16 buflen)
+{
+	
+	if (NULL == pbuf || buflen == 0) {
+		DEBUG("cut off oil power param error!");
+		return 1;
+	}
+
+	if (pbuf[0] == CUTOFF_OIL_POWER_TRUE) {
+		oa_gpio_write(0, OUT_GPIO);
+		DEBUG("cut off oil and power");
+		return 0;
+	}
+	else if (pbuf[0] == CUTOFF_OIL_POWER_FALSE) {
+		oa_gpio_write(1, OUT_GPIO);
+		DEBUG("connect oil and power");
+		return 0;
+	}
+	else {
+		DEBUG("cut off oil and power err!");
+		return 1;
+	}
+
+	return 1;
+}
+/*********************************************************
 *Function:     set_round_area
 *Description:  下发圆形区域
 *Calls:          
@@ -2559,6 +2590,11 @@ u8 JT808_ServReq_handle(u16 ServReqMsgid,u8 *msgbody,u16 msgbodylen/*,u8 *sendbu
 			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
 			break;
 		}
+		case CUTOFF_OIL_POWER: {
+			status = cutoff_oil_power(msgbody, msgbodylen);
+			Write_ProtclHandl(eRsp2ServSeq,&status,1);
+			JT808MsgRsp_Send(DEV_COMMON_rsp,1,0/*,sendbuf,sendbuflen*/);
+		} break;
 		#if 0
 		case SET_EVENT:
 		{
