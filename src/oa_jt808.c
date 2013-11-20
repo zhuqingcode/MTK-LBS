@@ -2225,12 +2225,12 @@ u8 cutoff_oil_power(u8 *pbuf, u16 buflen)
 	}
 
 	if (pbuf[0] == CUTOFF_OIL_POWER_TRUE) {
-		oa_gpio_write(0, OUT_GPIO);
+		oa_gpio_write(OIL_POWER_DISABLE, OUT_GPIO);
 		DEBUG("cut off oil and power");
 		return 0;
 	}
 	else if (pbuf[0] == CUTOFF_OIL_POWER_FALSE) {
-		oa_gpio_write(1, OUT_GPIO);
+		oa_gpio_write(OIL_POWER_ENABLE, OUT_GPIO);
 		DEBUG("connect oil and power");
 		return 0;
 	}

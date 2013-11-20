@@ -232,7 +232,7 @@ void oa_gpio_set(void)
 	//OUT
 	oa_gpio_mode_setup(OUT_GPIO, GPIO_MODE);
 	oa_gpio_init(GPIO_OUTPUT, OUT_GPIO);
-	oa_gpio_write(1, OUT_GPIO);//if it used as oil & power control, connect oil & power defaultly
+	oa_gpio_write(OIL_POWER_ENABLE, OUT_GPIO);//if it used as oil & power control, connect oil & power defaultly
 	//SCRN POWER
 	oa_gpio_mode_setup(SCRN_POWER, GPIO_MODE);
 	oa_gpio_init(GPIO_OUTPUT, SCRN_POWER);
