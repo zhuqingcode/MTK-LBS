@@ -156,7 +156,9 @@ void oa_app_uart3_recv( void * param, oa_uint32 len)
 		if (uart_contain.buf[0] == PROTOCOL_SCREEN_HEAD) {
 			App_TaskSScrnRcvManage(NULL);//schedule screen
 		} else if (uart_contain.buf[0] == PROTOCOL_JT808_HEAD) {
+		#ifndef USE_SCREEN
 			oa_app_uart();
+		#endif
 		}
 	}
 }

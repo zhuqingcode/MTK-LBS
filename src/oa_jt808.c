@@ -54,7 +54,9 @@ extern area_alarm_addition_struct area_alarm_addition_var;
 #ifdef USE_ZFZ_SENSOR
 extern zfz_enum zfz_sensor_status;
 #endif
+#ifndef USE_SCREEN
 extern fuel_sensor_struct fuel_sensor_var;
+#endif
 dev_control_type control_type = none;
 upgrade_paras up_paras;
 action_kind plat_paraset = 0x0;

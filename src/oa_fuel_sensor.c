@@ -29,6 +29,7 @@
 #include "oa_debug.h"
 #include "oa_hw.h"
 #include "oa_fuel_sensor.h"
+#ifndef USE_SCREEN
 fuel_sensor_struct fuel_sensor_var = {Fuel_Status_Normal, 0x0, 0x0, 0x0};
 /*********************************************************
 *Function:      oa_app_fuel()
@@ -90,3 +91,4 @@ void oa_app_fuel(void) {
 	oa_uart_write(OA_UART3, fuel_data, len);
 	oa_timer_start(OA_TIMER_ID_14, oa_app_fuel, NULL, OA_APP_FUEL_SETTIME);
 }
+#endif
