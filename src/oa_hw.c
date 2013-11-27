@@ -310,7 +310,7 @@ void acc_status_detect(void *param)
 	//zfz sensor
 	tz_times++;
 	if (tz_times * OA_ACC_RUN_SECOND > TZ_SHRESHOLD_TIME) {
-		if (Pos_Inf.Speed == 0) {
+		if (acc_status == ACC_OFF) {
 			zfz_sensor_status = tz;
 		}
 		zz_cal = 0;

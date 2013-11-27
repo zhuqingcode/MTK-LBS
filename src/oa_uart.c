@@ -302,7 +302,6 @@ void oa_app_uart(void)
 		//percent
 		char_to_short(&uart_contain.buf[9], &per);
 		if (Fuel_Not_Support2 != per) {
-			u16 tmp;
 			DEBUG("analysis ok");
 			fuel_sensor_var.fuel_percent = per;
 			//steal fuel
@@ -327,11 +326,8 @@ void oa_app_uart(void)
 				fuel_per_last = 0;
 				times = 0;
 			}
-			tmp = (u16)((dev_now_params.def_oil * fuel_sensor_var.fuel_percent) * 10.0/*1/10L*/  / 10000.0);
-			if (tmp <= fuel_sensor_var.fuel_volume) {
-				fuel_sensor_var.fuel_volume = tmp;
-			}
 			
+			fuel_sensor_var.fuel_volume = (u16)((dev_now_params.def_oil * fuel_sensor_var.fuel_percent) * 10.0/*1/10L*/  / 10000.0);
 			DEBUG("fuel_volume:%d", fuel_sensor_var.fuel_volume);
 		}
 
