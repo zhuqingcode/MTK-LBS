@@ -12,7 +12,7 @@
 #include "oa_dev_params.h"
 #include "oa_uart.h"
 #include "oa_hw_test.h"
-
+#include "oa_fuel_sensor.h"
 extern STRUCT_RMC Pos_Inf;
 extern oa_uint8 acc_status;
 extern DEVICE_PARAMS dev_now_params;
@@ -20,6 +20,7 @@ extern STRUCT_SScrn_Result SScrn_Result;
 extern scrn_struct s_s;
 extern void oa_screen_demo(void *param);
 extern void oa_hardware_test(void *param);
+extern void oa_oil_test(void *param);
 #if 0
 #ifdef EVDO_USE
 extern u32 SYS_CHANNEL;  //EVDO分配给监控平台的socket号
@@ -100,9 +101,9 @@ void App_TaskSScrnRcvManage(void *Para)
 //		app_SScrnRcvtaskinit(pSchedulScrnHandle);
 //		scrn_init = OA_TRUE;
 //	}
-	oa_memset(pSchedulScrnHandle, 0, sizeof( Stk_Schedul_Handle));
+	memset(pSchedulScrnHandle, 0, sizeof( Stk_Schedul_Handle));
 	pSchedulScrnHandle->ScrnType = SchedulScrn;
-	oa_memset(&SScrn_Result, 0, sizeof(SScrn_Result));
+	memset(&SScrn_Result, 0, sizeof(SScrn_Result));
 	
 	app_SScrnRcvtaskExcute(pSchedulScrnHandle);
 }
@@ -516,6 +517,72 @@ static void app_SScrnRcvtaskExcute(Stk_Schedul_Handle *pSchedulScrnHandle)
 					DEBUG("end hardware test!");
 					oa_timer_stop(OA_TIMER_ID_13);
 				}
+			}
+		} break;
+		case SCR_OIL_TEST_MODE: {
+		SScrn_SMSResult_Send(0);//ack to sched_scrn
+		SScrn_GetResult(pSchedulScrnHandle->DataBuf, 
+						sizeof(pSchedulScrnHandle->DataBuf), 
+						&pSchedulScrnHandle->len, 
+						SCR_OIL_TEST_MODE,0);//copy data
+			if (pSchedulScrnHandle->len == 1) {
+				if (pSchedulScrnHandle->DataBuf[0] == 0x01) {//start oil test
+					DEBUG("start oil test!");
+					oa_timer_start(OA_TIMER_ID_16, oa_oil_test, NULL, HW_TEST_TIME);
+				} else if (pSchedulScrnHandle->DataBuf[0] == 0x0) {//end oil test
+					DEBUG("end oil test!");
+					oa_timer_stop(OA_TIMER_ID_16);
+				}
+			}
+		} break;
+		case SCR_OIL_DATA_SEND: {
+			static JDUGE_PARAM oil_st_data;
+			static u16 i;
+			u16 j, k;
+			oa_bool ret;
+			SScrn_SMSResult_Send(0);//ack to sched_scrn
+			SScrn_GetResult(pSchedulScrnHandle->DataBuf, 
+							sizeof(pSchedulScrnHandle->DataBuf), 
+							&pSchedulScrnHandle->len, 
+							SCR_OIL_DATA_SEND,0);//copy data
+			DEBUG("oil st data recv!");
+			if (pSchedulScrnHandle->DataBuf[0] == 0x01) {//first packet
+				DEBUG("recv first packet!");
+				//enpacket
+				for (i = 0, j = 1; i < 60; i++, j = 4*i + 1) {
+					oil_st_data.data[i].real_value = pSchedulScrnHandle->DataBuf[j+0] | (pSchedulScrnHandle->DataBuf[j+1]<<8);
+					oil_st_data.data[i].measure_value = pSchedulScrnHandle->DataBuf[j+2] | (pSchedulScrnHandle->DataBuf[j+3]<<8);
+					#if 0
+					DEBUG("%02x %02x %02x %02x", pSchedulScrnHandle->DataBuf[j+0], 
+																pSchedulScrnHandle->DataBuf[j+1], 
+																pSchedulScrnHandle->DataBuf[j+2], 
+																pSchedulScrnHandle->DataBuf[j+3]);
+					#endif
+				}
+			} else if (pSchedulScrnHandle->DataBuf[0] == 0x02) {//second packet
+				DEBUG("recv second packet!");
+				for (k = 0; i < 100; i++, k++, j = 4*k + 1) {
+					oil_st_data.data[i].real_value = pSchedulScrnHandle->DataBuf[j+0] | (pSchedulScrnHandle->DataBuf[j+1]<<8);
+					oil_st_data.data[i].measure_value = pSchedulScrnHandle->DataBuf[j+2] | (pSchedulScrnHandle->DataBuf[j+3]<<8);
+					#if 0
+					DEBUG("%02x %02x %02x %02x", pSchedulScrnHandle->DataBuf[j+0], 
+																pSchedulScrnHandle->DataBuf[j+1], 
+																pSchedulScrnHandle->DataBuf[j+2], 
+																pSchedulScrnHandle->DataBuf[j+3]);
+					#endif
+					if (i == 99) {
+						oil_st_data.JDUGE_Data_Num = pSchedulScrnHandle->DataBuf[j+4];
+						oil_st_data.vail_flag = pSchedulScrnHandle->DataBuf[j+5];
+						#if 0
+						DEBUG("%02x %02x", pSchedulScrnHandle->DataBuf[j+4], 
+																pSchedulScrnHandle->DataBuf[j+5]);
+						#endif
+						ret = save_st_ad(&oil_st_data);
+						if (ret) DEBUG("import standand data OK!!!!!!"); 
+						memset(&oil_st_data, 0x0, sizeof(oil_st_data));
+					}
+				}
+				//.......
 			}
 		} break;
 		#if 0

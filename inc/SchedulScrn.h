@@ -44,8 +44,8 @@
 	typedef struct _sms_data_result_//短信内容
 	{
 		u8 TelNum[21];
-		u8 SMSDat[150];
-		u8 SMSLen;
+		u8 SMSDat[512];
+		u16 SMSLen;
 	}STRUCT_SMS_DATA;
 	typedef union _result_data_
 	{
@@ -93,8 +93,8 @@
 	typedef struct _sms_data_result_//短信内容
 	{
 		u8 TelNum[33];
-		u8 SMSDat[150];
-		u8 SMSLen;
+		u8 SMSDat[512];
+		u16 SMSLen;
 	}STRUCT_SMS_DATA;
 
 	typedef enum
@@ -158,6 +158,8 @@
 /*学生刷卡短信模板下发指令*/
 #define SCR_SMS_DOWNLOAD_CMD	0x55
 #define START_HW_TEST 0x58
+#define SCR_OIL_TEST_MODE 0x62
+#define SCR_OIL_DATA_SEND 0x63
 
 //主机→ 调度屏命令字
 #define UP_STATUS_CMD	0XA0	//状态上报指令码

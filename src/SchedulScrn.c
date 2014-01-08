@@ -1133,6 +1133,8 @@ u8 SScrn_DataAnaly(void)
 			case STATION_DOWNLOAD_CMD:
 			case SCR_SMS_DOWNLOAD_CMD:
 			case START_HW_TEST:
+			case SCR_OIL_TEST_MODE:
+			case SCR_OIL_DATA_SEND:
 				SScrn_Ack_Send();/*应答*/
 				SScrn_UpResult(pStr,Cmd);//copy data to 'SScrn_Result'
 				SScrn_Result.CMD_TYPE=Cmd;
@@ -1204,6 +1206,8 @@ u8 SScrn_GetResult(u8 *Buf,u8 BufSize,u8 *ReadSize,u8 Cmd,u8 SubField)
 	{
 		case CENTER_SMS_CMD:
 		case START_HW_TEST:
+		case SCR_OIL_TEST_MODE:
+		case SCR_OIL_DATA_SEND:
 			datalen=SScrn_Result.result.SMS_Data.SMSLen;//strlen(SScrn_Result.result.SMS_Data.SMSDat);
 			if(datalen>BufSize)
 			{
@@ -1465,8 +1469,10 @@ static u8 SScrn_UpResult(u8 *Str,u8 Cmd)
 	{
 		case CENTER_SMS_CMD:
 		case START_HW_TEST:
+		case SCR_OIL_TEST_MODE:
+		case SCR_OIL_DATA_SEND:
 			datalen=*pStr++-2;
-			Mem_Copy(SScrn_Result.result.SMS_Data.SMSDat,pStr,datalen);  //将中心短信信息保存
+			oa_memcpy(SScrn_Result.result.SMS_Data.SMSDat,pStr,datalen);  //将中心短信信息保存
 			SScrn_Result.result.SMS_Data.SMSLen=datalen;
 			SScrn_Result.result.SMS_Data.SMSDat[datalen]='\0';
 			//SSCRN_Print("中心短信内容:%s",SScrn_Result.result.SMS_Data.SMSDat);

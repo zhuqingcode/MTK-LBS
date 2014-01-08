@@ -61,5 +61,18 @@ typedef struct {
 	u16 fuel_volume;
 	u16 fuel_ad;
 }fuel_sensor_struct;
+//just for ad oil	
+typedef struct
+{
+	struct
+	{
+		u16 real_value;//单位升
+		u16 measure_value;//AD采样值
+	} data[100];
+	u8 JDUGE_Data_Num;//校准参数个数
+	u8 vail_flag;//有效标志 0xAA
+} JDUGE_PARAM;
+
+#define STANDAND_AD_FILE L"standand_ad.ini"
 #endif
 

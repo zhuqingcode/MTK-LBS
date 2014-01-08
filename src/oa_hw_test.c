@@ -73,8 +73,8 @@ void oa_hardware_test(void *param) {
 	//BYTE2----------------
 	hw_status[2] = oa_network_get_signal_level();
 	//BYTE7~8--------------
-	hw_status[7] = adc_value && 0xff;
-	hw_status[8] = (adc_value>>8) && 0xff;
+	hw_status[7] = adc_value & 0xff;
+	hw_status[8] = (adc_value>>8) & 0xff;
 	//BYTE11---------------
 	if (GPS_FIXED == Pos_Inf.Fix_Status) {
 		hw_status[11] = 0x1;
@@ -94,4 +94,27 @@ void oa_hardware_test(void *param) {
 	hw_status[21] = (gps_info.Speed>>8) & 0xff;
 	send_hw_status(hw_status, sizeof(hw_status));
 	oa_timer_start(OA_TIMER_ID_13, oa_hardware_test, NULL, HW_TEST_TIME);
+}
+/*********************************************************
+*Function:     send_oil_info()
+*Description:  send_oil_info     
+*Return:		void
+*Others:         
+*********************************************************/
+void send_oil_info(u8 *data, u8 len) {
+	Host_Send_Packag(0xD8, data, len);
+}
+/*********************************************************
+*Function:     oa_oil_test()
+*Description:  oa_oil_test     
+*Return:		void
+*Others:         
+*********************************************************/
+void oa_oil_test(void *param) {
+	u8 ad_oil[2] = {0x0};
+	DEBUG("sending oil info......");
+	ad_oil[0] = adc_value & 0xff;
+	ad_oil[1] = (adc_value>>8) & 0xff;
+	send_oil_info(ad_oil, sizeof(ad_oil));
+	oa_timer_start(OA_TIMER_ID_16, oa_oil_test, NULL, HW_TEST_TIME);
 }

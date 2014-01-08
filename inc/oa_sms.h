@@ -107,6 +107,7 @@
 #define RESTART "RESTART"
 #define DEVID "DEVID"//7 λ
 #define OIL_AMOUNT "oil_amount"
+#define MAX_OIL_CHANGE "MaxOilChangeRate"
 
 #define COLON ':'
 #define SEMICOLON ';'
@@ -191,6 +192,7 @@ typedef enum
 	e_RESTART,
 	e_DEVID,
 	e_OIL_AMOUNT,
+	e_MAX_OIL_CHANGE,
 	e_none = 0xff,
 }e_keyword;
 typedef enum

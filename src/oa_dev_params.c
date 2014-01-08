@@ -41,6 +41,7 @@
 #include "oa_hw.h"
 #include "oa_debug.h"
 #include "oa_area.h"
+#include "oa_fuel_sensor.h"
 #define FS_PATH_NOT_FOUND -19
 extern oa_soc_set_parameter soc_cs;
 
@@ -113,6 +114,7 @@ DEVICE_PARAMS dev_def_params =
 	{"talent"},					//pwd
 	{"mtk-lbs v1.0.0"},				//program name
 	0,//def_oil
+	10,//def_oil_shreshold
 };
 
 DEVICE_PARAMS dev_now_params;
@@ -443,6 +445,17 @@ oa_bool del_some_files(void)
 			return OA_FALSE;
 		}
 	}
+
+	handle = oa_fopen(STANDAND_AD_FILE);
+	if (handle >= 0){
+		oa_fclose(handle);
+		//delete files about auther code
+		ret = oa_fdelete(STANDAND_AD_FILE);
+		if (ret < 0){
+			DEBUG("delete file:standand_data err!");
+			return OA_FALSE;
+		}
+	}
 #if 0
 	handle = oa_fopen(RESTART_FILE);
 	if (handle >= 0){
@@ -748,6 +761,7 @@ void print_key_dev_params(void)
 	DEBUG("term model					:%s", dev_now_params.term_model);
 	DEBUG("term id						:%s", dev_now_params.term_id);
 	DEBUG("oil_volume					:%d", dev_now_params.def_oil);
+	DEBUG("oil_volume_shreshold				:%d", dev_now_params.def_oil_shreshold);
 	#if 0
 	DEBUG_N("car id						:%s", dev_now_params.vehicle_license);
 	DEBUG_N("plate_color					:%d", dev_now_params.plate_color);

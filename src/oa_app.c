@@ -67,6 +67,7 @@ extern void App_TaskSScrnSendManage(void *Para);
 extern void oa_app_area(void *para);
 extern void oa_app_online_offline(void);
 extern void oa_app_fuel(void);
+extern void oa_app_ad(void *para);
 /*--------END: Customer code----------*/
 oa_char OA_VERSION_NO[]="v4.0.0ep";
 /*****************************************************************
@@ -595,6 +596,8 @@ void oa_app_main(void)
 #endif
 		//area judge task
 		oa_timer_start(OA_TIMER_ID_9, oa_app_area, NULL, OA_AREA_DETECT_1TIME);
+		//ad task
+		oa_timer_start(OA_TIMER_ID_15, oa_app_ad, NULL, 20000);
 	}
 	else if (OA_TRUE == dev_is_locked)  //device is lock
 	{

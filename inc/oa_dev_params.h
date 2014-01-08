@@ -129,6 +129,7 @@ typedef struct
 	oa_uint8 ftppwd[FTP_MAX_LEN];
 	oa_uint8 ftp_prog_name[FTP_MAX_LEN];
 	oa_uint16 def_oil;
+	oa_uint16 def_oil_shreshold;
 }DEVICE_PARAMS;
 
 typedef struct

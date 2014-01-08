@@ -150,8 +150,15 @@ void oa_app_uart3_recv( void * param, oa_uint32 len)
 	}
 	else
 	{
+		oa_uint16 i;
 		oa_memset(uart_contain.buf, 0x0, UART3_MAX_SIZE);
 		oa_memcpy(uart_contain.buf, pBuf, len);
+		#if 0
+		for (i = 0; i < len; i++) {
+			DEBUG_N("%02x ", uart_contain.buf[i]);
+		}
+		DEBUG();
+		#endif
 		uart_contain.len = len;
 		if (uart_contain.buf[0] == PROTOCOL_SCREEN_HEAD) {
 			App_TaskSScrnRcvManage(NULL);//schedule screen

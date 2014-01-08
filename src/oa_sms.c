@@ -121,6 +121,7 @@ oa_char *p_keyword[] = {
  RESTART,
  DEVID,
  OIL_AMOUNT,
+ MAX_OIL_CHANGE,
 };
 oa_uint8 KEYWORDS_SIZE = sizeof(p_keyword)/4;
 //unicode
@@ -784,7 +785,8 @@ oa_bool set_enquiry_check(oa_char *p_key, oa_uint8 e_len, keyword_context *p_set
 					return OA_FALSE;
 				}
 			}break;
-			case e_OIL_AMOUNT:{
+			case e_OIL_AMOUNT:
+			case e_MAX_OIL_CHANGE: {
 				if (oa_is_digit_str(temp, oa_strlen(temp))){
 					u32 tmp = oa_atoi(temp);
 					p_set->context.con_int = tmp;
@@ -1127,6 +1129,13 @@ void handle_common4ms(e_keyword key_kind, oa_char *buf, u8 *len, sms_or_uart whi
 			u8 tmp[8] = {0x0};
 			oa_strcat(enquire_temp, "oil_amount:");
 			oa_itoa(dev_now_params.def_oil, tmp, DEC);
+			oa_strcat(enquire_temp, tmp);
+			oa_strcat(enquire_temp, ";");
+		} break;
+		case e_MAX_OIL_CHANGE: {
+			u8 tmp[8] = {0x0};
+			oa_strcat(enquire_temp, "MaxOilChangeRate:");
+			oa_itoa(dev_now_params.def_oil_shreshold, tmp, DEC);
 			oa_strcat(enquire_temp, tmp);
 			oa_strcat(enquire_temp, ";");
 		} break;
@@ -2045,6 +2054,12 @@ void handle_keyword4ms(e_keyword key_kind,
 		case e_OIL_AMOUNT: {
 			if (p_set->kind == set) {
 				dev_now_params.def_oil = p_set->context.con_int;
+				p_set->act_kind = para_save;
+			}
+		} break;
+		case e_MAX_OIL_CHANGE: {
+			if (p_set->kind == set) {
+				dev_now_params.def_oil_shreshold = p_set->context.con_int;
 				p_set->act_kind = para_save;
 			}
 		} break;
